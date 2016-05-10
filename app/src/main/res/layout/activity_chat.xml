@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:background="#c40090"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <LinearLayout
+            android:layout_marginTop="0dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="40dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <TextView
+            android:textColor="#ffffff"
+            android:layout_marginTop="0dp"
+            android:id="@+id/groupName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:singleLine="false"
+            android:text="Group Name"
+            android:textSize="10dp"/>
+
+        <TextView
+            android:layout_marginTop="3dp"
+            android:textColor="#ffffff"
+            android:id="@+id/noOfParticipants"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:singleLine="false"
+            android:text=""
+            android:textSize="10dp"/>
+        </LinearLayout>
+
+
+        <Button
+            android:layout_gravity="right"
+            android:id="@+id/imgCall"
+            android:src="#000000"
+            android:text="C"
+            android:textColor="#ffffff"
+            android:layout_marginRight="40dp"
+            android:layout_marginTop="0dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+
+        <Button
+            android:layout_gravity="right"
+            android:id="@+id/imgInfo"
+            android:src="#000000"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <RelativeLayout
+        android:id="@+id/sizeNotifierLayout"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+
+            <EditText
+                android:id="@+id/messageEdit"
+                android:maxLines="4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/chatSendButton"
+                android:hint="Type a message"/>
+
+            <Button
+                android:id="@+id/chatSendButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:text="Send"/>
+
+            <ListView
+                android:id="@+id/messagesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/messageEdit"
+                android:layout_alignParentLeft="false"
+                android:layout_alignParentTop="false"
+                android:layout_below="@+id/meLabel"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="10dp"
+                android:divider="@null"
+                android:listSelector="@android:color/transparent"
+                android:transcriptMode="alwaysScroll"/>
+
+            <TextView
+                android:id="@+id/companionLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:singleLine="false"
+                android:text="Friend"
+                android:textSize="20dp"/>
+
+            <TextView
+                android:id="@+id/meLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:text="Me"
+                android:textSize="20dp"/>
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"/>
+
+        </RelativeLayout>
+
+        <FrameLayout
+            android:id="@+id/frame"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_alignParentBottom="true"/>
+    </RelativeLayout>
+</LinearLayout>
