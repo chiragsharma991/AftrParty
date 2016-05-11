@@ -27,6 +27,11 @@ public class Configuration_Parameter
     public AmazonDynamoDB ddbClient;
     public DynamoDBMapper mapper;
 
+    //Meghana
+    public String Entered_User_Name = "UserName";
+    public String Entered_Email = "Email";
+    public String Entered_Contact_No = "ContactNo";
+
     /**
      * Create private constructor
      */

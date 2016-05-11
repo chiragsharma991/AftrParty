@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Aftrparties</string>
+    <string name="facebook_app_id">655826694556269</string>
+    <string name="identity_pool_id">us-east-1:bd2ea8c9-5aa9-4e32-b8e5-20235fc7f4ac</string>
+
 </resources>

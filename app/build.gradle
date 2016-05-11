@@ -44,6 +44,12 @@ android {
             url "https://github.com/QuickBlox/quickblox-android-sdk-releases/raw/master/"
 
         }
+
+    }
+
+    repositories {
+        mavenCentral()
+
     }
 }
 
@@ -66,4 +72,7 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true;
     }
+
+    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+
 }
