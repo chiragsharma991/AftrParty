@@ -31,6 +31,8 @@ public class Configuration_Parameter
     public String Entered_User_Name = "UserName";
     public String Entered_Email = "Email";
     public String Entered_Contact_No = "ContactNo";
+    public String LoggedInFBUserID = "";
+    public String FBLoginDone ="FBLoginDone";
 
     /**
      * Create private constructor
