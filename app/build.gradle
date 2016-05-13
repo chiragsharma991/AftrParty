@@ -57,9 +57,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.1'
-    compile files('libs/aws-android-sdk-core-2.2.14.jar')
-    compile files('libs/aws-android-sdk-ddb-2.2.14.jar')
-    compile files('libs/aws-android-sdk-ddb-mapper-2.2.14.jar')
     compile 'com.quickblox:quickblox-android-sdk-core:2.5.1@aar'
     compile('com.quickblox:quickblox-android-sdk-chat:2.5.1@aar') {
         transitive = true
@@ -74,4 +71,7 @@ dependencies {
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
     compile files('libs/gson-2.3.1.jar')
     compile project(':linkedin-sdk')
+    compile files('libs/aws-android-sdk-core-2.2.14.jar')
+    compile files('libs/aws-android-sdk-ddb-2.2.14.jar')
+    compile files('libs/aws-android-sdk-ddb-mapper-2.2.14.jar')
 }

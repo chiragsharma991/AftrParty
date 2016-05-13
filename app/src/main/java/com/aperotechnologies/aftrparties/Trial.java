@@ -3,9 +3,7 @@ package com.aperotechnologies.aftrparties;
 import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyIdStatusClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserIdStatusClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 
 import java.util.ArrayList;

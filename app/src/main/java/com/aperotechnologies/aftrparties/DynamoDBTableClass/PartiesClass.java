@@ -7,8 +7,7 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBDocument
  * Created by hasai on 19/04/16.
  */
 @DynamoDBDocument
-public class PartyIdStatusClass {
-
+public class PartiesClass {
 
     private String PartyId;
     private String PartyStatus;
