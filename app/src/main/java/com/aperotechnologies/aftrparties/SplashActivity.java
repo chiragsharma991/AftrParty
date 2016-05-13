@@ -49,15 +49,17 @@ public class SplashActivity extends Activity
                 }
                 finally
                 {
-                    if (sharedpreferences.getBoolean(m_config.FBLoginDone, false) == false)
-                    {
+//                    if (sharedpreferences.getBoolean(m_config.FBLoginDone, false) == false)
+//                    {
                         Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                         startActivity(i);
-                    }
-                    else
-                    {
-                        GenerikFunctions.showToast(cont,"Facebook login id done. Go for LinkedIn");
-                    }
+//                    }
+//                    else
+//                    {
+//                        GenerikFunctions.showToast(cont,"Facebook login id done. Go for LinkedIn");
+//                    }
+
+
                 }
             }
         };

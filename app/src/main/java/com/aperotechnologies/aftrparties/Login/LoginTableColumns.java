@@ -21,5 +21,13 @@ public class LoginTableColumns
         public static final String FB_USER_HOMETOWN_NAME          = "fb_user_hometown_name";
         public static final String FB_USER_CURRENT_LOCATION_ID    = "fb_user_current_location_id";
         public static final String FB_USER_CURRENT_LOCATION_NAME  = "fb_user_current_location_name";
+        public static final String FB_USER_FRIENDS                = "fb_user_friends";
+
+        public static final String LI_USER_ID                     = "li_user_id";
+
+        public static final String LI_USER_PROFILE_PIC            =  "li_user_profile_pic";
+        public static final String LI_USER_EMAIL                  ="li_user_email";
+        public static final String LI_USER_CONNECTIONS            ="li_user_connections";
+
 
 }

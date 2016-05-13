@@ -7,15 +7,6 @@ package com.aperotechnologies.aftrparties.Login;
     //Class to get JSON object
 public class FbUserInformation
 {
-    /* {"picture":
-    {"data":
-    {"url":"https:\/\/fbcdn-profile-a.akamaihd.net\/hprofile-ak-xft1\/v\/t1.0-1\/p200x200\/13133150_145693209167310_7419746219172680731_n.jpg?oh=1c1b1d986aa4644f9a0c175a797b753e&oe=57AD5435&__gda__=1474315388_aee3f970f392960a884640e086c46e3c","is_silhouette":false}},
-    "id":"155325838204047","gender":"female",
-    "birthday":"02\/26\/1991","email":"hasai@aperotechnologies.com",
-    "link":"https:\/\/www.facebook.com\/app_scoped_user_id\/155325838204047\/",
-    "name":"Harsha Apero"}
-    */
-
     String id=null;
     String gender=null;
     String birthday=null;

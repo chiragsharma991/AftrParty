@@ -53,6 +53,13 @@ public class DBHelper extends SQLiteOpenHelper
                 + LoginTableColumns.FB_USER_HOMETOWN_ID + " TEXT, "
                 + LoginTableColumns.FB_USER_HOMETOWN_NAME + " TEXT, "
                 + LoginTableColumns.FB_USER_CURRENT_LOCATION_ID + " TEXT, "
+                + LoginTableColumns.FB_USER_FRIENDS + " TEXT, "
+
+                + LoginTableColumns.LI_USER_ID + " TEXT, "
+                + LoginTableColumns.LI_USER_EMAIL + " TEXT, "
+                + LoginTableColumns.LI_USER_PROFILE_PIC + " TEXT, "
+                + LoginTableColumns.LI_USER_CONNECTIONS + " TEXT, "
+
                 + LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " TEXT) ";
 
 

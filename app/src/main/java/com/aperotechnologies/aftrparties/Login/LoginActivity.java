@@ -23,6 +23,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
@@ -42,6 +43,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.gson.Gson;
@@ -59,6 +61,7 @@ import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 import com.facebook.FacebookSdk;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.security.MessageDigest;
@@ -67,11 +70,27 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
+
+
+import com.linkedin.platform.APIHelper;
+import com.linkedin.platform.LISessionManager;
+import com.linkedin.platform.errors.LIApiError;
+import com.linkedin.platform.errors.LIAuthError;
+import com.linkedin.platform.listeners.ApiListener;
+import com.linkedin.platform.listeners.ApiResponse;
+import com.linkedin.platform.listeners.AuthListener;
+import com.linkedin.platform.utils.Scope;
+
 import static com.aperotechnologies.aftrparties.Login.LoginTableColumns.FB_USER_ID;
+
 
 /**
  * Created by hasai on 06/05/16.
  */
+
+/*LinkedIn App
+Client ID: 752m6fkgel868f
+Client Secret: yxNWdXkj0iZwG3wq*/
 public class LoginActivity extends Activity
 {
     //Harshada
@@ -93,20 +112,23 @@ public class LoginActivity extends Activity
     FbUserInformation fbUserInformation;
     FBCurrentLocationInformation fBCurrentLocationInformation;
     FbHomelocationInformation fbHomelocationInformation;
+    String AdvancedConnectionsLinkedIn="https://api.linkedin.com/v1/people/~:(id,first-name,email-address,last-name,num-connections,picture-url,positions:(id,title,summary,start-date,end-date,is-current,company:(id,name,type,size,industry,ticker)),educations:(id,field-of-study,start-date,end-date,notes),publications:(id,title,publisher:(name),authors:(id,name),date,url,summary),patents:(id,title,summary,number,status:(id,name),office:(name),inventors:(id,name),date,url),languages:(id,language:(name),proficiency:(level,name)),skills:(id,skill:(name)),certifications:(id,name,authority:(name),number,start-date,end-date),courses:(id,name,number),recommendations-received:(id,recommendation-type,recommendation-text,recommender),honors-awards,three-current-positions,three-past-positions,volunteer)?format=json";
+    LIUserInformation liUserInformation;
     Gson gson;
-
     EditText edt_usr_name, edt_usr_email, edt_usr_phone;
     RelativeLayout layout_parent_login;
-
     String inputToastDisplay = "";
+    String linkedinStart="";
+    String Token;
     Iterator iterator;
+    int total_friends_count=0;
+
     //General
     Configuration_Parameter m_config;
     Context cont;
     SharedPreferences sharedpreferences;
     SQLiteDatabase sqldb;
     DBHelper helper;
-
 
     public void onCreate(Bundle savedInstanceState)
     {
@@ -161,7 +183,7 @@ public class LoginActivity extends Activity
         permissions.add("user_hometown");
 
         // permissions.add("taggable_friends");
-        // getDebugHashKey();
+         getDebugHashKey();
 
         layout_parent_login.setOnTouchListener(new View.OnTouchListener()
         {
@@ -188,6 +210,15 @@ public class LoginActivity extends Activity
             edt_usr_name.setText(sharedpreferences.getString(m_config.Entered_User_Name, "UserName"));
             edt_usr_email.setText(sharedpreferences.getString(m_config.Entered_Email, "Email"));
             edt_usr_phone.setText(sharedpreferences.getString(m_config.Entered_Contact_No, "Contact No"));
+        }
+
+        if(sharedpreferences.getBoolean(m_config.FBLoginDone,false)==false)
+        {
+            linkedinStart="";
+        }
+        else
+        {
+            linkedinStart="Yes";
         }
     }
 
@@ -336,14 +367,115 @@ public class LoginActivity extends Activity
 
     //Meghana
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        callbackManager.onActivityResult(requestCode, resultCode, data);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if(linkedinStart.equals(""))
+        {
+            //For FB
+            super.onActivityResult(requestCode, resultCode, data);
+            callbackManager.onActivityResult(requestCode, resultCode, data);
+        }
+        else
+        {
+            //For LI
+            LISessionManager.getInstance(getApplicationContext()).onActivityResult(this, requestCode, resultCode, data);
+            Log.i("Request Code phase 2", requestCode + "   " + resultCode + "  " + data);
+            Log.e("Token from start", Token + "");
+            if (Token == null)
+            {
+                GenerikFunctions.showToast(cont,"LI Login Failed");
+                startLinkedInProcess();
+            }
+            else
+            {
+                APIHelper apiHelper = APIHelper.getInstance(getApplicationContext());
+                apiHelper.getRequest(cont, AdvancedConnectionsLinkedIn, new ApiListener()
+                {
+                    @Override
+                    public void onApiSuccess(ApiResponse result)
+                    {
+                        try
+                        {
+
+                            setLIUserProfile(result.getResponseDataAsJson());
+                            JSONObject jsonObject = result.getResponseDataAsJson();
+                            Log.e("jsonresponse", "aa" + jsonObject.toString() + " ");
+
+
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                            GenerikFunctions.showToast(cont,"Li Error  "+ e.toString());
+                        }
+                    }
+                    @Override
+                    public void onApiError(LIApiError error)
+                    {
+                        Log.e("Linked In Error", error.toString());
+                    }
+                });
+            }
+        }
+    }
+
+    public  void  setLIUserProfile(JSONObject response)
+    {
+        Log.e("Response ",response.toString()+"");
+        liUserInformation= gson.fromJson(response.toString(),LIUserInformation.class);
+        Log.e("LI Email ", liUserInformation.getEmailAddress());
+        Log.e("LI Connections " ,liUserInformation.getNumConnections());
+        Log.e("LI Id",liUserInformation.getId());
+        Log.e("LI Pic",liUserInformation.getPictureUrl());
+        if(liUserInformation.getNumConnections().equals(null))
+        {
+
+        }
+        else
+        {
+            String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
+                    FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
+            Log.i("User Query  : ", Query);
+            Cursor cursor = sqldb.rawQuery(Query, null);
+            Log.e("Cursor count",cursor.getCount()+"");
+            if(cursor.getCount() == 0)
+            {
+
+            }
+            else
+            {
+                String Update = "Update " + LoginTableColumns.USERTABLE + " set "
+                        + LoginTableColumns.LI_USER_ID  + " = '" + liUserInformation.getId() + "', "
+                        +  LoginTableColumns.LI_USER_EMAIL  + " = '" + liUserInformation.emailAddress + "', "
+                        +  LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + liUserInformation.getPictureUrl() + "', "
+                        +  LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + liUserInformation.getNumConnections() + "' "
+                        + " where " + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
+
+                // Log.i("update Brands "+brand_id[i], Update);
+                sqldb.execSQL(Update);
+            }
+
+//            Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
+//                                    FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
+//                            Log.i("User Query  : ", Query);
+//                             cursor = sqldb.rawQuery(Query, null);
+//                            cursor.moveToFirst();
+//                            Log.e("Cursor ",cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_ID)) +"   "
+//                            + cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_CONNECTIONS)) +"  " +
+//                            cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_EMAIL)) +"   " +
+//                            cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_PROFILE_PIC))+"   \\n    ===FB====     "
+//                            + cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_NAME)) +"   " +
+//                            cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_FRIENDS))+"    " +
+//                            cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_GENDER)));
+
+        }
+
     }
 
     //Harshada
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         //Meghana
         //Clear Focus from all edit texts
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -510,6 +642,7 @@ public class LoginActivity extends Activity
     public void FacebookDataRetieval()
     {
         Log.e("Inside FB data retreive","Yes");
+        linkedinStart="";
         loginManager.registerCallback(callbackManager,
             new FacebookCallback<LoginResult>()
             {
@@ -559,7 +692,6 @@ public class LoginActivity extends Activity
                     edt_usr_name.setText("");
                     Log.e("Login onCancel", "Yes");
                     GenerikFunctions.showToast(cont,"Please provide permissions for app login");
-
                 }
 
                 @Override
@@ -712,6 +844,7 @@ public class LoginActivity extends Activity
 //                            Log.e("getLocationName " , fbHomelocationInformation.getLocationName());
                         }
 
+
                         if(emptyFields.equals(""))
                         {
                             String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
@@ -765,18 +898,172 @@ public class LoginActivity extends Activity
         values.put(LoginTableColumns.FB_USER_GENDER,fbUserInformation.getGender().trim());
         values.put(LoginTableColumns.FB_USER_BIRTHDATE,fbUserInformation.getBirthday().trim());
         values.put(LoginTableColumns.FB_USER_EMAIL,fbUserInformation.getEmail().trim());
-        values.put(LoginTableColumns.FB_USER_PROFILE_PIC,
-                fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl().trim());
+        values.put(LoginTableColumns.FB_USER_PROFILE_PIC,fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl().trim());
         values.put(LoginTableColumns.FB_USER_HOMETOWN_ID,fbHomelocationInformation.getLocationId().trim());
         values.put(LoginTableColumns.FB_USER_HOMETOWN_NAME, fbHomelocationInformation.getLocationName().trim());
         values.put(LoginTableColumns.FB_USER_CURRENT_LOCATION_ID,fBCurrentLocationInformation.getLocationId().trim());
         values.put(LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME, fBCurrentLocationInformation.getLocationName().trim());
         sqldb.insert(LoginTableColumns.USERTABLE, null, values);
         Log.i("Inserted User ", fbUserInformation.getFbId().trim() + "");
+
+
+
+
+
+        /******/
+
+        //Total No of friends
+        new GraphRequest(
+                AccessToken.getCurrentAccessToken(),
+                "/me/friends",
+                null,
+                HttpMethod.GET,
+                new GraphRequest.Callback()
+                {
+                    public void onCompleted(GraphResponse response)
+                    {
+                        Log.e(" user friends list", response + "");
+                        try
+                        {
+                            JSONObject graphObject = response.getJSONObject();
+                            Log.e("graphObject",graphObject.toString());
+                            //        JSONArray dataArray = graphObject.getJSONArray("data");
+                            //        JSONObject paging = graphObject.getJSONObject("paging");
+                            JSONObject summary = graphObject.getJSONObject("summary");
+                            String totCount = summary.getString("total_count");
+                            Log.e("Summary  totCount ", summary + "      " + totCount);
+
+                            total_friends_count = (Integer.parseInt(totCount.trim()));
+
+
+                            String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
+                                    FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
+                            Log.i("User Query  : ", Query);
+                            Cursor cursor = sqldb.rawQuery(Query, null);
+                            Log.e("Cursor count",cursor.getCount()+"");
+                            if(cursor.getCount() == 0)
+                            {
+                            }
+                            else
+                            {
+                                String Update = "Update " + LoginTableColumns.USERTABLE + " set "
+                                        + LoginTableColumns.FB_USER_FRIENDS  + " = '" + total_friends_count + "'"
+                                        + " where " + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
+
+                                //   Log.i("update Brands "+brand_id[i], Update);
+                                sqldb.execSQL(Update);
+                            }
+                            //Check for DB Updation
+//                             Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
+//                                    FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
+//                            Log.i("User Query  : ", Query);
+//                             cursor = sqldb.rawQuery(Query, null);
+//                            cursor.moveToFirst();
+//                            Log.e("Cursor ",cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_NAME)) +"   "
+//                                    + cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_FRIENDS)));
+
+                        }
+                        catch (Exception e)
+                        {
+                            System.out.println("Exception=" + e);
+                            e.printStackTrace();
+                        }
+                    }
+                }
+        ).executeAsync();
+    }
+
+    private static Scope buildScope()
+    {
+        return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
     }
 
     public void startLinkedInProcess()
     {
+        linkedinStart="Yes";
+        Log.e("Inside startLinkedInProcess","Yes");
+        LISessionManager.getInstance(getApplicationContext()).init(this, buildScope(), new AuthListener()
+        {
+            @Override
+            public void onAuthSuccess()
+            {
+                Token=LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().getValue().toString();
+                Log.e("LI Token",Token+"");
+                GenerikFunctions.showToast(cont,"success       Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
+            }
 
+            @Override
+            public void onAuthError(LIAuthError error)
+            {
+                Log.e("LI Login Error",error.toString()+"");
+                GenerikFunctions.showToast(cont, "failed  linked in " + error.toString());
+                if(error.toString().trim().contains("USER_CANCELLED"))
+                {
+                    GenerikFunctions.showToast(cont, "Please accept permissions " );
+                    startLinkedInProcess();
+                }
+            }
+        }, true);
     }
 }
+/*
+*
+
+//
+//new GraphRequest(
+//        AccessToken.getCurrentAccessToken(),
+//        "/" + fbUserInformation.getFbId().trim() + "/taggable_friends",
+//        null,
+//        HttpMethod.GET,
+//        new GraphRequest.Callback()
+//        {
+//public void onCompleted(GraphResponse response)
+//        {
+//        JSONObject res = response.getJSONObject();
+//        Log.e("Taggable user friends list", response + "");
+//        try
+//        {
+//        JSONObject graphObject = response.getJSONObject();
+//        JSONArray dataArray = graphObject.getJSONArray("data");
+//        Log.e("Taggable Array length", dataArray.length() + "");
+//        JSONObject paging = graphObject.getJSONObject("paging");
+//        Log.e("Taggable Paging", paging + "");
+//        String next = paging.getString("next");
+//        Log.e("Taggable next", next + "");
+//        for (int i = 0; i < dataArray.length(); i++)
+//        {
+//        try
+//        {
+//        // here all that you want
+//        JSONObject object = dataArray.getJSONObject(i);
+//
+//        // get facebook user id,name and picture
+//        String str_id = object.getString("id");
+//
+//        String str_name = object.getString("name");
+//
+//
+//        JSONObject picture_obj = object.getJSONObject("picture");
+//
+//        JSONObject data_obj = picture_obj.getJSONObject("data");
+//
+//        String str_url = data_obj.getString("url");
+//        Log.e(i + "Taggable Info", str_id + "    " + str_name + "     " + "       " + str_url + "     " + picture_obj + "    " + data_obj);
+//
+//        }
+//        catch (Exception e)
+//        {
+//        e.printStackTrace();
+//        }
+//        }
+//        }
+//        catch (Exception e)
+//        {
+//        System.out.println("Exception=" + e);
+//        e.printStackTrace();
+//        }
+//        }
+//        }
+//        ).executeAsync();
+//
+//        */
