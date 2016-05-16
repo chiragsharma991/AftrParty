@@ -1,7 +1,6 @@
 package com.aperotechnologies.aftrparties.Login;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -221,8 +220,6 @@ public class LoginActivity extends Activity
             linkedinStart="Yes";
         }
     }
-
-
 
     //Harshada
     //function for starting session of quickblox
@@ -449,12 +446,9 @@ public class LoginActivity extends Activity
                     {
                         try
                         {
-
                             setLIUserProfile(result.getResponseDataAsJson());
                             JSONObject jsonObject = result.getResponseDataAsJson();
                             Log.e("jsonresponse", "aa" + jsonObject.toString() + " ");
-
-
                         }
                         catch (Exception e)
                         {
@@ -482,7 +476,6 @@ public class LoginActivity extends Activity
         Log.e("LI Connections " ,liUserInformation.getNumConnections());
         Log.e("LI Id",liUserInformation.getId());
         Log.e("LI Pic",liUserInformation.getPictureUrl());
-
         if(liUserInformation.getNumConnections().equals(null))
         {
 
@@ -504,7 +497,10 @@ public class LoginActivity extends Activity
                         + LoginTableColumns.LI_USER_ID  + " = '" + liUserInformation.getId() + "', "
                         +  LoginTableColumns.LI_USER_EMAIL  + " = '" + liUserInformation.getEmailAddress() + "', "
                         +  LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + liUserInformation.getPictureUrl() + "', "
-                        +  LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + liUserInformation.getNumConnections() + "' "
+                        +  LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + liUserInformation.getNumConnections() + "', "
+                        +LoginTableColumns.LI_USER_FIRST_NAME + " = '" + liUserInformation.getFirstName() + "', "
+                        +LoginTableColumns.LI_USER_LAST_NAME + " = '" + liUserInformation.getLastName() + "', "
+                        +LoginTableColumns.LI_USER_HEADLINE + " = '" + liUserInformation.getHeadline() + "' "
                         + " where " + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
 
                 // Log.i("update Brands "+brand_id[i], Update);
@@ -517,6 +513,16 @@ public class LoginActivity extends Activity
                 loggedInUserInfo.setLI_USER_PROFILE_PIC(liUserInformation.getPictureUrl());
                 loggedInUserInfo.setLI_USER_CONNECTIONS(liUserInformation.getNumConnections());
                 loggedInUserInfo.setLI_USER_HEADLINE(liUserInformation.getHeadline());
+
+                SharedPreferences.Editor editor= sharedpreferences.edit();
+                editor.putString(m_config.LILoginDone,"Yes");
+                editor.apply();;
+
+
+
+                //Harshada
+
+
 
                 GenerikFunctions generikFunctions = new GenerikFunctions();
                 generikFunctions.showDialog(m_config.pDialog, "Loading...");
@@ -586,7 +592,7 @@ public class LoginActivity extends Activity
             for (Signature mysignature : info.signatures) {
                 MessageDigest mymd = MessageDigest.getInstance("SHA");
                 mymd.update(mysignature.toByteArray());
-                //Log.e("KeyHash:", Base64.encodeToString(mymd.digest(), Base64.DEFAULT));
+                Log.e("KeyHash:", Base64.encodeToString(mymd.digest(), Base64.DEFAULT));
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -799,7 +805,7 @@ public class LoginActivity extends Activity
             while (iterator.hasNext())
             {
                 String perm_name = iterator.next().toString();
-                Log.e("Given Permission already logged in : ", perm_name + " ");
+                Log.e("Given Permission from already logged in : ", perm_name + " ");
             }
 
             ArrayList<String> declined_permissions = new ArrayList<String>();
@@ -808,7 +814,7 @@ public class LoginActivity extends Activity
             while (iterator.hasNext())
             {
                 String perm_name = iterator.next().toString();
-                Log.e("declined_permission already loggoed in: ", perm_name + "");
+                Log.e("declined_permission from already loggoed in : ", perm_name + " ");
                 declined_permissions.add(perm_name);
             }
 
@@ -845,10 +851,11 @@ public class LoginActivity extends Activity
 
                         fbUserInformation = gson.fromJson(object.toString(), FbUserInformation.class);
                         Log.e("User Information --->","Information");
-//                        Log.e("getFbId Id: " , fbUserInformation.getFbId());
-//                        Log.e("getGender: " , fbUserInformation.getGender());
-//                        Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
-//                        Log.e("getEmail: " ,fbUserInformation.getEmail());
+                        Log.e("getFbId Id: " , fbUserInformation.getFbId());
+                        Log.e("getGender: " , fbUserInformation.getGender());
+                        Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
+                        Log.e("getEmail: " ,fbUserInformation.getEmail());
+                        Log.e("getBirthday: " ,fbUserInformation.getBirthday());
 
                         if(fbUserInformation.getBirthday().equals(null))
                         {
@@ -973,6 +980,7 @@ public class LoginActivity extends Activity
         values.put(LoginTableColumns.FB_USER_CURRENT_LOCATION_ID,fBCurrentLocationInformation.getLocationId().trim());
         values.put(LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME, fBCurrentLocationInformation.getLocationName().trim());
         sqldb.insert(LoginTableColumns.USERTABLE, null, values);
+
         Log.i("Inserted User ", fbUserInformation.getFbId().trim() + "");
 
         loggedInUserInfo =new LoggedInUserInformation();
@@ -987,11 +995,6 @@ public class LoginActivity extends Activity
         loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
         loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
         loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
-
-
-
-
-
 
         /******/
 

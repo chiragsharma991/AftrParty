@@ -5,15 +5,15 @@ package com.aperotechnologies.aftrparties.Login;
  */
 public class LIUserInformation
 {
-    String id=null;
-    String pictureUrl=null;
-    String emailAddress=null;
-    String numConnections="0";
+   String id=null;
+   String pictureUrl=null;
+   String emailAddress=null;
+   String numConnections="0";
     String headline=null;
     String firstName=null;
     String lastName=null;
 
-    public String getId()
+   public String getId()
    {
        return id;
    }
@@ -52,7 +52,6 @@ public class LIUserInformation
     {
         this.pictureUrl = pictureUrl;
     }
-
 
     public String getFirstName() {
         return firstName;
