@@ -1,6 +1,7 @@
 package com.aperotechnologies.aftrparties.Login;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -23,7 +24,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
@@ -31,7 +31,6 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
-import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
@@ -61,7 +60,6 @@ import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 import com.facebook.FacebookSdk;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.security.MessageDigest;
@@ -95,12 +93,11 @@ public class LoginActivity extends Activity
 {
     //Harshada
     private static final String TAG = "LoginActivity";
-    static final String APP_ID = "34621";
-    static final String AUTH_KEY = "q6aK9sm6GCSmtru";
-    static final String AUTH_SECRET = "uTOm5-R4zYyR-DV";
-    static final String ACCOUNT_KEY = "bzbtQDLez742xU468TXt";
+    static final String APP_ID = "40454";//"34621";
+    static final String AUTH_KEY = "sYpuKrOrGT4pG6d";//"q6aK9sm6GCSmtru";
+    static final String AUTH_SECRET = "hVx9RNMT4emBK5K";//"uTOm5-R4zYyR-DV";
+    static final String ACCOUNT_KEY = "VLBr2asUuw9uHDFC7qgb";//"bzbtQDLez742xU468TXt";
 
-    QBUser primary_user;
     PlayServicesHelper playServicesHelper;
 
     //Meghana
@@ -112,6 +109,7 @@ public class LoginActivity extends Activity
     FbUserInformation fbUserInformation;
     FBCurrentLocationInformation fBCurrentLocationInformation;
     FbHomelocationInformation fbHomelocationInformation;
+    LoggedInUserInformation loggedInUserInfo;
     String AdvancedConnectionsLinkedIn="https://api.linkedin.com/v1/people/~:(id,first-name,email-address,last-name,num-connections,picture-url,positions:(id,title,summary,start-date,end-date,is-current,company:(id,name,type,size,industry,ticker)),educations:(id,field-of-study,start-date,end-date,notes),publications:(id,title,publisher:(name),authors:(id,name),date,url,summary),patents:(id,title,summary,number,status:(id,name),office:(name),inventors:(id,name),date,url),languages:(id,language:(name),proficiency:(level,name)),skills:(id,skill:(name)),certifications:(id,name,authority:(name),number,start-date,end-date),courses:(id,name,number),recommendations-received:(id,recommendation-type,recommendation-text,recommender),honors-awards,three-current-positions,three-past-positions,volunteer)?format=json";
     LIUserInformation liUserInformation;
     Gson gson;
@@ -145,17 +143,19 @@ public class LoginActivity extends Activity
         gson=new Gson();
         helper= DBHelper.getInstance(cont);
         sqldb=helper.getWritableDatabase();
+        m_config.pDialog = new ProgressDialog(cont);
 
-        //Harshada
-        primary_user = new QBUser();
 
         QBSettings.getInstance().init(getApplicationContext(), APP_ID, AUTH_KEY, AUTH_SECRET);
         QBSettings.getInstance().setAccountKey(ACCOUNT_KEY);
 
         // Initialize the Amazon Cognito credentials provider
-        final CognitoCachingCredentialsProvider credentialsProvider
-                = new CognitoCachingCredentialsProvider(getApplicationContext(),
-                getResources().getString(R.string.identity_pool_id), Regions.US_EAST_1);
+        final CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+                getApplicationContext(),
+                "us-east-1:bd2ea8c9-5aa9-4e32-b8e5-20235fc7f4ac", // Identity Pool ID
+                Regions.US_EAST_1 // Region
+        );
+
 
         m_config.ddbClient = new AmazonDynamoDBClient(credentialsProvider);
         //DynamoDB client to create an Object m_config.mapper:
@@ -222,28 +222,41 @@ public class LoginActivity extends Activity
         }
     }
 
+
+
     //Harshada
-    public void QBStartSession() {
+    //function for starting session of quickblox
+    public void QBStartSession(){
         QBAuth.createSession(new QBEntityCallback() {
             @Override
             public void onSuccess(Object o, Bundle bundle) {
                 Log.e("createSession", "onsuccess");
                 try {
-                    String token = QBAuth.getBaseService().getToken();
-                    Log.e("New token", token);
+                    String qbtoken = QBAuth.getBaseService().getToken();
+                    Log.e("New token", qbtoken);
                 } catch (Exception e) {
 
                 }
 
-
-                loginWithFbQuickBlox("CAAGvR03Lv3ABAEYwSlAxqLrNOqNi7Ecp0avE9W9ULI0LB2ZBFZAXFJn1dZBS7kybcsprJt4bViAjDVdUsxD7ZBUUrNWsOj1hoLAn8GZCqSUGhzqZCk5oarzbwkhx6PumvtlZAktIsHRcAZBzD6edYzm0UdNZCHHyk0ZAAz8ZACS5yqYxCLXgZB9UQtxCl1cnHEw0YuAFZBZAlVToousGGfLfBZCl0yQU1DM4TaoPjX64u95pRhmdAZDZD", "Meghana Apero", "https://graph.facebook.com/129419790774542/picture?type=large");
+                String FBprofilePic =  loggedInUserInfo.getFB_USER_PROFILE_PIC();
+                String LIprofilePic = loggedInUserInfo.getLI_USER_PROFILE_PIC();
+                Log.e("FBprofilePic"," "+FBprofilePic);
+                Log.e("LIprofilePic"," "+LIprofilePic);
+                String profilePic = "";
+                if(FBprofilePic == null || FBprofilePic.equals("")){
+                    profilePic = LIprofilePic;
+                }else{
+                    profilePic = FBprofilePic;
+                }
+                Log.e("token"," "+token.getToken());
+                loginWithFbQuickBlox(token.getToken(),profilePic);//"https://graph.facebook.com/129419790774542/picture?type=large");
 
 
             }
 
             @Override
             public void onError(QBResponseException e) {
-                Log.e("createSession", "onerror");
+                Log.e("createSession","onerror");
                 e.printStackTrace();
             }
 
@@ -251,49 +264,34 @@ public class LoginActivity extends Activity
     }
 
     //Harshada
-    public void loginWithFbQuickBlox(String accessToken, final String FullName, final String avatarUrl) {
-        QBUsers.signInUsingSocialProvider(QBProvider.FACEBOOK, accessToken,
-                null, new QBEntityCallback<QBUser>() {
-                    @Override
-                    public void onSuccess(QBUser user, Bundle args) {
-                        //Log.e("On success qbuser",user.toString() +"   " +user.getFullName());
-                        primary_user = user;
-                        m_config.primary_user = primary_user;
-                        Log.e("Facebook login", "Success" + " ");
-                        Log.e("user", "" + user);
-                        if (!user.getFullName().equals(FullName)) {
-                            user.setFullName(FullName);
-                        }
+    //function for Login with FB using Quickblox
+    public void loginWithFbQuickBlox(String accessToken, final String avatarUrl){
 
+
+        QBUsers.signInUsingSocialProvider(QBProvider.FACEBOOK, String.valueOf(accessToken),
+                null, new QBEntityCallback<QBUser>()
+                {
+                    @Override
+                    public void onSuccess(QBUser user, Bundle args)
+                    {
+
+
+                        //m_config.qb_user = user;
+                        Log.e("Facebook login","Success"+" ");
+                        //Log.e("user",""+user);
+                        Log.e("user",""+user);
+
+                        user.setFullName(sharedpreferences.getString(m_config.Entered_User_Name,""));
                         uploadprofilePic(user, avatarUrl);
 
-                        if (primary_user.equals(null) || primary_user == null) {
-                            //Log.e("primary user",null+"  null");
-                        } else {
-                            try {
-                                primary_user.setPassword(BaseService.getBaseService().getToken());
-                            } catch (BaseServiceException e) {
-                                e.printStackTrace();
-                                // means you have not created a session before
-                            }
+//
 
-                            // initialize Chat service
-                            try {
-                                QBChatService.init(getApplicationContext());
-                                final QBChatService chatService = QBChatService.getInstance();
-                                m_config.chatService = chatService;
-                                //playServicesHelper = new PlayServicesHelper(LoginActivity.this);
-                                chatLogout();
-                                chatLogin();//
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
                     }
 
                     @Override
-                    public void onError(QBResponseException errors) {
-                        Log.e("Facebook login", "OnError");
+                    public void onError(QBResponseException errors)
+                    {
+                        Log.e("Facebook login","OnError");
                         errors.printStackTrace();
                     }
                 });
@@ -301,68 +299,123 @@ public class LoginActivity extends Activity
     }
 
     //Harshada
-    public void uploadprofilePic(QBUser user, String avatarUrl) {
-        Log.e("here", ":1----");
+    //function for profile pic upload in Quickblox user table
+    public void uploadprofilePic(QBUser user, String avatarUrl){
 
-        if (user.getCustomData() == null || !user.getCustomData().equals(avatarUrl)) {
-            user.setCustomData(avatarUrl);
-            Log.e("here", ":2----");
-        }
+        user.setCustomData(avatarUrl);
 
 
         QBUsers.updateUser(user, new QBEntityCallback<QBUser>() {
             @Override
             public void onSuccess(QBUser user, Bundle args) {
-                Log.e("user image ", " " + user.getCustomData());
+                Log.e("user image "," "+user.getCustomData());
+                Log.e("user occp id "," "+user.getId());
+
+//                Gson gson = new Gson();
+//                String qbuserjson = gson.toJson(user);
+                //m_config.qb_user = user;
+                SharedPreferences.Editor editor = sharedpreferences.edit();
+                editor.putString(m_config.FBloginWithQB, "Yes");
+//                editor.putString(m_config.qbuser, qbuserjson);
+                editor.apply();
+
+                Log.e("update user---",""+user);
+
+                if(user.equals(null) || user==null)
+                {
+                    //Log.e("primary user",null+"  null");
+                }
+                else {
+                    try {
+                        user.setPassword(BaseService.getBaseService().getToken());
+
+
+                    } catch (BaseServiceException e) {
+
+                        e.printStackTrace();
+                        // means you have not created a session before
+                    }
+
+                    // initialize Chat service
+                    try {
+
+                        QBChatService.init(getApplicationContext());
+                        final QBChatService chatService = QBChatService.getInstance();
+                        m_config.chatService = chatService;
+
+                        chatLogout(user);
+
+
+
+
+//
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
             }
 
             @Override
             public void onError(QBResponseException errors) {
+
             }
         });
 
     }
 
     //Harshada
-    public void chatLogin() {
-        m_config.chatService.login(primary_user, new QBEntityCallback() {
+    //function for chat login
+    public void chatLogin(QBUser qb_user){
+
+        m_config.chatService.login(qb_user, new QBEntityCallback()
+        {
             @Override
-            public void onSuccess(Object o, Bundle bundle) {
-                Log.e("ChatServicelogin", "Success ");
-                QBGroupChatManager groupChatManager = m_config.chatService.getGroupChatManager();
+            public void onSuccess(Object o, Bundle bundle)
+            {
+                Log.e("ChatServicelogin","Success ");
+                QBGroupChatManager groupChatManager  = m_config.chatService.getGroupChatManager();
                 QBPrivateChatManager privateChatManager = m_config.chatService.getPrivateChatManager();
                 m_config.groupChatManager = groupChatManager;
                 m_config.privateChatManager = privateChatManager;
-                playServicesHelper = new PlayServicesHelper(LoginActivity.this);
-                Intent intent = new Intent(LoginActivity.this, HomePageActivity.class);
-                startActivity(intent);
+                playServicesHelper = new PlayServicesHelper(LoginActivity.this, loggedInUserInfo);
+
             }
 
             @Override
-            public void onError(QBResponseException error) {
+            public void onError(QBResponseException error)
+            {
                 // errror
-                Log.e("ChatServicelogin", "OnError " + error.toString());
+                Log.e("ChatServicelogin","OnError "+error.toString());
                 error.printStackTrace();
             }
         });
     }
 
     //Harshada
-    public void chatLogout() {
+    //function for chat logout
+    public void chatLogout(final QBUser user){
         boolean isLoggedIn = m_config.chatService.isLoggedIn();
 
-        if (isLoggedIn) {
+        if(isLoggedIn) {
+
             m_config.chatService.logout(new QBEntityCallback() {
                 @Override
                 public void onSuccess(Object o, Bundle bundle) {
+
                     m_config.chatService.destroy();
+                    chatLogin(user);
                 }
 
                 @Override
                 public void onError(QBResponseException errors) {
                 }
             });
+        }else{
+            chatLogin(user);
         }
+
     }
 
     //Meghana
@@ -407,12 +460,14 @@ public class LoginActivity extends Activity
                         {
                             e.printStackTrace();
                             GenerikFunctions.showToast(cont,"Li Error  "+ e.toString());
+                            QBStartSession();
                         }
                     }
                     @Override
                     public void onApiError(LIApiError error)
                     {
                         Log.e("Linked In Error", error.toString());
+                        QBStartSession();
                     }
                 });
             }
@@ -427,6 +482,7 @@ public class LoginActivity extends Activity
         Log.e("LI Connections " ,liUserInformation.getNumConnections());
         Log.e("LI Id",liUserInformation.getId());
         Log.e("LI Pic",liUserInformation.getPictureUrl());
+
         if(liUserInformation.getNumConnections().equals(null))
         {
 
@@ -446,13 +502,27 @@ public class LoginActivity extends Activity
             {
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                         + LoginTableColumns.LI_USER_ID  + " = '" + liUserInformation.getId() + "', "
-                        +  LoginTableColumns.LI_USER_EMAIL  + " = '" + liUserInformation.emailAddress + "', "
+                        +  LoginTableColumns.LI_USER_EMAIL  + " = '" + liUserInformation.getEmailAddress() + "', "
                         +  LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + liUserInformation.getPictureUrl() + "', "
                         +  LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + liUserInformation.getNumConnections() + "' "
                         + " where " + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
 
                 // Log.i("update Brands "+brand_id[i], Update);
                 sqldb.execSQL(Update);
+
+                loggedInUserInfo.setLI_USER_ID(liUserInformation.getId());
+                loggedInUserInfo.setLI_USER_FIRST_NAME(liUserInformation.getFirstName());
+                loggedInUserInfo.setLI_USER_LAST_NAME(liUserInformation.getLastName());
+                loggedInUserInfo.setLI_USER_EMAIL(liUserInformation.getEmailAddress());
+                loggedInUserInfo.setLI_USER_PROFILE_PIC(liUserInformation.getPictureUrl());
+                loggedInUserInfo.setLI_USER_CONNECTIONS(liUserInformation.getNumConnections());
+                loggedInUserInfo.setLI_USER_HEADLINE(liUserInformation.getHeadline());
+
+                GenerikFunctions generikFunctions = new GenerikFunctions();
+                generikFunctions.showDialog(m_config.pDialog, "Loading...");
+                QBStartSession();
+
+
             }
 
 //            Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
@@ -516,7 +586,7 @@ public class LoginActivity extends Activity
             for (Signature mysignature : info.signatures) {
                 MessageDigest mymd = MessageDigest.getInstance("SHA");
                 mymd.update(mysignature.toByteArray());
-                Log.e("KeyHash:", Base64.encodeToString(mymd.digest(), Base64.DEFAULT));
+                //Log.e("KeyHash:", Base64.encodeToString(mymd.digest(), Base64.DEFAULT));
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
@@ -729,7 +799,7 @@ public class LoginActivity extends Activity
             while (iterator.hasNext())
             {
                 String perm_name = iterator.next().toString();
-                Log.e("Given Permission from already logged in : ", perm_name + " ");
+                Log.e("Given Permission already logged in : ", perm_name + " ");
             }
 
             ArrayList<String> declined_permissions = new ArrayList<String>();
@@ -738,7 +808,7 @@ public class LoginActivity extends Activity
             while (iterator.hasNext())
             {
                 String perm_name = iterator.next().toString();
-                Log.e("declined_permission from already loggoed in : ", perm_name + " ");
+                Log.e("declined_permission already loggoed in: ", perm_name + "");
                 declined_permissions.add(perm_name);
             }
 
@@ -871,7 +941,6 @@ public class LoginActivity extends Activity
                             editor.putString(m_config.LoggedInFBUserID, fbUserInformation.getFbId());
                             editor.putBoolean(m_config.FBLoginDone,true);
                             editor.apply();
-
                             startLinkedInProcess();
                         }
                         else
@@ -905,6 +974,20 @@ public class LoginActivity extends Activity
         values.put(LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME, fBCurrentLocationInformation.getLocationName().trim());
         sqldb.insert(LoginTableColumns.USERTABLE, null, values);
         Log.i("Inserted User ", fbUserInformation.getFbId().trim() + "");
+
+        loggedInUserInfo =new LoggedInUserInformation();
+
+        loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
+        loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
+        loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
+        loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+        loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
+        loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
+        loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
+        loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
+        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
+        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
+
 
 
 

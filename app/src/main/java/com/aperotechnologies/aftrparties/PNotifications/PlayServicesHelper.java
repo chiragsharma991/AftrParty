@@ -17,7 +17,10 @@ import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
+import com.aperotechnologies.aftrparties.Login.LoggedInUserInformation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -34,17 +37,20 @@ import java.util.ArrayList;
 public class PlayServicesHelper {
 
     private static final String PROPERTY_APP_VERSION = "appVersion";
-    private static final String PROPERTY_REG_ID = "registration_id";
     private static final String TAG = "PlayServicesHelper";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     private GoogleCloudMessaging googleCloudMessaging;
-    private Activity activity;
+    private Activity context;
     private String regId;
+    Configuration_Parameter m_config;
+    LoggedInUserInformation loggedInUserInfo;
 
 
-    public PlayServicesHelper(Activity activity) {
-        this.activity = activity;
+    public PlayServicesHelper(Activity context, LoggedInUserInformation loggedInUserInfo) {
+        this.context = context;
+        this.loggedInUserInfo = loggedInUserInfo;;
+        m_config = Configuration_Parameter.getInstance();
         checkPlayService();
     }
 
@@ -52,12 +58,17 @@ public class PlayServicesHelper {
         // Check device for Play Services APK. If check succeeds, proceed with
         // GCM registration.
         if (checkPlayServices()) {
-            googleCloudMessaging = GoogleCloudMessaging.getInstance(activity);
+            googleCloudMessaging = GoogleCloudMessaging.getInstance(context);
             regId = getRegistrationId();
-            Log.e("regId--- "," "+regId);
-            registerInBackground();
-            //subscribeToPushNotifications(regId);
-            //getDeviceIdAndroid(regId);
+            Log.e("check regId--- "," "+regId);
+
+            if (regId.isEmpty()) {
+                registerInBackground();
+            }else{
+                AWSDBOperations amazonDb = new AWSDBOperations();
+                amazonDb.createUser(context, loggedInUserInfo);
+            }
+
 
 
         } else {
@@ -71,14 +82,14 @@ public class PlayServicesHelper {
      * the Google Play Store or enable it in the device's system settings.
      */
     public boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, activity, PLAY_SERVICES_RESOLUTION_REQUEST)
+                GooglePlayServicesUtil.getErrorDialog(resultCode, context, PLAY_SERVICES_RESOLUTION_REQUEST)
                         .show();
             } else {
                 Log.i(TAG, "This device is not supported.");
-                activity.finish();
+                context.finish();
             }
             return false;
         }
@@ -95,7 +106,7 @@ public class PlayServicesHelper {
      */
     private String getRegistrationId() {
         final SharedPreferences prefs = getGCMPreferences();
-        String registrationId = prefs.getString(PROPERTY_REG_ID, "");
+        String registrationId = prefs.getString(m_config.REG_ID, "");
         if (registrationId.isEmpty()) {
             Log.i(TAG, "Registration not found.");
             return "";
@@ -117,15 +128,13 @@ public class PlayServicesHelper {
                 String msg = "";
                 try {
                     if (googleCloudMessaging == null) {
-                        googleCloudMessaging = GoogleCloudMessaging.getInstance(activity);
+                        googleCloudMessaging = GoogleCloudMessaging.getInstance(context);
                     }
                     regId = googleCloudMessaging.register(ConstsCore.PROJECT_NUMBER);
                     Log.e("regID"," "+regId);
                     msg = "Device registered, registration ID=" + regId;
 
-                    // You should send the registration ID to your server over HTTP, so it
-                    // can use GCM/HTTP or CCS to send messages to your app.
-                    Handler h = new Handler(activity.getMainLooper());
+                    Handler h = new Handler(context.getMainLooper());
                     h.post(new Runnable() {
                         @Override
                         public void run() {
@@ -134,12 +143,10 @@ public class PlayServicesHelper {
                     });
 
                     // Persist the regID - no need to register again.
-                    storeRegistrationId(regId);
+                    //storeRegistrationId(regId);
                 } catch (IOException ex) {
                     msg = "Error :" + ex.getMessage();
-                    // If there is an error, don't just keep trying to register.
-                    // Require the user to click a button again, or perform
-                    // exponential back-off.
+
                 }
                 return msg;
             }
@@ -157,7 +164,7 @@ public class PlayServicesHelper {
     private SharedPreferences getGCMPreferences() {
         // This sample app persists the registration ID in shared preferences, but
         // how you store the regID in your app is up to you.
-        return activity.getSharedPreferences(activity.getPackageName(), Context.MODE_PRIVATE);
+        return context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
     }
 
     /**
@@ -165,7 +172,7 @@ public class PlayServicesHelper {
      *
      * @param regId registration ID
      */
-    private void subscribeToPushNotifications(String regId, TelephonyManager mTelephony) {
+    private void subscribeToPushNotifications(final String regId, TelephonyManager mTelephony) {
 
             QBSubscription subscription = new QBSubscription(QBNotificationChannel.GCM);
             subscription.setEnvironment(QBEnvironment.DEVELOPMENT);
@@ -175,7 +182,7 @@ public class PlayServicesHelper {
            if (mTelephony.getDeviceId() != null) {
                 deviceId = mTelephony.getDeviceId(); //*** use for mobiles
             } else {
-                deviceId = Settings.Secure.getString(activity.getContentResolver(),
+                deviceId = Settings.Secure.getString(context.getContentResolver(),
                         Settings.Secure.ANDROID_ID); //*** use for tablets
             }
             subscription.setDeviceUdid(deviceId);
@@ -187,6 +194,10 @@ public class PlayServicesHelper {
                 @Override
                 public void onSuccess(ArrayList<QBSubscription> subscriptions, Bundle args) {
                     Log.e("subscription","OnSuccess");
+                    // Persist the regID - no need to register again.
+                    storeRegistrationId(regId);
+                    AWSDBOperations amazonDb = new AWSDBOperations();
+                    amazonDb.createUser(context, loggedInUserInfo);
                 }
 
                 @Override
@@ -207,7 +218,7 @@ public class PlayServicesHelper {
     private void storeRegistrationId(String regId) {
         final SharedPreferences prefs = getGCMPreferences();
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_REG_ID, regId);
+        editor.putString(m_config.REG_ID, regId);
         editor.commit();
     }
 
@@ -219,26 +230,26 @@ public class PlayServicesHelper {
 
         if ((int) Build.VERSION.SDK_INT < 23)
         {
-            mTelephony = (TelephonyManager) activity.getSystemService(
+            mTelephony = (TelephonyManager) context.getSystemService(
                     Context.TELEPHONY_SERVICE);
             subscribeToPushNotifications(regId,mTelephony);
         }
         else
         {
-            int permissionCheck = ContextCompat.checkSelfPermission(activity,
+            int permissionCheck = ContextCompat.checkSelfPermission(context,
                     Manifest.permission.READ_PHONE_STATE);
 
 
             if(permissionCheck == PackageManager.PERMISSION_GRANTED) {
 
-                mTelephony = (TelephonyManager) activity.getSystemService(
+                mTelephony = (TelephonyManager) context.getSystemService(
                         Context.TELEPHONY_SERVICE);
                 subscribeToPushNotifications(regId,mTelephony);
 
 
             }else{
-                ActivityCompat.requestPermissions(activity,
-                        new String[]{Manifest.permission.READ_PHONE_STATE},30);
+                ActivityCompat.requestPermissions(context,
+                        new String[]{Manifest.permission.READ_PHONE_STATE}, 30);
             }
 
         }
@@ -260,13 +271,13 @@ public class PlayServicesHelper {
                 else if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_DENIED)
                 {
 
-                    new AlertDialog.Builder(activity)
+                    new AlertDialog.Builder(context)
                             .setTitle("Permission Denied")
                             .setMessage("READ_PHONE_STATE")
                             .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     // continue with delete
-                                    ActivityCompat.requestPermissions(activity,
+                                    ActivityCompat.requestPermissions(context,
                                             new String[]{Manifest.permission.READ_PHONE_STATE},
                                             30);
                                 }

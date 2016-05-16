@@ -1,6 +1,7 @@
 package com.aperotechnologies.aftrparties.Constants;
 
 import android.app.NotificationManager;
+import android.app.ProgressDialog;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -18,7 +19,8 @@ import java.util.Collection;
 public class Configuration_Parameter
 {
     private static Configuration_Parameter myObj;
-    public QBUser primary_user;
+    //Harshada
+
     public QBGroupChatManager groupChatManager;
     public QBPrivateChatManager privateChatManager;
     public QBChatService chatService;
@@ -26,13 +28,20 @@ public class Configuration_Parameter
     public NotificationManager notificationManager;
     public AmazonDynamoDB ddbClient;
     public DynamoDBMapper mapper;
+    public ProgressDialog pDialog;
+    public String FBloginWithQB = "No";
+    public String REG_ID = "registration_id";
 
+
+    /*shared preference*/
     //Meghana
     public String Entered_User_Name = "UserName";
     public String Entered_Email = "Email";
     public String Entered_Contact_No = "ContactNo";
     public String LoggedInFBUserID = "";
     public String FBLoginDone ="FBLoginDone";
+    //Harshada
+    public String qbuser = "";
 
     /**
      * Create private constructor
