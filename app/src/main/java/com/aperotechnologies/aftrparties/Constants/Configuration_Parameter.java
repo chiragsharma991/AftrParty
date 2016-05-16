@@ -33,6 +33,7 @@ public class Configuration_Parameter
     public String Entered_Contact_No = "ContactNo";
     public String LoggedInFBUserID = "";
     public String FBLoginDone ="FBLoginDone";
+    public String LILoginDone ="LILoginDone";
 
     /**
      * Create private constructor

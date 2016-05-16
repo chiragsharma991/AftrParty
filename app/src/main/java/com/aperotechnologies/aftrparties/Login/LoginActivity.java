@@ -112,8 +112,9 @@ public class LoginActivity extends Activity
     FbUserInformation fbUserInformation;
     FBCurrentLocationInformation fBCurrentLocationInformation;
     FbHomelocationInformation fbHomelocationInformation;
-    String AdvancedConnectionsLinkedIn="https://api.linkedin.com/v1/people/~:(id,first-name,email-address,last-name,num-connections,picture-url,positions:(id,title,summary,start-date,end-date,is-current,company:(id,name,type,size,industry,ticker)),educations:(id,field-of-study,start-date,end-date,notes),publications:(id,title,publisher:(name),authors:(id,name),date,url,summary),patents:(id,title,summary,number,status:(id,name),office:(name),inventors:(id,name),date,url),languages:(id,language:(name),proficiency:(level,name)),skills:(id,skill:(name)),certifications:(id,name,authority:(name),number,start-date,end-date),courses:(id,name,number),recommendations-received:(id,recommendation-type,recommendation-text,recommender),honors-awards,three-current-positions,three-past-positions,volunteer)?format=json";
+    String AdvancedConnectionsLinkedIn="https://api.linkedin.com/v1/people/~:(id,first-name,email-address,headline,last-name,num-connections,picture-url,positions:(id,title,summary,start-date,end-date,is-current,company:(id,name,type,size,industry,ticker)),educations:(id,field-of-study,start-date,end-date,notes),publications:(id,title,publisher:(name),authors:(id,name),date,url,summary),patents:(id,title,summary,number,status:(id,name),office:(name),inventors:(id,name),date,url),languages:(id,language:(name),proficiency:(level,name)),skills:(id,skill:(name)),certifications:(id,name,authority:(name),number,start-date,end-date),courses:(id,name,number),recommendations-received:(id,recommendation-type,recommendation-text,recommender),honors-awards,three-current-positions,three-past-positions,volunteer)?format=json";
     LIUserInformation liUserInformation;
+    LoggedInUserInformation loggedInUserInfo;
     Gson gson;
     EditText edt_usr_name, edt_usr_email, edt_usr_phone;
     RelativeLayout layout_parent_login;
@@ -251,34 +252,46 @@ public class LoginActivity extends Activity
     }
 
     //Harshada
-    public void loginWithFbQuickBlox(String accessToken, final String FullName, final String avatarUrl) {
+    public void loginWithFbQuickBlox(String accessToken, final String FullName, final String avatarUrl)
+    {
         QBUsers.signInUsingSocialProvider(QBProvider.FACEBOOK, accessToken,
-                null, new QBEntityCallback<QBUser>() {
+                null, new QBEntityCallback<QBUser>()
+                {
                     @Override
-                    public void onSuccess(QBUser user, Bundle args) {
+                    public void onSuccess(QBUser user, Bundle args)
+                    {
                         //Log.e("On success qbuser",user.toString() +"   " +user.getFullName());
                         primary_user = user;
                         m_config.primary_user = primary_user;
                         Log.e("Facebook login", "Success" + " ");
                         Log.e("user", "" + user);
-                        if (!user.getFullName().equals(FullName)) {
+                        if (!user.getFullName().equals(FullName))
+                        {
                             user.setFullName(FullName);
                         }
 
                         uploadprofilePic(user, avatarUrl);
 
-                        if (primary_user.equals(null) || primary_user == null) {
+                        if (primary_user.equals(null) || primary_user == null)
+                        {
                             //Log.e("primary user",null+"  null");
-                        } else {
-                            try {
+                        }
+                        else
+                        {
+                            try
+                            {
                                 primary_user.setPassword(BaseService.getBaseService().getToken());
-                            } catch (BaseServiceException e) {
+                            }
+                            catch (BaseServiceException e)
+                            {
                                 e.printStackTrace();
                                 // means you have not created a session before
                             }
 
                             // initialize Chat service
-                            try {
+                            try
+
+                            {
                                 QBChatService.init(getApplicationContext());
                                 final QBChatService chatService = QBChatService.getInstance();
                                 m_config.chatService = chatService;
@@ -396,12 +409,9 @@ public class LoginActivity extends Activity
                     {
                         try
                         {
-
                             setLIUserProfile(result.getResponseDataAsJson());
                             JSONObject jsonObject = result.getResponseDataAsJson();
                             Log.e("jsonresponse", "aa" + jsonObject.toString() + " ");
-
-
                         }
                         catch (Exception e)
                         {
@@ -424,9 +434,12 @@ public class LoginActivity extends Activity
         Log.e("Response ",response.toString()+"");
         liUserInformation= gson.fromJson(response.toString(),LIUserInformation.class);
         Log.e("LI Email ", liUserInformation.getEmailAddress());
-        Log.e("LI Connections " ,liUserInformation.getNumConnections());
-        Log.e("LI Id",liUserInformation.getId());
-        Log.e("LI Pic",liUserInformation.getPictureUrl());
+//        Log.e("LI Connections " ,liUserInformation.getNumConnections());
+//        Log.e("LI Id",liUserInformation.getId());
+//        Log.e("LI Pic",liUserInformation.getPictureUrl());
+//        Log.e("LI first Name",liUserInformation.getFirstName());
+//        Log.e("LI last Name",liUserInformation.getLastName());
+//        Log.e("LI headline",liUserInformation.getHeadline());
         if(liUserInformation.getNumConnections().equals(null))
         {
 
@@ -446,13 +459,33 @@ public class LoginActivity extends Activity
             {
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                         + LoginTableColumns.LI_USER_ID  + " = '" + liUserInformation.getId() + "', "
-                        +  LoginTableColumns.LI_USER_EMAIL  + " = '" + liUserInformation.emailAddress + "', "
+                        +  LoginTableColumns.LI_USER_EMAIL  + " = '" + liUserInformation.getEmailAddress() + "', "
                         +  LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + liUserInformation.getPictureUrl() + "', "
-                        +  LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + liUserInformation.getNumConnections() + "' "
+                        +  LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + liUserInformation.getNumConnections() + "', "
+                        +LoginTableColumns.LI_USER_FIRST_NAME + " = '" + liUserInformation.getFirstName() + "', "
+                        +LoginTableColumns.LI_USER_LAST_NAME + " = '" + liUserInformation.getLastName() + "', "
+                        +LoginTableColumns.LI_USER_HEADLINE + " = '" + liUserInformation.getHeadline() + "' "
                         + " where " + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
 
                 // Log.i("update Brands "+brand_id[i], Update);
                 sqldb.execSQL(Update);
+
+                loggedInUserInfo.setLI_USER_ID(liUserInformation.getId());
+                loggedInUserInfo.setLI_USER_FIRST_NAME(liUserInformation.getFirstName());
+                loggedInUserInfo.setLI_USER_LAST_NAME(liUserInformation.getLastName());
+                loggedInUserInfo.setLI_USER_EMAIL(liUserInformation.getEmailAddress());
+                loggedInUserInfo.setLI_USER_PROFILE_PIC(liUserInformation.getPictureUrl());
+                loggedInUserInfo.setLI_USER_CONNECTIONS(liUserInformation.getNumConnections());
+                loggedInUserInfo.setLI_USER_HEADLINE(liUserInformation.getHeadline());
+
+                SharedPreferences.Editor editor= sharedpreferences.edit();
+                editor.putString(m_config.LILoginDone,"Yes");
+                editor.apply();;
+
+
+
+                //Harshada
+
             }
 
 //            Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
@@ -463,7 +496,8 @@ public class LoginActivity extends Activity
 //                            Log.e("Cursor ",cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_ID)) +"   "
 //                            + cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_CONNECTIONS)) +"  " +
 //                            cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_EMAIL)) +"   " +
-//                            cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_PROFILE_PIC))+"   \\n    ===FB====     "
+//                            cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_PROFILE_PIC))+
+//                            cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_HEADLINE)) +"   \\n    ===FB====     "
 //                            + cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_NAME)) +"   " +
 //                            cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_FRIENDS))+"    " +
 //                            cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_GENDER)));
@@ -775,10 +809,11 @@ public class LoginActivity extends Activity
 
                         fbUserInformation = gson.fromJson(object.toString(), FbUserInformation.class);
                         Log.e("User Information --->","Information");
-//                        Log.e("getFbId Id: " , fbUserInformation.getFbId());
-//                        Log.e("getGender: " , fbUserInformation.getGender());
-//                        Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
-//                        Log.e("getEmail: " ,fbUserInformation.getEmail());
+                        Log.e("getFbId Id: " , fbUserInformation.getFbId());
+                        Log.e("getGender: " , fbUserInformation.getGender());
+                        Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
+                        Log.e("getEmail: " ,fbUserInformation.getEmail());
+                        Log.e("getBirthday: " ,fbUserInformation.getBirthday());
 
                         if(fbUserInformation.getBirthday().equals(null))
                         {
@@ -904,11 +939,21 @@ public class LoginActivity extends Activity
         values.put(LoginTableColumns.FB_USER_CURRENT_LOCATION_ID,fBCurrentLocationInformation.getLocationId().trim());
         values.put(LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME, fBCurrentLocationInformation.getLocationName().trim());
         sqldb.insert(LoginTableColumns.USERTABLE, null, values);
+
         Log.i("Inserted User ", fbUserInformation.getFbId().trim() + "");
 
+        loggedInUserInfo =new LoggedInUserInformation();
 
-
-
+        loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
+        loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
+        loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
+        loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+        loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
+        loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
+        loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
+        loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
+        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
+        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
 
         /******/
 
