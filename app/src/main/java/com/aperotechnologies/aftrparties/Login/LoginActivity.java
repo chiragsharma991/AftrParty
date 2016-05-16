@@ -321,7 +321,7 @@ public class LoginActivity extends Activity
 
                 if(user.equals(null) || user==null)
                 {
-                    Log.e("primary user",null+"  null");
+                    //Log.e("primary user",null+"  null");
                 }
                 else {
                     try {
