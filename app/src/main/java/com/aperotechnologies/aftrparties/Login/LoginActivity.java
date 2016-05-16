@@ -1,6 +1,7 @@
 package com.aperotechnologies.aftrparties.Login;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -320,7 +321,7 @@ public class LoginActivity extends Activity
 
                 if(user.equals(null) || user==null)
                 {
-                    //Log.e("primary user",null+"  null");
+                    Log.e("primary user",null+"  null");
                 }
                 else {
                     try {
