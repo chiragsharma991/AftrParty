@@ -28,9 +28,8 @@ public class Configuration_Parameter
     public NotificationManager notificationManager;
     public AmazonDynamoDB ddbClient;
     public DynamoDBMapper mapper;
+
     public ProgressDialog pDialog;
-    public String FBloginWithQB = "No";
-    public String REG_ID = "registration_id";
 
 
     /*shared preference*/
@@ -41,8 +40,9 @@ public class Configuration_Parameter
     public String LoggedInFBUserID = "";
     public String FBLoginDone ="FBLoginDone";
     public String LILoginDone ="LILoginDone";
+
     //Harshada
-    public String qbuser = "";
+    public String REG_ID = "registration_id";
 
     /**
      * Create private constructor
