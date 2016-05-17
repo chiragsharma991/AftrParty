@@ -236,19 +236,26 @@ public class LoginActivity extends Activity
 
                 }
 
-                String FBprofilePic =  loggedInUserInfo.getFB_USER_PROFILE_PIC();
-                String LIprofilePic = loggedInUserInfo.getLI_USER_PROFILE_PIC();
-                Log.e("FBprofilePic"," "+FBprofilePic);
-                Log.e("LIprofilePic"," "+LIprofilePic);
-                String profilePic = "";
-                if(FBprofilePic == null || FBprofilePic.equals("")){
-                    profilePic = LIprofilePic;
-                }else{
-                    profilePic = FBprofilePic;
-                }
-                Log.e("token"," "+token.getToken());
-                loginWithFbQuickBlox(token.getToken(),profilePic);//"https://graph.facebook.com/129419790774542/picture?type=large");
 
+
+                if(sharedpreferences.getString("ChatLogin","No").equals("Yes")){
+                    playServicesHelper = new PlayServicesHelper(LoginActivity.this, loggedInUserInfo);
+
+                }else {
+
+                    String FBprofilePic = loggedInUserInfo.getFB_USER_PROFILE_PIC();
+                    String LIprofilePic = loggedInUserInfo.getLI_USER_PROFILE_PIC();
+                    Log.e("FBprofilePic", " " + FBprofilePic);
+                    Log.e("LIprofilePic", " " + LIprofilePic);
+                    String profilePic = "";
+                    if (FBprofilePic == null || FBprofilePic.equals("")) {
+                        profilePic = LIprofilePic;
+                    } else {
+                        profilePic = FBprofilePic;
+                    }
+                    Log.e("token", " " + token.getToken());
+                    loginWithFbQuickBlox(token.getToken(), profilePic);//"https://graph.facebook.com/129419790774542/picture?type=large");
+                }
 
             }
 
@@ -340,7 +347,6 @@ public class LoginActivity extends Activity
                         QBChatService.init(getApplicationContext());
                         final QBChatService chatService = QBChatService.getInstance();
                         m_config.chatService = chatService;
-
                         chatLogout(user);
 
 
@@ -377,7 +383,13 @@ public class LoginActivity extends Activity
                 QBPrivateChatManager privateChatManager = m_config.chatService.getPrivateChatManager();
                 m_config.groupChatManager = groupChatManager;
                 m_config.privateChatManager = privateChatManager;
+                SharedPreferences.Editor editor = sharedpreferences.edit();
+                editor.putString("ChatLogin", "Yes");
+                editor.apply();
+
                 playServicesHelper = new PlayServicesHelper(LoginActivity.this, loggedInUserInfo);
+
+
 
             }
 
