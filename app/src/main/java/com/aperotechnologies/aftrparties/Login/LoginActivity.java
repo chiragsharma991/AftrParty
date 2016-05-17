@@ -453,10 +453,13 @@ public class LoginActivity extends Activity
             Log.e("Cursor count",cursor.getCount()+"");
             if(cursor.getCount() == 0)
             {
-
             }
             else
             {
+
+
+
+
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                         + LoginTableColumns.LI_USER_ID  + " = '" + liUserInformation.getId() + "', "
                         +  LoginTableColumns.LI_USER_EMAIL  + " = '" + liUserInformation.getEmailAddress() + "', "
@@ -480,9 +483,7 @@ public class LoginActivity extends Activity
 
                 SharedPreferences.Editor editor= sharedpreferences.edit();
                 editor.putString(m_config.LILoginDone,"Yes");
-                editor.apply();;
-
-
+                editor.apply();
 
                 //Harshada
 

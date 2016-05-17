@@ -38,12 +38,15 @@ public class Configuration_Parameter
     /**
      * Create private constructor
      */
+
     private Configuration_Parameter()
     {
     }
+
     /**
      * Create a static method to get instance.
      */
+
     public static Configuration_Parameter getInstance()
     {
         if(myObj == null)
