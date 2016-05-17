@@ -160,7 +160,7 @@ public class LoginActivity extends Activity
         m_config.ddbClient = new AmazonDynamoDBClient(credentialsProvider);
         //DynamoDB client to create an Object m_config.mapper:
         m_config.mapper = new DynamoDBMapper(m_config.ddbClient);
-        Log.e("m_config.mapper ", " " + m_config.mapper);
+        //Log.e("m_config.mapper ", " " + m_config.mapper);
 
         //Meghana
         //UI Components
