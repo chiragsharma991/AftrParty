@@ -108,28 +108,24 @@ public class AWSDBOperations {
             } else {
 
                 if (selUserData.getFacebookID().equals(FacebookID)) {
-                    if(selUserData.getDeviceToken().equals(null) || selUserData.getDeviceToken().equals("")){
-                        selUserData.setDeviceToken(DeviceToken);
-                    }else {
 
-                        selUserData.setQuickBloxID(QuickBloxID);
-                        selUserData.setLinkedInID(LinkedInID);
-                        selUserData.setSocialEmail(SocialEmail);
-                        selUserData.setFBUserName(FBUserName);
-                        selUserData.setFBCurrentLocation(FBCurrentLocation);
-                        selUserData.setFBHomeLocation(FBHomeLocation);
-                        selUserData.setBirthDate(BirthDate);
-                        selUserData.setFBFriendsCount(FBFriendsCount);
-                        selUserData.setGender(Gender);
-                        selUserData.setFBProfilePicUrl(FBProfilePicUrl);
-                        selUserData.setLKProfilePicUrl(LKProfilePicUrl);
-                        selUserData.setLKConnectionsCount(LKConnectionsCount);
-                        selUserData.setLKHeadLine(LKHeadLine);
-                        selUserData.setName(Name);
-                        selUserData.setEmail(Email);
-                        selUserData.setPhoneNumber(PhoneNumber);
-                        selUserData.setDeviceToken(DeviceToken);
-                    }
+                    selUserData.setQuickBloxID(QuickBloxID);
+                    selUserData.setLinkedInID(LinkedInID);
+                    selUserData.setSocialEmail(SocialEmail);
+                    selUserData.setFBUserName(FBUserName);
+                    selUserData.setFBCurrentLocation(FBCurrentLocation);
+                    selUserData.setFBHomeLocation(FBHomeLocation);
+                    selUserData.setBirthDate(BirthDate);
+                    selUserData.setFBFriendsCount(FBFriendsCount);
+                    selUserData.setGender(Gender);
+                    selUserData.setFBProfilePicUrl(FBProfilePicUrl);
+                    selUserData.setLKProfilePicUrl(LKProfilePicUrl);
+                    selUserData.setLKConnectionsCount(LKConnectionsCount);
+                    selUserData.setLKHeadLine(LKHeadLine);
+                    selUserData.setName(Name);
+                    selUserData.setEmail(Email);
+                    selUserData.setPhoneNumber(PhoneNumber);
+                    selUserData.setDeviceToken(DeviceToken);
 
                     m_config.mapper.save(selUserData);
                     SharedPreferences.Editor editor= sharedPreferences.edit();

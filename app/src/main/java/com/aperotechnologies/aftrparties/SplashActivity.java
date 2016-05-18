@@ -15,6 +15,7 @@ import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Login.LoginActivity;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.crashlytics.android.Crashlytics;
+import com.facebook.FacebookSdk;
 
 import io.fabric.sdk.android.Fabric;
 

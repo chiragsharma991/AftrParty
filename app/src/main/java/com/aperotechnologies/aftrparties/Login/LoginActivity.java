@@ -262,14 +262,18 @@ public class LoginActivity extends Activity
                         {
                             e.printStackTrace();
                             GenerikFunctions.showToast(cont,"Li Error  "+ e.toString());
-                            QBStartSession();
+                            //Harshada
+                            GenerikFunctions.showDialog(m_config.pDialog, "Loading...");
+                            LoginValidations.QBStartSession(cont);
                         }
                     }
                     @Override
                     public void onApiError(LIApiError error)
                     {
                         Log.e("Linked In Error", error.toString());
-                        QBStartSession();
+                        //Harshada
+                        GenerikFunctions.showDialog(m_config.pDialog, "Loading...");
+                        LoginValidations.QBStartSession(cont);
                     }
                 });
             }
