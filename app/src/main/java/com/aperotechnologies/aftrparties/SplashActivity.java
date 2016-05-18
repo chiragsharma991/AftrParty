@@ -7,9 +7,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Login.LoginActivity;
-import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.crashlytics.android.Crashlytics;
 
 import io.fabric.sdk.android.Fabric;
@@ -24,16 +27,25 @@ public class SplashActivity extends Activity
     Configuration_Parameter m_config;
     Context cont = this;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
-
         setContentView(R.layout.activity_splash);
-
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         m_config=Configuration_Parameter.getInstance();
+
+        // Initialize the Amazon Cognito credentials provider
+        final CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+                getApplicationContext(),
+                "us-east-1:bd2ea8c9-5aa9-4e32-b8e5-20235fc7f4ac", // Identity Pool ID
+                Regions.US_EAST_1 // Region
+        );
+
+        m_config.ddbClient = new AmazonDynamoDBClient(credentialsProvider);
+        m_config.mapper = new DynamoDBMapper(m_config.ddbClient);
 
         Thread timer = new Thread()
         {
@@ -56,7 +68,7 @@ public class SplashActivity extends Activity
 //                    }
 //                    else
 //                    {
-//                        GenerikFunctions.showToast(cont,"Facebook login id done. Go for LinkedIn");
+//                        //GenerikFunctions.showToast(cont,"Facebook login id done. Go for LinkedIn");
 //
 //                    }
 

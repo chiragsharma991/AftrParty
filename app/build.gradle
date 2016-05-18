@@ -74,4 +74,5 @@ dependencies {
     compile files('libs/aws-android-sdk-core-2.2.14.jar')
     compile files('libs/aws-android-sdk-ddb-2.2.14.jar')
     compile files('libs/aws-android-sdk-ddb-mapper-2.2.14.jar')
+    compile 'com.github.siyamed:android-shape-imageview:0.9.+@aar'
 }

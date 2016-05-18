@@ -21,11 +21,13 @@ public class Configuration_Parameter
     private static Configuration_Parameter myObj;
     //Harshada
 
+    public QBChatService chatService;
     public QBGroupChatManager groupChatManager;
     public QBPrivateChatManager privateChatManager;
-    public QBChatService chatService;
     public Collection<Integer> onlineUsers;
     public NotificationManager notificationManager;
+
+    //AWS variables
     public AmazonDynamoDB ddbClient;
     public DynamoDBMapper mapper;
 
@@ -43,6 +45,7 @@ public class Configuration_Parameter
 
     //Harshada
     public String REG_ID = "registration_id";
+    public String AWSUserDataDone = "No";
 
     /**
      * Create private constructor

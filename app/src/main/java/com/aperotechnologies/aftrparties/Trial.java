@@ -261,3 +261,15 @@ public class Trial
 
 }
 
+
+
+//store obj data in gson sharedpreference
+
+//                 Gson gson = new Gson();
+//                String qbuserjson = gson.toJson(user);
+//                m_config.qb_user = user;
+//                SharedPreferences.Editor editor = sharedpreferences.edit();
+//                editor.putString(m_config.qbuser, qbuserjson);
+//                editor.apply();
+
+

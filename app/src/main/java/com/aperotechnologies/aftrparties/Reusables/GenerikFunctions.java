@@ -29,7 +29,7 @@ public class GenerikFunctions
     }
 
 
-    public void showDialog(ProgressDialog pDialog, String message){
+    public static void showDialog(ProgressDialog pDialog, String message){
 
         pDialog.setMessage(message);
         pDialog.setCancelable(false);
@@ -38,7 +38,7 @@ public class GenerikFunctions
         }
     }
 
-    public void hideDialog(ProgressDialog pDialog){
+    public static void hideDialog(ProgressDialog pDialog){
         if (pDialog.isShowing()) {
             pDialog.cancel();
         }

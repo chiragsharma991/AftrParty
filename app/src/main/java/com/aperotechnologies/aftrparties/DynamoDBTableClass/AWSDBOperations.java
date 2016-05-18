@@ -1,13 +1,11 @@
 package com.aperotechnologies.aftrparties.DynamoDBTableClass;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
-import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.Login.LoggedInUserInformation;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 
@@ -16,21 +14,25 @@ import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
  */
 public class AWSDBOperations {
 
-    Configuration_Parameter m_config;
-    SharedPreferences sharedPreferences;
 
-    public void createUser(Context context, LoggedInUserInformation loggedInUserInfo) {
+
+    public static void createUser(Context context, LoggedInUserInformation loggedInUserInfo) {
+
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
         try {
-
-            m_config = Configuration_Parameter.getInstance();
-            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
              String FacebookID = loggedInUserInfo.getFB_USER_ID();
              String QuickBloxID = String.valueOf(m_config.chatService.getUser().getId());
              String LinkedInID = loggedInUserInfo.getLI_USER_ID();
-             String SocialEmail;
-             if(loggedInUserInfo.getFB_USER_EMAIL() == null || loggedInUserInfo.getFB_USER_EMAIL().equals("")){
-                 SocialEmail = loggedInUserInfo.getLI_USER_EMAIL();
+             String SocialEmail = loggedInUserInfo.getFB_USER_EMAIL();
+             if(SocialEmail.equals(null) || SocialEmail.equals("") || SocialEmail.equals("N/A")){
+                 if(loggedInUserInfo.getLI_USER_EMAIL() == null || loggedInUserInfo.getLI_USER_EMAIL().equals("") || loggedInUserInfo.getLI_USER_EMAIL().equals("N/A")) {
+                     SocialEmail = "N/A";
+                 }else{
+                     SocialEmail = loggedInUserInfo.getLI_USER_EMAIL();
+                 }
              }else{
                  SocialEmail = loggedInUserInfo.getFB_USER_EMAIL();
              }
@@ -39,11 +41,22 @@ public class AWSDBOperations {
              String FBCurrentLocation = loggedInUserInfo.getFB_USER_CURRENT_LOCATION_NAME();
              String FBHomeLocation = loggedInUserInfo.getFB_USER_HOMETOWN_NAME();
              String BirthDate = loggedInUserInfo.getFB_USER_BIRTHDATE();
-             int FBFriendsCount = Integer.parseInt(loggedInUserInfo.getFB_USER_FRIENDS());
+             int FBFriendsCount;
+             if(loggedInUserInfo.getFB_USER_FRIENDS() == null){
+                FBFriendsCount = 0;
+             } else{
+                FBFriendsCount = Integer.parseInt(loggedInUserInfo.getFB_USER_FRIENDS());
+             }
              String Gender = loggedInUserInfo.getFB_USER_GENDER();
              String FBProfilePicUrl = loggedInUserInfo.getFB_USER_PROFILE_PIC();
              String LKProfilePicUrl = loggedInUserInfo.getLI_USER_PROFILE_PIC();
-             int LKConnectionsCount = Integer.parseInt(loggedInUserInfo.getLI_USER_CONNECTIONS());
+             int LKConnectionsCount;
+             if(loggedInUserInfo.getLI_USER_CONNECTIONS() == null){
+                LKConnectionsCount = 0;
+             }else{
+                LKConnectionsCount = Integer.parseInt(loggedInUserInfo.getLI_USER_CONNECTIONS());
+            }
+
              String LKHeadLine = loggedInUserInfo.getLI_USER_HEADLINE();
              String Name = sharedPreferences.getString(m_config.Entered_User_Name,"");
              String Email = sharedPreferences.getString(m_config.Entered_Email,"");
@@ -74,7 +87,11 @@ public class AWSDBOperations {
                 user.setEmail(Email);
                 user.setPhoneNumber(PhoneNumber);
                 user.setDeviceToken(DeviceToken);
+                Log.e("AWS User insert "," " +user.toString());
                 m_config.mapper.save(user);
+                SharedPreferences.Editor editor= sharedPreferences.edit();
+                editor.putString(m_config.AWSUserDataDone,"Yes");
+                editor.apply();
                 Log.e("", "User Inserted");
 
                 UserTable savedUserClass = m_config.mapper.load(UserTable.class, FacebookID);
@@ -91,24 +108,33 @@ public class AWSDBOperations {
             } else {
 
                 if (selUserData.getFacebookID().equals(FacebookID)) {
-                    selUserData.setQuickBloxID(QuickBloxID);
-                    selUserData.setLinkedInID(LinkedInID);
-                    selUserData.setSocialEmail(SocialEmail);
-                    selUserData.setFBUserName(FBUserName);
-                    selUserData.setFBCurrentLocation(FBCurrentLocation);
-                    selUserData.setFBHomeLocation(FBHomeLocation);
-                    selUserData.setBirthDate(BirthDate);
-                    selUserData.setFBFriendsCount(FBFriendsCount);
-                    selUserData.setGender(Gender);
-                    selUserData.setFBProfilePicUrl(FBProfilePicUrl);
-                    selUserData.setLKProfilePicUrl(LKProfilePicUrl);
-                    selUserData.setLKConnectionsCount(LKConnectionsCount);
-                    selUserData.setLKHeadLine(LKHeadLine);
-                    selUserData.setName(Name);
-                    selUserData.setEmail(Email);
-                    selUserData.setPhoneNumber(PhoneNumber);
-                    selUserData.setDeviceToken(DeviceToken);
+                    if(selUserData.getDeviceToken().equals(null) || selUserData.getDeviceToken().equals("")){
+                        selUserData.setDeviceToken(DeviceToken);
+                    }else {
+
+                        selUserData.setQuickBloxID(QuickBloxID);
+                        selUserData.setLinkedInID(LinkedInID);
+                        selUserData.setSocialEmail(SocialEmail);
+                        selUserData.setFBUserName(FBUserName);
+                        selUserData.setFBCurrentLocation(FBCurrentLocation);
+                        selUserData.setFBHomeLocation(FBHomeLocation);
+                        selUserData.setBirthDate(BirthDate);
+                        selUserData.setFBFriendsCount(FBFriendsCount);
+                        selUserData.setGender(Gender);
+                        selUserData.setFBProfilePicUrl(FBProfilePicUrl);
+                        selUserData.setLKProfilePicUrl(LKProfilePicUrl);
+                        selUserData.setLKConnectionsCount(LKConnectionsCount);
+                        selUserData.setLKHeadLine(LKHeadLine);
+                        selUserData.setName(Name);
+                        selUserData.setEmail(Email);
+                        selUserData.setPhoneNumber(PhoneNumber);
+                        selUserData.setDeviceToken(DeviceToken);
+                    }
+
                     m_config.mapper.save(selUserData);
+                    SharedPreferences.Editor editor= sharedPreferences.edit();
+                    editor.putString(m_config.AWSUserDataDone,"Yes");
+                    editor.apply();;
                     UserTable savedUserClass = m_config.mapper.load(UserTable.class, FacebookID);
                     if (savedUserClass.getFacebookID().equals(FacebookID)) {
                         Log.e("---", " updated successfully");
@@ -126,9 +152,7 @@ public class AWSDBOperations {
         } catch (Exception ex) {
             Log.e("", "Error retrieving data");
             ex.printStackTrace();
-
-            GenerikFunctions generikFunctions = new GenerikFunctions();
-            generikFunctions.hideDialog(m_config.pDialog);
+            GenerikFunctions.hideDialog(m_config.pDialog);
         }
     }
 
