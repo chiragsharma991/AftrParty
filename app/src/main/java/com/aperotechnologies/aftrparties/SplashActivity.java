@@ -49,7 +49,7 @@ public class SplashActivity extends Activity
 
         m_config.ddbClient = new AmazonDynamoDBClient(credentialsProvider);
         m_config.mapper = new DynamoDBMapper(m_config.ddbClient);
-
+//
         Thread timer = new Thread()
         {
             public void run()
