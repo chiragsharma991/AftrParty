@@ -42,6 +42,7 @@ public class Configuration_Parameter
     public String LoggedInFBUserID = "";
     public String FBLoginDone ="FBLoginDone";
     public String LILoginDone ="LILoginDone";
+    public String QBFBLoginDone ="QBFBLoginDone";
 
     //Harshada
     public String REG_ID = "registration_id";

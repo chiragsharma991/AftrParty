@@ -105,18 +105,19 @@ public class LoginActivity extends Activity
     FbUserInformation fbUserInformation;
     FBCurrentLocationInformation fBCurrentLocationInformation;
     FbHomelocationInformation fbHomelocationInformation;
+    FbProfilePictureData fbProfilePictureData;
     LoggedInUserInformation loggedInUserInfo;
-    String AdvancedConnectionsLinkedIn = "https://api.linkedin.com/v1/people/~:(id,first-name,email-address,last-name,num-connections,picture-url,positions:(id,title,summary,start-date,end-date,is-current,company:(id,name,type,size,industry,ticker)),educations:(id,field-of-study,start-date,end-date,notes),publications:(id,title,publisher:(name),authors:(id,name),date,url,summary),patents:(id,title,summary,number,status:(id,name),office:(name),inventors:(id,name),date,url),languages:(id,language:(name),proficiency:(level,name)),skills:(id,skill:(name)),certifications:(id,name,authority:(name),number,start-date,end-date),courses:(id,name,number),recommendations-received:(id,recommendation-type,recommendation-text,recommender),honors-awards,three-current-positions,three-past-positions,volunteer)?format=json";
+    String AdvancedConnectionsLinkedIn="https://api.linkedin.com/v1/people/~:(id,first-name,email-address,last-name,num-connections,picture-url,positions:(id,title,summary,start-date,end-date,is-current,company:(id,name,type,size,industry,ticker)),educations:(id,field-of-study,start-date,end-date,notes),publications:(id,title,publisher:(name),authors:(id,name),date,url,summary),patents:(id,title,summary,number,status:(id,name),office:(name),inventors:(id,name),date,url),languages:(id,language:(name),proficiency:(level,name)),skills:(id,skill:(name)),certifications:(id,name,authority:(name),number,start-date,end-date),courses:(id,name,number),recommendations-received:(id,recommendation-type,recommendation-text,recommender),honors-awards,three-current-positions,three-past-positions,volunteer)?format=json";
     LIUserInformation liUserInformation;
     Gson gson;
     EditText edt_usr_name, edt_usr_email, edt_usr_phone;
     RelativeLayout layout_parent_login;
     String inputToastDisplay = "";
-    String linkedinStart = "";
+    String linkedinStart="";
     String Token;
     Iterator iterator;
     int total_friends_count = 0;
-    FbProfilePictureData fbProfilePictureData;
+
 
     //General
     Configuration_Parameter m_config;
@@ -128,10 +129,9 @@ public class LoginActivity extends Activity
     private static final  int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
     String regId;
 
-
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
-        FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_login);
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -140,9 +140,9 @@ public class LoginActivity extends Activity
         m_config = Configuration_Parameter.getInstance();
         cont = this;
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        gson = new Gson();
-        helper = DBHelper.getInstance(cont);
-        sqldb = helper.getWritableDatabase();
+        gson=new Gson();
+        helper= DBHelper.getInstance(cont);
+        sqldb=helper.getWritableDatabase();
         m_config.pDialog = new ProgressDialog(cont);
 
 
@@ -183,36 +183,46 @@ public class LoginActivity extends Activity
         permissions.add("user_hometown");
 
         // permissions.add("taggable_friends");
-        getDebugHashKey();
+         getDebugHashKey();
 
-        layout_parent_login.setOnTouchListener(new View.OnTouchListener() {
+        layout_parent_login.setOnTouchListener(new View.OnTouchListener()
+        {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public boolean onTouch(View v, MotionEvent event)
+            {
                 dismissCursor();
                 return true;
             }
         });
 
-        btn_login.setOnClickListener(new View.OnClickListener() {
+        btn_login.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 Log.e("Login Clicked", "yes");
                 validateUserInput();
             }
         });
 
-        if (sharedpreferences.getString(m_config.Entered_User_Name, "").length() > 0) {
+        if (sharedpreferences.getString(m_config.Entered_User_Name, "").length() > 0)
+        {
             edt_usr_name.setText(sharedpreferences.getString(m_config.Entered_User_Name, "UserName"));
             edt_usr_email.setText(sharedpreferences.getString(m_config.Entered_Email, "Email"));
             edt_usr_phone.setText(sharedpreferences.getString(m_config.Entered_Contact_No, "Contact No"));
         }
 
-        if (sharedpreferences.getBoolean(m_config.FBLoginDone, false) == false) {
-            linkedinStart = "";
-        } else {
-            linkedinStart = "Yes";
+        if(sharedpreferences.getBoolean(m_config.FBLoginDone,false)==false)
+        {
+            linkedinStart="";
+        }
+        else
+        {
+            linkedinStart="Yes";
         }
     }
+
+
 
 
     //Meghana
@@ -222,37 +232,44 @@ public class LoginActivity extends Activity
             //For FB
             super.onActivityResult(requestCode, resultCode, data);
             callbackManager.onActivityResult(requestCode, resultCode, data);
-        } else {
+        }
+        else
+        {
             //For LI
             LISessionManager.getInstance(getApplicationContext()).onActivityResult(this, requestCode, resultCode, data);
             Log.i("Request Code phase 2", requestCode + "   " + resultCode + "  " + data);
             Log.e("Token from start", Token + "");
-            if (Token == null) {
-                GenerikFunctions.showToast(cont, "LI Login Failed");
+            if (Token == null)
+            {
+                GenerikFunctions.showToast(cont,"LI Login Failed");
                 startLinkedInProcess();
-            } else {
+            }
+            else
+            {
                 APIHelper apiHelper = APIHelper.getInstance(getApplicationContext());
-                apiHelper.getRequest(cont, AdvancedConnectionsLinkedIn, new ApiListener() {
+                apiHelper.getRequest(cont, AdvancedConnectionsLinkedIn, new ApiListener()
+                {
                     @Override
-                    public void onApiSuccess(ApiResponse result) {
-                        try {
+                    public void onApiSuccess(ApiResponse result)
+                    {
+                        try
+                        {
                             setLIUserProfile(result.getResponseDataAsJson());
                             JSONObject jsonObject = result.getResponseDataAsJson();
                             Log.e("jsonresponse", "aa" + jsonObject.toString() + " ");
-                        } catch (Exception e) {
+                        }
+                        catch (Exception e)
+                        {
                             e.printStackTrace();
-                            GenerikFunctions.showToast(cont, "Li Error  " + e.toString());
-                            //Harshada
-                            GenerikFunctions.showDialog(m_config.pDialog, "Loading...");
-                            LoginValidations.QBStartSession(cont);
+                            GenerikFunctions.showToast(cont,"Li Error  "+ e.toString());
+                            QBStartSession();
                         }
                     }
-
                     @Override
-                    public void onApiError(LIApiError error) {
+                    public void onApiError(LIApiError error)
+                    {
                         Log.e("Linked In Error", error.toString());
-                        GenerikFunctions.showDialog(m_config.pDialog, "Loading...");
-                        LoginValidations.QBStartSession(cont);
+                        QBStartSession();
                     }
                 });
             }
@@ -280,18 +297,18 @@ public class LoginActivity extends Activity
             Log.e("Cursor count",cursor.getCount()+"");
             if(cursor.getCount() == 0)
             {
-
             }
             else
             {
+
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
-                        + LoginTableColumns.LI_USER_ID + " = '" + liUserInformation.getId() + "', "
-                        + LoginTableColumns.LI_USER_EMAIL + " = '" + liUserInformation.getEmailAddress() + "', "
-                        + LoginTableColumns.LI_USER_PROFILE_PIC + " = '" + liUserInformation.getPictureUrl() + "', "
-                        + LoginTableColumns.LI_USER_CONNECTIONS + " = '" + liUserInformation.getNumConnections() + "', "
-                        + LoginTableColumns.LI_USER_FIRST_NAME + " = '" + liUserInformation.getFirstName() + "', "
-                        + LoginTableColumns.LI_USER_LAST_NAME + " = '" + liUserInformation.getLastName() + "', "
-                        + LoginTableColumns.LI_USER_HEADLINE + " = '" + liUserInformation.getHeadline() + "' "
+                        + LoginTableColumns.LI_USER_ID  + " = '" + liUserInformation.getId() + "', "
+                        +  LoginTableColumns.LI_USER_EMAIL  + " = '" + liUserInformation.getEmailAddress() + "', "
+                        +  LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + liUserInformation.getPictureUrl() + "', "
+                        +  LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + liUserInformation.getNumConnections() + "', "
+                        +LoginTableColumns.LI_USER_FIRST_NAME + " = '" + liUserInformation.getFirstName() + "', "
+                        +LoginTableColumns.LI_USER_LAST_NAME + " = '" + liUserInformation.getLastName() + "', "
+                        +LoginTableColumns.LI_USER_HEADLINE + " = '" + liUserInformation.getHeadline() + "' "
                         + " where " + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
 
                 // Log.i("update Brands "+brand_id[i], Update);
@@ -307,9 +324,12 @@ public class LoginActivity extends Activity
 
                 SharedPreferences.Editor editor= sharedpreferences.edit();
                 editor.putString(m_config.LILoginDone,"Yes");
-                editor.apply();;
+                editor.apply();
 
-
+                 //Log out code
+//                loginManager.logOut();
+//                LISessionManager.getInstance(getApplicationContext()).clearSession();
+//                Log.e("Logged out from FB LI","Yes");
 
                 //Harshada
                 GenerikFunctions.showDialog(m_config.pDialog, "Loading...");
@@ -373,19 +393,28 @@ public class LoginActivity extends Activity
     }
 
     //Meghana
-    public void getDebugHashKey() {
-        try {
+    public void getDebugHashKey()
+    {
+        try
+        {
             PackageInfo info = getPackageManager().getPackageInfo("com.aperotechnologies.aftrparties", PackageManager.GET_SIGNATURES);
-            for (Signature mysignature : info.signatures) {
+            for (Signature mysignature : info.signatures)
+            {
                 MessageDigest mymd = MessageDigest.getInstance("SHA");
                 mymd.update(mysignature.toByteArray());
                 Log.e("KeyHash:", Base64.encodeToString(mymd.digest(), Base64.DEFAULT));
             }
-        } catch (PackageManager.NameNotFoundException e) {
+        }
+        catch (PackageManager.NameNotFoundException e)
+        {
             e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
+        }
+        catch (NoSuchAlgorithmException e)
+        {
             e.printStackTrace();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
@@ -393,7 +422,8 @@ public class LoginActivity extends Activity
     //meghana
     //dismiss cursor on other screen area tab
     //clear edittext focus
-    public void dismissCursor() {
+    public void dismissCursor()
+    {
         //Meghana
         //Clear Focus from all edit texts
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -435,22 +465,29 @@ public class LoginActivity extends Activity
             //Check for valid email pattern
             if (LoginValidations.isValidEmailId(edt_usr_email.getText().toString().trim()))
             {
-                //check for network availability
-                if (GenerikFunctions.chkStatus(cont))
+                //Check for valid contact no
+                if(LoginValidations.isValidMobile(edt_usr_phone))
                 {
-                    //Start Facebook Login Here
-
-                    SharedPreferences.Editor editor = sharedpreferences.edit();
-                    editor.putString(m_config.Entered_User_Name, edt_usr_name.getText().toString().trim());
-                    editor.putString(m_config.Entered_Email, edt_usr_email.getText().toString().trim());
-                    editor.putString(m_config.Entered_Contact_No, edt_usr_phone.getText().toString().trim());
-                    editor.apply();
-
-                    processLogin();
+                    //check for network availability
+                    if (GenerikFunctions.chkStatus(cont))
+                    {
+                        //Start Facebook Login Here
+                        SharedPreferences.Editor editor = sharedpreferences.edit();
+                        editor.putString(m_config.Entered_User_Name, edt_usr_name.getText().toString().trim());
+                        editor.putString(m_config.Entered_Email, edt_usr_email.getText().toString().trim());
+                        editor.putString(m_config.Entered_Contact_No, edt_usr_phone.getText().toString().trim());
+                        editor.apply();
+                        processLogin();
+                    }
+                    else
+                    {
+                        GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    }
                 }
                 else
                 {
-                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    GenerikFunctions.showToast(cont, "Enter Valid Contact No");
+                    edt_usr_phone.setText("");
                 }
             }
             else
@@ -523,7 +560,7 @@ public class LoginActivity extends Activity
                     while (iterator.hasNext())
                     {
                         String perm_name = iterator.next().toString();
-                       // Log.e("Given Permission: ", perm_name + " ");
+                        Log.e("Given Permission in FBDR: ", perm_name + " ");
                     }
 
                     ArrayList<String> declined_permissions = new ArrayList<String>();
@@ -532,7 +569,7 @@ public class LoginActivity extends Activity
                     while (iterator.hasNext())
                     {
                         String perm_name = iterator.next().toString();
-                      //  Log.e("declined_permission : ", perm_name + " ");
+                        Log.e("declined_permission in FBDR: ", perm_name + " ");
                         declined_permissions.add(perm_name);
                     }
                     if (declined_perm.size() > 0)
@@ -550,9 +587,9 @@ public class LoginActivity extends Activity
                 public void onCancel()
                 {
                     // App code
-                    edt_usr_email.setText("");
-                    edt_usr_phone.setText("");
-                    edt_usr_name.setText("");
+                    //    edt_usr_email.setText("");
+                    //edt_usr_phone.setText("");
+                    //  edt_usr_name.setText("");
                     Log.e("Login onCancel", "Yes");
                     GenerikFunctions.showToast(cont,"Please provide permissions for app login");
                 }
@@ -639,10 +676,10 @@ public class LoginActivity extends Activity
                         fbUserInformation = gson.fromJson(object.toString(), FbUserInformation.class);
                         Log.e("User Information --->","Information");
                         Log.e("getFbId Id: " , fbUserInformation.getFbId());
-                        Log.e("getGender: " , fbUserInformation.getGender());
-                        Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
-                        Log.e("getEmail: " ,fbUserInformation.getEmail());
-                        Log.e("getBirthday: " ,fbUserInformation.getBirthday());
+//                        Log.e("getGender: " , fbUserInformation.getGender());
+//                        Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
+//                        Log.e("getEmail: " ,fbUserInformation.getEmail());
+//                        Log.e("getBirthday: " ,fbUserInformation.getBirthday());
 
                         if(fbUserInformation.getBirthday().equals(null))
                         {
@@ -654,48 +691,61 @@ public class LoginActivity extends Activity
                         //    Log.e("getBirthday : " , fbUserInformation.getBirthday());
                         }
 
-                        if (fbUserInformation.getEmail().equals(null)) {
+                        if(fbUserInformation.getEmail().equals(null))
+                        {
                             fbUserInformation.setEmail("N/A");
-                        } else {
-                            Log.e("getEmail: ", fbUserInformation.getEmail());
+                        }
+                        else
+                        {
+                            Log.e("getEmail: " ,fbUserInformation.getEmail());
                         }
 
-                        if (fbUserInformation.getFBLocationInformation() == null) {
+                        if(fbUserInformation.getFBLocationInformation() == null)
+                        {
                             fBCurrentLocationInformation = new FBCurrentLocationInformation();
                             fBCurrentLocationInformation.setLocationId("N/A");
                             fBCurrentLocationInformation.setLocationName("N/A");
-                        } else {
+                        }
+                        else
+                        {
                             fBCurrentLocationInformation = fbUserInformation.getFBLocationInformation();
                         }
 
-                        Log.e("CUrrent Location --->", "Details");
-                        Log.e("getLocationId Id: ", fBCurrentLocationInformation.getLocationId());
-                        Log.e("getLocationName ", fBCurrentLocationInformation.getLocationName());
+                        Log.e("CUrrent Location --->","Details");
+                        Log.e("getLocationId Id: " , fBCurrentLocationInformation.getLocationId());
+                        Log.e("getLocationName " , fBCurrentLocationInformation.getLocationName());
 
 
-                        if (fbUserInformation.getFbProfilePictureData().equals(null)) {
+                        if(fbUserInformation.getFbProfilePictureData().equals(null))
+                        {
 
-                            fbProfilePictureData = fbUserInformation.getFbProfilePictureData();
+                            fbProfilePictureData= fbUserInformation.getFbProfilePictureData();
                             fbProfilePictureData.getFbPictureInformation().setUrl("N/A");
-                        } else {
-                            fbProfilePictureData = fbUserInformation.getFbProfilePictureData();
+                        }
+                        else
+                        {
+                            fbProfilePictureData=fbUserInformation.getFbProfilePictureData();
 
                         }
 
-                        Log.e("getImgLink", fbProfilePictureData.getFbPictureInformation().getUrl());
+                        Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
 
 
-                        if (fbUserInformation.getFbHomelocationInformation() == null) {
+                        if(fbUserInformation.getFbHomelocationInformation() == null)
+                        {
                             fbHomelocationInformation = new FbHomelocationInformation();
                             fbHomelocationInformation.setLocationId("N/A");
                             fbHomelocationInformation.setLocationName("N/A");
-                        } else {
+                        }
+                        else
+                        {
                             fbHomelocationInformation = fbUserInformation.getFbHomelocationInformation();
                         }
 
-                        Log.e("Home Location --->", "Details");
-                        Log.e("getLocationId Id: ", fbHomelocationInformation.getLocationId() + "  aa");
-                        Log.e("getLocationName ", fbHomelocationInformation.getLocationName() + "  aa");
+                        Log.e("Home Location --->","Details");
+                        Log.e("getLocationId Id: " , fbHomelocationInformation.getLocationId() +"  aa");
+                        Log.e("getLocationName " , fbHomelocationInformation.getLocationName()+"  aa");
+
 
                         if(emptyFields.equals(""))
                         {

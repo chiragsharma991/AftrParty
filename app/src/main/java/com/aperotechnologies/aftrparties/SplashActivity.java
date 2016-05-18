@@ -13,6 +13,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Login.LoginActivity;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.crashlytics.android.Crashlytics;
 
 import io.fabric.sdk.android.Fabric;
@@ -32,6 +33,7 @@ public class SplashActivity extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_splash);
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -68,7 +70,7 @@ public class SplashActivity extends Activity
 //                    }
 //                    else
 //                    {
-//                        //GenerikFunctions.showToast(cont,"Facebook login id done. Go for LinkedIn");
+//                        GenerikFunctions.showToast(cont,"Facebook login id done. Go for LinkedIn");
 //
 //                    }
 
