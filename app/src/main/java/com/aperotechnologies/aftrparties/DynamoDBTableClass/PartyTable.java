@@ -9,35 +9,35 @@ import java.util.List;
 /**
  * Created by hasai on 03/05/16.
  */
-@DynamoDBTable(tableName = "Party")
+@DynamoDBTable(tableName = "AP_Parties")
 public class PartyTable {
 
-    private String PartyId;
+    private String PartyID;
     private String PartyName;
-    private String PartyStartTime;
-    private String PartyEndTime;
+    private String StartTime;
+    private String EndTime;
     private String Date;
     private String HostFBID;
-    private String HostUserId;
+    private String HostQBID;
     private String HostName;
-    private String PredefineDesc;
-    private String Description;
+    private String PartyType;//Predefine desc
+    private String PartyDescription;
     private String BYOB;
     private String PartyAddress;
-    private String LatLong;
+    private String PartyLatLong;
     private String PartyImage;
-    private String FlagMask;
-    private String DialogId;
-    private List<UserIdStatusClass> UserIdStatus;
+    private String MaskStatus;
+    private String DialogID;
+    private List<GateCrashersClass> GateCrashers;
 
 
-    @DynamoDBHashKey(attributeName = "PartyId")
-    public String getPartyId() {
-        return PartyId;
+    @DynamoDBHashKey(attributeName = "PartyID")
+    public String getPartyID() {
+        return PartyID;
     }
 
-    public void setPartyId(String PartyId) {
-        this.PartyId = PartyId;
+    public void setPartyID(String PartyID) {
+        this.PartyID = PartyID;
     }
 
     @DynamoDBAttribute(attributeName = "PartyName")
@@ -49,22 +49,22 @@ public class PartyTable {
         this.PartyName = PartyName;
     }
 
-    @DynamoDBAttribute(attributeName = "PartyStartTime")
-    public String getPartyStartTime() {
-        return PartyStartTime;
+    @DynamoDBAttribute(attributeName = "StartTime")
+    public String getStartTime() {
+        return StartTime;
     }
 
-    public void setPartyStartTime(String PartyStartTime) {
-        this.PartyStartTime = PartyStartTime;
+    public void setStartTime(String StartTime) {
+        this.StartTime = StartTime;
     }
 
-    @DynamoDBAttribute(attributeName = "PartyEndTime")
-    public String getPartyEndTime() {
-        return PartyEndTime;
+    @DynamoDBAttribute(attributeName = "EndTime")
+    public String getEndTime() {
+        return EndTime;
     }
 
-    public void setPartyEndTime(String PartyEndTime) {
-        this.PartyEndTime = PartyEndTime;
+    public void setEndTime(String EndTime) {
+        this.EndTime = EndTime;
     }
 
     @DynamoDBAttribute(attributeName = "Date")
@@ -85,13 +85,13 @@ public class PartyTable {
         this.HostFBID = HostFBID;
     }
 
-    @DynamoDBAttribute(attributeName = "HostUserId")
-    public String getHostUserId() {
-        return HostUserId;
+    @DynamoDBAttribute(attributeName = "HostQBID")
+    public String getHostQBID() {
+        return HostQBID;
     }
 
-    public void setHostUserId(String HostUserId) {
-        this.HostUserId = HostUserId;
+    public void setHostQBID(String HostQBID) {
+        this.HostQBID = HostQBID;
     }
 
     @DynamoDBAttribute(attributeName = "HostName")
@@ -103,22 +103,22 @@ public class PartyTable {
         this.HostName = HostName;
     }
 
-    @DynamoDBAttribute(attributeName = "PredefineDesc")
-    public String getPredefineDesc() {
-        return PredefineDesc;
+    @DynamoDBAttribute(attributeName = "PartyType")
+    public String getPartyType() {
+        return PartyType;
     }
 
-    public void setPredefineDesc(String PredefineDesc) {
-        this.PredefineDesc = PredefineDesc;
+    public void setPartyType(String PartyType) {
+        this.PartyType = PartyType;
     }
 
-    @DynamoDBAttribute(attributeName = "Description")
-    public String getDescription() {
-        return Description;
+    @DynamoDBAttribute(attributeName = "PartyDescription")
+    public String getPartyDescription() {
+        return PartyDescription;
     }
 
-    public void setDescription(String Description) {
-        this.Description = Description;
+    public void setPartyDescription(String PartyDescription) {
+        this.PartyDescription = PartyDescription;
     }
 
     @DynamoDBAttribute(attributeName = "BYOB")
@@ -139,13 +139,13 @@ public class PartyTable {
         this.PartyAddress = PartyAddress;
     }
 
-    @DynamoDBAttribute(attributeName = "LatLong")
-    public String getLatLong() {
-        return LatLong;
+    @DynamoDBAttribute(attributeName = "PartyLatLong")
+    public String getPartyLatLong() {
+        return PartyLatLong;
     }
 
-    public void setLatLong(String LatLong) {
-        this.LatLong = LatLong;
+    public void setPartyLatLong(String PartyLatLong) {
+        this.PartyLatLong = PartyLatLong;
     }
 
     @DynamoDBAttribute(attributeName = "PartyImage")
@@ -157,31 +157,31 @@ public class PartyTable {
         this.PartyImage = PartyImage;
     }
 
-    @DynamoDBAttribute(attributeName = "FlagMask")
-    public String getFlagMask() {
-        return FlagMask;
+    @DynamoDBAttribute(attributeName = "MaskStatus")
+    public String getMaskStatus() {
+        return MaskStatus;
     }
 
-    public void setFlagMask(String FlagMask) {
-        this.FlagMask = FlagMask;
+    public void setMaskStatus(String MaskStatus) {
+        this.MaskStatus = MaskStatus;
     }
 
-    @DynamoDBAttribute(attributeName = "DialogId")
-    public String getDialogId() {
-        return DialogId;
+    @DynamoDBAttribute(attributeName = "DialogID")
+    public String getDialogID() {
+        return DialogID;
     }
 
-    public void setDialogId(String DialogId) {
-        this.DialogId = DialogId;
+    public void setDialogID(String DialogID) {
+        this.DialogID = DialogID;
     }
 
 
-    public List<UserIdStatusClass> getUserIdStatus() {
-        return UserIdStatus;
+    public List<GateCrashersClass> getGateCrashers() {
+        return GateCrashers;
     }
 
-    public void setUserIdStatus(List<UserIdStatusClass> UserIdStatus) {
-        this.UserIdStatus = UserIdStatus;
+    public void setGateCrashers(List<GateCrashersClass> GateCrashers) {
+        this.GateCrashers = GateCrashers;
     }
 
 }

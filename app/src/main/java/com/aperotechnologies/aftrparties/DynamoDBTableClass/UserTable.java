@@ -3,152 +3,125 @@ package com.aperotechnologies.aftrparties.DynamoDBTableClass;
 /**
  * Created by hasai on 05/04/16.
  */
-
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.*;
 
 import java.util.List;
 
-@DynamoDBTable(tableName = "User")
+@DynamoDBTable(tableName = "AP_Users")
 public class UserTable {
 
-    private String FBId;
-    private String Login;//check whether have account or not
-    private String UserId;
-    private String LinkedInId;
-    private String UserName;
-    private String Email;
-    private String FBLIEmail;
-    private String DOB;
-    private int Age;
-    private int Connections;
-    private int FriendsCount;
-    private String DeviceToken;
+    private String FacebookID;
+    //private String InvitedUser;//check whether have account or not
+    private String QuickBloxID;
+    private String LinkedInID;
+    private String SocialEmail;
+    private String FBUserName;
+    private String FBCurrentLocation;
+    private String FBHomeLocation;
+    private String BirthDate;
+    private int FBFriendsCount;
     private String Gender;
-    private String Phone;
-    private String Profilepic;
+    private String FBProfilePicUrl;
+    private String LKProfilePicUrl;
+    private int LKConnectionsCount;
+    private String LKHeadLine;
+    private String Name;
+    private String Email;
+    private String PhoneNumber;
     private int Ratings;
-    private String UserStatusMsg;
-    private List<PartyIdStatusClass> PartyIdStatus;
+    private String ProfileStatus;
+    private String DeviceToken;
+    private List<PartiesClass> Parties;
+    private List Images;
 
 
-    @DynamoDBHashKey(attributeName = "FBId")
-    public String getFBId() {
-        return FBId;
+    @DynamoDBHashKey(attributeName = "FacebookID")
+    public String getFacebookID() {
+        return FacebookID;
     }
 
-    public void setFBId(String FBId) {
-        this.FBId = FBId;
-    }
-
-
-    @DynamoDBAttribute(attributeName = "Login")
-    public String getLogin() {
-        return Login;
-    }
-
-    public void setLogin(String Login) {
-        this.Login = Login;
-    }
-
-    @DynamoDBAttribute(attributeName = "UserId")
-    public String getUserId() {
-        return UserId;
-    }
-
-    public void setUserId(String UserId) {
-        this.UserId = UserId;
+    public void setFacebookID(String FacebookID) {
+        this.FacebookID = FacebookID;
     }
 
 
-    @DynamoDBAttribute(attributeName = "LinkedInId")
-    public String getLinkedInId() {
-        return LinkedInId;
+    @DynamoDBAttribute(attributeName = "QuickBloxID")
+    public String getQuickBloxID() {
+        return QuickBloxID;
     }
 
-    public void setLinkedInId(String LinkedInId) {
-        this.LinkedInId = LinkedInId;
-    }
-
-
-    @DynamoDBAttribute(attributeName = "UserName")
-    public String getUserName() {
-        return UserName;
-    }
-
-    public void setUserName(String UserName) {
-        this.UserName = UserName;
+    public void setQuickBloxID(String QuickBloxID) {
+        this.QuickBloxID = QuickBloxID;
     }
 
 
-    @DynamoDBAttribute(attributeName = "Email")
-    public String getEmail() {
-        return Email;
+    @DynamoDBAttribute(attributeName = "LinkedInID")
+    public String getLinkedInID() {
+        return LinkedInID;
     }
 
-    public void setEmail(String Email) {
-        this.Email = Email;
-    }
-
-
-    @DynamoDBAttribute(attributeName = "FBLIEmail")
-    public String getFBLIEmail() {
-        return FBLIEmail;
-    }
-
-    public void setFBLIEmail(String FBLIEmail) {
-        this.FBLIEmail = FBLIEmail;
+    public void setLinkedInID(String LinkedInID) {
+        this.LinkedInID = LinkedInID;
     }
 
 
-    @DynamoDBAttribute(attributeName = "DOB")
-    public String getDOB() {
-        return DOB;
+    @DynamoDBAttribute(attributeName = "SocialEmail")
+    public String getSocialEmail() {
+        return SocialEmail;
     }
 
-    public void setDOB(String DOB) {
-        this.DOB = DOB;
-    }
-
-
-    @DynamoDBAttribute(attributeName = "Age")
-    public int getAge() {
-        return Age;
-    }
-
-    public void setAge(int Age) {
-        this.Age = Age;
+    public void setSocialEmail(String SocialEmail) {
+        this.SocialEmail = SocialEmail;
     }
 
 
-    @DynamoDBAttribute(attributeName = "Connections")
-    public int getConnections() {
-        return Connections;
+    @DynamoDBAttribute(attributeName = "FBUserName")
+    public String getFBUserName() {
+        return FBUserName;
     }
 
-    public void setConnections(int Connections) {
-        this.Connections = Connections;
-    }
-
-
-    @DynamoDBAttribute(attributeName = "FriendsCount")
-    public int getFriendsCount() {
-        return FriendsCount;
-    }
-
-    public void setFriendsCount(int FriendsCount) {
-        this.FriendsCount = FriendsCount;
+    public void setFBUserName(String FBUserName) {
+        this.FBUserName = FBUserName;
     }
 
 
-    @DynamoDBAttribute(attributeName = "DeviceToken")
-    public String getDeviceToken() {
-        return DeviceToken;
+    @DynamoDBAttribute(attributeName = "FBCurrentLocation")
+    public String getFBCurrentLocation() {
+        return FBCurrentLocation;
     }
 
-    public void setDeviceToken(String DeviceToken) {
-        this.DeviceToken = DeviceToken;
+    public void setFBCurrentLocation(String FBCurrentLocation) {
+        this.FBCurrentLocation = FBCurrentLocation;
+    }
+
+
+    @DynamoDBAttribute(attributeName = "FBHomeLocation")
+    public String FBHomeLocation() {
+        return FBHomeLocation;
+    }
+
+    public void setFBHomeLocation(String FBHomeLocation) {
+        this.FBHomeLocation = FBHomeLocation;
+    }
+
+
+    @DynamoDBAttribute(attributeName = "BirthDate")
+    public String getBirthDate() {
+        return BirthDate;
+    }
+
+    public void setBirthDate(String BirthDate) {
+        this.BirthDate = BirthDate;
+    }
+    
+
+    @DynamoDBAttribute(attributeName = "FBFriendsCount")
+    public int getFBFriendsCount() {
+        return FBFriendsCount;
+    }
+
+    public void setFBFriendsCount(int FBFriendsCount) {
+        this.FBFriendsCount = FBFriendsCount;
     }
 
 
@@ -162,27 +135,83 @@ public class UserTable {
     }
 
 
-
-    @DynamoDBAttribute(attributeName = "Phone")
-    public String getPhone() {
-        return Phone;
+    @DynamoDBAttribute(attributeName = "FBProfilePicUrl")
+    public String getFBProfilePicUrl() {
+        return FBProfilePicUrl;
     }
 
-    public void setPhone(String Phone) {
-        this.Phone = Phone;
+    public void setFBProfilePicUrl(String FBProfilePicUrl) {
+        this.FBProfilePicUrl = FBProfilePicUrl;
+    }
+
+    @DynamoDBAttribute(attributeName = "LKProfilePicUrl")
+    public String getLKProfilePicUrl() {
+        return LKProfilePicUrl;
+    }
+
+    public void setLKProfilePicUrl(String LKProfilePicUrl) {
+        this.LKProfilePicUrl = LKProfilePicUrl;
     }
 
 
-
-    @DynamoDBAttribute(attributeName = "Profilepic")
-    public String getProfilepic() {
-        return Profilepic;
+    @DynamoDBAttribute(attributeName = "LKConnectionsCount")
+    public int getLKConnectionsCount() {
+        return LKConnectionsCount;
     }
 
-    public void setProfilepic(String Profilepic) {
-        this.Profilepic = Profilepic;
+    public void setLKConnectionsCount(int LKConnectionsCount) {
+        this.LKConnectionsCount = LKConnectionsCount;
     }
 
+
+    @DynamoDBAttribute(attributeName = "LKHeadLine")
+    public String getLKHeadLine() {
+        return LKHeadLine;
+    }
+
+    public void setLKHeadLine(String LKHeadLine) {
+        this.LKHeadLine = LKHeadLine;
+    }
+
+
+    @DynamoDBAttribute(attributeName = "DeviceToken")
+    public String getDeviceToken() {
+        return DeviceToken;
+    }
+
+    public void setDeviceToken(String DeviceToken) {
+        this.DeviceToken = DeviceToken;
+    }
+
+
+    @DynamoDBAttribute(attributeName = "Name")
+    public String getName() {
+        return Name;
+    }
+
+    public void setName(String Name) {
+        this.Name = Name;
+    }
+
+
+    @DynamoDBAttribute(attributeName = "Email")
+    public String getEmail() {
+        return Email;
+    }
+
+    public void setEmail(String Email) {
+        this.Email = Email;
+    }
+
+
+    @DynamoDBAttribute(attributeName = "PhoneNumber")
+    public String getPhoneNumber() {
+        return PhoneNumber;
+    }
+
+    public void setPhoneNumber(String PhoneNumber) {
+        this.PhoneNumber = PhoneNumber;
+    }
 
 
     @DynamoDBAttribute(attributeName = "Ratings")
@@ -195,25 +224,32 @@ public class UserTable {
     }
 
 
-
-    @DynamoDBAttribute(attributeName = "UserStatusMsg")
-    public String getUserStatusMsg() {
-        return UserStatusMsg;
+    @DynamoDBAttribute(attributeName = "ProfileStatus")
+    public String getProfileStatus() {
+        return ProfileStatus;
     }
 
-    public void setUserStatusMsg(String UserStatusMsg) {
-        this.UserStatusMsg = UserStatusMsg;
+    public void setProfileStatus(String ProfileStatus) {
+        this.ProfileStatus = ProfileStatus;
     }
 
 
+    @DynamoDBAttribute(attributeName = "Images")
+    public List getImages() {
+        return Images;
+    }
+
+    public void setImages(List Images) {
+        this.Images = Images;
+    }
 //
 
-    public List<PartyIdStatusClass> getPartyIdStatus() {
-        return PartyIdStatus;
+    public List<PartiesClass> getParties() {
+        return Parties;
     }
 
-    public void setPartyIdStatus(List<PartyIdStatusClass> PartyIdStatus) {
-        this.PartyIdStatus = PartyIdStatus;
+    public void setParties(List<PartiesClass> Parties) {
+        this.Parties = Parties;
     }
 }
 

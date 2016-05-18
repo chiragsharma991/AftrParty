@@ -1,0 +1,50 @@
+[
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/anim/abc_slide_in_bottom.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_slide_in_bottom.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/anim/abc_fade_out.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_fade_out.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/anim/abc_slide_out_bottom.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_slide_out_bottom.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/anim/abc_fade_in.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_fade_in.xml"
+    },
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/anim/abc_fade_out.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_fade_out.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/anim/abc_slide_in_top.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_slide_in_top.xml"
+    },
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/anim/abc_slide_in_top.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_slide_in_top.xml"
+    },
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/anim/abc_slide_out_top.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_slide_out_top.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/anim/abc_slide_out_top.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_slide_out_top.xml"
+    },
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/anim/abc_fade_in.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_fade_in.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/anim/abc_slide_in_bottom.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_slide_in_bottom.xml"
+    },
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/anim/abc_slide_out_bottom.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/anim/abc_slide_out_bottom.xml"
+    }
+]

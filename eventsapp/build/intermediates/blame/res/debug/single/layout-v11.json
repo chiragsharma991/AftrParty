@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/layout-v11/abc_action_bar_decor.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout-v11/abc_action_bar_decor.xml"
+    },
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/layout-v11/abc_simple_decor.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout-v11/abc_simple_decor.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/layout-v11/abc_simple_decor.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout-v11/abc_simple_decor.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/layout-v11/abc_action_bar_decor.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout-v11/abc_action_bar_decor.xml"
+    }
+]

@@ -57,6 +57,7 @@ public class SplashActivity extends Activity
 //                    else
 //                    {
 //                        GenerikFunctions.showToast(cont,"Facebook login id done. Go for LinkedIn");
+//
 //                    }
 
 
