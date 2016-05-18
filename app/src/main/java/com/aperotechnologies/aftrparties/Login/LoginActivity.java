@@ -85,7 +85,8 @@ import static com.aperotechnologies.aftrparties.Login.LoginTableColumns.FB_USER_
 /*LinkedIn App
 Client ID: 752m6fkgel868f
 Client Secret: yxNWdXkj0iZwG3wq*/
-public class LoginActivity extends Activity {
+public class LoginActivity extends Activity
+{
     //Harshada
     private static final String TAG = "LoginActivity";
     static final String APP_ID = "40454";//"34621";
@@ -258,24 +259,31 @@ public class LoginActivity extends Activity {
         }
     }
 
-    public void setLIUserProfile(JSONObject response) {
-        Log.e("Response ", response.toString() + "");
-        liUserInformation = gson.fromJson(response.toString(), LIUserInformation.class);
+    public  void  setLIUserProfile(JSONObject response)
+    {
+        Log.e("Response ",response.toString()+"");
+        liUserInformation= gson.fromJson(response.toString(),LIUserInformation.class);
         Log.e("LI Email ", liUserInformation.getEmailAddress());
-        Log.e("LI Connections ", liUserInformation.getNumConnections());
-        Log.e("LI Id", liUserInformation.getId());
-        Log.e("LI Pic", liUserInformation.getPictureUrl());
-        if (liUserInformation.getNumConnections().equals(null)) {
+        Log.e("LI Connections " ,liUserInformation.getNumConnections());
+        Log.e("LI Id",liUserInformation.getId());
+        Log.e("LI Pic",liUserInformation.getPictureUrl());
+        if(liUserInformation.getNumConnections().equals(null))
+        {
 
-        } else {
-            String Query = "Select * from " + LoginTableColumns.USERTABLE + " where " +
-                    FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
+        }
+        else
+        {
+            String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
+                    FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
             Log.i("User Query  : ", Query);
             Cursor cursor = sqldb.rawQuery(Query, null);
-            Log.e("Cursor count", cursor.getCount() + "");
-            if (cursor.getCount() == 0) {
+            Log.e("Cursor count",cursor.getCount()+"");
+            if(cursor.getCount() == 0)
+            {
 
-            } else {
+            }
+            else
+            {
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                         + LoginTableColumns.LI_USER_ID + " = '" + liUserInformation.getId() + "', "
                         + LoginTableColumns.LI_USER_EMAIL + " = '" + liUserInformation.getEmailAddress() + "', "
@@ -297,10 +305,10 @@ public class LoginActivity extends Activity {
                 loggedInUserInfo.setLI_USER_CONNECTIONS(liUserInformation.getNumConnections());
                 loggedInUserInfo.setLI_USER_HEADLINE(liUserInformation.getHeadline());
 
-                SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putString(m_config.LILoginDone, "Yes");
-                editor.apply();
-                ;
+                SharedPreferences.Editor editor= sharedpreferences.edit();
+                editor.putString(m_config.LILoginDone,"Yes");
+                editor.apply();;
+
 
 
                 //Harshada
@@ -329,7 +337,8 @@ public class LoginActivity extends Activity {
 
     //Harshada
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         //Meghana
         //Clear Focus from all edit texts
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -401,24 +410,34 @@ public class LoginActivity extends Activity {
     }
 
     //Meghana
-    public void validateUserInput() {
+    public void validateUserInput()
+    {
         //CHeck for empty or invalid input
         if (LoginValidations.isEmpty(edt_usr_name) || LoginValidations.isEmpty(edt_usr_email) || LoginValidations.isEmpty(edt_usr_phone)) {
-            if (LoginValidations.isEmpty(edt_usr_name)) {
+            if (LoginValidations.isEmpty(edt_usr_name))
+            {
                 inputToastDisplay = "Please enter user name";
                 GenerikFunctions.showToast(cont, inputToastDisplay);
-            } else if (LoginValidations.isEmpty(edt_usr_email)) {
+            }
+            else if (LoginValidations.isEmpty(edt_usr_email))
+            {
                 inputToastDisplay = "Please enter email";
                 GenerikFunctions.showToast(cont, inputToastDisplay);
-            } else if (LoginValidations.isEmpty(edt_usr_phone)) {
+            }
+            else if (LoginValidations.isEmpty(edt_usr_phone))
+            {
                 inputToastDisplay = "Please enter contact no";
                 GenerikFunctions.showToast(cont, inputToastDisplay);
             }
-        } else {
+        }
+        else
+        {
             //Check for valid email pattern
-            if (LoginValidations.isValidEmailId(edt_usr_email.getText().toString().trim())) {
+            if (LoginValidations.isValidEmailId(edt_usr_email.getText().toString().trim()))
+            {
                 //check for network availability
-                if (GenerikFunctions.chkStatus(cont)) {
+                if (GenerikFunctions.chkStatus(cont))
+                {
                     //Start Facebook Login Here
 
                     SharedPreferences.Editor editor = sharedpreferences.edit();
@@ -428,10 +447,14 @@ public class LoginActivity extends Activity {
                     editor.apply();
 
                     processLogin();
-                } else {
+                }
+                else
+                {
                     GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
                 }
-            } else {
+            }
+            else
+            {
                 GenerikFunctions.showToast(cont, "EnterValid Mail");
                 edt_usr_email.setText("");
             }
@@ -439,12 +462,16 @@ public class LoginActivity extends Activity {
     }
 
     //Meghana
-    public void processLogin() {
-        try {
+    public void processLogin()
+    {
+        try
+        {
             loginManager.logInWithReadPermissions(LoginActivity.this, permissions);
             Log.e("Inside start login", "yes");
             FacebookDataRetieval();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             Log.e("External Exception", e.toString());
             e.printStackTrace();
         }
@@ -452,8 +479,10 @@ public class LoginActivity extends Activity {
 
     //Meghana
     //Ask for declined FB permissions
-    public void askForDeclinedFBPermissions(ArrayList<String> declined_perm) {
-        for (int i = 0; i < declined_perm.size(); i++) {
+    public void askForDeclinedFBPermissions(ArrayList<String> declined_perm)
+    {
+        for (int i = 0; i < declined_perm.size(); i++)
+        {
             Log.e("From dec perm func", declined_perm.get(i));
         }
         loginManager.logInWithReadPermissions(LoginActivity.this, declined_perm);
@@ -464,89 +493,104 @@ public class LoginActivity extends Activity {
 
     //Meghana
     //Check if user logged in FB app or not
-    public boolean isFBLoggedIn() {
+    public boolean isFBLoggedIn()
+    {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        Log.e("Current AccessToken", "Yes");
+        Log.e("Current AccessToken","Yes");
         return accessToken != null;
 
     }
-
     //Meghana 13-5-16
     //After all permissions get FB Data
-    public void FacebookDataRetieval() {
-        Log.e("Inside FB data retreive", "Yes");
-        linkedinStart = "";
+    public void FacebookDataRetieval()
+    {
+        Log.e("Inside FB data retreive","Yes");
+        linkedinStart="";
         loginManager.registerCallback(callbackManager,
-                new FacebookCallback<LoginResult>() {
-                    @Override
-                    public void onSuccess(LoginResult loginResult) {
-                        // App code
-                        Log.e("Login Success", "Yes");
-                        token = loginResult.getAccessToken();
-                        Log.e("AccessToken", token.toString() + "");
+            new FacebookCallback<LoginResult>()
+            {
+                @Override
+                public void onSuccess(LoginResult loginResult)
+                {
+                    // App code
+                    Log.e("Login Success", "Yes");
+                    token = loginResult.getAccessToken();
+                    Log.e("AccessToken", token.toString() + "");
 
-                        Set<String> given_perm = token.getPermissions();
-                        iterator = given_perm.iterator();
+                    Set<String> given_perm = token.getPermissions();
+                    iterator = given_perm.iterator();
 
-                        while (iterator.hasNext()) {
-                            String perm_name = iterator.next().toString();
-                            // Log.e("Given Permission: ", perm_name + " ");
-                        }
-
-                        ArrayList<String> declined_permissions = new ArrayList<String>();
-                        Set<String> declined_perm = token.getDeclinedPermissions();
-                        iterator = declined_perm.iterator();
-                        while (iterator.hasNext()) {
-                            String perm_name = iterator.next().toString();
-                            //  Log.e("declined_permission : ", perm_name + " ");
-                            declined_permissions.add(perm_name);
-                        }
-                        if (declined_perm.size() > 0) {
-                            askForDeclinedFBPermissions(declined_permissions);
-                        } else {
-                            retrieveFBMeData();
-                        }
-                        //DELETE /{user-id}/permissions/{permission-name}
+                    while (iterator.hasNext())
+                    {
+                        String perm_name = iterator.next().toString();
+                       // Log.e("Given Permission: ", perm_name + " ");
                     }
 
-                    @Override
-                    public void onCancel() {
-                        // App code
-                        edt_usr_email.setText("");
-                        edt_usr_phone.setText("");
-                        edt_usr_name.setText("");
-                        Log.e("Login onCancel", "Yes");
-                        GenerikFunctions.showToast(cont, "Please provide permissions for app login");
+                    ArrayList<String> declined_permissions = new ArrayList<String>();
+                    Set<String> declined_perm = token.getDeclinedPermissions();
+                    iterator = declined_perm.iterator();
+                    while (iterator.hasNext())
+                    {
+                        String perm_name = iterator.next().toString();
+                      //  Log.e("declined_permission : ", perm_name + " ");
+                        declined_permissions.add(perm_name);
                     }
+                    if (declined_perm.size() > 0)
+                    {
+                        askForDeclinedFBPermissions(declined_permissions);
+                    }
+                    else
+                    {
+                        retrieveFBMeData();
+                    }
+                    //DELETE /{user-id}/permissions/{permission-name}
+                }
 
-                    @Override
-                    public void onError(FacebookException error) {
-                        Log.e("Login error", "error" + error.toString());
+                @Override
+                public void onCancel()
+                {
+                    // App code
+                    edt_usr_email.setText("");
+                    edt_usr_phone.setText("");
+                    edt_usr_name.setText("");
+                    Log.e("Login onCancel", "Yes");
+                    GenerikFunctions.showToast(cont,"Please provide permissions for app login");
+                }
 
-                        if (error instanceof FacebookAuthorizationException) {
-                            if (AccessToken.getCurrentAccessToken() != null) {
-                                LoginManager.getInstance().logOut();
-                                SharedPreferences.Editor editor = sharedpreferences.edit();
-                                editor.putString(m_config.Entered_User_Name, "");
-                                editor.putString(m_config.Entered_Email, "");
-                                editor.putString(m_config.Entered_Contact_No, "");
-                                editor.commit();
-                                startFBLoginScenario();
-                            }
+                @Override
+                public void onError(FacebookException error)
+                {
+                    Log.e("Login error", "error" + error.toString());
+
+                    if (error instanceof FacebookAuthorizationException)
+                    {
+                        if (AccessToken.getCurrentAccessToken() != null)
+                        {
+                            LoginManager.getInstance().logOut();
+                            SharedPreferences.Editor editor = sharedpreferences.edit();
+                            editor.putString(m_config.Entered_User_Name, "");
+                            editor.putString(m_config.Entered_Email, "");
+                            editor.putString(m_config.Entered_Contact_No, "");
+                            editor.commit();
+                            startFBLoginScenario();
                         }
                     }
-                });
+                }
+            });
     }
 
     //Meghana
     //If already logged in FB
-    public void startFBLoginScenario() {
-        if (isFBLoggedIn()) {
+    public void startFBLoginScenario()
+    {
+        if (isFBLoggedIn())
+        {
             token = AccessToken.getCurrentAccessToken();
-            Log.e("Token of current user", "yes");
+            Log.e("Token of current user","yes");
             Set<String> given_perm = token.getPermissions();
             iterator = given_perm.iterator();
-            while (iterator.hasNext()) {
+            while (iterator.hasNext())
+            {
                 String perm_name = iterator.next().toString();
                 Log.e("Given Permission from already logged in : ", perm_name + " ");
             }
@@ -554,49 +598,60 @@ public class LoginActivity extends Activity {
             ArrayList<String> declined_permissions = new ArrayList<String>();
             Set<String> declined_perm = token.getDeclinedPermissions();
             iterator = declined_perm.iterator();
-            while (iterator.hasNext()) {
+            while (iterator.hasNext())
+            {
                 String perm_name = iterator.next().toString();
                 Log.e("declined_permission from already loggoed in : ", perm_name + " ");
                 declined_permissions.add(perm_name);
             }
 
             //If permissions are declined then ask for the permissions else get FB user data
-            if (declined_perm.size() > 0) {
+            if (declined_perm.size() > 0)
+            {
                 askForDeclinedFBPermissions(declined_permissions);
-            } else {
+            }
+            else
+            {
                 retrieveFBMeData();
             }
-        } else {
+        }
+        else
+        {
             processLogin();
         }
     }
 
     //Meghana
     //Get user data
-    public void retrieveFBMeData() {
+    public void retrieveFBMeData()
+    {
         GraphRequest request1 = GraphRequest.newMeRequest(token,
-                new GraphRequest.GraphJSONObjectCallback() {
+                new GraphRequest.GraphJSONObjectCallback()
+                {
                     @Override
-                    public void onCompleted(JSONObject object, GraphResponse response) {
-
-                        String emptyFields = "";
+                    public void onCompleted(JSONObject object, GraphResponse response)
+                    {
+                        String emptyFields="";
 
                         // Application code
                         Log.i("Me Request", object.toString());
 
                         fbUserInformation = gson.fromJson(object.toString(), FbUserInformation.class);
-                        Log.e("User Information --->", "Information");
-                        Log.e("getFbId Id: ", fbUserInformation.getFbId());
-//                        Log.e("getGender: " , fbUserInformation.getGender());
-//                        Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
-//                        Log.e("getEmail: " ,fbUserInformation.getEmail());
-//                        Log.e("getBirthday: " ,fbUserInformation.getBirthday());
+                        Log.e("User Information --->","Information");
+                        Log.e("getFbId Id: " , fbUserInformation.getFbId());
+                        Log.e("getGender: " , fbUserInformation.getGender());
+                        Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
+                        Log.e("getEmail: " ,fbUserInformation.getEmail());
+                        Log.e("getBirthday: " ,fbUserInformation.getBirthday());
 
-                        if (fbUserInformation.getBirthday().equals(null)) {
-                            emptyFields = "Birthday";
-                        } else {
-                            emptyFields = "";
-                            //    Log.e("getBirthday : " , fbUserInformation.getBirthday());
+                        if(fbUserInformation.getBirthday().equals(null))
+                        {
+                            emptyFields="Birthday";
+                        }
+                        else
+                        {
+                            emptyFields="";
+                        //    Log.e("getBirthday : " , fbUserInformation.getBirthday());
                         }
 
                         if (fbUserInformation.getEmail().equals(null)) {
@@ -642,17 +697,20 @@ public class LoginActivity extends Activity {
                         Log.e("getLocationId Id: ", fbHomelocationInformation.getLocationId() + "  aa");
                         Log.e("getLocationName ", fbHomelocationInformation.getLocationName() + "  aa");
 
-
-                        if (emptyFields.equals("")) {
-                            String Query = "Select * from " + LoginTableColumns.USERTABLE + " where " +
-                                    FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
+                        if(emptyFields.equals(""))
+                        {
+                            String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
+                                            FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
 //                            Log.i("User Query  : ", Query);
                             Cursor cursor = sqldb.rawQuery(Query, null);
 //                            Log.e("Cursir count",cursor.getCount()+"");
-                            if (cursor.getCount() == 0) {
+                            if(cursor.getCount() == 0)
+                            {
                                 //  Store here
                                 storeUserInDb();
-                            } else {
+                            }
+                            else
+                            {
                                 //Clear and insert Here
                                 sqldb.delete(LoginTableColumns.USERTABLE, LoginTableColumns.FB_USER_ID + " = '"
                                         + fbUserInformation.getFbId().trim() + "'", null);
@@ -663,12 +721,14 @@ public class LoginActivity extends Activity {
                             //Make FB Login Flag true
                             SharedPreferences.Editor editor = sharedpreferences.edit();
                             editor.putString(m_config.LoggedInFBUserID, fbUserInformation.getFbId());
-                            editor.putBoolean(m_config.FBLoginDone, true);
+                            editor.putBoolean(m_config.FBLoginDone,true);
                             editor.apply();
                             startLinkedInProcess();
-                        } else {
+                        }
+                        else
+                        {
 //                            Log.e("emptyFields " ,emptyFields);
-                            GenerikFunctions.showToast(cont, "Please specify your " + emptyFields + " in Facebook");
+                            GenerikFunctions.showToast(cont,"Please specify your "+ emptyFields + " in Facebook");
                         }
                     }
                 });
@@ -681,23 +741,24 @@ public class LoginActivity extends Activity {
 
     //Meghana
     //Store User Information In database
-    public void storeUserInDb() {
+    public void storeUserInDb()
+    {
         ContentValues values = new ContentValues();
-        values.put(LoginTableColumns.FB_USER_ID, fbUserInformation.getFbId().trim());
-        values.put(LoginTableColumns.FB_USER_NAME, fbUserInformation.getFbUserName().trim());
-        values.put(LoginTableColumns.FB_USER_GENDER, fbUserInformation.getGender().trim());
-        values.put(LoginTableColumns.FB_USER_BIRTHDATE, fbUserInformation.getBirthday().trim());
-        values.put(LoginTableColumns.FB_USER_EMAIL, fbUserInformation.getEmail().trim());
-        values.put(LoginTableColumns.FB_USER_PROFILE_PIC, fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl().trim());
-        values.put(LoginTableColumns.FB_USER_HOMETOWN_ID, fbHomelocationInformation.getLocationId().trim());
+        values.put(LoginTableColumns.FB_USER_ID,fbUserInformation.getFbId().trim());
+        values.put(LoginTableColumns.FB_USER_NAME,fbUserInformation.getFbUserName().trim());
+        values.put(LoginTableColumns.FB_USER_GENDER,fbUserInformation.getGender().trim());
+        values.put(LoginTableColumns.FB_USER_BIRTHDATE,fbUserInformation.getBirthday().trim());
+        values.put(LoginTableColumns.FB_USER_EMAIL,fbUserInformation.getEmail().trim());
+        values.put(LoginTableColumns.FB_USER_PROFILE_PIC,fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl().trim());
+        values.put(LoginTableColumns.FB_USER_HOMETOWN_ID,fbHomelocationInformation.getLocationId().trim());
         values.put(LoginTableColumns.FB_USER_HOMETOWN_NAME, fbHomelocationInformation.getLocationName().trim());
-        values.put(LoginTableColumns.FB_USER_CURRENT_LOCATION_ID, fBCurrentLocationInformation.getLocationId().trim());
+        values.put(LoginTableColumns.FB_USER_CURRENT_LOCATION_ID,fBCurrentLocationInformation.getLocationId().trim());
         values.put(LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME, fBCurrentLocationInformation.getLocationName().trim());
         sqldb.insert(LoginTableColumns.USERTABLE, null, values);
 
         Log.i("Inserted User ", fbUserInformation.getFbId().trim() + "");
 
-        loggedInUserInfo = new LoggedInUserInformation();
+        loggedInUserInfo =new LoggedInUserInformation();
 
         loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
         loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
@@ -718,12 +779,15 @@ public class LoginActivity extends Activity {
                 "/me/friends",
                 null,
                 HttpMethod.GET,
-                new GraphRequest.Callback() {
-                    public void onCompleted(GraphResponse response) {
+                new GraphRequest.Callback()
+                {
+                    public void onCompleted(GraphResponse response)
+                    {
                         Log.e(" user friends list", response + "");
-                        try {
+                        try
+                        {
                             JSONObject graphObject = response.getJSONObject();
-                            Log.e("graphObject", graphObject.toString());
+                            Log.e("graphObject",graphObject.toString());
                             //        JSONArray dataArray = graphObject.getJSONArray("data");
                             //        JSONObject paging = graphObject.getJSONObject("paging");
                             JSONObject summary = graphObject.getJSONObject("summary");
@@ -733,15 +797,18 @@ public class LoginActivity extends Activity {
                             total_friends_count = (Integer.parseInt(totCount.trim()));
 
 
-                            String Query = "Select * from " + LoginTableColumns.USERTABLE + " where " +
-                                    FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
+                            String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
+                                    FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
                             Log.i("User Query  : ", Query);
                             Cursor cursor = sqldb.rawQuery(Query, null);
-                            Log.e("Cursor count", cursor.getCount() + "");
-                            if (cursor.getCount() == 0) {
-                            } else {
+                            Log.e("Cursor count",cursor.getCount()+"");
+                            if(cursor.getCount() == 0)
+                            {
+                            }
+                            else
+                            {
                                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
-                                        + LoginTableColumns.FB_USER_FRIENDS + " = '" + total_friends_count + "'"
+                                        + LoginTableColumns.FB_USER_FRIENDS  + " = '" + total_friends_count + "'"
                                         + " where " + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
 
                                 //   Log.i("update Brands "+brand_id[i], Update);
@@ -756,7 +823,9 @@ public class LoginActivity extends Activity {
 //                            Log.e("Cursor ",cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_NAME)) +"   "
 //                                    + cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_FRIENDS)));
 
-                        } catch (Exception e) {
+                        }
+                        catch (Exception e)
+                        {
                             System.out.println("Exception=" + e);
                             e.printStackTrace();
                         }
@@ -765,27 +834,33 @@ public class LoginActivity extends Activity {
         ).executeAsync();
     }
 
-    private static Scope buildScope() {
+    private static Scope buildScope()
+    {
         return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
     }
 
-    public void startLinkedInProcess() {
-        linkedinStart = "Yes";
-        Log.e("Inside startLinkedInProcess", "Yes");
-        LISessionManager.getInstance(getApplicationContext()).init(this, buildScope(), new AuthListener() {
+    public void startLinkedInProcess()
+    {
+        linkedinStart="Yes";
+        Log.e("Inside startLinkedInProcess","Yes");
+        LISessionManager.getInstance(getApplicationContext()).init(this, buildScope(), new AuthListener()
+        {
             @Override
-            public void onAuthSuccess() {
-                Token = LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().getValue().toString();
-                Log.e("LI Token", Token + "");
-                GenerikFunctions.showToast(cont, "success       Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
+            public void onAuthSuccess()
+            {
+                Token=LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().getValue().toString();
+                Log.e("LI Token",Token+"");
+                GenerikFunctions.showToast(cont,"success       Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
             }
 
             @Override
-            public void onAuthError(LIAuthError error) {
-                Log.e("LI Login Error", error.toString() + "");
+            public void onAuthError(LIAuthError error)
+            {
+                Log.e("LI Login Error",error.toString()+"");
                 GenerikFunctions.showToast(cont, "failed  linked in " + error.toString());
-                if (error.toString().trim().contains("USER_CANCELLED")) {
-                    GenerikFunctions.showToast(cont, "Please accept permissions ");
+                if(error.toString().trim().contains("USER_CANCELLED"))
+                {
+                    GenerikFunctions.showToast(cont, "Please accept permissions " );
                     startLinkedInProcess();
                 }
             }

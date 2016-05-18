@@ -2,5 +2,9 @@
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/linkedin-sdk/build/intermediates/res/merged/debug/drawable-xhdpi-v4/ic_launcher.png",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/linkedin-sdk/src/main/res/drawable-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/linkedin-sdk/build/intermediates/res/merged/debug/drawable-xhdpi-v4/ic_launcher.png",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/linkedin-sdk/src/main/res/drawable-xhdpi/ic_launcher.png"
     }
 ]
