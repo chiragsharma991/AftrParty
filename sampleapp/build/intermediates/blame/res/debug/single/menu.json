@@ -1,5 +1,13 @@
 [
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/menu/api.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/src/main/res/menu/api.xml"
+    },
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/menu/deeplink.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/src/main/res/menu/deeplink.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/menu/api.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/src/main/res/menu/api.xml"
     },
@@ -8,19 +16,11 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/src/main/res/menu/deeplink.xml"
     },
     {
-        "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/menu/api.xml",
-        "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/src/main/res/menu/api.xml"
-    },
-    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/menu/main.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/src/main/res/menu/main.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/menu/main.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/src/main/res/menu/main.xml"
-    },
-    {
-        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/menu/deeplink.xml",
-        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/src/main/res/menu/deeplink.xml"
     }
 ]
