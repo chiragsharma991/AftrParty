@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
+    android:focusable="true">
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/lLyoutHost"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/drawerSettingsToolbar"
+                android:background="@android:color/black"
+                android:layout_alignParentTop="true"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                >
+            </android.support.v7.widget.Toolbar>
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text="Select Start Time"
+                        android:textSize="15sp"
+                        android:layout_weight="0.4"/>
+
+                    <Spinner
+                        android:padding="10dp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginRight="5dp"
+                        android:paddingLeft="5dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:textSize="15sp"
+                        android:id="@+id/spn_startTime"
+                        android:layout_weight="0.6"/>
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1">
+
+                    <View
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="0.4"/>
+
+                    <TextView
+                        android:padding="10dp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginRight="5dp"
+                        android:paddingLeft="5dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:textSize="15sp"
+                        android:id="@+id/txtStartDate"
+                        android:layout_weight="0.6"/>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_height="5dp"
+                    android:layout_width="3dp"  />
+
+
+
+                <View
+                    android:layout_height="5dp"
+                    android:layout_width="3dp"  />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text="Select End Time"
+                        android:textSize="15sp"
+                        android:layout_weight="0.4"/>
+
+                    <TextView
+                        android:padding="10dp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginRight="5dp"
+                        android:paddingLeft="5dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:textSize="15sp"
+                        android:id="@+id/txtEndDate"
+                        android:layout_weight="0.6"/>
+
+
+                    <!--<TimePicker
+                        android:id="@+id/endTimePicker"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="0.6"/>-->
+
+                </LinearLayout>
+
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text="Party Name"
+                        android:textSize="15sp"
+                        android:layout_weight="0.4"/>
+
+
+                    <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                        android:textCursorDrawable="@null"
+                        android:padding="10dp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginRight="5dp"
+                        android:paddingLeft="5dp"
+                        android:hint="Name"
+                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:textSize="15sp"
+                        android:id="@+id/edt_PartyName"
+                        android:layout_weight="0.6"/>
+                </LinearLayout>
+
+
+                <View
+                    android:layout_height="5dp"
+                    android:layout_width="3dp"  />
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text="Description"
+                        android:textSize="15sp"
+                        android:layout_weight="0.4"/>
+
+
+                    <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                        android:textCursorDrawable="@null"
+                        android:padding="10dp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginRight="5dp"
+                        android:paddingLeft="5dp"
+                        android:hint="Description"
+                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:textSize="15sp"
+                        android:id="@+id/edt_Description"
+                        android:layout_weight="0.6"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_height="5dp"
+                    android:layout_width="3dp"  />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text="BYOB"
+                        android:textSize="15sp"
+                        android:layout_weight="0.4"/>
+
+                    <Spinner
+                        android:padding="10dp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginRight="5dp"
+                        android:paddingLeft="5dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:textSize="15sp"
+                        android:id="@+id/spn_byob"
+                        android:layout_weight="0.6"/>
+
+                </LinearLayout>
+
+
+                <View
+                    android:layout_height="5dp"
+                    android:layout_width="3dp"  />
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text="Party Address"
+                        android:textSize="15sp"
+                        android:layout_weight="0.4"/>
+
+
+                    <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                        android:textCursorDrawable="@null"
+                        android:padding="10dp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginRight="5dp"
+                        android:hint="Address"
+                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:textSize="15sp"
+                        android:id="@+id/edt_partyaddress"
+                        android:layout_weight="0.6"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_height="5dp"
+                    android:layout_width="3dp"  />
+
+                <Button
+                    android:textStyle="bold"
+                    android:layout_height="52dp"
+                    android:layout_width="200dp"
+                    android:textSize="17sp"
+                    android:text="CREATE PARTY"
+                    android:textAllCaps="true"
+                    android:id="@+id/btn_createParty"
+                    android:layout_gravity="center_horizontal"
+                    android:textColor="@android:color/black"/>
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <!--<LinearLayout
+        android:visibility="gone"
+        android:id="@+id/startTimelinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <DatePicker
+            android:calendarViewShown="false"
+            android:id="@+id/dtPickerStartTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </DatePicker>
+
+        <TimePicker
+            android:id="@+id/tmPickerStartTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </TimePicker>
+
+        <Button
+            android:text="Set Date"
+            android:id="@+id/btnsetStartTimeDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/endTimelinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <DatePicker
+            android:calendarViewShown="false"
+            android:id="@+id/dtPickerEndTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </DatePicker>
+
+        <TimePicker
+            android:id="@+id/tmPickerEndTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </TimePicker>
+
+        <Button
+            android:text="Set Date"
+            android:id="@+id/btnsetEndTimeDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>-->
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/startdtPickerlinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <DatePicker
+                android:id="@+id/dtPickerStart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </DatePicker>
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:layout_weight="0.5"
+                    android:text="Cancel"
+                    android:id="@+id/btnCancelStartDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:layout_weight="0.5"
+                    android:text="Set Date"
+                    android:id="@+id/btnsetStartDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/starttmPickerlinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TimePicker
+                android:id="@+id/tmPickerStart"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </TimePicker>
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:layout_weight="0.5"
+                    android:text="Cancel"
+                    android:id="@+id/btnCancelStartTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:layout_weight="0.5"
+                    android:text="Set Date"
+                    android:id="@+id/btnsetStartTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/enddtPickerlinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <DatePicker
+                android:id="@+id/dtPickerEnd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </DatePicker>
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:layout_weight="0.5"
+                    android:text="Cancel"
+                    android:id="@+id/btnCancelEndDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:layout_weight="0.5"
+                    android:text="Set Date"
+                    android:id="@+id/btnsetEndDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/endtmPickerlinearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TimePicker
+                android:id="@+id/tmPickerEnd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </TimePicker>
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:layout_weight="0.5"
+                    android:text="Cancel"
+                    android:id="@+id/btnCancelEndTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:layout_weight="0.5"
+                    android:text="Set Date"
+                    android:id="@+id/btnsetEndTIme"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</RelativeLayout>

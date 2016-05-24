@@ -13,6 +13,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Login.LoginActivity;
+import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.FacebookSdk;
@@ -34,7 +35,7 @@ public class SplashActivity extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        FacebookSdk.sdkInitialize(getApplicationContext());
+        //FacebookSdk.sdkInitialize(getApplicationContext());
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_splash);
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -68,6 +69,8 @@ public class SplashActivity extends Activity
 //                    {
                         Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                         startActivity(i);
+
+
 //                    }
 //                    else
 //                    {
@@ -82,3 +85,4 @@ public class SplashActivity extends Activity
         timer.start();
     }
 }
+///https://docs.aws.amazon.com/devicefarm/latest/developerguide/getting-started.html

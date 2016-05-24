@@ -1,0 +1,195 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:id="@+id/loginactivity"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <!-- Toolbar for HomePage-->
+        <LinearLayout
+            android:visibility="visible"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/ll_home_toolbar"   >
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/home_toolbar"
+                android:layout_marginLeft="-16dp"
+                android:layout_alignParentTop="true"
+                android:background="@color/black"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:minHeight="?attr/actionBarSize" >
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="44dp"
+                    android:id="@+id/toolbar_content"   >
+
+
+                    <TextView
+                        android:textSize="@dimen/text_size"
+                        android:layout_centerInParent="true"
+                        android:text="SETTINGS"
+                        android:id="@+id/activity_title"
+                        android:textColor="#ffffff"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"   />
+
+
+                    <Button
+                        android:text="Edit"
+                        android:layout_marginRight="0dp"
+                        android:id="@+id/img_editSettings"
+                        android:background="@color/colorAccent"
+                        android:layout_width="40dp"
+                        android:layout_height="44dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true" />
+
+                </RelativeLayout>
+
+            </android.support.v7.widget.Toolbar>
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            android:focusableInTouchMode="true">
+
+            <View
+                android:layout_height="10dp"
+                android:layout_width="3dp"     />
+
+            <com.github.siyamed.shapeimageview.CircularImageView
+                android:id="@+id/userimage"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:src="@drawable/placeholder_user"
+                app:siBorderWidth="4dp"
+                android:layout_gravity="center"
+                app:siBorderColor="@color/colorAccent"/>
+
+
+            <View
+                android:layout_height="10dp"
+                android:layout_width="3dp"     />
+
+            <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:layout_margin="20dp"
+                android:hint="Profile Status"
+                android:id="@+id/edt_usermsgStatus"
+                android:drawableLeft="@drawable/ic_launcher"
+                android:textSize="@dimen/text_size"
+                android:inputType="textNoSuggestions"
+                android:background="@color/white"
+                android:layout_gravity="center_horizontal"
+                android:paddingLeft="5dp"
+                android:textCursorDrawable="@null"
+                android:focusable="true"/>
+
+            <View
+                android:layout_height="10dp"
+                android:layout_width="3dp"     />
+
+            <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:layout_margin="20dp"
+                android:hint="Age"
+                android:id="@+id/edt_Age"
+                android:drawableLeft="@drawable/ic_launcher"
+                android:textSize="@dimen/text_size"
+                android:inputType="textNoSuggestions"
+                android:background="@color/white"
+                android:layout_gravity="center_horizontal"
+                android:paddingLeft="5dp"
+                android:textCursorDrawable="@null"
+                android:focusable="true"/>
+
+            <View
+                android:layout_height="10dp"
+                android:layout_width="3dp"     />
+
+
+
+            <Spinner
+                android:padding="20dp"
+                android:textColor="@android:color/black"
+                android:layout_margin="20dp"
+                android:layout_gravity="center_horizontal"
+                android:paddingLeft="5dp"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:textSize="@dimen/text_size"
+                android:id="@+id/spn_Gender" />
+
+            <View
+                android:layout_height="10dp"
+                android:layout_width="3dp"     />
+
+            <!--<LinearLayout android:id="@+id/seekbar_placeholder"
+                android:layout_margin="20dp"
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>-->
+
+
+            <TextView android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:id="@+id/txtrangeseekbarval"
+                android:layout_gravity="center_horizontal"/>
+
+            <com.yahoo.mobile.client.android.util.rangeseekbar.RangeSeekBar
+                android:id="@+id/rangeseekbar"
+                android:layout_margin="20dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                app:absoluteMinValue="0"
+                app:absoluteMaxValue="5"
+                app:singleThumb="true"
+                />
+
+
+            <TextView android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:id="@+id/txtseekbarval"
+                android:layout_gravity="center_horizontal"/>
+
+            <SeekBar
+                android:id="@+id/seekbar"
+                android:layout_margin="20dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:progress="5"
+                android:max="5" />
+
+            <com.aperotechnologies.aftrparties.utils.SeekbarWithIntervals
+                android:layout_margin="10dp"
+                android:id="@+id/seekbarWithIntervals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"/>
+
+
+        </LinearLayout>
+
+
+
+        </LinearLayout>
+    </ScrollView>

@@ -44,6 +44,19 @@
             android:name="com.aperotechnologies.aftrparties.HomePage.HomePageActivity"
             android:screenOrientation="portrait"></activity>
 
+
+        <activity
+            android:name="com.aperotechnologies.aftrparties.TipsActivity"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name="com.aperotechnologies.aftrparties.SettingsActivity"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name="com.aperotechnologies.aftrparties.History.HistoryActivity"
+            android:screenOrientation="portrait"></activity>
+
         <activity
             android:name="com.aperotechnologies.aftrparties.Host.HostActivity"
             android:screenOrientation="portrait"></activity>
@@ -52,12 +65,14 @@
             android:name="com.aperotechnologies.aftrparties.GateCrasher.GateCrasherActivity"
             android:screenOrientation="portrait"></activity>
 
-        <activity
-            android:name="com.aperotechnologies.aftrparties.Chats.ChatActivity"
-            android:screenOrientation="portrait"></activity>
+
 
         <activity
             android:name="com.aperotechnologies.aftrparties.Chats.DialogsActivity"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name="com.aperotechnologies.aftrparties.Chats.ChatActivity"
             android:screenOrientation="portrait"></activity>
 
 
@@ -92,6 +107,9 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="ffdd609785d2fe5506254706299413b2c3ea9898" />
+
+        <meta-data android:name="CLOUDINARY_URL" android:value="cloudinary://585356451553425:ylB_rZgnwVT823PH3_HtZo79Sf4@dklb21dyh"/>
+
 
     </application>
 

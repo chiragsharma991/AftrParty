@@ -11,6 +11,7 @@ import com.quickblox.chat.QBPrivateChatManager;
 import com.quickblox.users.model.QBUser;
 
 import java.util.Collection;
+import java.util.Date;
 
 /**
  * Created by mpatil on 28/04/15.
@@ -42,11 +43,13 @@ public class Configuration_Parameter
     public String LoggedInFBUserID = "";
     public String FBLoginDone ="FBLoginDone";
     public String LILoginDone ="LILoginDone";
-    public String QBFBLoginDone ="QBFBLoginDone";
+
 
     //Harshada
     public String REG_ID = "registration_id";
+    public String temp_regId = "registration_id";
     public String AWSUserDataDone = "No";
+    public String SessionToken = null;
 
     /**
      * Create private constructor

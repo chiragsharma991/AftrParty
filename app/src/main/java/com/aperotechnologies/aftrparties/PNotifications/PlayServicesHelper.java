@@ -12,12 +12,14 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
@@ -60,7 +62,9 @@ public class PlayServicesHelper {
         this.loggedInUserInfo = loggedInUserInfo;;
         m_config = Configuration_Parameter.getInstance();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        checkPlayService();
+        //checkPlayService();
+        Thread t = new Thread(new CheckPlayServicesLooper());
+        t.start();
     }
 
     private void checkPlayService() {
@@ -159,6 +163,11 @@ public class PlayServicesHelper {
                         googleCloudMessaging = GoogleCloudMessaging.getInstance(context);
                     }
                     regId = googleCloudMessaging.register(ConstsCore.PROJECT_NUMBER);
+
+                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putString(m_config.temp_regId, regId);
+                    editor.apply();
                     Log.e("regID"," "+regId);
                     msg = "Device registered, registration ID=" + regId;
 
@@ -194,6 +203,23 @@ public class PlayServicesHelper {
         // how you store the regID in your app is up to you.
         return context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
     }
+
+
+    class CheckPlayServicesLooper implements Runnable {
+
+        private Looper myLooper;
+
+        @Override
+        public void run() {
+
+            Looper.prepare();
+            // code that needed a separated thread
+            checkPlayService();
+            myLooper = Looper.myLooper();
+            Looper.loop();
+            myLooper.quit();
+        }
+    };
 
 
 }

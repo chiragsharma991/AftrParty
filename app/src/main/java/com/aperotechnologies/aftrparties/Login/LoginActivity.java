@@ -15,6 +15,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -35,7 +36,6 @@ import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
-import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
@@ -94,7 +94,6 @@ public class LoginActivity extends Activity
     static final String AUTH_SECRET = "hVx9RNMT4emBK5K";//"uTOm5-R4zYyR-DV";
     static final String ACCOUNT_KEY = "VLBr2asUuw9uHDFC7qgb";//"bzbtQDLez742xU468TXt";
 
-    PlayServicesHelper playServicesHelper;
 
     //Meghana
     Button btn_login;
@@ -127,13 +126,13 @@ public class LoginActivity extends Activity
     DBHelper helper;
     TelephonyManager mTelephony;
     private static final  int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
-    String regId;
+
 
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        FacebookSdk.sdkInitialize(getApplicationContext());
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
@@ -148,6 +147,8 @@ public class LoginActivity extends Activity
 
         QBSettings.getInstance().init(getApplicationContext(), APP_ID, AUTH_KEY, AUTH_SECRET);
         QBSettings.getInstance().setAccountKey(ACCOUNT_KEY);
+
+
 
 //        // Initialize the Amazon Cognito credentials provider
 //        final CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
@@ -205,6 +206,9 @@ public class LoginActivity extends Activity
             }
         });
 
+
+        Log.e("fetch stored values "," "+sharedpreferences.getString(m_config.Entered_User_Name, ""));
+
         if (sharedpreferences.getString(m_config.Entered_User_Name, "").length() > 0)
         {
             edt_usr_name.setText(sharedpreferences.getString(m_config.Entered_User_Name, "UserName"));
@@ -261,6 +265,7 @@ public class LoginActivity extends Activity
                         catch (Exception e)
                         {
                             e.printStackTrace();
+
                             GenerikFunctions.showToast(cont,"Li Error  "+ e.toString());
                             //Harshada
                             GenerikFunctions.showDialog(m_config.pDialog, "Loading...");
@@ -481,6 +486,8 @@ public class LoginActivity extends Activity
                         editor.putString(m_config.Entered_Email, edt_usr_email.getText().toString().trim());
                         editor.putString(m_config.Entered_Contact_No, edt_usr_phone.getText().toString().trim());
                         editor.apply();
+
+                        Log.e("storing values "," "+sharedpreferences.getString(m_config.Entered_User_Name, ""));
                         processLogin();
                     }
                     else
@@ -603,6 +610,7 @@ public class LoginActivity extends Activity
                 {
                     Log.e("Login error", "error" + error.toString());
 
+
                     if (error instanceof FacebookAuthorizationException)
                     {
                         if (AccessToken.getCurrentAccessToken() != null)
@@ -654,6 +662,7 @@ public class LoginActivity extends Activity
             else
             {
                 retrieveFBMeData();
+
             }
         }
         else
@@ -788,7 +797,7 @@ public class LoginActivity extends Activity
                 });
 
         Bundle parameters1 = new Bundle();
-        parameters1.putString("fields", "id,name,birthday,gender,email,location,picture,hometown");
+        parameters1.putString("fields", "id,name,birthday,gender,email,location,picture.type(large),hometown");
         request1.setParameters(parameters1);
         request1.executeAsync();
     }
@@ -923,8 +932,9 @@ public class LoginActivity extends Activity
 
 
     //function for enabling TelephonyManager for fetching deviceId
-    public void getDeviceIdAndroid(String regId, Activity context){
-        this.regId = regId;
+    public void getDeviceIdAndroid(String regId, Activity context)
+    {
+
 
         if ((int) Build.VERSION.SDK_INT < 23)
         {
@@ -932,14 +942,13 @@ public class LoginActivity extends Activity
             mTelephony = (TelephonyManager) context.getSystemService(
                     Context.TELEPHONY_SERVICE);
 
-           LoginValidations.subscribeToPushNotifications(regId,mTelephony,context);
+           new LoginValidations.subscribeToPushNotifications(regId,mTelephony,context).execute();
         }
         else
         {
             //this is a check for build version above 23
-            if (ContextCompat.checkSelfPermission(context,
-                    Manifest.permission.READ_PHONE_STATE)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED)
+            {
 
                 ActivityCompat.requestPermissions(context,
                         new String[]{Manifest.permission.READ_PHONE_STATE},
@@ -948,10 +957,12 @@ public class LoginActivity extends Activity
                 Log.e("If permission is not granted",", request for permission");
 
 
-            }else{
+            }
+            else
+            {
                 mTelephony = (TelephonyManager) context.getSystemService(
                         Context.TELEPHONY_SERVICE);
-                LoginValidations.subscribeToPushNotifications(regId,mTelephony, context);
+                new LoginValidations.subscribeToPushNotifications(regId,mTelephony, context).execute();
                 Log.e("If Permission is granted","");
             }
 
@@ -959,28 +970,36 @@ public class LoginActivity extends Activity
 
     }
 
-    //Callback function for Permission
+    //Callback function for Android M Permission
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           String permissions[], int[] grantResults)
+    {
+        Log.e("grantResults.length"," "+grantResults.length+" "+grantResults[0]);
+
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_READ_PHONE_STATE: {
                 // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
 
                     Log.e("Permission request is accepted","");
                     mTelephony = (TelephonyManager) cont.getSystemService(
                             Context.TELEPHONY_SERVICE);
-                    LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont);
+                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(cont);
+                    String regId = pref.getString(m_config.temp_regId,"");
+                    new LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont).execute();
 
-                } else {
+                }
+                else
+                {
 
                     // permission denied
                     Log.e("Permission request is denied","");
                     final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
 
                     boolean should = ActivityCompat.shouldShowRequestPermissionRationale((Activity) cont, Manifest.permission.READ_PHONE_STATE);
-                    if(should){
+                    if(should)
+                    {
                         //user denied without Never ask again, just show rationale explanation
                         new android.app.AlertDialog.Builder(LoginActivity.this)
                                 .setTitle("Permission Denied")
@@ -1016,7 +1035,9 @@ public class LoginActivity extends Activity
 
                                 .show();
 
-                    }else{
+                    }
+                    else
+                    {
                         //user has denied with `Never Ask Again`
                         Log.e("Click of Never ask again",", permission request is denied");
                         if(sharedPreferences.getString(m_config.AWSUserDataDone,"No").equals("Yes"))
@@ -1038,6 +1059,7 @@ public class LoginActivity extends Activity
 
         }
     }
+
 
 }
 /*
