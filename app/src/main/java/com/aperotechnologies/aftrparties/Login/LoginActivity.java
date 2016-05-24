@@ -144,11 +144,8 @@ public class LoginActivity extends Activity
         sqldb=helper.getWritableDatabase();
         m_config.pDialog = new ProgressDialog(cont);
 
-
         QBSettings.getInstance().init(getApplicationContext(), APP_ID, AUTH_KEY, AUTH_SECRET);
         QBSettings.getInstance().setAccountKey(ACCOUNT_KEY);
-
-
 
 //        // Initialize the Amazon Cognito credentials provider
 //        final CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
