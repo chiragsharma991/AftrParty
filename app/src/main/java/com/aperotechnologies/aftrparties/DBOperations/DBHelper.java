@@ -65,8 +65,6 @@ public class DBHelper extends SQLiteOpenHelper
 
                 + LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " TEXT) ";
 
-
-
         db.execSQL(CREATE_TABLE_USER);
 
 

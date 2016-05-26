@@ -7,7 +7,6 @@ package com.aperotechnologies.aftrparties.Host;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,7 +45,7 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
     long selected_startTimeVal;
     long selected_endTimeVal;
 
-    String selected_byob;
+    String selected_byob, selected_maskStatus = "mask";
 
     private String format = "";
 
@@ -75,6 +74,13 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
         byobList.add("Yes");
         byobList.add("No");
 
+
+        // Spinner for Mask/UnMask
+        Spinner spn_mask = (Spinner) findViewById(R.id.spn_startTime);
+        List<String> maskList = new ArrayList<String>();
+        maskList.add("Mask");
+        maskList.add("Unmask");
+
         final ArrayAdapter<String> startTime = new ArrayAdapter<String>(HostActivity.this, R.layout.spinner_item, startTimelist);
         startTime.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_startTime.setAdapter(startTime);
@@ -82,6 +88,10 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
         final ArrayAdapter<String> byob = new ArrayAdapter<String>(HostActivity.this, R.layout.spinner_item, byobList);
         byob.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_byob.setAdapter(byob);
+
+        final ArrayAdapter<String> maskStatus = new ArrayAdapter<String>(HostActivity.this, R.layout.spinner_item, maskList);
+        maskStatus.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spn_mask.setAdapter(maskStatus);
 
         lLyoutHost = (LinearLayout) findViewById(R.id.lLyoutHost);
         txtStartDate = (TextView) findViewById(R.id.txtStartDate);
@@ -161,7 +171,6 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
             }
         });
 
-
         // spinner selection for BYOB
         spn_byob.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -175,6 +184,30 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
 
             }
         });
+
+
+        // spinner selection for Mask
+        spn_mask.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.e("selected_maskStatus"," "+selected_maskStatus);
+
+                if(parent.getSelectedItem().toString().trim().equals("Unmask")){
+                    //ask for in-app purchase
+                    Log.e("ask for in-app purchase"," ");
+
+                    selected_maskStatus = "Unmask";
+                }else{
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
 
 
         // create party button click

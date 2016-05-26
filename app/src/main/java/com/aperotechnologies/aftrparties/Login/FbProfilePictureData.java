@@ -1,7 +1,5 @@
 package com.aperotechnologies.aftrparties.Login;
 
-import org.json.JSONObject;
-
 /**
  * Created by mpatil on 12/05/16.
  */

@@ -18,7 +18,6 @@ import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherActivity;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
-import com.aperotechnologies.aftrparties.Login.LoginActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.SettingsActivity;
@@ -26,8 +25,6 @@ import com.aperotechnologies.aftrparties.TipsActivity;
 import com.aperotechnologies.aftrparties.utils.ResizableButton;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.squareup.picasso.Picasso;
-
-import java.net.URL;
 
 /**
  * Created by hasai on 06/05/16.

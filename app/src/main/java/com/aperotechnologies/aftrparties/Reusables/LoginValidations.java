@@ -2,15 +2,12 @@ package com.aperotechnologies.aftrparties.Reusables;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -21,7 +18,6 @@ import android.widget.Toast;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
-import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.Login.LoggedInUserInformation;
 import com.aperotechnologies.aftrparties.Login.LoginTableColumns;
 import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
@@ -989,8 +985,8 @@ public  class LoginValidations
 
                     SharedPreferences.Editor editor= sharedpreferences.edit();
                     try {
-                        editor.putString(m_config.SessionToken,BaseService.getBaseService().getToken());
-                        editor.putLong("SessionExpirationDate",BaseService.getBaseService().getTokenExpirationDate().getTime());
+                        editor.putString(m_config.SessionToken, BaseService.getBaseService().getToken());
+                        editor.putLong("SessionExpirationDate", BaseService.getBaseService().getTokenExpirationDate().getTime());
                     } catch (BaseServiceException e) {
                         e.printStackTrace();
                         //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();

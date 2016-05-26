@@ -1,5 +1,29 @@
 [
     {
+        "outputFile": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/values-w360dp-v13/values-w360dp-v13.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endColumn": 54,
+                    "endOffset": 105
+                },
+                "from": {
+                    "file": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values-w360dp/values.xml",
+                    "position": {
+                        "startLine": 6,
+                        "startColumn": 4,
+                        "startOffset": 281,
+                        "endColumn": 54,
+                        "endOffset": 331
+                    }
+                }
+            }
+        ]
+    },
+    {
         "outputFile": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/values-w360dp-v13/values-w360dp-v13.xml",
         "map": [
             {

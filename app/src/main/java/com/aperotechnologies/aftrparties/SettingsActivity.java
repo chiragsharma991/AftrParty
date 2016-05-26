@@ -1,27 +1,21 @@
 package com.aperotechnologies.aftrparties;
 
-import android.*;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -32,41 +26,26 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed;
-import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.utils.SeekbarWithIntervals;
-import com.cloudinary.Cloudinary;
-import com.cloudinary.android.Utils;
-import com.cloudinary.utils.ObjectUtils;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.squareup.picasso.Picasso;
-import com.yahoo.mobile.client.android.util.rangeseekbar.RangeSeekBar;
-
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * Created by hasai on 19/05/16.
@@ -82,8 +61,8 @@ public class SettingsActivity extends Activity {
     CircularImageView imguser;
     EditTextPopUpFixed edt_usermsgStatus, edt_Age;
     TextView txtrangeseekbarval, txtseekbarval;
-    RangeSeekBar rangeSeekBar;
-    SeekBar SeekBar;
+//    RangeSeekBar rangeSeekBar;
+//    SeekBar SeekBar;
     SeekbarWithIntervals seekbarWithIntervals = null;
     String seekbarVal = "1";
     Spinner spn_Gender;
@@ -118,8 +97,11 @@ public class SettingsActivity extends Activity {
         edt_Age.setEnabled(false);
         txtrangeseekbarval = (TextView) findViewById(R.id.txtrangeseekbarval);
         txtseekbarval = (TextView) findViewById(R.id.txtseekbarval);
-        rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeseekbar);
-        SeekBar = (SeekBar) findViewById(R.id.seekbar);
+        //rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeseekbar);
+        //SeekBar = (SeekBar) findViewById(R.id.seekbar);
+
+        List<String> seekbarIntervals = getIntervals();
+        getSeekbarWithIntervals().setIntervals(seekbarIntervals);
         img_editSettings = (Button) findViewById(R.id.img_editSettings);
 
         String PrfStatus = sharedPreferences.getString("ProfileStatus","");
@@ -127,8 +109,7 @@ public class SettingsActivity extends Activity {
         seekbarVal = sharedPreferences.getString("Distance","1");
         String Age = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_BIRTHDATE();
 
-        List<String> seekbarIntervals = getIntervals();
-        getSeekbarWithIntervals().setIntervals(seekbarIntervals);
+
 //
 
 
@@ -173,6 +154,8 @@ public class SettingsActivity extends Activity {
         }
 
 
+
+        //check whether profilestatus is stored in shared preference
         if(PrfStatus.equals(null) || PrfStatus.equals(""))
         {
             UserTable userTable = m_config.mapper.load(UserTable.class, FacebookID);
@@ -252,40 +235,38 @@ public class SettingsActivity extends Activity {
 
 
 
-        rangeSeekBar.setNotifyWhileDragging(true);
-        rangeSeekBar.setOnRangeSeekBarChangeListener(new RangeSeekBar.OnRangeSeekBarChangeListener<Integer>() {
-            @Override
-            public void onRangeSeekBarValuesChanged(RangeSeekBar<?> bar, Integer minValue, Integer maxValue) {
-
-                txtrangeseekbarval.setText(String.valueOf(maxValue));
-            }
-        });
-
-
+//        rangeSeekBar.setNotifyWhileDragging(true);
+//        rangeSeekBar.setOnRangeSeekBarChangeListener(new RangeSeekBar.OnRangeSeekBarChangeListener<Integer>() {
+//            @Override
+//            public void onRangeSeekBarValuesChanged(RangeSeekBar<?> bar, Integer minValue, Integer maxValue) {
+//
+//                txtrangeseekbarval.setText(String.valueOf(maxValue));
+//            }
+//        });
 
 
 
-        final int stepSize = 1;
-        SeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                progress = ((int)Math.round(progress/stepSize))*stepSize;
-                seekBar.setProgress(progress);
-                txtseekbarval.setText(progress + "");
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
 
 
+//        final int stepSize = 1;
+//        SeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+//                progress = ((int)Math.round(progress/stepSize))*stepSize;
+//                seekBar.setProgress(progress);
+//                txtseekbarval.setText(progress + "");
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//        });
 
         imguser.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -318,7 +299,6 @@ public class SettingsActivity extends Activity {
 
                                 if(which==0)
                                 {
-
                                     if ((int) Build.VERSION.SDK_INT < 23)
                                     {
                                         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -342,7 +322,7 @@ public class SettingsActivity extends Activity {
                                                     android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
                                             //here
-                                            int permissioncheckRead=ContextCompat.checkSelfPermission(SettingsActivity.this,
+                                            int permissioncheckRead= ContextCompat.checkSelfPermission(SettingsActivity.this,
                                                     android.Manifest.permission.READ_EXTERNAL_STORAGE);
 
                                             if(permissionCheck == PackageManager.PERMISSION_GRANTED && permissioncheckRead == PackageManager.PERMISSION_GRANTED)
@@ -443,6 +423,65 @@ public class SettingsActivity extends Activity {
 
     }
 
+
+
+    private List<String> getIntervals()
+    {
+        return new ArrayList<String>() {{
+            add("1");
+            add("2");
+            add("3");
+            add("4");
+            add("5");
+
+        }};
+    }
+
+    private SeekbarWithIntervals getSeekbarWithIntervals()
+    {
+        if (seekbarWithIntervals == null)
+        {
+
+
+            Log.e("---------------","");
+            seekbarWithIntervals = (SeekbarWithIntervals) findViewById(R.id.seekbarWithIntervals);
+
+            seekbarWithIntervals.setProgress(Integer.parseInt(seekbarVal));
+            selectedDistVal = Integer.parseInt(seekbarVal);
+
+        }
+
+
+
+        seekbarWithIntervals.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+            {
+
+                selectedDistVal = progress;
+                progress = progress + 1;
+                Log.e("progress"," "+progress);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+
+
+
+        return seekbarWithIntervals;
+    }
+
     private void editSettings()
     {
         Log.e("picturePath "," "+picturePath);
@@ -504,72 +543,13 @@ public class SettingsActivity extends Activity {
         }
     }
 
-    private List<String> getIntervals() {
-        return new ArrayList<String>() {{
-            add("1");
-            add("2");
-            add("3");
-            add("4");
-            add("5");
-
-        }};
-    }
-
-    private SeekbarWithIntervals getSeekbarWithIntervals()
-    {
-        if (seekbarWithIntervals == null)
-        {
-
-
-            Log.e("---------------","");
-            seekbarWithIntervals = (SeekbarWithIntervals) findViewById(R.id.seekbarWithIntervals);
-
-            seekbarWithIntervals.setProgress(Integer.parseInt(seekbarVal));
-            selectedDistVal = Integer.parseInt(seekbarVal);
-
-        }
-
-
-
-        seekbarWithIntervals.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-            {
-
-
-                selectedDistVal = progress;
-                progress = progress + 1;
-                Log.e("progress"," "+progress);
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-
-
-
-        return seekbarWithIntervals;
-    }
-
-
     /* Creating file uri to store image */
     public Uri getOutputMediaFileUri(int type)
     {
         return Uri.fromFile(getOutputMediaFile(type));
     }
 
-
-      /* returning image */
+    /* returning image */
 
     public File getOutputMediaFile(int type)
     {

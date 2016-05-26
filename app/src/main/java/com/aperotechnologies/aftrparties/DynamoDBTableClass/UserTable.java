@@ -3,7 +3,10 @@ package com.aperotechnologies.aftrparties.DynamoDBTableClass;
 /**
  * Created by hasai on 05/04/16.
  */
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.*;
+
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 
 import java.util.List;
 

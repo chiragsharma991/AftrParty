@@ -12,11 +12,8 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
-import com.aperotechnologies.aftrparties.Login.LoginActivity;
-import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
-import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.aperotechnologies.aftrparties.InAppPurchase.InAppBillingActivity;
 import com.crashlytics.android.Crashlytics;
-import com.facebook.FacebookSdk;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -52,7 +49,7 @@ public class SplashActivity extends Activity
         m_config.mapper = new DynamoDBMapper(m_config.ddbClient);
 //
         Thread timer = new Thread()
-        {
+         {
             public void run()
             {
                 try
@@ -67,8 +64,12 @@ public class SplashActivity extends Activity
                 {
 //                    if (sharedpreferences.getBoolean(m_config.FBLoginDone, false) == false)
 //                    {
-                        Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                        startActivity(i);
+//                        Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+//                        startActivity(i);
+
+
+                    Intent i = new Intent(SplashActivity.this, InAppBillingActivity.class);
+                    startActivity(i);
 
 
 //                    }

@@ -15,10 +15,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -59,13 +57,7 @@ import com.linkedin.platform.listeners.ApiListener;
 import com.linkedin.platform.listeners.ApiResponse;
 import com.linkedin.platform.listeners.AuthListener;
 import com.linkedin.platform.utils.Scope;
-import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.QBSettings;
-import com.quickblox.core.exception.QBResponseException;
-import com.quickblox.messages.QBPushNotifications;
-import com.quickblox.messages.model.QBEnvironment;
-import com.quickblox.messages.model.QBNotificationChannel;
-import com.quickblox.messages.model.QBSubscription;
 
 import org.json.JSONObject;
 
@@ -312,9 +304,9 @@ public class LoginActivity extends Activity
                         +  LoginTableColumns.LI_USER_EMAIL  + " = '" + liUserInformation.getEmailAddress() + "', "
                         +  LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + liUserInformation.getPictureUrl() + "', "
                         +  LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + liUserInformation.getNumConnections() + "', "
-                        +LoginTableColumns.LI_USER_FIRST_NAME + " = '" + liUserInformation.getFirstName() + "', "
-                        +LoginTableColumns.LI_USER_LAST_NAME + " = '" + liUserInformation.getLastName() + "', "
-                        +LoginTableColumns.LI_USER_HEADLINE + " = '" + liUserInformation.getHeadline() + "' "
+                        + LoginTableColumns.LI_USER_FIRST_NAME + " = '" + liUserInformation.getFirstName() + "', "
+                        + LoginTableColumns.LI_USER_LAST_NAME + " = '" + liUserInformation.getLastName() + "', "
+                        + LoginTableColumns.LI_USER_HEADLINE + " = '" + liUserInformation.getHeadline() + "' "
                         + " where " + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
 
                 // Log.i("update Brands "+brand_id[i], Update);
@@ -908,7 +900,7 @@ public class LoginActivity extends Activity
             @Override
             public void onAuthSuccess()
             {
-                Token=LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().getValue().toString();
+                Token= LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().getValue().toString();
                 Log.e("LI Token",Token+"");
                 GenerikFunctions.showToast(cont,"success       Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
             }

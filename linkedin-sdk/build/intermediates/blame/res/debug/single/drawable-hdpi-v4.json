@@ -6,5 +6,9 @@
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/linkedin-sdk/build/intermediates/res/merged/debug/drawable-hdpi-v4/ic_launcher.png",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/linkedin-sdk/src/main/res/drawable-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/linkedin-sdk/build/intermediates/res/merged/debug/drawable-hdpi-v4/ic_launcher.png",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/linkedin-sdk/src/main/res/drawable-hdpi/ic_launcher.png"
     }
 ]

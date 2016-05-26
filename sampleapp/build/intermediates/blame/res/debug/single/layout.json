@@ -16,16 +16,20 @@
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_popup_menu_item_layout.xml"
     },
     {
-        "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/activity_main.xml",
-        "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/src/main/res/layout/activity_main.xml"
-    },
-    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_activity_chooser_view_include.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_activity_chooser_view_include.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/activity_main.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/src/main/res/layout/activity_main.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_decor_include.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_decor_include.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/support_simple_spinner_dropdown_item.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/support_simple_spinner_dropdown_item.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_mode_bar.xml",
@@ -40,32 +44,52 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_decor.xml"
     },
     {
-        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/activity_deeplink.xml",
-        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/src/main/res/layout/activity_deeplink.xml"
-    },
-    {
-        "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_home.xml",
-        "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_home.xml"
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_search_view.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_search_view.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_mode_close_item.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_mode_close_item.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_home.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_home.xml"
+    },
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/activity_deeplink.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/src/main/res/layout/activity_deeplink.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_simple_decor.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_simple_decor.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_home.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_home.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/support_simple_spinner_dropdown_item.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/support_simple_spinner_dropdown_item.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/activity_main.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/src/main/res/layout/activity_main.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_view_list_nav_layout.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_view_list_nav_layout.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_view_list_nav_layout.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_view_list_nav_layout.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_tabbar.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_tabbar.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_title_item.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_title_item.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_search_dropdown_item_icons_2line.xml",
@@ -88,6 +112,10 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/support_simple_spinner_dropdown_item.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/activity_deeplink.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/src/main/res/layout/activity_deeplink.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_title_item.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_title_item.xml"
     },
@@ -100,6 +128,14 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_popup_menu_item_layout.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_list_menu_item_checkbox.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_list_menu_item_checkbox.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_activity_chooser_view_include.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_activity_chooser_view_include.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_list_menu_item_icon.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_list_menu_item_icon.xml"
     },
@@ -108,12 +144,20 @@
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_title_item.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_expanded_menu_layout.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_expanded_menu_layout.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_home.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_home.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_view_list_nav_layout.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_view_list_nav_layout.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_mode_close_item.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_mode_close_item.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_activity_chooser_view.xml",
@@ -132,8 +176,20 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_search_view.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_tab.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_tab.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_tabbar.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_tabbar.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_list_menu_item_icon.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_list_menu_item_icon.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_activity_chooser_view.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_activity_chooser_view.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_decor_overlay.xml",
@@ -156,12 +212,28 @@
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_list_menu_item_icon.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_popup_menu_item_layout.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_popup_menu_item_layout.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_search_view.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_search_view.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_list_menu_item_layout.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_list_menu_item_layout.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_decor_overlay.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_decor_overlay.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_list_menu_item_layout.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_list_menu_item_layout.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_search_dropdown_item_icons_2line.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_search_dropdown_item_icons_2line.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/activity_api.xml",
@@ -170,6 +242,10 @@
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_tab.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_tab.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_simple_decor.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_simple_decor.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_tab.xml",
@@ -182,6 +258,14 @@
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_decor_overlay.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_decor_overlay.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/activity_api.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/src/main/res/layout/activity_api.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_list_menu_item_radio.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_list_menu_item_radio.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_expanded_menu_layout.xml",
@@ -208,8 +292,24 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_activity_chooser_view_list_item.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_menu_layout.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_menu_layout.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_menu_item_layout.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_menu_item_layout.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_activity_chooser_view_list_item.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_activity_chooser_view_list_item.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_activity_chooser_view_include.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_activity_chooser_view_include.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_decor.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_decor.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_mode_close_item.xml",
@@ -218,6 +318,18 @@
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_activity_chooser_view_list_item.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_activity_chooser_view_list_item.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_decor_include.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_decor_include.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_bar_tabbar.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_bar_tabbar.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_mode_bar.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/layout/abc_action_mode_bar.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/layout/abc_action_mode_bar.xml",

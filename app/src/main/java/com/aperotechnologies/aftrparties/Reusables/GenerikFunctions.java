@@ -6,8 +6,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.widget.Toast;
 
-import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
-
 /**
  * Created by mpatil on 11/05/16.
  */

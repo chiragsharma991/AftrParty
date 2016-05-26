@@ -1,15 +1,7 @@
 package com.aperotechnologies.aftrparties.Chats;
 
-import android.os.Bundle;
-import android.util.Log;
-
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.quickblox.chat.QBPrivateChatManager;
-import com.quickblox.chat.model.QBDialog;
-import com.quickblox.core.QBEntityCallback;
-import com.quickblox.core.exception.QBResponseException;
-
-import java.util.ArrayList;
 
 /**
  * Created by hasai on 17/05/16.

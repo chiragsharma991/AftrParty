@@ -8,10 +8,8 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBGroupChatManager;
 import com.quickblox.chat.QBPrivateChatManager;
-import com.quickblox.users.model.QBUser;
 
 import java.util.Collection;
-import java.util.Date;
 
 /**
  * Created by mpatil on 28/04/15.

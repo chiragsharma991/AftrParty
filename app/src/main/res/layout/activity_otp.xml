@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_margin="10dp"
+    android:gravity="center_horizontal" >
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/txt_enter_otp"
+        android:text="Enter OTP here"
+        android:textSize="20dp"
+        android:layout_margin="10dp" />
+
+    <EditText
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/edi_otp"
+        android:hint="Enter OTP here"
+        android:layout_margin="10dp" />
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/txt_timer"
+        android:text="Timer"
+        android:textSize="20dp"
+        android:layout_margin="10dp" />
+
+    <Button android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_generate"
+        android:text="Generate OTP"
+        android:layout_margin="10dp" />
+
+    <Button android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_verify"
+        android:text="Verify OTP"
+        android:layout_margin="10dp" />
+
+</LinearLayout>

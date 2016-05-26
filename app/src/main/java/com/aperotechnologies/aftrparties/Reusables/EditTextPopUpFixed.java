@@ -1,7 +1,6 @@
 package com.aperotechnologies.aftrparties.Reusables;
 
 import android.content.Context;
-import android.os.Handler;
 import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
 import android.view.KeyEvent;

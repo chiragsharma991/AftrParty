@@ -1,5 +1,13 @@
 [
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_item_background_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_item_background_holo_dark.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_spinner_ab_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_spinner_ab_holo_dark.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear_holo_light.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear_holo_light.xml"
     },
@@ -28,12 +36,16 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_background_transition_holo_dark.xml"
     },
     {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear_holo_light.xml",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear_holo_light.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_holo_light.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_holo_light.xml"
     },
     {
-        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear_holo_light.xml",
-        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear_holo_light.xml"
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_holo_dark.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/conference.jpg",
@@ -48,12 +60,20 @@
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_background_transition_holo_dark.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_right_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_right_holo_dark.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_search_dropdown_dark.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_search_dropdown_dark.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_search_dropdown_dark.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_search_dropdown_dark.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_spinner_ab_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_spinner_ab_holo_light.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_item_background_holo_light.xml",
@@ -68,16 +88,28 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_item_background_holo_dark.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/conference.jpg",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/src/main/res/drawable/conference.jpg"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_search_dropdown_light.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_search_dropdown_light.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_item_background_holo_light.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_item_background_holo_light.xml"
     },
     {
-        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/ic_action_search.png",
-        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/src/main/res/drawable/ic_action_search.png"
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_holo_dark.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_holo_light.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_holo_light.xml"
+    },
+    {
+        "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/ic_action_search.png",
+        "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/src/main/res/drawable/ic_action_search.png"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/arrow_right.png",
@@ -96,16 +128,40 @@
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_right_holo_dark.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_item_background_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_item_background_holo_light.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_holo_dark.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_holo_dark.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/logo.png",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/src/main/res/drawable/logo.png"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_right_holo_light.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_right_holo_light.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_tab_indicator_ab_holo.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_tab_indicator_ab_holo.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/linkedin_login.png",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/src/main/res/drawable/linkedin_login.png"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/arrow_left.png",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/src/main/res/drawable/arrow_left.png"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_search_dropdown_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_search_dropdown_dark.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_background_transition_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_background_transition_holo_dark.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/arrow_right.png",
@@ -114,6 +170,10 @@
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/logo.png",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/src/main/res/drawable/logo.png"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/ic_action_search.png",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/src/main/res/drawable/ic_action_search.png"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_light.xml",
@@ -128,12 +188,28 @@
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_spinner_ab_holo_light.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/arrow_right.png",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/src/main/res/drawable/arrow_right.png"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/ic_action_search.png",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/src/main/res/drawable/ic_action_search.png"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/ic_launcher.png",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/src/main/res/drawable/ic_launcher.png"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_holo_light.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/linkedin_login.png",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/src/main/res/drawable/linkedin_login.png"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_right_holo_dark.xml",
@@ -142,6 +218,10 @@
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_dark.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_holo_dark.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_background_transition_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_background_transition_holo_light.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_right_holo_light.xml",
@@ -164,6 +244,10 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_spinner_ab_holo_light.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_spinner_ab_holo_dark.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_spinner_ab_holo_dark.xml"
     },
@@ -172,8 +256,20 @@
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/src/main/res/drawable/conference.jpg"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear_holo_light.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_right_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_right_holo_light.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_holo_light.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/eventsapp/build/intermediates/res/merged/debug/drawable/ghost_person.png",
@@ -198,5 +294,9 @@
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/build/intermediates/res/merged/debug/drawable/ic_launcher.png",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/eventsapp/src/main/res/drawable/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/build/intermediates/res/merged/debug/drawable/ghost_person.png",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/eventsapp/src/main/res/drawable/ghost_person.png"
     }
 ]
