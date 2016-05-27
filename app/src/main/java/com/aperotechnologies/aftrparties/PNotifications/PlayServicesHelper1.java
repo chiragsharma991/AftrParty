@@ -21,7 +21,7 @@ import android.util.Log;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
-import com.aperotechnologies.aftrparties.Login.LoggedInUserInformation;
+import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;

@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -22,6 +23,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -38,6 +40,7 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
 
     LinearLayout lLyoutHost;
     TextView txtStartDate, txtEndDate;
+    EditText edt_Description, edt_Address;
     Button btn_createParty;
     String timeSelection;
 
@@ -76,7 +79,7 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
 
 
         // Spinner for Mask/UnMask
-        Spinner spn_mask = (Spinner) findViewById(R.id.spn_startTime);
+        Spinner spn_mask = (Spinner) findViewById(R.id.spn_maskStatus);
         List<String> maskList = new ArrayList<String>();
         maskList.add("Mask");
         maskList.add("Unmask");
@@ -96,6 +99,8 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
         lLyoutHost = (LinearLayout) findViewById(R.id.lLyoutHost);
         txtStartDate = (TextView) findViewById(R.id.txtStartDate);
         txtEndDate = (TextView) findViewById(R.id.txtEndDate);
+        edt_Description = (EditText) findViewById(R.id.edt_Description);
+        edt_Address = (EditText) findViewById(R.id.edt_partyaddress);
         btn_createParty = (Button) findViewById(R.id.btn_createParty);
 
         //Calendar date,time value for StartDateTime
@@ -200,6 +205,8 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
                 }else{
 
                 }
+
+
             }
 
             @Override
@@ -215,6 +222,8 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
             @Override
             public void onClick(View v) {
 
+                Validations.checkWordsCount(edt_Description.getText().toString());
+
                 if (selected_endTimeVal - selected_startTimeVal == 0) {
                     Toast.makeText(getApplicationContext(), "StartTime & EndTime cannot be same. It should be greater than one hour", Toast.LENGTH_SHORT).show();
                 } else if (selected_endTimeVal < selected_startTimeVal) {
@@ -224,6 +233,9 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
                 } else if (selected_endTimeVal - selected_startTimeVal > 43200000) {
                     Toast.makeText(getApplicationContext(), " EndTime cannot be greater than 12 hours ", Toast.LENGTH_SHORT).show();
                 } else {
+
+                    Validations.checkWordsCount(edt_Description.getText().toString());
+
 //                    Log.e(""," "+timeSelection);
 //                    Log.e("selected_byob"," "+selected_byob);
 //                    Log.e("selected_startTimeVal"," "+selected_startTimeVal);

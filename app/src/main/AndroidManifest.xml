@@ -76,6 +76,14 @@
             android:screenOrientation="portrait"></activity>
 
 
+        <activity android:name=".Login.OTPActivity"
+            android:screenOrientation="portrait"></activity>
+
+
+        <activity android:name=".InAppPurchase.InAppBillingActivity"
+            android:screenOrientation="portrait"></activity>
+
+
 
         <!-- GCM (Push Notifications) setup: http://developer.android.com/google/gcm/gs.html#android-app -->
 

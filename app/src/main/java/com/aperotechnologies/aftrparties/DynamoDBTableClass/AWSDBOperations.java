@@ -1,18 +1,28 @@
 package com.aperotechnologies.aftrparties.DynamoDBTableClass;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.EditText;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
-import com.aperotechnologies.aftrparties.Login.LoggedInUserInformation;
+import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.Login.AsyncAgeCalculation;
+import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
+import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.android.Utils;
 import com.cloudinary.utils.ObjectUtils;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * Created by hasai on 16/05/16.
@@ -27,10 +38,29 @@ import java.util.Random;
 public class AWSDBOperations {
 
 
+
+    //Meghana
+    //public static  String profilePicAvailable="No";
+    //public static String validAge="No";
+    //public static String validFriendsCount="No";
+    //public static String validConnCount="No";
+
+    public static Context cont;
+    public static SharedPreferences sharedPreferences;
+    public static Configuration_Parameter m_config;
+
+    public static FaceOverlayView faceOverlayView;
+    public static Bitmap imageBitmap = null;
+    public static boolean hasFBImage = false;
+    public static boolean hasLIImage = false;
+
     public static void createUser(Context context, LoggedInUserInformation loggedInUserInfo) {
 
-        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        cont = context;
+        m_config = Configuration_Parameter.getInstance();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        Activity act=(Activity)context;
+        faceOverlayView = (FaceOverlayView) ((Activity) context).findViewById(R.id.face_overlay);
 
         try {
 
@@ -60,6 +90,9 @@ public class AWSDBOperations {
             }
             String Gender = loggedInUserInfo.getFB_USER_GENDER();
             String FBProfilePicUrl = loggedInUserInfo.getFB_USER_PROFILE_PIC();
+            List ProfilePicUrlList = new ArrayList();
+            ProfilePicUrlList.add(FBProfilePicUrl);
+
             String LKProfilePicUrl = loggedInUserInfo.getLI_USER_PROFILE_PIC();
             int LKConnectionsCount;
             if (loggedInUserInfo.getLI_USER_CONNECTIONS() == null)
@@ -94,7 +127,7 @@ public class AWSDBOperations {
                 user.setBirthDate(BirthDate);
                 user.setFBFriendsCount(FBFriendsCount);
                 user.setGender(Gender);
-                user.setFBProfilePicUrl(FBProfilePicUrl);
+                user.setProfilePicUrl(ProfilePicUrlList);
                 user.setLKProfilePicUrl(LKProfilePicUrl);
                 user.setLKConnectionsCount(LKConnectionsCount);
                 user.setLKHeadLine(LKHeadLine);
@@ -108,9 +141,9 @@ public class AWSDBOperations {
                 {
                     user.setDeviceToken(DeviceToken);
                 }
-                user.setProfileStatus(null);
-                user.setParties(null);
-                user.setImages(null);
+                //user.setProfileStatus("N/A");
+                //user.setParties();
+
 
                 Log.e("AWS User insert ", " " + user.toString());
                 m_config.mapper.save(user);
@@ -119,15 +152,28 @@ public class AWSDBOperations {
                 editor.apply();
                 Log.e("", "User Inserted");
 
-                UserTable savedUserClass = m_config.mapper.load(UserTable.class, FacebookID);
-                if (savedUserClass.getFacebookID().equals(FacebookID))
-                {
-                    Log.e("---", " inserted successfully");
+//                UserTable savedUserClass = m_config.mapper.load(UserTable.class, FacebookID);
+//                if (savedUserClass.getFacebookID().equals(FacebookID))
+//                {
+//                    Log.e("---", " inserted successfully");
+//
+//                }
+//                else {
+//                    Log.e("---", " not inserted");
+//                }
 
-                }
-                else {
-                    Log.e("---", " not inserted");
-                }
+
+                //Validations Meghana
+                Log.e("call to next activity","");
+                //Validations for login
+                //Age in bg  - 16
+                //Profile pic availability
+                //No of friends and connections -50 50
+                //Meghana
+
+
+                //Calculate Age
+                new AsyncAgeCalculation(context).execute();
 
                 GenerikFunctions generikFunctions = new GenerikFunctions();
                 generikFunctions.hideDialog(m_config.pDialog);
@@ -146,7 +192,7 @@ public class AWSDBOperations {
                     selUserData.setBirthDate(BirthDate);
                     selUserData.setFBFriendsCount(FBFriendsCount);
                     selUserData.setGender(Gender);
-                    selUserData.setFBProfilePicUrl(FBProfilePicUrl);
+                    selUserData.setProfilePicUrl(ProfilePicUrlList);
                     selUserData.setLKProfilePicUrl(LKProfilePicUrl);
                     selUserData.setLKConnectionsCount(LKConnectionsCount);
                     selUserData.setLKHeadLine(LKHeadLine);
@@ -159,13 +205,26 @@ public class AWSDBOperations {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString(m_config.AWSUserDataDone, "Yes");
                     editor.apply();
-                    ;
-                    UserTable savedUserClass = m_config.mapper.load(UserTable.class, FacebookID);
-                    if (savedUserClass.getFacebookID().equals(FacebookID)) {
-                        Log.e("---", " updated successfully");
-                    } else {
-                        Log.e("---", " not updated");
-                    }
+
+//                    UserTable savedUserClass = m_config.mapper.load(UserTable.class, FacebookID);
+//                    if (savedUserClass.getFacebookID().equals(FacebookID)) {
+//                        Log.e("---", " updated successfully");
+//                    } else {
+//                        Log.e("---", " not updated");
+//                    }
+
+
+                    // Valdations Meghana
+                    Log.e("call to next activity","");
+
+                    //Validations for login
+                    //Age in bg  - 16
+                    //Profile pic availability
+                    //No of friends and connections -50 50
+                    //Meghana
+
+                    //Calculate Age
+                    new AsyncAgeCalculation(context).execute();
 
                     GenerikFunctions generikFunctions = new GenerikFunctions();
                     generikFunctions.hideDialog(m_config.pDialog);
@@ -205,8 +264,8 @@ public class AWSDBOperations {
 
             try {
 
-                Random myRandom = new Random();
-                String Id = String.valueOf(myRandom.nextInt());
+
+                String Id = UUID.randomUUID().toString();
                 // upload picture to cloudinary
                 cloudinary.uploader().upload(picturePath, ObjectUtils.asMap("public_id", Id));
                 //fetch image from cloudinary
@@ -216,7 +275,7 @@ public class AWSDBOperations {
                 String profileStatus = edt_usermsgStatus.getText().toString().replaceAll("\\s+", " ").trim();
                 UserTable userTable = m_config.mapper.load(UserTable.class, FacebookID);
                 userTable.setProfileStatus(profileStatus);
-                userTable.setLKProfilePicUrl(url);
+                //userTable.setLKProfilePicUrl(url);
                 m_config.mapper.save(userTable);
                 GenerikFunctions.showToast(cont, "Profile updated successfully");
 
@@ -465,6 +524,235 @@ public class AWSDBOperations {
             selPartyTable.setGateCrashers(finalGateCrasherList);
             m_config.mapper.save(selPartyTable);
 
+        }
+    }
+
+
+    public static void basicValidation(final LoggedInUserInformation loggedInUserInfo)
+    {
+        if(loggedInUserInfo.getFB_USER_PROFILE_PIC().equals("N/A") || loggedInUserInfo.getFB_USER_PROFILE_PIC().equals(null))
+        {
+            hasFBImage=false;
+            //Check for LI profile Pic
+            if(loggedInUserInfo.getLI_USER_PROFILE_PIC().equals("N/A") || loggedInUserInfo.getLI_USER_PROFILE_PIC().equals(null))
+            {
+                ConstsCore.profilePicAvailable="No";
+                hasLIImage=false;
+            }
+            else
+            {
+                hasLIImage=true;
+                ConstsCore.profilePicAvailable="Yes";
+            }
+        }
+        else
+        {
+            hasFBImage=true;
+            ConstsCore.profilePicAvailable="Yes";
+        }
+
+        //Connection Count
+        if(Integer.parseInt(loggedInUserInfo.getFB_USER_FRIENDS()) >= ConstsCore.FB_FRIENDS)
+        {
+
+            if(Integer.parseInt(loggedInUserInfo.getLI_USER_CONNECTIONS())< ConstsCore.LI_CONNECTIONS)
+            {
+                //fb valid  li invalid
+                ConstsCore.validFriendsCount="Yes";
+                ConstsCore.validConnCount="No";
+            }
+            else
+            {
+                // fb valid li valid
+                ConstsCore.validFriendsCount="Yes";
+                ConstsCore.validConnCount="Yes";
+            }
+        }
+        else
+        {
+            ConstsCore.validFriendsCount="No";
+        }
+
+
+//                    profilePicAvailable="No";
+//                    String validAge="No";
+//                    String validFriendsCount="No";
+//                    String validConnCount="No";
+
+        //     Log.e("Before Conditions check priflefald ageflag friendsflag", ConstsCore.profilePicAvailable +"    " + ConstsCore.ValidAge +"    " + ConstsCore.validFriendsCount);
+        if(ConstsCore.profilePicAvailable.equals("No"))
+        {
+            Handler h = new Handler(cont.getMainLooper());
+            h.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    GenerikFunctions.showToast(cont,"DOnt have profile picture");
+                }
+            });
+
+        }
+        else
+        {
+            //Have profile picture
+            if(ConstsCore.ValidAge.equals("No"))
+            {
+
+                Handler h = new Handler(cont.getMainLooper());
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        GenerikFunctions.showToast(cont,"Invalid age");
+                    }
+                });
+
+            }
+            else
+            {
+                //Valid age
+                if(ConstsCore.validFriendsCount.equals("No"))
+                {
+                    Handler h = new Handler(cont.getMainLooper());
+                    h.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            GenerikFunctions.showToast(cont,"Face book friends count is less than " + ConstsCore.FB_FRIENDS);
+                        }
+                    });
+                }
+                else
+                {
+                    if(ConstsCore.validConnCount.equals("No"))
+                    {
+                        Handler h = new Handler(cont.getMainLooper());
+                        h.post(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                GenerikFunctions.showToast(cont,"LI conn count is less than "+ ConstsCore.LI_CONNECTIONS);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        //Start Home Page
+                        //Set Validation FLags Here
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(m_config.BasicFBLIValidationsDone,"Yes");
+                        editor.apply();
+
+                        //Go for Face Detection
+                        //  new Imageverification(context).execute();
+
+                        try
+                        {
+                            // Log.e("Inside try","yes");
+                            String url = loggedInUserInfo.getFB_USER_PROFILE_PIC();
+
+                            if(url.equals(null) || url.equals("") || url.equals("N/A"))
+                            {
+                                if(loggedInUserInfo.getLI_USER_PROFILE_PIC() == null ||
+                                        loggedInUserInfo.equals("") ||
+                                        loggedInUserInfo.getLI_USER_PROFILE_PIC().equals("N/A"))
+                                {
+                                    url = "";
+                                }
+                                else
+                                {
+                                    url = loggedInUserInfo.getLI_USER_PROFILE_PIC();
+                                }
+                            }
+                            else
+                            {
+                                url = loggedInUserInfo.getFB_USER_PROFILE_PIC();
+                            }
+
+                            // Log.e("URL",url);
+
+                            if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
+                            {
+
+                                //       Log.e("Before Picasso play service","yes");
+
+                                Target mTarget = new Target()
+                                {
+                                    @Override
+                                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom)
+                                    {
+                                        Log.e("FB bitmap loaded ","sucessfully  " + bitmap.toString() );
+
+
+                                        int faces = faceOverlayView.setBitmap(bitmap);
+
+                                        if(faces>0)
+                                        {
+                                            Log.e("There is face in pic",faces+"");
+                                            Log.e("GO for OTP","Yes");
+
+                                            //Set  Face detect flag here to true
+                                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                                            editor.putString(m_config.FaceDetectDone,"Yes");
+                                            editor.apply();
+                                        }
+                                        else
+                                        {
+
+                                            //Set  Face detect flag here to false
+                                            Log.e("There is no face in pic","");
+                                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                                            editor.putString(m_config.FaceDetectDone,"No");
+                                            editor.apply();
+
+                                            GenerikFunctions.showToast(cont,"There is no face in your profile pic");
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onBitmapFailed(Drawable drawable)
+                                    {
+                                        Log.e("On FB bitmap failed",drawable.toString());
+                                    }
+
+                                    @Override
+                                    public void onPrepareLoad(Drawable drawable)
+                                    {
+
+                                    }
+
+                                };
+
+
+                                Picasso.with(cont)
+                                        .load(url)
+                                        .into(mTarget);
+
+
+                                faceOverlayView.setTag(mTarget);
+
+
+
+                            }
+                        }
+
+                        catch(Exception e)
+                        {
+                            e.printStackTrace();
+//                            Log.e(TAG,e.getMessage());
+                        }
+
+
+//                        Intent i = new Intent(cont, HomePageActivity.class);
+//                        cont.startActivity(i);
+                    }
+                }
+            }
         }
     }
 

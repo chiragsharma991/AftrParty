@@ -13,11 +13,13 @@ import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.Age;
 import com.aperotechnologies.aftrparties.Reusables.AgeCalculator;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -132,7 +134,7 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
             }
 
 
-            Log.e("Before Conditions check priflefald ageflag friendsflag", ConstsCore.profilePicAvailable + "    " + ConstsCore.ValidAge + "    " + ConstsCore.validFriendsCount);
+          //  Log.e("Before Conditions check priflefald ageflag friendsflag", ConstsCore.profilePicAvailable + "    " + ConstsCore.ValidAge + "    " + ConstsCore.validFriendsCount);
             if (ConstsCore.profilePicAvailable.equals("No"))
             {
                 Handler h = new Handler(cont.getMainLooper());
@@ -247,7 +249,7 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
 
                 if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
                 {
-                    Log.e("Before Picasso play service","yes");
+             //       Log.e("Before Picasso play service","yes");
 
                     mTarget = new Target()
                     {
@@ -267,8 +269,11 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                                 editorq.putString(m_config.FaceDetectDone,"Yes");
                                 editorq.apply();
 
-                                Intent intent = new Intent(cont,OTPActivity.class);
+//                                Intent intent = new Intent(cont,OTPActivity.class);
+//                                cont.startActivity(intent);
+                                Intent intent = new Intent(cont,HomePageActivity.class);
                                 cont.startActivity(intent);
+
                             }
                             else
                             {

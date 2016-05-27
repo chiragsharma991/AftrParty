@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -18,9 +19,9 @@ import android.widget.Toast;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
-import com.aperotechnologies.aftrparties.Login.LoggedInUserInformation;
 import com.aperotechnologies.aftrparties.Login.LoginTableColumns;
 import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
+import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.facebook.AccessToken;
 import com.quickblox.auth.QBAuth;
 import com.quickblox.auth.model.QBProvider;
@@ -39,6 +40,7 @@ import com.quickblox.users.model.QBUser;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -46,10 +48,6 @@ import java.util.regex.Pattern;
  */
 public  class LoginValidations
 {
-
-
-    static SharedPreferences sharedpreferences;
-    static Configuration_Parameter m_config;
 
 
 
@@ -63,7 +61,7 @@ public  class LoginValidations
                 + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$").matcher(email).matches();
     }
 
-//Meghana
+    //Meghana
     public static boolean isEmpty(EditText etText)
     {
         if (etText.getText().toString().trim().length() > 0)
@@ -78,7 +76,7 @@ public  class LoginValidations
         boolean check=false;
         if(!Pattern.matches("[a-zA-Z]+", text))
         {
-            if(text.length() < 10 || text.length() > 13)
+            if(text.length() < 10 || text.length() > 10)
             {
                 check = false;
             }
@@ -94,7 +92,7 @@ public  class LoginValidations
         return check;
     }
 
-//Meghana
+    //Meghana
     public static boolean isFBLoggedIn()
     {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
@@ -103,7 +101,7 @@ public  class LoginValidations
     }
 
 
-//Meghana
+    //Meghana
     public static LoggedInUserInformation initialiseLoggedInUser(Context cont)
     {
         DBHelper helper = DBHelper.getInstance(cont);
@@ -114,32 +112,37 @@ public  class LoginValidations
         cursor.moveToFirst();
         LoggedInUserInformation loggedInUserInfo = new LoggedInUserInformation();
 
-        loggedInUserInfo.setFB_USER_ID(cursor.getString(cursor.getColumnIndex("fb_user_id")));
-        loggedInUserInfo.setFB_USER_NAME(cursor.getString(cursor.getColumnIndex("fb_user_name")));
-        loggedInUserInfo.setFB_USER_GENDER(cursor.getString(cursor.getColumnIndex("fb_user_gender")));
-        loggedInUserInfo.setFB_USER_BIRTHDATE(cursor.getString(cursor.getColumnIndex("fb_user_birthdate")));
-        loggedInUserInfo.setFB_USER_EMAIL(cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_EMAIL)));
-        loggedInUserInfo.setFB_USER_PROFILE_PIC(cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_PROFILE_PIC)));
-        loggedInUserInfo.setFB_USER_HOMETOWN_ID(cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_HOMETOWN_ID)));
-        loggedInUserInfo.setFB_USER_HOMETOWN_NAME(cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_HOMETOWN_NAME)));
-        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_CURRENT_LOCATION_ID)));
-        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME)));
+        loggedInUserInfo.setFB_USER_ID(cursor.getString(cursor.getColumnIndexOrThrow("fb_user_id")));
+        loggedInUserInfo.setFB_USER_NAME(cursor.getString(cursor.getColumnIndexOrThrow("fb_user_name")));
+        loggedInUserInfo.setFB_USER_GENDER(cursor.getString(cursor.getColumnIndexOrThrow("fb_user_gender")));
+        loggedInUserInfo.setFB_USER_BIRTHDATE(cursor.getString(cursor.getColumnIndexOrThrow("fb_user_birthdate")));
+        loggedInUserInfo.setFB_USER_EMAIL(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.FB_USER_EMAIL)));
+        loggedInUserInfo.setFB_USER_PROFILE_PIC(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.FB_USER_PROFILE_PIC)));
+        loggedInUserInfo.setFB_USER_HOMETOWN_ID(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.FB_USER_HOMETOWN_ID)));
+        loggedInUserInfo.setFB_USER_HOMETOWN_NAME(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.FB_USER_HOMETOWN_NAME)));
+        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.FB_USER_CURRENT_LOCATION_ID)));
+        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME)));
+        loggedInUserInfo.setFB_USER_FRIENDS(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.FB_USER_FRIENDS)));
 
-        loggedInUserInfo.setLI_USER_ID(cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_ID)));
-        loggedInUserInfo.setLI_USER_FIRST_NAME(cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_FIRST_NAME)));
-        loggedInUserInfo.setLI_USER_LAST_NAME(cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_LAST_NAME)));
-        loggedInUserInfo.setLI_USER_EMAIL(cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_EMAIL)));
-        loggedInUserInfo.setLI_USER_PROFILE_PIC(cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_PROFILE_PIC)));
-        loggedInUserInfo.setLI_USER_CONNECTIONS(cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_CONNECTIONS)));
-        loggedInUserInfo.setLI_USER_HEADLINE(cursor.getString(cursor.getColumnIndex(LoginTableColumns.LI_USER_HEADLINE)));
+        loggedInUserInfo.setLI_USER_ID(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.LI_USER_ID)));
+        loggedInUserInfo.setLI_USER_FIRST_NAME(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.LI_USER_FIRST_NAME)));
+        loggedInUserInfo.setLI_USER_LAST_NAME(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.LI_USER_LAST_NAME)));
+        loggedInUserInfo.setLI_USER_EMAIL(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.LI_USER_EMAIL)));
+        loggedInUserInfo.setLI_USER_PROFILE_PIC(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.LI_USER_PROFILE_PIC)));
+        loggedInUserInfo.setLI_USER_CONNECTIONS(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.LI_USER_CONNECTIONS)));
+        loggedInUserInfo.setLI_USER_HEADLINE(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.LI_USER_HEADLINE)));
+
 
         /*
-        public static final String FB_USER_FRIENDS = "fb_user_friends";
+        public static final String FB_USER_FRIENDS                = "fb_user_friends";
 
        */
 
         return loggedInUserInfo;
     }
+
+
+
 
     public static AccessToken getFBAccessToken()
     {
@@ -147,7 +150,6 @@ public  class LoginValidations
         return accessToken;
 
     }
-
 
     //Harshada
     //function for starting session of quickblox
@@ -169,6 +171,8 @@ public  class LoginValidations
             //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
             Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
             t.start();
+
+
         }
 
         Date expirationDate = new Date(expDate);
@@ -1119,6 +1123,8 @@ public  class LoginValidations
             myLooper.quit();
         }
     };
+
+
 
 
 

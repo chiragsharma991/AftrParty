@@ -1,11 +1,11 @@
 [
     {
-        "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear.xml",
-        "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear.xml"
-    },
-    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_background_transition_holo_dark.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_background_transition_holo_dark.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_item_background_holo_light.xml",
@@ -36,6 +36,10 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_spinner_ab_holo_light.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_background_transition_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_background_transition_holo_dark.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_item_background_holo_dark.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_item_background_holo_dark.xml"
     },
@@ -48,12 +52,32 @@
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_search_dropdown_dark.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_holo_dark.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_light.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_holo_light.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_right_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_right_holo_light.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_search_dropdown_light.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_search_dropdown_light.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_light.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_holo_light.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_spinner_ab_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_spinner_ab_holo_light.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_holo_light.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear_holo_light.xml",
@@ -64,16 +88,32 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_background_transition_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_background_transition_holo_light.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_holo_light.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_search_dropdown_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_search_dropdown_dark.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear.xml"
     },
     {
-        "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_dark.xml",
-        "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_holo_dark.xml"
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_holo_dark.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_background_transition_holo_dark.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_background_transition_holo_dark.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_list_selector_holo_dark.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_list_selector_background_transition_holo_dark.xml",
@@ -86,6 +126,10 @@
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_search_dropdown_dark.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_search_dropdown_dark.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear_holo_light.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_holo_light.xml",
@@ -132,6 +176,10 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_spinner_ab_holo_dark.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_tab_indicator_ab_holo.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_tab_indicator_ab_holo.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear_holo_light.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear_holo_light.xml"
     },
@@ -156,6 +204,10 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_right_holo_dark.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_spinner_ab_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_spinner_ab_holo_dark.xml"
+    },
+    {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_right_holo_light.xml",
         "source": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_right_holo_light.xml"
     },
@@ -172,12 +224,28 @@
         "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_search_dropdown_dark.xml"
     },
     {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_ic_clear.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_ic_clear.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_item_background_holo_light.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_item_background_holo_light.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_item_background_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_item_background_holo_dark.xml"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/res/merged/debug/drawable/abc_search_dropdown_light.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_search_dropdown_light.xml"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_holo_dark.xml",
         "source": "/Users/hasai/Documents/repositories/Aftrparties/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_holo_dark.xml"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_right_holo_dark.xml",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/sampleapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable/abc_textfield_searchview_right_holo_dark.xml"
     },
     {
         "merged": "/Users/mpatil/Documents/AfterPatyDocs/AftrParties/sampleapp/build/intermediates/res/merged/debug/drawable/abc_textfield_searchview_right_holo_dark.xml",

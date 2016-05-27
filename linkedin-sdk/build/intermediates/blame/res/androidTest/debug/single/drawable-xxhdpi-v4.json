@@ -1,5 +1,9 @@
 [
     {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/linkedin-sdk/build/intermediates/res/merged/androidTest/debug/drawable-xxhdpi-v4/ic_launcher.png",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/linkedin-sdk/build/intermediates/bundles/debug/res/drawable-xxhdpi-v4/ic_launcher.png"
+    },
+    {
         "merged": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/linkedin-sdk/build/intermediates/res/merged/androidTest/debug/drawable-xxhdpi-v4/ic_launcher.png",
         "source": "/Users/hasai/Documents/repositories/Aftrparties_v_1.0/linkedin-sdk/build/intermediates/bundles/debug/res/drawable-xxhdpi-v4/ic_launcher.png"
     },

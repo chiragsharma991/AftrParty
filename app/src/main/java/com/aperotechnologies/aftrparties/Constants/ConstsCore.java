@@ -14,4 +14,22 @@ public class ConstsCore {
     public static final String GCM_SEND_ERROR = "Send error: ";
     public static final String GCM_RECEIVED = "Received: ";
 
+    public static final int FB_AGE = 16;
+    public static final int FB_FRIENDS = 1;
+    public static final int LI_CONNECTIONS = 50;
+
+    public static String ValidAge="No";
+    public static String profilePicAvailable="No";
+    public static String validFriendsCount="No";
+    public static String validConnCount="No";
+
+    //OTP Verifcatiom
+    String customerId = "kr0lv39n";
+    String appkey = "b22ab60eda70072cd34c507c4870ab3c";
+    String appid = "c31396423a00078697c490cb13a6d99b";
+    String mobileNumber="9987936766";
+
+
+
+
 }

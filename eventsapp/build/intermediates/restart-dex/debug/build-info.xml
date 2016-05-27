@@ -1,24 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <instant-run
-    abi="x86"
-    api-level="16"
+    abi="armeabi-v7a,armeabi"
+    api-level="19"
     density="xhdpi"
     format="7"
-    timestamp="4709350902963" >
+    timestamp="17943486733714" >
 
     <task
         name="javac"
-        duration="0" />
+        duration="891" />
     <task
         name="instant-run-dex"
         duration="0" />
     <task
         name="instant-run-transform"
-        duration="0" />
+        duration="1593" />
     <task
         name="verifier"
-        duration="0" />
+        duration="87" />
 
-    <build timestamp="4709350902963" />
+    <artifact
+        location="/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/outputs/apk/eventsapp-debug.apk"
+        type="MAIN" />
+
+    <build timestamp="17943486733714" >
+        <artifact
+            location="/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/outputs/apk/eventsapp-debug.apk"
+            type="MAIN" />
+    </build>
 
 </instant-run>

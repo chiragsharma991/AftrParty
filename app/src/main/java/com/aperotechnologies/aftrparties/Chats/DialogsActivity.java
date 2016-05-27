@@ -36,7 +36,7 @@ public class DialogsActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialogs_activity);
         //playServicesHelper = new PlayServicesHelper(this);
-        m_config=Configuration_Parameter.getInstance();
+        m_config= Configuration_Parameter.getInstance();
 
         dialogsListView = (ListView) findViewById(R.id.roomsList);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);

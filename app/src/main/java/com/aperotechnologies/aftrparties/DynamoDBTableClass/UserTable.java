@@ -24,7 +24,7 @@ public class UserTable {
     private String BirthDate;
     private int FBFriendsCount;
     private String Gender;
-    private String FBProfilePicUrl;
+    private  List<String> ProfilePicUrl;
     private String LKProfilePicUrl;
     private int LKConnectionsCount;
     private String LKHeadLine;
@@ -138,13 +138,13 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "FBProfilePicUrl")
-    public String getFBProfilePicUrl() {
-        return FBProfilePicUrl;
+    @DynamoDBAttribute(attributeName = "ProfilePicUrl")
+    public  List<String> getProfilePicUrl() {
+        return ProfilePicUrl;
     }
 
-    public void setFBProfilePicUrl(String FBProfilePicUrl) {
-        this.FBProfilePicUrl = FBProfilePicUrl;
+    public void setProfilePicUrl( List<String> ProfilePicUrl) {
+        this.ProfilePicUrl = ProfilePicUrl;
     }
 
     @DynamoDBAttribute(attributeName = "LKProfilePicUrl")

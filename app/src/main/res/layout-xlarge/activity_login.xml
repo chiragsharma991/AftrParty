@@ -9,7 +9,10 @@
        android:layout_width="match_parent"
        android:layout_height="match_parent"
        android:layout_gravity="center"
-       android:id="@+id/layout_parent_login">
+       android:id="@+id/layout_parent_login"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    tools:context=".Login.LoginActivity">
 
        <LinearLayout
            android:id="@+id/line_login"
@@ -21,13 +24,16 @@
            android:focusableInTouchMode="true">
 
            <ImageView
-               android:layout_height="250dp"
-               android:layout_width="250dp"
-               android:layout_marginLeft="20dp"
-               android:layout_marginRight="20dp"
-               android:layout_gravity="center_horizontal"
-               android:background="@drawable/ic_launcher"
-               android:id="@+id/img_app_logo"/>
+           android:layout_height="200dp"
+           android:layout_width="match_parent"
+           android:layout_marginLeft="20dp"
+           android:layout_marginRight="20dp"
+           android:layout_gravity="center_horizontal"
+           android:background="@drawable/ic_launcher"
+           android:id="@+id/img_app_logo_one"/>
+
+
+
 
            <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
                android:layout_width="match_parent"
@@ -93,11 +99,9 @@
                android:paddingLeft="5dp"
                android:textCursorDrawable="@null" />
 
-
            <View
                android:layout_height="10dp"
                android:layout_width="3dp"     />
-
 
            <Button
                android:gravity="center"
@@ -113,8 +117,17 @@
                android:layout_gravity="center_horizontal" />
 
 
+           <com.aperotechnologies.aftrparties.Login.FaceOverlayView
+               android:id="@+id/face_overlay"
+               android:layout_width="300dp"
+               android:layout_height="300dp"
+               android:background="@android:color/white"
+               android:visibility="gone"/>
+
+
        </LinearLayout>
-       </RelativeLayout>
+
+</RelativeLayout>
 
 
 

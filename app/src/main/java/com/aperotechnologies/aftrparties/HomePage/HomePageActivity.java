@@ -71,11 +71,11 @@ public class HomePageActivity extends Activity
         String url = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_PROFILE_PIC();
 
         if(url.equals(null) || url.equals("") || url.equals("N/A")){
-            if(LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC() == null || LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC().equals("") || LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC().equals("N/A")) {
+            //if(LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC() == null || LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC().equals("") || LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC().equals("N/A")) {
                 url = "";
-            }else{
-                url = LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC();
-            }
+//            }else{
+//                url = LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC();
+//            }
         }else{
             url = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_PROFILE_PIC();
         }

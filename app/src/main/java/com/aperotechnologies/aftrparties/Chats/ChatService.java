@@ -46,7 +46,7 @@ public class ChatService {
     private QBChatService chatService;
 
     private ChatService() {
-        m_config=Configuration_Parameter.getInstance();
+        m_config= Configuration_Parameter.getInstance();
 
         chatService = m_config.chatService;//QBChatService.getInstance();
         chatService.addConnectionListener(chatConnectionListener);

@@ -14,6 +14,7 @@ import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -76,7 +77,7 @@ public class AsyncFaceDetection extends AsyncTask<Void, Void, Integer>
             if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
             {
 
-                Log.e("Before Picasso play service","yes");
+               // Log.e("Before Picasso play service","yes");
 
                 mTarget = new Target()
                 {
@@ -139,7 +140,7 @@ public class AsyncFaceDetection extends AsyncTask<Void, Void, Integer>
     protected void onPostExecute(Integer result)
     {
         faces = result;
-        Log.e("No of faces from onPostExecute",faces+"");
+       // Log.e("No of faces from onPostExecute",faces+"");
 
         if(faces>0)
         {

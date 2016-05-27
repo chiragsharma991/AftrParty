@@ -62,7 +62,7 @@ public class SettingsActivity extends Activity {
     EditTextPopUpFixed edt_usermsgStatus, edt_Age;
     TextView txtrangeseekbarval, txtseekbarval;
 //    RangeSeekBar rangeSeekBar;
-//    SeekBar SeekBar;
+    SeekBar SeekBar;
     SeekbarWithIntervals seekbarWithIntervals = null;
     String seekbarVal = "1";
     Spinner spn_Gender;
@@ -98,7 +98,7 @@ public class SettingsActivity extends Activity {
         txtrangeseekbarval = (TextView) findViewById(R.id.txtrangeseekbarval);
         txtseekbarval = (TextView) findViewById(R.id.txtseekbarval);
         //rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeseekbar);
-        //SeekBar = (SeekBar) findViewById(R.id.seekbar);
+        SeekBar = (SeekBar) findViewById(R.id.seekbar);
 
         List<String> seekbarIntervals = getIntervals();
         getSeekbarWithIntervals().setIntervals(seekbarIntervals);
@@ -131,14 +131,14 @@ public class SettingsActivity extends Activity {
 
         if(url.equals(null) || url.equals("") || url.equals("N/A"))
         {
-            if(LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC() == null || LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC().equals("") || LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC().equals("N/A"))
-            {
+//            if(LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC() == null || LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC().equals("") || LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC().equals("N/A"))
+//            {
                 url = "";
-            }
-            else
-            {
-                url = LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC();
-            }
+//            }
+//            else
+//            {
+//                url = LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC();
+//            }
         }
         else
         {
@@ -160,7 +160,7 @@ public class SettingsActivity extends Activity {
         {
             UserTable userTable = m_config.mapper.load(UserTable.class, FacebookID);
             Log.e("userTable "," "+userTable);
-            if(userTable.getProfileStatus() == null || userTable.getProfileStatus().equals(null) || userTable.getProfileStatus().equals(""))
+            if(userTable.getProfileStatus() == null || userTable.getProfileStatus().equals(null) || userTable.getProfileStatus().equals("N/A"))
             {
                 edt_usermsgStatus.setText("");
 
@@ -189,27 +189,27 @@ public class SettingsActivity extends Activity {
 
 
 
-//        if(seekbarVal.equals("")){
-//            String maxText = String.valueOf(2);
-//            txtrangeseekbarval.setText(maxText);
-//            txtseekbarval.setText(maxText);
-//            rangeSeekBar.setSelectedMaxValue(2);
-//            SeekBar.setProgress(2);
-//
-//            getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
-//            selectedDistVal = Integer.parseInt(seekbarVal);
-//        }else{
-//
-//            Log.e("came here"," ");
-//            txtrangeseekbarval.setText(seekbarVal);
-//            txtseekbarval.setText(seekbarVal);
-//            int value = Integer.parseInt(seekbarVal);
-//            rangeSeekBar.setSelectedMaxValue(value);
-//            SeekBar.setProgress(value);
-//
-//            getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
-//            selectedDistVal = Integer.parseInt(seekbarVal);
-//        }
+        if(seekbarVal.equals("")){
+            String maxText = String.valueOf(2);
+            txtrangeseekbarval.setText(maxText);
+            txtseekbarval.setText(maxText);
+            //rangeSeekBar.setSelectedMaxValue(2);
+            SeekBar.setProgress(2);
+
+            getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
+            selectedDistVal = Integer.parseInt(seekbarVal);
+        }else{
+
+            Log.e("came here"," ");
+            txtrangeseekbarval.setText(seekbarVal);
+            txtseekbarval.setText(seekbarVal);
+            int value = Integer.parseInt(seekbarVal);
+            //rangeSeekBar.setSelectedMaxValue(value);
+            SeekBar.setProgress(value);
+
+            getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
+            selectedDistVal = Integer.parseInt(seekbarVal);
+        }
 
 //        final RangeSeekBar<Integer> rangeSeekBar = new RangeSeekBar<Integer>(this);
 //        // Set the range
@@ -248,25 +248,25 @@ public class SettingsActivity extends Activity {
 
 
 
-//        final int stepSize = 1;
-//        SeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-//            @Override
-//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//                progress = ((int)Math.round(progress/stepSize))*stepSize;
-//                seekBar.setProgress(progress);
-//                txtseekbarval.setText(progress + "");
-//            }
-//
-//            @Override
-//            public void onStartTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//
-//            @Override
-//            public void onStopTrackingTouch(SeekBar seekBar) {
-//
-//            }
-//        });
+        final int stepSize = 1;
+        SeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progress = ((int)Math.round(progress/stepSize))*stepSize;
+                seekBar.setProgress(progress);
+                txtseekbarval.setText(progress + "");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
         imguser.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -492,7 +492,8 @@ public class SettingsActivity extends Activity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("ProfileStatus",profileStatus);
         editor.putString("Gender",selected_Gender);
-        editor.putString("Distance", String.valueOf(selectedDistVal));
+        editor.putString("Distance", txtseekbarval.getText().toString());
+       // editor.putString("Distance", String.valueOf(selectedDistVal));
         editor.apply();
 
     }

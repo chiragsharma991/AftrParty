@@ -41,6 +41,8 @@ public class Configuration_Parameter
     public String LoggedInFBUserID = "";
     public String FBLoginDone ="FBLoginDone";
     public String LILoginDone ="LILoginDone";
+    public String BasicFBLIValidationsDone = "BasicFBLIValidationsDone";
+    public String FaceDetectDone = "FaceDetectDone";
 
 
     //Harshada
