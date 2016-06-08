@@ -5,15 +5,15 @@ package com.aperotechnologies.aftrparties.model;
  */
 public class LIUserInformation
 {
-    String id=null;
-    String pictureUrl=null;
-    String emailAddress=null;
+    String id= "N/A";
+    String pictureUrl= "N/A";
+    String emailAddress="N/A";
     String numConnections="0";
-    String headline=null;
-    String firstName=null;
-    String lastName=null;
+    String headline="N/A";
+    String firstName="N/A";
+    String lastName="N/A";
 
-    LIPictureData pictureUrls=null;
+    LIPictureData pictureUrls;
 
     public LIUserInformation()
     {
@@ -83,8 +83,6 @@ public class LIUserInformation
     public void setHeadline(String headline) {
         this.headline = headline;
     }
-
-
 
     public LIPictureData getLIPictureData()
     {

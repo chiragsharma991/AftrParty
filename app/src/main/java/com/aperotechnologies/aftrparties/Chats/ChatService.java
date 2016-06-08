@@ -60,11 +60,11 @@ public class ChatService {
         chatService.removeConnectionListener(listener);
     }
 
-    public void getDialogs(final QBEntityCallback callback){
+    public void getDialogs(final QBEntityCallback callback, int count){
         // get dialogs
         //
         QBRequestGetBuilder customObjectRequestBuilder = new QBRequestGetBuilder();
-        customObjectRequestBuilder.setPagesLimit(100);
+        customObjectRequestBuilder.setPagesLimit(count);
 
         QBChatService.getChatDialogs(null, customObjectRequestBuilder, new QBEntityCallback<ArrayList<QBDialog>>() {
             @Override

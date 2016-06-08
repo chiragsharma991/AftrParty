@@ -13,7 +13,6 @@ import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
-import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.Age;
 import com.aperotechnologies.aftrparties.Reusables.AgeCalculator;
@@ -56,21 +55,25 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         m_config = Configuration_Parameter.getInstance();
         faceOverlayView = (FaceOverlayView) ((Activity)cont).findViewById(R.id.face_overlay);
+
+
+        Log.e("Shrd Pref in AsyncAgeCalc",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
+                sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "
+                + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
     }
 
     @Override
     protected Boolean doInBackground(Void... params)
     {
         //String dtStart=params[0];
-
        String  dtStart = loggedInUserInformation.getFB_USER_BIRTHDATE();
         SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
         try
         {
             Date date = format.parse(dtStart);
-            Log.e("Parsed Date", date + "");
+         //   Log.e("Parsed Date", date + "");
             Age age = AgeCalculator.calculateAge(date);
-            Log.e("Calculated AGe", age.toString() + "    " + ConstsCore.FB_AGE);
+         //   Log.e("Calculated AGe", age.toString() + "    " + ConstsCore.FB_AGE);
             if (age.getYears() < ConstsCore.FB_AGE)
             {
                 ConstsCore.ValidAge = "No";
@@ -79,12 +82,7 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
             {
                 ConstsCore.ValidAge = "Yes";
             }
-            Log.e("Valid Age", ConstsCore.ValidAge + "");
-
-
-
-
-
+          //  Log.e("Valid Age", ConstsCore.ValidAge + "");
 
             // basicValidation();
 
@@ -194,10 +192,8 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                         }
                         else
                         {
-
                             //Initialise shared prefs
                             return true;
-
                         }
                     }
                 }
@@ -226,19 +222,19 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
             {
                 // Log.e("Inside try","yes");
                 String  url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
-
+                Log.e("URL for FB",url+"");
                 if(url.equals(null) || url.equals("") || url.equals("N/A"))
                 {
-                    if(loggedInUserInformation.getLI_USER_PROFILE_PIC() == null ||
-                            loggedInUserInformation.equals("") ||
-                            loggedInUserInformation.getLI_USER_PROFILE_PIC().equals("N/A"))
-                    {
-                        url = "";
-                    }
-                    else
-                    {
-                        url = loggedInUserInformation.getLI_USER_PROFILE_PIC();
-                    }
+                    Log.e("Users FB Pic not Avail","Yes");
+                    url = "";
+//                    if( loggedInUserInformation.getLI_USER_PROFILE_PIC() == null || loggedInUserInformation.equals("") || loggedInUserInformation.getLI_USER_PROFILE_PIC().equals("N/A") )
+//                    {
+//                        url = "";
+//                    }
+//                    else
+//                    {
+//                        url = loggedInUserInformation.getLI_USER_PROFILE_PIC();
+//                    }
                 }
                 else
                 {
@@ -246,11 +242,9 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                 }
 
                 // Log.e("URL",url);
-
                 if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
                 {
-             //       Log.e("Before Picasso play service","yes");
-
+                    // Log.e("Before Picasso play service","yes");
                     mTarget = new Target()
                     {
                         @Override
@@ -269,11 +263,8 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                                 editorq.putString(m_config.FaceDetectDone,"Yes");
                                 editorq.apply();
 
-//                                Intent intent = new Intent(cont,OTPActivity.class);
-//                                cont.startActivity(intent);
-                                Intent intent = new Intent(cont,HomePageActivity.class);
+                                Intent intent = new Intent(cont,OTPActivity.class);
                                 cont.startActivity(intent);
-
                             }
                             else
                             {
@@ -285,7 +276,6 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                                 GenerikFunctions.showToast(cont,"There is no face in your profile pic");
                             }
                             GenerikFunctions.hideDialog(m_config.pDialog);
-
                         }
 
                         @Override
@@ -300,13 +290,10 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                         }
                     };
 
-
                     Picasso.with(cont)
                             .load(url)
                             .into(mTarget);
                     faceOverlayView.setTag(mTarget);
-
-
                 }
             }
             catch(Exception e)
@@ -316,7 +303,6 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
         }
         else
         {
-
         }
     }
 }

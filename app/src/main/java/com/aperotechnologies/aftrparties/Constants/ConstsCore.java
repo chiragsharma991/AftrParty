@@ -30,6 +30,17 @@ public class ConstsCore {
     String mobileNumber="9987936766";
 
 
+    //harshada
+    public static final String IMAGE_DIRECTORY_NAME = "AftrParties";
+    public static final int MEDIA_TYPE_IMAGE = 1;
+    public static final int MY_PERMISSIONS_REQUEST_CAMERA=15;
+    public static final int MY_PERMISSIONS_REQUEST_R=30;
+    public static final int MY_PERMISSIONS_REQUEST_RWFRMCAM=60;
+    public static final int CAMERA_REQUEST = 100;
+    public static final int GALLERY_REQUEST = 200;
+
+
+
 
 
 }

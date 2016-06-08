@@ -35,14 +35,14 @@
                     android:id="@+id/toolbar_content"   >
 
 
-                <TextView
-                    android:textSize="@dimen/text_size"
-                    android:layout_centerInParent="true"
-                    android:text="HOST"
-                    android:id="@+id/activity_title"
-                    android:textColor="#ffffff"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"   />
+                    <TextView
+                        android:textSize="@dimen/text_size"
+                        android:layout_centerInParent="true"
+                        android:text="HOST"
+                        android:id="@+id/activity_title"
+                        android:textColor="#ffffff"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"   />
                 </RelativeLayout>
 
 
@@ -58,30 +58,6 @@
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-
-                <View
-                    android:layout_height="5dp"
-                    android:layout_width="3dp"  />
-
-                <com.github.siyamed.shapeimageview.CircularImageView
-                    android:id="@+id/partyImage"
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:src="@drawable/placeholder_user"
-                    app:siBorderWidth="4dp"
-                    android:layout_gravity="center"
-                    app:siBorderColor="@color/colorAccent"/>
-
-                <TextView
-                    android:layout_gravity="center_horizontal"
-                    android:id="@+id/uploadPartyImage"
-                    android:textColor="@android:color/black"
-                    android:padding="10dp"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="Upload Image"
-                    android:textSize="@dimen/text_size"
-                    />
 
                 <View
                     android:layout_height="5dp"
@@ -148,11 +124,8 @@
 
 
 
-                <View
-                    android:layout_height="5dp"
-                    android:layout_width="3dp"  />
 
-                <LinearLayout
+                <!--<LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:weightSum="1">
@@ -180,89 +153,10 @@
                         android:layout_weight="0.6"/>
 
 
-                    <!--<TimePicker
-                        android:id="@+id/endTimePicker"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:layout_weight="0.6"/>-->
-
-                </LinearLayout>
 
 
+                </LinearLayout>-->
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:weightSum="1">
-
-                    <TextView
-                        android:singleLine="true"
-                        android:ellipsize="end"
-                        android:textColor="@android:color/black"
-                        android:padding="10dp"
-                        android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:text="Party Name"
-                        android:textSize="@dimen/text_size"
-                        android:layout_weight="0.4"/>
-
-
-                    <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
-                        android:textCursorDrawable="@null"
-                        android:padding="10dp"
-                        android:textColor="@android:color/black"
-                        android:layout_marginRight="5dp"
-                        android:paddingLeft="5dp"
-                        android:hint="Name"
-                        android:inputType="textCapSentences|textAutoComplete"
-                        android:nextFocusDown="@+id/edt_Description"
-                        android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:textSize="@dimen/text_size"
-                        android:id="@+id/edt_PartyName"
-                        android:layout_weight="0.6"/>
-                </LinearLayout>
-
-
-                <View
-                    android:layout_height="5dp"
-                    android:layout_width="3dp"  />
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:weightSum="1">
-
-                    <TextView
-                        android:singleLine="true"
-                        android:ellipsize="end"
-                        android:textColor="@android:color/black"
-                        android:padding="10dp"
-                        android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:text="Description"
-                        android:textSize="@dimen/text_size"
-                        android:layout_weight="0.4"/>
-
-
-                    <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
-                        android:textCursorDrawable="@null"
-                        android:padding="10dp"
-                        android:textColor="@android:color/black"
-                        android:layout_marginRight="5dp"
-                        android:paddingLeft="5dp"
-                        android:hint="Description"
-                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
-                        android:nextFocusDown="@+id/edt_Address"
-                        android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:textSize="@dimen/text_size"
-                        android:id="@+id/edt_Description"
-                        android:layout_weight="0.6"/>
-
-                </LinearLayout>
 
                 <View
                     android:layout_height="5dp"
@@ -303,49 +197,16 @@
                     android:layout_width="3dp"  />
 
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:weightSum="1">
 
-                    <TextView
-                        android:singleLine="true"
-                        android:ellipsize="end"
-                        android:textColor="@android:color/black"
-                        android:padding="10dp"
-                        android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:text="Party Address"
-                        android:textSize="@dimen/text_size"
-                        android:layout_weight="0.4"/>
-
-
-                    <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
-                        android:textCursorDrawable="@null"
-                        android:padding="10dp"
-                        android:textColor="@android:color/black"
-                        android:layout_marginRight="5dp"
-                        android:hint="Address"
-                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
-                        android:layout_height="wrap_content"
-                        android:layout_width="0dp"
-                        android:textSize="@dimen/text_size"
-                        android:id="@+id/edt_Partyaddress"
-                        android:layout_weight="0.6"/>
-                </LinearLayout>
-
-                <View
-                    android:layout_height="5dp"
-                    android:layout_width="3dp"  />
 
                 <Button
                     android:textStyle="bold"
                     android:layout_height="52dp"
                     android:layout_width="200dp"
                     android:textSize="@dimen/text_size"
-                    android:text="CREATE PARTY"
+                    android:text="SEARCH PARTY"
                     android:textAllCaps="true"
-                    android:id="@+id/btn_CreateParty"
+                    android:id="@+id/btn_SearchGCParty"
                     android:layout_gravity="center_horizontal"
                     android:textColor="@android:color/black"/>
 

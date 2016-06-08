@@ -5,11 +5,13 @@ import android.app.ProgressDialog;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.aperotechnologies.aftrparties.GateCrasher.PartyConversion;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBGroupChatManager;
 import com.quickblox.chat.QBPrivateChatManager;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by mpatil on 28/04/15.
@@ -48,8 +50,11 @@ public class Configuration_Parameter
     //Harshada
     public String REG_ID = "registration_id";
     public String temp_regId = "registration_id";
+    public String QBLoginDone = "QBLoginDone";
     public String AWSUserDataDone = "No";
     public String SessionToken = null;
+
+    public List<PartyConversion> pc;
 
     /**
      * Create private constructor

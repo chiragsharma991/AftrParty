@@ -10,13 +10,18 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBDocument
 public class PartiesClass {
 
     private String PartyId;
+    private String PartyName;
     private String PartyStatus;
     private String PartyStartTime;
     private String PartyEndTime;
 
 
+
     public String getPartyId() { return PartyId; }
     public void setPartyId(String PartyId) { this.PartyId = PartyId; }
+
+    public String getPartyName() { return PartyName; }
+    public void setPartyName(String PartyName) { this.PartyName = PartyName; }
 
     public String getPartyStatus() { return PartyStatus; }
     public void setPartyStatus(String PartyStatus) { this.PartyStatus = PartyStatus; }

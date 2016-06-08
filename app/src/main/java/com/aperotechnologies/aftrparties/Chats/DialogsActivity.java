@@ -7,7 +7,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
+
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -21,14 +23,21 @@ import com.quickblox.core.exception.QBResponseException;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
+
+
 public class DialogsActivity extends Activity
 {
 
     private static final String TAG = DialogsActivity.class.getSimpleName();
     private ListView dialogsListView;
+    //LoadMoreListView dialogsListView;
     private ProgressBar progressBar;
     TextView txtNoChat;
+    Button btnLoadMore;
     Configuration_Parameter m_config;
+    int count = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -39,16 +48,42 @@ public class DialogsActivity extends Activity
         m_config= Configuration_Parameter.getInstance();
 
         dialogsListView = (ListView) findViewById(R.id.roomsList);
+        //dialogsListView = (LoadMoreListView) findViewById(R.id.roomsList);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         txtNoChat = (TextView)findViewById(R.id.nochat);
+        btnLoadMore = (Button)findViewById(R.id.btnloadmore);
 
+//        // Creating a button - Load More
+//        Button btnLoadMore = new Button(this);
+//        btnLoadMore.setText("Load More");
+//
+//        // Adding button to listview at footer
+//        dialogsListView.addFooterView(btnLoadMore);
+        progressBar.setVisibility(View.VISIBLE);
         // Get dialogs
-        getDialogs();
+        getDialogs(count);
+
+        btnLoadMore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                count = count + 2;
+                getDialogs(count);
+            }
+        });
+
+
+//        ((LoadMoreListView) getListView())
+//                .setOnLoadMoreListener(new OnLoadMoreListener() {
+//                    public void onLoadMore() {
+//                        count = count + 2;
+//                        getDialogs(count);
+//                    }
+//                });
 
     }
 
-    private void getDialogs(){
-        progressBar.setVisibility(View.VISIBLE);
+    private void getDialogs(int count){
+        //progressBar.setVisibility(View.VISIBLE);
 
 
 //         QBRequestGetBuilder requestBuilder = new QBRequestGetBuilder();
@@ -96,6 +131,7 @@ public class DialogsActivity extends Activity
 
             @Override
             public void onError(QBResponseException e) {
+                e.printStackTrace();
                 progressBar.setVisibility(View.GONE);
                 txtNoChat.setVisibility(View.VISIBLE);
                 txtNoChat.setText("Some Error Occured");
@@ -104,7 +140,7 @@ public class DialogsActivity extends Activity
             }
 
 
-        });
+        },count);
 
     }
 
@@ -164,3 +200,6 @@ public class DialogsActivity extends Activity
 
 
 }
+
+
+//4023498  12784139

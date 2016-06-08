@@ -24,7 +24,7 @@ public class UserTable {
     private String BirthDate;
     private int FBFriendsCount;
     private String Gender;
-    private  List<String> ProfilePicUrl;
+    private List<String> ProfilePicUrl;
     private String LKProfilePicUrl;
     private int LKConnectionsCount;
     private String LKHeadLine;

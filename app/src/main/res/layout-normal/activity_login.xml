@@ -85,7 +85,8 @@
                android:id="@+id/edt_usr_phone"
                android:drawableLeft="@drawable/ic_launcher"
                android:textSize="22sp"
-               android:inputType="phone"
+               android:inputType="number"
+               android:maxLength="10"
                android:nextFocusDown="@+id/user_password"
                android:background="@color/white"
                android:layout_gravity="center_horizontal"
@@ -112,29 +113,29 @@
                android:id="@+id/btn_login"
                android:layout_gravity="center_horizontal" />
 
-           <EditText
-               android:layout_height="wrap_content"
-               android:layout_width="match_parent"
-               android:layout_marginTop="10dp"
-               android:layout_marginBottom="10dp"
-               android:id="@+id/otp_text"
-               android:layout_marginLeft="30dp"
-               android:layout_marginRight="30dp"/>
+           <!--<EditText-->
+               <!--android:layout_height="wrap_content"-->
+               <!--android:layout_width="match_parent"-->
+               <!--android:layout_marginTop="10dp"-->
+               <!--android:layout_marginBottom="10dp"-->
+               <!--android:id="@+id/otp_text"-->
+               <!--android:layout_marginLeft="30dp"-->
+               <!--android:layout_marginRight="30dp"/>-->
 
 
 
-           <Button
-               android:gravity="center"
-               android:layout_margin="15dp"
-               android:background="@color/black"
-               android:layout_height="wrap_content"
-               android:layout_width="match_parent"
-               android:textSize="25sp"
-               android:text="Verify"
-               android:textColor="@color/white"
-               android:textAllCaps="false"
-               android:id="@+id/btn_verify"
-               android:layout_gravity="center_horizontal" />
+           <!--<Button-->
+               <!--android:gravity="center"-->
+               <!--android:layout_margin="15dp"-->
+               <!--android:background="@color/black"-->
+               <!--android:layout_height="wrap_content"-->
+               <!--android:layout_width="match_parent"-->
+               <!--android:textSize="25sp"-->
+               <!--android:text="Verify"-->
+               <!--android:textColor="@color/white"-->
+               <!--android:textAllCaps="false"-->
+               <!--android:id="@+id/btn_verify"-->
+               <!--android:layout_gravity="center_horizontal" />-->
 
 
            <com.aperotechnologies.aftrparties.Login.FaceOverlayView

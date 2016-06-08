@@ -3,4 +3,11 @@
     <string name="facebook_app_id">655826694556269</string>
     <string name="identity_pool_id">us-east-1:bd2ea8c9-5aa9-4e32-b8e5-20235fc7f4ac</string>
 
+    <string name="permission_denied_contacts">Camera Test</string>
+    <string name="message_camera_permission">Without this permission the app is unable to add photo from your device camera. Are you sure you want to deny this permission?</string>
+    <string name="snack_camera_permission">To allow camera access, please enable permission in settings.</string>
+    <string name="message_rw_permission">Without this permission the app is unable to access photos on your device. Are you sure you want to deny this permission?</string>
+    <string name="snack_rw_permission">To allow photo access, please enable permission in settings.</string>
+
+
 </resources>

@@ -35,6 +35,11 @@
             android:authorities="com.facebook.app.FacebookContentProvider655826694556269"
             android:exported="true" />
 
+
+        <activity
+            android:name="com.aperotechnologies.aftrparties.Login.Welcome"
+            android:screenOrientation="portrait"></activity>
+
         <activity
             android:name="com.aperotechnologies.aftrparties.Login.LoginActivity"
             android:screenOrientation="portrait"></activity>
@@ -59,6 +64,11 @@
 
         <activity
             android:name="com.aperotechnologies.aftrparties.Host.HostActivity"
+            android:screenOrientation="portrait"></activity>
+
+
+        <activity
+            android:name="com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity

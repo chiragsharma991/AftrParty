@@ -5,15 +5,19 @@ package com.aperotechnologies.aftrparties.Chats;
  */
 
 import android.app.Activity;
+import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aperotechnologies.aftrparties.R;
 import com.quickblox.chat.model.QBDialog;
 import com.quickblox.chat.model.QBDialogType;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -21,10 +25,12 @@ import java.util.List;
 public class DialogsAdapter extends BaseAdapter {
     private List<QBDialog> dataSource;
     private LayoutInflater inflater;
+    Context cont;
 
     public DialogsAdapter(List<QBDialog> dataSource, Activity ctx) {
         this.dataSource = dataSource;
         this.inflater = LayoutInflater.from(ctx);
+        cont = ctx;
     }
 
     public List<QBDialog> getDataSource() {
@@ -55,6 +61,7 @@ public class DialogsAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.list_item_room, null);
             holder = new ViewHolder();
+            holder.image = (ImageView)convertView.findViewById(R.id.roomImage);
             holder.name = (TextView)convertView.findViewById(R.id.roomName);
             holder.lastMessage = (TextView)convertView.findViewById(R.id.lastMessage);
             holder.groupType = (TextView)convertView.findViewById(R.id.textViewGroupType);
@@ -67,6 +74,18 @@ public class DialogsAdapter extends BaseAdapter {
         // set data
         //
         QBDialog dialog = dataSource.get(position);
+        String url = dialog.getPhoto();
+        Log.e("url "," "+url);
+
+
+//        if(!url.equals("") || !url.equals(null)) {
+//            Picasso.with(cont).load(url).fit().centerCrop()
+//                    .placeholder(R.drawable.placeholder_user)
+//                    .error(R.drawable.placeholder_user)
+//                    .into(holder.image);
+//        }
+
+
         if(dialog.getType().equals(QBDialogType.GROUP)){
             holder.name.setText(dialog.getName());
         }else{
@@ -94,6 +113,7 @@ public class DialogsAdapter extends BaseAdapter {
     }
 
     private static class ViewHolder{
+        ImageView image;
         TextView name;
         TextView lastMessage;
         TextView groupType;

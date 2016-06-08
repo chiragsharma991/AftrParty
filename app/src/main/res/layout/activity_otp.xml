@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:layout_margin="10dp"
-    android:gravity="center_horizontal" >
+ <GridLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:columnCount="1"
+        android:rowCount="2"
+        android:layout_gravity="center_horizontal"    >
 
     <TextView
         android:layout_height="wrap_content"
@@ -41,4 +42,21 @@
         android:text="Verify OTP"
         android:layout_margin="10dp" />
 
-</LinearLayout>
+    <EditText
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/edi_verify_mobileno"
+        android:hint="Enter correct mobile no"
+        android:layout_margin="10dp"
+        android:visibility="gone"/>
+
+    <Button android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_submit"
+        android:text="Submit"
+        android:layout_margin="10dp"
+        android:visibility="gone"/>
+
+    </GridLayout>
+
+

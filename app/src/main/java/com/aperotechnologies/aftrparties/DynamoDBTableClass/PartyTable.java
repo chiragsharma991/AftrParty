@@ -24,7 +24,7 @@ public class PartyTable {
     private String PartyDescription;
     private String BYOB;
     private String PartyAddress;
-    private String PartyLatLong;
+    private List<String> PartyLatLong;
     private String PartyImage;
     private String MaskStatus;
     private String DialogID;
@@ -140,11 +140,11 @@ public class PartyTable {
     }
 
     @DynamoDBAttribute(attributeName = "PartyLatLong")
-    public String getPartyLatLong() {
+    public List<String> getPartyLatLong() {
         return PartyLatLong;
     }
 
-    public void setPartyLatLong(String PartyLatLong) {
+    public void setPartyLatLong(List<String> PartyLatLong) {
         this.PartyLatLong = PartyLatLong;
     }
 

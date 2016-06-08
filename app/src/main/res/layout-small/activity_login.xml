@@ -85,7 +85,8 @@
                android:id="@+id/edt_usr_phone"
                android:drawableLeft="@drawable/ic_launcher"
                android:textSize="15sp"
-               android:inputType="phone"
+               android:inputType="number"
+               android:maxLength="10"
                android:nextFocusDown="@+id/user_password"
                android:background="@color/white"
                android:layout_gravity="center_horizontal"
@@ -111,6 +112,14 @@
                android:textAllCaps="false"
                android:id="@+id/btn_login"
                android:layout_gravity="center_horizontal" />
+
+
+           <com.aperotechnologies.aftrparties.Login.FaceOverlayView
+               android:id="@+id/face_overlay"
+               android:layout_width="300dp"
+               android:layout_height="300dp"
+               android:background="@android:color/white"
+               android:visibility="gone"/>
 
 
        </LinearLayout>

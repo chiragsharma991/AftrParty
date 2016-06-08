@@ -22,6 +22,7 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
 import com.aperotechnologies.aftrparties.Login.LoginTableColumns;
 import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
+import com.aperotechnologies.aftrparties.model.Qbloxuser;
 import com.facebook.AccessToken;
 import com.quickblox.auth.QBAuth;
 import com.quickblox.auth.model.QBProvider;
@@ -49,48 +50,6 @@ import java.util.regex.Pattern;
 public  class LoginValidations
 {
 
-
-
-    public static boolean isValidEmailId(String email)
-    {
-        return Pattern.compile("^(([\\w-]+\\.)+[\\w-]+|([a-zA-Z]{1}|[\\w-]{2,}))@"
-                + "((([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
-                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\."
-                + "([0-1]?[0-9]{1,2}|25[0-5]|2[0-4][0-9])\\.([0-1]?"
-                + "[0-9]{1,2}|25[0-5]|2[0-4][0-9])){1}|"
-                + "([a-zA-Z]+[\\w-]+\\.)+[a-zA-Z]{2,4})$").matcher(email).matches();
-    }
-
-    //Meghana
-    public static boolean isEmpty(EditText etText)
-    {
-        if (etText.getText().toString().trim().length() > 0)
-            return false;
-
-        return true;
-    }
-
-    public static boolean isValidMobile(EditText edt )
-    {
-        String text=edt.getText().toString().trim();
-        boolean check=false;
-        if(!Pattern.matches("[a-zA-Z]+", text))
-        {
-            if(text.length() < 10 || text.length() > 10)
-            {
-                check = false;
-            }
-            else
-            {
-                check = true;
-            }
-        }
-        else
-        {
-            check=false;
-        }
-        return check;
-    }
 
     //Meghana
     public static boolean isFBLoggedIn()
@@ -142,14 +101,14 @@ public  class LoginValidations
     }
 
 
-
-
     public static AccessToken getFBAccessToken()
     {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         return accessToken;
 
     }
+
+
 
     //Harshada
     //function for starting session of quickblox
@@ -159,56 +118,56 @@ public  class LoginValidations
         final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
 
 
-        String token = null;
-        Long expDate = null;
-        try {
-            token = sharedpreferences.getString(m_config.SessionToken,null);
-            expDate = sharedpreferences.getLong("SessionExpirationDate",0);
-            // save to secure storage when your application goes offline or to the background
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-            Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-            t.start();
-
-
-        }
-
-        Date expirationDate = new Date(expDate);
-        Date currentDate = new Date();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(currentDate);
-        cal.add(Calendar.HOUR, 2);
-        Date twoHoursAfter = cal.getTime();
-
-        if(token != null && expirationDate != null){
-            if(expirationDate.before(twoHoursAfter)){
-                try {
-                    QBAuth.createFromExistentToken(token, expirationDate);
-                    QBChatService.init(cont);
-                    final QBChatService chatService = QBChatService.getInstance();
-                    m_config.chatService = chatService;
-                    //if session is not expired give call to PlayServiceHelper
-                    PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
-
-                } catch (BaseServiceException e) {
-                    e.printStackTrace();
-                    //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                    t.start();
-                }
-            }else {
-                //if session is expired PlayServiceHelper
-                // recreate session on next start app
-                //createSession(cont);
-                new createSession(cont).execute();
-            }
-        }else{
+//        String token = null;
+//        Long expDate = null;
+//        try {
+//            token = sharedpreferences.getString(m_config.SessionToken,null);
+//            expDate = sharedpreferences.getLong("SessionExpirationDate",0);
+//            // save to secure storage when your application goes offline or to the background
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
+//            Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
+//            t.start();
+//
+//
+//        }
+//
+//        Date expirationDate = new Date(expDate);
+//        Date currentDate = new Date();
+//        Calendar cal = Calendar.getInstance();
+//        cal.setTime(currentDate);
+//        cal.add(Calendar.HOUR, 2);
+//        Date twoHoursAfter = cal.getTime();
+//
+//        if(token != null && expirationDate != null){
+//            if(expirationDate.before(twoHoursAfter)){
+//                try {
+//                    QBAuth.createFromExistentToken(token, expirationDate);
+//                    QBChatService.init(cont);
+//                    final QBChatService chatService = QBChatService.getInstance();
+//                    m_config.chatService = chatService;
+//                    //if session is not expired give call to PlayServiceHelper
+//                    PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+//
+//                } catch (BaseServiceException e) {
+//                    e.printStackTrace();
+//                    //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
+//                    Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
+//                    t.start();
+//                }
+//            }else {
+//                //if session is expired PlayServiceHelper
+//                // recreate session on next start app
+//                //createSession(cont);
+//                new createSession(cont).execute();
+//            }
+//        }else{
             //for very first time when app is installed and session is not created
             //createSession(cont);
             new createSession(cont).execute();
-        }
+//                                                                                     }
 
     }
 
@@ -400,7 +359,466 @@ public  class LoginValidations
     }
 
 
-    /*public static void createSession(final Context cont){
+
+
+
+
+    static class CreateSessionLooper implements Runnable {
+
+        private Looper myLooper;
+        Context cont;
+
+
+
+
+        public CreateSessionLooper(Context cont) {
+            this.cont = cont;
+
+        }
+
+        @Override
+        public void run() {
+            Looper.prepare();
+            // code that needed a separated thread
+            //createSession(cont);
+
+            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+            final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+
+            QBAuth.createSession(new QBEntityCallback() {
+                @Override
+                public void onSuccess(Object o, Bundle bundle) {
+                    Log.e("createSession", "onsuccess");
+
+                    try {
+                        String qbtoken = QBAuth.getBaseService().getToken();
+                        Log.e("qbtoken ", qbtoken);
+                    } catch (Exception e) {
+
+                    }
+
+                    QBChatService.init(cont);
+                    final QBChatService chatService = QBChatService.getInstance();
+                    m_config.chatService = chatService;
+
+                    String FBprofilePic = initialiseLoggedInUser(cont).getFB_USER_PROFILE_PIC();
+                    //String LIprofilePic = initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC();
+
+                    String profilePic = FBprofilePic;
+                    if (profilePic.equals(null) || profilePic.equals("")) {
+                        //if (LIprofilePic == null || LIprofilePic.equals("")) {
+                            profilePic = "";
+//                        } else {
+//                            profilePic = LIprofilePic;
+//                        }
+                    } else {
+                        profilePic = FBprofilePic;
+                    }
+                    Log.e("fb token", " " + getFBAccessToken().getToken());
+
+                    //loginWithFbQuickBlox(getFBAccessToken().getToken(), profilePic, cont);//"https://graph.facebook.com/129419790774542/picture?type=large");
+
+                    //call to QuickBlox Login
+                    new loginWithFbQuickBlox(getFBAccessToken().getToken(), profilePic, cont).execute();//"https://graph.facebook.com/129419790774542/picture?type=large");
+
+
+                }
+
+                @Override
+                public void onError(QBResponseException e) {
+                    Log.e("createSession", "onerror");
+                    e.printStackTrace();
+                    //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Thread t = new Thread(new ToastDispLooper(cont, "Login Failed, Please try again after some time"));
+                    t.start();
+                    GenerikFunctions.hideDialog(m_config.pDialog);
+                }
+
+            });
+
+
+
+            myLooper = Looper.myLooper();
+            Looper.loop();
+            myLooper.quit();
+        }
+    };
+
+
+    static class loginWithFbQuickBloxLooper implements Runnable {
+
+        private Looper myLooper;
+        Context cont;
+        String accessToken;
+        String avatarUrl;
+
+
+        public loginWithFbQuickBloxLooper(String accessToken, String avatarUrl, Context cont) {
+            this.cont = cont;
+            this.accessToken = accessToken;
+            this.avatarUrl = avatarUrl;
+
+        }
+
+        @Override
+        public void run() {
+            Looper.prepare();
+            // code that needed a separated thread
+
+            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+            final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+
+            QBUsers.signInUsingSocialProvider(QBProvider.FACEBOOK, String.valueOf(accessToken),
+                    null, new QBEntityCallback<QBUser>()
+                    {
+                        @Override
+                        public void onSuccess(QBUser user, Bundle args)
+                        {
+                            Log.e("Facebook login","Success"+" ");
+                            Log.e("user",""+user);
+                            user.setFullName(sharedPreferences.getString(m_config.Entered_User_Name,""));
+                            new uploadprofilePic(user, avatarUrl, cont).execute();
+
+                        }
+
+                        @Override
+                        public void onError(QBResponseException e)
+                        {
+                            Log.e("Facebook login","OnError");
+                            e.printStackTrace();
+                            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Thread t = new Thread(new ToastDispLooper(cont, "Login Failed, Please try again after some time"));
+                            t.start();
+                            GenerikFunctions.hideDialog(m_config.pDialog);
+                        }
+                    });
+
+            myLooper = Looper.myLooper();
+            Looper.loop();
+            myLooper.quit();
+        }
+    };
+
+
+    static class uploadprofilePicLooper implements Runnable {
+
+        private Looper myLooper;
+        Context cont;
+        QBUser user;
+        String avatarUrl;
+
+
+        public uploadprofilePicLooper(QBUser user, String avatarUrl, Context cont) {
+            this.cont = cont;
+            this.user = user;
+            this.avatarUrl = avatarUrl;
+
+        }
+
+        @Override
+        public void run() {
+            Looper.prepare();
+            // code that needed a separated thread
+            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+            final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+            user.setCustomData(avatarUrl);
+
+            QBUsers.updateUser(user, new QBEntityCallback<QBUser>()
+            {
+                @Override
+                public void onSuccess(QBUser user, Bundle args) {
+                    Log.e("user image "," "+user.getCustomData());
+                    Log.e("updated user---",""+user);
+
+
+
+                    if(user.equals(null) || user==null)
+                    {
+                        //Log.e("primary user",null+"  null");
+                    }
+                    else {
+                        try
+                        {
+                            user.setPassword(BaseService.getBaseService().getToken());
+
+                        }
+                        catch (BaseServiceException e)
+                        {
+                            e.printStackTrace();
+                            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
+                            // means you have not created a session before
+                            Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
+                            t.start();
+
+                        }
+
+                        // initialize Chat service
+                        try
+                        {
+
+//                        QBChatService.init(cont);
+//                        final QBChatService chatService = QBChatService.getInstance();
+//                        m_config.chatService = chatService;
+
+                            boolean isLoggedIn = m_config.chatService.isLoggedIn();
+                            Log.e("isLoggedIn "," "+isLoggedIn);
+                            if(isLoggedIn)
+                            {
+                                //if chat is LoggedIn give a call to PlayServiceHelper
+                                PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+                            }
+                            else
+                            {
+                                //call to chatLogin
+                                //chatLogin(user, cont);
+                                new chatLogin(user, cont).execute();
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
+                            Thread t = new Thread(new ToastDispLooper(cont, "Login Failed, Please try again after some time"));
+                            t.start();
+                            GenerikFunctions.hideDialog(m_config.pDialog);
+                        }
+                    }
+
+
+                }
+
+                @Override
+                public void onError(QBResponseException errors)
+                {
+
+                }
+            });
+
+
+            myLooper = Looper.myLooper();
+            Looper.loop();
+            myLooper.quit();
+        }
+    };
+
+
+    static class chatLoginLooper implements Runnable {
+
+        private Looper myLooper;
+        Context cont;
+        QBUser qb_user;
+
+
+        public chatLoginLooper(QBUser qb_user, Context cont) {
+            this.cont = cont;
+            this.qb_user = qb_user;
+
+        }
+
+        @Override
+        public void run() {
+            Looper.prepare();
+            // code that needed a separated thread
+            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+            final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+
+            m_config.chatService.login(qb_user, new QBEntityCallback()
+            {
+                @Override
+                public void onSuccess(Object o, Bundle bundle)
+                {
+                    Log.e("ChatServicelogin","Success ");
+
+                    SharedPreferences.Editor editor= sharedPreferences.edit();
+                    try {
+                        editor.putString(m_config.SessionToken, BaseService.getBaseService().getToken());
+                        editor.putLong("SessionExpirationDate", BaseService.getBaseService().getTokenExpirationDate().getTime());
+
+
+                    } catch (BaseServiceException e) {
+                        e.printStackTrace();
+                        //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
+                        t.start();
+                    }
+
+                    editor.apply();
+
+
+                    //QBGroupChatManager groupChatManager  = m_config.chatService.getGroupChatManager();
+                    //QBPrivateChatManager privateChatManager = m_config.chatService.getPrivateChatManager();
+                    //m_config.groupChatManager = groupChatManager;
+                    //m_config.privateChatManager = privateChatManager;
+
+                    //call to PlayServiceHelper
+                    PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+
+
+                }
+
+                @Override
+                public void onError(QBResponseException e)
+                {
+                    // errror
+                    Log.e("ChatServicelogin","OnError "+e.toString());
+                    e.printStackTrace();
+                    Thread t = new Thread(new ToastDispLooper(cont, "Login Failed, Please try again after some time"));
+                    t.start();
+                    GenerikFunctions.hideDialog(m_config.pDialog);
+
+                }
+            });
+
+            myLooper = Looper.myLooper();
+            Looper.loop();
+            myLooper.quit();
+        }
+    };
+
+
+    static class subscribeToPushNotificationsLooper implements Runnable
+    {
+
+        private Looper myLooper;
+        Context cont;
+        String regId;
+        TelephonyManager mTelephony;
+
+        public subscribeToPushNotificationsLooper(String regId, TelephonyManager mTelephony, Activity cont)
+        {
+            this.cont = cont;
+            this.regId = regId;
+            this.mTelephony = mTelephony;
+        }
+
+        @Override
+        public void run()
+        {
+            Looper.prepare();
+            // code that needed a separated thread
+            final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+            final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+
+            QBSubscription subscription = new QBSubscription(QBNotificationChannel.GCM);
+            subscription.setEnvironment(QBEnvironment.DEVELOPMENT);
+
+            String deviceId;
+
+            if (mTelephony.getDeviceId() != null) {
+                deviceId = mTelephony.getDeviceId(); //*** use for mobiles
+            } else {
+                deviceId = Settings.Secure.getString(cont.getContentResolver(),
+                        Settings.Secure.ANDROID_ID); //*** use for tablets
+            }
+            Log.e("deviceId"," "+deviceId +" "+regId);
+
+            subscription.setDeviceUdid(deviceId);
+            subscription.setRegistrationID(regId);
+
+            QBPushNotifications.createSubscription(subscription, new QBEntityCallback<ArrayList<QBSubscription>>() {
+
+                @Override
+                public void onSuccess(ArrayList<QBSubscription> subscriptions, Bundle args) {
+                    Log.e("subscription","OnSuccess");
+                    // Persist the regID - no need to register again.
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(m_config.REG_ID, regId);
+                    editor.apply();
+                    AWSDBOperations.createUser(cont, initialiseLoggedInUser(cont));
+
+                }
+
+                @Override
+                public void onError(QBResponseException error) {
+                    Log.e("subscription","onError");
+                    error.printStackTrace();
+                    AWSDBOperations.createUser(cont, initialiseLoggedInUser(cont));
+                }
+            });
+
+
+            myLooper = Looper.myLooper();
+            Looper.loop();
+            myLooper.quit();
+        }
+    };
+
+    public static class ToastDispLooper implements Runnable
+    {
+
+        private Looper myLooper;
+        Context cont;
+        String message;
+
+        public ToastDispLooper(Context cont, String message)
+        {
+            this.cont = cont;
+            this.message = message;
+        }
+
+        @Override
+        public void run()
+        {
+            Looper.prepare();
+            // code that needed a separated thread
+            Toast.makeText(cont," "+message,Toast.LENGTH_SHORT).show();
+
+            myLooper = Looper.myLooper();
+            Looper.loop();
+            myLooper.quit();
+        }
+    };
+
+
+    //Harshada
+    //function for chat logout
+    public static void chatLogout(){
+
+        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        boolean isLoggedIn = m_config.chatService.isLoggedIn();
+        if(isLoggedIn) {
+            m_config.chatService.logout(new QBEntityCallback() {
+                @Override
+                public void onSuccess(Object o, Bundle bundle)
+                {
+                    m_config.chatService.destroy();
+                }
+
+                @Override
+                public void onError(QBResponseException errors)
+                {
+                    errors.printStackTrace();
+                    Log.e("onerror","Chat Logout");
+                }
+            });
+        }else{
+
+        }
+
+    }
+
+
+    public static void QBSessionLogOut(){
+        QBUsers.signOut(new QBEntityCallback(){
+
+            @Override
+            public void onSuccess(Object o, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onError(QBResponseException errors) {
+
+            }
+        });
+    }
+
+
+
+
+
+/*public static void createSession(final Context cont){
 
 
         final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
@@ -634,49 +1052,6 @@ public  class LoginValidations
             }
         });
 
-    }*/
-
-    //Harshada
-    //function for chat logout
-    public static void chatLogout(){
-
-        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-        boolean isLoggedIn = m_config.chatService.isLoggedIn();
-        if(isLoggedIn) {
-            m_config.chatService.logout(new QBEntityCallback() {
-                @Override
-                public void onSuccess(Object o, Bundle bundle)
-                {
-                    m_config.chatService.destroy();
-                }
-
-                @Override
-                public void onError(QBResponseException errors)
-                {
-                    errors.printStackTrace();
-                    Log.e("onerror","Chat Logout");
-                }
-            });
-        }else{
-
-        }
-
-    }
-
-
-    public static void QBSessionLogOut(){
-        QBUsers.signOut(new QBEntityCallback(){
-
-            @Override
-            public void onSuccess(Object o, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onError(QBResponseException errors) {
-
-            }
-        });
     }
 
     //subscribe deviceId and regId in quickblox for PushNotifications
@@ -724,408 +1099,6 @@ public  class LoginValidations
         });
 
     }*/
-
-
-    static class CreateSessionLooper implements Runnable {
-
-        private Looper myLooper;
-        Context cont;
-
-
-
-
-        public CreateSessionLooper(Context cont) {
-            this.cont = cont;
-
-        }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-            // code that needed a separated thread
-            //createSession(cont);
-
-
-                    final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-                    QBAuth.createSession(new QBEntityCallback() {
-                        @Override
-                        public void onSuccess(Object o, Bundle bundle) {
-                            Log.e("createSession", "onsuccess");
-
-                            try {
-                                String qbtoken = QBAuth.getBaseService().getToken();
-                                Log.e("New token", qbtoken);
-                            } catch (Exception e) {
-
-                            }
-
-                            QBChatService.init(cont);
-                            final QBChatService chatService = QBChatService.getInstance();
-                            m_config.chatService = chatService;
-
-                            String FBprofilePic = initialiseLoggedInUser(cont).getFB_USER_PROFILE_PIC();
-                            String LIprofilePic = initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC();
-
-                            String profilePic = FBprofilePic;
-                            if (profilePic.equals(null) || profilePic.equals("")) {
-                                if (LIprofilePic == null || LIprofilePic.equals("")) {
-                                    profilePic = "";
-                                } else {
-                                    profilePic = LIprofilePic;
-                                }
-                            } else {
-                                profilePic = FBprofilePic;
-                            }
-                            Log.e("token", " " + getFBAccessToken().getToken());
-
-                            //loginWithFbQuickBlox(getFBAccessToken().getToken(), profilePic, cont);//"https://graph.facebook.com/129419790774542/picture?type=large");
-                            new loginWithFbQuickBlox(getFBAccessToken().getToken(), profilePic, cont).execute();//"https://graph.facebook.com/129419790774542/picture?type=large");
-                            //call to QuickBlox Login
-
-
-
-                        }
-
-                        @Override
-                        public void onError(QBResponseException e) {
-                            Log.e("createSession", "onerror");
-                            e.printStackTrace();
-                            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                            t.start();
-                        }
-
-                    });
-
-
-
-            myLooper = Looper.myLooper();
-            Looper.loop();
-            myLooper.quit();
-        }
-    };
-
-
-    static class loginWithFbQuickBloxLooper implements Runnable {
-
-        private Looper myLooper;
-        Context cont;
-        String accessToken;
-        String avatarUrl;
-
-
-        public loginWithFbQuickBloxLooper(String accessToken, String avatarUrl, Context cont) {
-            this.cont = cont;
-            this.accessToken = accessToken;
-            this.avatarUrl = avatarUrl;
-
-        }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-            // code that needed a separated thread
-
-            final SharedPreferences sharedpreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-            final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-
-            QBUsers.signInUsingSocialProvider(QBProvider.FACEBOOK, String.valueOf(accessToken),
-                    null, new QBEntityCallback<QBUser>()
-                    {
-                        @Override
-                        public void onSuccess(QBUser user, Bundle args)
-                        {
-                            Log.e("Facebook login","Success"+" ");
-                            Log.e("user",""+user);
-                            user.setFullName(sharedpreferences.getString(m_config.Entered_User_Name,""));
-                            new uploadprofilePic(user, avatarUrl, cont).execute();
-
-                        }
-
-                        @Override
-                        public void onError(QBResponseException e)
-                        {
-                            Log.e("Facebook login","OnError");
-                            e.printStackTrace();
-                            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                            t.start();
-                        }
-                    });
-
-            myLooper = Looper.myLooper();
-            Looper.loop();
-            myLooper.quit();
-        }
-    };
-
-
-    static class uploadprofilePicLooper implements Runnable {
-
-        private Looper myLooper;
-        Context cont;
-        QBUser user;
-        String avatarUrl;
-
-
-        public uploadprofilePicLooper(QBUser user, String avatarUrl, Context cont) {
-            this.cont = cont;
-            this.user = user;
-            this.avatarUrl = avatarUrl;
-
-        }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-            // code that needed a separated thread
-            final SharedPreferences sharedpreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-            final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-            user.setCustomData(avatarUrl);
-
-            QBUsers.updateUser(user, new QBEntityCallback<QBUser>()
-            {
-                @Override
-                public void onSuccess(QBUser user, Bundle args) {
-                    Log.e("user image "," "+user.getCustomData());
-                    Log.e("updated user---",""+user);
-
-
-                    if(user.equals(null) || user==null)
-                    {
-                        //Log.e("primary user",null+"  null");
-                    }
-                    else {
-                        try
-                        {
-                            user.setPassword(BaseService.getBaseService().getToken());
-
-                        }
-                        catch (BaseServiceException e)
-                        {
-                            e.printStackTrace();
-                            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                            // means you have not created a session before
-                            Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                            t.start();
-
-                        }
-
-                        // initialize Chat service
-                        try
-                        {
-
-//                        QBChatService.init(cont);
-//                        final QBChatService chatService = QBChatService.getInstance();
-//                        m_config.chatService = chatService;
-
-                            boolean isLoggedIn = m_config.chatService.isLoggedIn();
-                            if(isLoggedIn)
-                            {
-                                //if chat is LoggedIn give a call to PlayServiceHelper
-                                PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
-                            }
-                            else
-                            {
-                                //call to chatLogin
-                                //chatLogin(user, cont);
-                                new chatLogin(user, cont).execute();
-                            }
-
-                        }
-                        catch (Exception e)
-                        {
-                            e.printStackTrace();
-                            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                            t.start();
-                        }
-                    }
-
-
-                }
-
-                @Override
-                public void onError(QBResponseException errors)
-                {
-
-                }
-            });
-
-
-            myLooper = Looper.myLooper();
-            Looper.loop();
-            myLooper.quit();
-        }
-    };
-
-
-    static class chatLoginLooper implements Runnable {
-
-        private Looper myLooper;
-        Context cont;
-        QBUser qb_user;
-
-
-        public chatLoginLooper(QBUser qb_user, Context cont) {
-            this.cont = cont;
-            this.qb_user = qb_user;
-
-        }
-
-        @Override
-        public void run() {
-            Looper.prepare();
-            // code that needed a separated thread
-            final SharedPreferences sharedpreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-            final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-
-            m_config.chatService.login(qb_user, new QBEntityCallback()
-            {
-                @Override
-                public void onSuccess(Object o, Bundle bundle)
-                {
-                    Log.e("ChatServicelogin","Success ");
-
-                    SharedPreferences.Editor editor= sharedpreferences.edit();
-                    try {
-                        editor.putString(m_config.SessionToken, BaseService.getBaseService().getToken());
-                        editor.putLong("SessionExpirationDate", BaseService.getBaseService().getTokenExpirationDate().getTime());
-                    } catch (BaseServiceException e) {
-                        e.printStackTrace();
-                        //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                        Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                        t.start();
-                    }
-
-                    editor.apply();
-
-
-                    //QBGroupChatManager groupChatManager  = m_config.chatService.getGroupChatManager();
-                    //QBPrivateChatManager privateChatManager = m_config.chatService.getPrivateChatManager();
-                    //m_config.groupChatManager = groupChatManager;
-                    //m_config.privateChatManager = privateChatManager;
-
-                    //call to PlayServiceHelper
-                    PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
-
-
-                }
-
-                @Override
-                public void onError(QBResponseException e)
-                {
-                    // errror
-                    Log.e("ChatServicelogin","OnError "+e.toString());
-                    e.printStackTrace();
-                    // Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                    t.start();
-
-                }
-            });
-
-            myLooper = Looper.myLooper();
-            Looper.loop();
-            myLooper.quit();
-        }
-    };
-
-
-    static class subscribeToPushNotificationsLooper implements Runnable
-    {
-
-        private Looper myLooper;
-        Context cont;
-        String regId;
-        TelephonyManager mTelephony;
-
-        public subscribeToPushNotificationsLooper(String regId, TelephonyManager mTelephony, Activity cont)
-        {
-            this.cont = cont;
-            this.regId = regId;
-            this.mTelephony = mTelephony;
-        }
-
-        @Override
-        public void run()
-        {
-            Looper.prepare();
-            // code that needed a separated thread
-            final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-            final SharedPreferences sharedpreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-
-            QBSubscription subscription = new QBSubscription(QBNotificationChannel.GCM);
-            subscription.setEnvironment(QBEnvironment.DEVELOPMENT);
-
-            String deviceId;
-
-            if (mTelephony.getDeviceId() != null) {
-                deviceId = mTelephony.getDeviceId(); //*** use for mobiles
-            } else {
-                deviceId = Settings.Secure.getString(cont.getContentResolver(),
-                        Settings.Secure.ANDROID_ID); //*** use for tablets
-            }
-            Log.e("deviceId"," "+deviceId +" "+regId);
-
-            subscription.setDeviceUdid(deviceId);
-            subscription.setRegistrationID(regId);
-
-            QBPushNotifications.createSubscription(subscription, new QBEntityCallback<ArrayList<QBSubscription>>() {
-
-                @Override
-                public void onSuccess(ArrayList<QBSubscription> subscriptions, Bundle args) {
-                    Log.e("subscription","OnSuccess");
-                    // Persist the regID - no need to register again.
-                    SharedPreferences.Editor editor = sharedpreferences.edit();
-                    editor.putString(m_config.REG_ID, regId);
-                    editor.apply();
-                    AWSDBOperations.createUser(cont, initialiseLoggedInUser(cont));
-
-                }
-
-                @Override
-                public void onError(QBResponseException error) {
-                    Log.e("subscription","onError");
-                    error.printStackTrace();
-                }
-            });
-
-
-            myLooper = Looper.myLooper();
-            Looper.loop();
-            myLooper.quit();
-        }
-    };
-
-    static class ToastDispLooper implements Runnable
-    {
-
-        private Looper myLooper;
-        Context cont;
-        String message;
-
-        public ToastDispLooper(Context cont, String message)
-        {
-            this.cont = cont;
-            this.message = message;
-        }
-
-        @Override
-        public void run()
-        {
-            Looper.prepare();
-            // code that needed a separated thread
-            Toast.makeText(cont," "+message,Toast.LENGTH_SHORT).show();
-
-            myLooper = Looper.myLooper();
-            Looper.loop();
-            myLooper.quit();
-        }
-    };
-
-
-
 
 
 }

@@ -1,6 +1,81 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="fill_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:focusableInTouchMode="true"
+android:focusable="true"
+xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    </ScrollView>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/lLyoutHost"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/drawerSettingsToolbar"
+            android:background="@android:color/black"
+            android:layout_alignParentTop="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="44dp"
+                android:id="@+id/toolbar_content"   >
+
+
+                <TextView
+                    android:textSize="@dimen/text_size"
+                    android:layout_centerInParent="true"
+                    android:text="HISTORY"
+                    android:id="@+id/activity_title"
+                    android:textColor="#ffffff"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"   />
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
+    </LinearLayout>
+
+
+    <ListView
+        android:layout_marginTop="50dp"
+        android:id="@+id/listhistory"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"/>
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:visibility="gone"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/noHistory"
+        android:gravity="center"
+        android:text="No History Available"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+</RelativeLayout>
+
+
+
+</RelativeLayout>

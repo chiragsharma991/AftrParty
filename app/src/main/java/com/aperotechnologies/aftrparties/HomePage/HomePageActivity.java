@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherActivity;
+import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
 import com.aperotechnologies.aftrparties.R;
@@ -152,7 +153,7 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                Intent i = new Intent(HomePageActivity.this, GateCrasherActivity.class);
+                Intent i = new Intent(HomePageActivity.this, GateCrasherSearchActivity.class);
                 startActivity(i);
 
             }

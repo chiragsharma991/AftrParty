@@ -7,11 +7,11 @@ package com.aperotechnologies.aftrparties.model;
     //Class to get JSON object
 public class FbUserInformation
 {
-    String id=null;
-    String gender=null;
-    String birthday=null;
-    String email=null;
-    String name=null;
+    String id = "N/A";
+    String gender = "N/A";
+    String birthday = "N/A";
+    String email = "N/A";
+    String name = "N/A";
 
     FBCurrentLocationInformation location=null;
     FbProfilePictureData picture=null;

@@ -5,8 +5,8 @@ package com.aperotechnologies.aftrparties.model;
  */
 public class FbHomelocationInformation
 {
-    String id=null;
-    String name=null;
+    String id = "N/A";
+    String name = "N/A";
 
     public FbHomelocationInformation()
     {

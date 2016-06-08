@@ -1,15 +1,69 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:focusableInTouchMode="true"
+    android:focusable="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/lLyoutHost"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/drawerSettingsToolbar"
+            android:background="@android:color/black"
+            android:layout_alignParentTop="true"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="44dp"
+                android:id="@+id/toolbar_content"   >
+
+
+                <TextView
+                    android:textSize="@dimen/text_size"
+                    android:layout_centerInParent="true"
+                    android:text="CHAT"
+                    android:id="@+id/activity_title"
+                    android:textColor="#ffffff"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"   />
+            </RelativeLayout>
+
+
+
+        </android.support.v7.widget.Toolbar>
+    </LinearLayout>
 
 
     <ListView
+        android:layout_marginBottom="50dp"
+        android:layout_marginTop="50dp"
         android:id="@+id/roomsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"/>
+
+        <!--<com.costum.android.widget.LoadMoreListView
+            android:id="@+id/android:list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />-->
 
     <ProgressBar
         style="?android:attr/progressBarStyleLarge"
@@ -20,12 +74,25 @@
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 
-    <TextView
-        android:visibility="gone"
-        android:id="@+id/nochat"
-        android:gravity="center"
-        android:text="No Chat Available"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/nochat"
+            android:gravity="center"
+            android:text="No Chat Available"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+
+        <Button
+            android:layout_alignParentBottom="true"
+            android:id="@+id/btnloadmore"
+            android:text="Load More"
+            android:layout_width="match_parent"
+            android:layout_height="50dp" />
+
+
+    </RelativeLayout>
+
+
 
 </RelativeLayout>

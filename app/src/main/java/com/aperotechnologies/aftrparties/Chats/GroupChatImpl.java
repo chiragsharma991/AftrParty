@@ -42,7 +42,10 @@ public class GroupChatImpl extends QBMessageListenerImpl<QBGroupChat> implements
 
     private void initManagerIfNeed(){
         if(groupChatManager == null){
-            groupChatManager = m_config.groupChatManager;//QBChatService.getInstance().getGroupChatManager();
+
+            //groupChatManager = m_config.groupChatManager;//QBChatService.getInstance().getGroupChatManager();
+            groupChatManager  = m_config.chatService.getGroupChatManager();
+
         }
     }
 

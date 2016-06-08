@@ -5,25 +5,25 @@ package com.aperotechnologies.aftrparties.model;
  */
 public class LoggedInUserInformation
 {
-    String    FB_USER_ID=null;
-    String    FB_USER_NAME=null;
-    String    FB_USER_GENDER=null;
-    String    FB_USER_BIRTHDATE=null;
-    String    FB_USER_EMAIL=null;
-    String    FB_USER_PROFILE_PIC=null;
-    String    FB_USER_HOMETOWN_ID=null;
-    String    FB_USER_HOMETOWN_NAME=null;
-    String    FB_USER_CURRENT_LOCATION_ID=null;
-    String    FB_USER_CURRENT_LOCATION_NAME=null;
+    String    FB_USER_ID= "N/A";
+    String    FB_USER_NAME= "N/A";
+    String    FB_USER_GENDER="N/A";
+    String    FB_USER_BIRTHDATE="N/A";
+    String    FB_USER_EMAIL="N/A";
+    String    FB_USER_PROFILE_PIC="N/A";
+    String    FB_USER_HOMETOWN_ID="N/A";
+    String    FB_USER_HOMETOWN_NAME="N/A";
+    String    FB_USER_CURRENT_LOCATION_ID="N/A";
+    String    FB_USER_CURRENT_LOCATION_NAME="N/A";
     String    FB_USER_FRIENDS="0";
 
-    String    LI_USER_ID=null;
-    String    LI_USER_PROFILE_PIC=null;
-    String    LI_USER_EMAIL=null;
+    String    LI_USER_ID="N/A";
+    String    LI_USER_PROFILE_PIC="N/A";
+    String    LI_USER_EMAIL="N/A";
     String    LI_USER_CONNECTIONS="0";
-    String    LI_USER_FIRST_NAME=null;
-    String    LI_USER_LAST_NAME=null;
-    String    LI_USER_HEADLINE=null;
+    String    LI_USER_FIRST_NAME="N/A";
+    String    LI_USER_LAST_NAME="N/A";
+    String    LI_USER_HEADLINE="N/A";
 
     public String getFB_USER_ID()
     {

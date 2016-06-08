@@ -14,8 +14,11 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Login.LoginActivity;
 import com.aperotechnologies.aftrparties.Login.OTPActivity;
+import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.FacebookSdk;
+import com.quickblox.auth.model.QBSession;
+import com.quickblox.core.QBSettings;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -29,10 +32,10 @@ public class SplashActivity extends Activity
     Configuration_Parameter m_config;
     Context cont = this;
 
-//    static final String APP_ID = "40454";//"34621";
-//    static final String AUTH_KEY = "sYpuKrOrGT4pG6d";//"q6aK9sm6GCSmtru";
-//    static final String AUTH_SECRET = "hVx9RNMT4emBK5K";//"uTOm5-R4zYyR-DV";
-//    static final String ACCOUNT_KEY = "VLBr2asUuw9uHDFC7qgb";//"bzbtQDLez742xU468TXt";
+    static final String APP_ID = "40454";//"34621";
+    static final String AUTH_KEY = "sYpuKrOrGT4pG6d";//"q6aK9sm6GCSmtru";
+    static final String AUTH_SECRET = "hVx9RNMT4emBK5K";//"uTOm5-R4zYyR-DV";
+    static final String ACCOUNT_KEY = "VLBr2asUuw9uHDFC7qgb";//"bzbtQDLez742xU468TXt";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -56,6 +59,10 @@ public class SplashActivity extends Activity
         m_config.ddbClient = new AmazonDynamoDBClient(credentialsProvider);
         m_config.mapper = new DynamoDBMapper(m_config.ddbClient);
 
+
+        QBSettings.getInstance().init(getApplicationContext(), APP_ID, AUTH_KEY, AUTH_SECRET);
+        QBSettings.getInstance().setAccountKey(ACCOUNT_KEY);
+
 //
 //        QBSettings.getInstance().init(getApplicationContext(), APP_ID, AUTH_KEY, AUTH_SECRET);
 //        QBSettings.getInstance().setAccountKey(ACCOUNT_KEY);
@@ -77,9 +84,12 @@ public class SplashActivity extends Activity
 //                    if (sharedpreferences.getBoolean(m_config.FBLoginDone, false) == false)
 //                    {
 
+                    if(sharedpreferences.getBoolean(m_config.FBLoginDone, false) == false) {
                         Intent i = new Intent(getApplicationContext(), LoginActivity.class);
                         startActivity(i);
-
+                    }else{
+                        LoginValidations.QBStartSession(cont);
+                    }
 
 //                    Intent intent = new Intent(cont,OTPActivity.class);
 //                    cont.startActivity(intent);

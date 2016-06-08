@@ -37,8 +37,10 @@ public class GenerikFunctions
     }
 
     public static void hideDialog(ProgressDialog pDialog){
-        if (pDialog.isShowing()) {
-            pDialog.cancel();
+        if(pDialog != null) {
+            if (pDialog.isShowing()) {
+                pDialog.cancel();
+            }
         }
     }
 }

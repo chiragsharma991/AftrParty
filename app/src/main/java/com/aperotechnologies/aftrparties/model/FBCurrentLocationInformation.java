@@ -7,8 +7,8 @@ package com.aperotechnologies.aftrparties.model;
 //FB USer Location Information class
 public class FBCurrentLocationInformation
 {
-    String id=null;
-    String name=null;
+    String id= "N/A";
+    String name= "N/A";
 
     public FBCurrentLocationInformation()
     {

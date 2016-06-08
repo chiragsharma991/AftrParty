@@ -17,6 +17,7 @@ import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
+import com.aperotechnologies.aftrparties.Login.AsyncAgeCalculation;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.Login.LoginActivity;
 import com.aperotechnologies.aftrparties.R;
@@ -30,21 +31,15 @@ import java.io.IOException;
 
 public class PlayServicesHelper {
 
-
     //Harshada
-
-    private static final String PROPERTY_APP_VERSION = "appVersion";
     private static final String TAG = "PlayServicesHelper";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private static final  int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 30;
-
     private GoogleCloudMessaging googleCloudMessaging;
     private Activity context;
     private String regId;
     Configuration_Parameter m_config;
     LoggedInUserInformation loggedInUserInfo;
     SharedPreferences sharedPreferences;
-
 
     //Meghana
     Bitmap imageBitmap = null;
@@ -89,10 +84,12 @@ public class PlayServicesHelper {
                 if(sharedPreferences.getString(m_config.AWSUserDataDone,"No").equals("Yes"))
                 {
                     Log.e("call to next activity","");
-                    GenerikFunctions.hideDialog(m_config.pDialog);
+                    //GenerikFunctions.hideDialog(m_config.pDialog);
                     Intent i = new Intent(context, HomePageActivity.class);
                     context.startActivity(i);
-
+                      //Calculate Age
+                      //new AsyncAgeCalculation(context).execute();
+//
                 }
                 else
                 {
