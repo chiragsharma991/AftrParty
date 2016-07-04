@@ -25,7 +25,6 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -44,9 +43,10 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
@@ -54,12 +54,12 @@ import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.github.siyamed.shapeimageview.CircularImageView;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
 
 import static com.aperotechnologies.aftrparties.Reusables.Validations.decodeFile;
 import static com.aperotechnologies.aftrparties.Reusables.Validations.getImageUri;
@@ -68,8 +68,8 @@ import static com.aperotechnologies.aftrparties.Reusables.Validations.getOutputM
 /**
  * Created by hasai on 02/05/16.
  */
-public class HostActivity extends Activity{//implements AdapterView.OnItemSelectedListener,TimePicker.OnTimeChangedListener {
-
+public class HostActivity extends Activity//implements AdapterView.OnItemSelectedListener,TimePicker.OnTimeChangedListener {
+{
 
     LinearLayout lLyoutHost;
     CircularImageView imgParty;
@@ -104,11 +104,9 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_host);
-        cont = this;
-
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                 .detectAll()
@@ -117,6 +115,9 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
         StrictMode.setThreadPolicy(policy);
 
         m_config = Configuration_Parameter.getInstance();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
+        cont = this;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         m_config.pDialog = new ProgressDialog(cont);
 
@@ -448,13 +449,13 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
                     msglength++;
                     //Toast.makeText(getApplicationContext(), " EndTime should be greater than StartTime", Toast.LENGTH_SHORT).show();
                 }
-                else if (selected_endTimeVal - selected_startTimeVal < 3600000)
+                else if (selected_endTimeVal - selected_startTimeVal < ConstsCore.hourVal)
                 {
                     msg += "EndTime should be greater than 1 hour" + "\n";
                     msglength++;
                     //Toast.makeText(getApplicationContext(), " EndTime should be greater than 1 hour ", Toast.LENGTH_SHORT).show();
                 }
-                else if (selected_endTimeVal - selected_startTimeVal > 43200000)
+                else if (selected_endTimeVal - selected_startTimeVal > ConstsCore.TwelveHrVal)
                 {
                     msg += "EndTime cannot be greater than 12 hours" + "\n";
                     msglength++;
@@ -824,9 +825,9 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
                             Toast.makeText(getApplicationContext(), "StartTime & EndTime cannot be same", Toast.LENGTH_SHORT).show();
                         } else if (tempendTimeVal[0] < selected_startTimeVal) {
                             Toast.makeText(getApplicationContext(), " EndTime should be greater than StartTime", Toast.LENGTH_SHORT).show();
-                        } else if (tempendTimeVal[0] - selected_startTimeVal < 3600000) {
+                        } else if (tempendTimeVal[0] - selected_startTimeVal < ConstsCore.hourVal) {
                             Toast.makeText(getApplicationContext(), " EndTime should be greater than 1 hour ", Toast.LENGTH_SHORT).show();
-                        } else if (tempendTimeVal[0] - selected_startTimeVal > 43200000) {
+                        } else if (tempendTimeVal[0] - selected_startTimeVal > ConstsCore.TwelveHrVal) {
                             Toast.makeText(getApplicationContext(), " EndTime cannot be greater than 12 hours ", Toast.LENGTH_SHORT).show();
                         } else {
 
@@ -911,11 +912,10 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
                 //edt_Address.setError("Unable to get Latitude and Longitude for this address location.");
                 GenerikFunctions.hideDialog(m_config.pDialog);
             }else{
-                AWSDBOperations.createParty(cont, initialiseParty(cont, locationAddress));
+                new AWSPartyOperations.createParty(cont, initialiseParty(cont, locationAddress)).execute();
+
+
             }
-
-
-
 
             //lblLatLang.setText("GeoLocation  " + locationAddress);
 
@@ -940,8 +940,15 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
                     picturePath = getpath(tempUri);
                     BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                     Bitmap bitmap = BitmapFactory.decodeFile(picturePath,bmOptions);
-                    bitmap = Bitmap.createScaledBitmap(bitmap,bitmap.getWidth(),bitmap.getHeight(),true);
-                    imgParty.setImageBitmap(bitmap);
+                    int value = 0;
+                    if (bitmap.getHeight() <= bitmap.getWidth()) {
+                        value = bitmap.getHeight();
+                    } else {
+                        value = bitmap.getWidth();
+                    }
+                    Bitmap finalbitmap = null;
+                    finalbitmap = Bitmap.createScaledBitmap(bitmap,value,value,true);
+                    imgParty.setImageBitmap(finalbitmap);
 
 
                 } catch (Exception e) {
@@ -964,8 +971,17 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
                 picturePath = cursor.getString(columnIndex);
                 BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                 Bitmap bitmap = BitmapFactory.decodeFile(picturePath,bmOptions);
-                bitmap = Bitmap.createScaledBitmap(bitmap,bitmap.getWidth(),bitmap.getHeight(),true);
-                imgParty.setImageBitmap(bitmap);
+                //Log.e("--- "," "+bitmap.getWidth()+" "+bitmap.getHeight());
+                int value = 0;
+                if (bitmap.getHeight() <= bitmap.getWidth()) {
+                    value = bitmap.getHeight();
+                } else {
+                    value = bitmap.getWidth();
+                }
+
+                Bitmap finalbitmap = null;
+                finalbitmap = Bitmap.createScaledBitmap(bitmap,value,value,true);
+                imgParty.setImageBitmap(finalbitmap);
 
             }
         }
@@ -1162,13 +1178,18 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
         party.setEndTime(String.valueOf(selected_endTimeVal));
         //party.setDate("");
         party.setHostFBID(LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID());
-        party.setHostQBID(String.valueOf(m_config.chatService.getUser().getId()));
+        party.setHostQBID(sharedPreferences.getString(m_config.QuickBloxID,""));//String.valueOf(m_config.chatService.getUser().getId()));
         party.setHostName(sharedPreferences.getString(m_config.Entered_User_Name, ""));
         //party.setPartyType("");
         party.setPartyDescription(edt_Description.getText().toString().trim());
-        party.setBYOB(selected_byob);
+        if(selected_byob.equals("Yes")){
+            party.setBYOB("Yes");
+        }else{
+            party.setBYOB("No");
+        }
+
         party.setPartyAddress(edt_Address.getText().toString().trim());
-        party.setPartyLatLong(latlong);
+        party.setPartylatlong(latlong);
         party.setPartyImage(picturePath);
         //party.setPartyImage("");
         //party.setMaskStatus("");
@@ -1178,6 +1199,12 @@ public class HostActivity extends Activity{//implements AdapterView.OnItemSelect
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
+    }
 
     @Override
     public void onBackPressed() {

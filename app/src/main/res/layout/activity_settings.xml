@@ -71,28 +71,74 @@
                 android:src="@drawable/placeholder_user"
                 app:siBorderWidth="4dp"
                 android:layout_gravity="center"
-                app:siBorderColor="@color/colorAccent"/>
+                app:siBorderColor="@color/colorPrimaryDark"/>
+
+            <TextView
+                android:textSize="@dimen/text_size"
+                android:layout_centerInParent="true"
+                android:text="Select Profile Picture"
+                android:padding="3dp"
+                android:layout_margin="5dp"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"   />
+
+            <HorizontalScrollView
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                                >
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/lineimages"
+                    android:layout_gravity="right"
+                    android:orientation="horizontal"
+                    />
+
+            </HorizontalScrollView>
+
 
 
             <View
                 android:layout_height="5dp"
                 android:layout_width="3dp"     />
 
+
             <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:layout_margin="20dp"
-                android:hint="Profile Status"
-                android:id="@+id/edt_usermsgStatus"
-                android:drawableLeft="@drawable/ic_launcher"
+                android:hint="User Name"
+                android:layout_margin="5dp"
+                android:id="@+id/edt_userName"
+                android:drawablePadding="10dp"
                 android:textSize="@dimen/text_size"
                 android:inputType="textNoSuggestions"
                 android:background="@color/white"
                 android:layout_gravity="center_horizontal"
-                android:paddingLeft="5dp"
+                android:padding="5dp"
                 android:textCursorDrawable="@null"
                 android:focusable="true"/>
+
+
+            <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:hint="Profile Status"
+                android:layout_margin="5dp"
+                android:id="@+id/edt_usermsgStatus"
+                android:drawablePadding="10dp"
+                android:textSize="@dimen/text_size"
+                android:inputType="textNoSuggestions"
+                android:background="@color/white"
+                android:layout_gravity="center_horizontal"
+                android:padding="5dp"
+                android:textCursorDrawable="@null"
+                android:focusable="true"/>
+                <!--android:drawableLeft="@drawable/ic_launcher"-->
+
 
             <View
                 android:layout_height="5dp"
@@ -102,27 +148,37 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:layout_margin="20dp"
+                android:layout_margin="5dp"
+                android:drawablePadding="10dp"
                 android:hint="Age"
                 android:id="@+id/edt_Age"
-                android:drawableLeft="@drawable/ic_launcher"
                 android:textSize="@dimen/text_size"
                 android:inputType="textNoSuggestions"
                 android:background="@color/white"
                 android:layout_gravity="center_horizontal"
-                android:paddingLeft="5dp"
+                android:padding="5dp"
                 android:textCursorDrawable="@null"
-                android:focusable="true"/>
+                android:focusable="true"   />
 
             <View
                 android:layout_height="5dp"
                 android:layout_width="3dp"     />
+
+            <!--<GridView-->
+                <!--android:layout_gravity="center"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="500dp"-->
+                <!--android:id= "@+id/imggrid"-->
+                <!--android:verticalSpacing="2dp"-->
+                <!--android:horizontalSpacing="2dp"-->
+                <!--android:numColumns="auto_fit"-->
+                <!--/>-->
 
 
             <Spinner
-                android:padding="20dp"
+                android:padding="10dp"
                 android:textColor="@android:color/black"
-                android:layout_margin="10dp"
+                android:layout_margin="5dp"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:textSize="@dimen/text_size"
@@ -133,16 +189,25 @@
                 android:layout_height="5dp"
                 android:layout_width="3dp"  />
 
-
+            <TextView
+                android:textSize="@dimen/text_size"
+                android:layout_centerInParent="true"
+                android:text="Party Gender Preference"
+                android:padding="3dp"
+                android:layout_margin="5dp"
+                android:textColor="@android:color/black"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"   />
 
             <Spinner
-                android:padding="20dp"
+                android:padding="10dp"
                 android:textColor="@android:color/black"
-                android:layout_margin="20dp"
+                android:layout_margin="5dp"
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
                 android:textSize="@dimen/text_size"
                 android:id="@+id/spn_Gender" />
+
 
             <View
                 android:layout_height="5dp"
@@ -174,14 +239,18 @@
                 android:textSize="@dimen/text_size"
                 android:layout_centerInParent="true"
                 android:text="Distance(Km)"
-                android:textColor="#ffffff"
+                android:padding="3dp"
+                android:layout_margin="5dp"
+                android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"   />
 
             <TextView android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:id="@+id/txtseekbarval"
-                android:layout_gravity="center_horizontal"/>
+                android:text="1"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@android:color/black"/>
 
             <SeekBar
                 android:id="@+id/seekbar"
@@ -195,6 +264,15 @@
                 android:layout_height="5dp"
                 android:layout_width="3dp"     />
 
+            <com.aperotechnologies.aftrparties.Login.FaceOverlayView
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/face_overlay"
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:background="@android:color/white"
+                android:visibility="gone"
+                android:layout_below="@+id/btn_register"/>
+
             <!--<com.aperotechnologies.aftrparties.utils.SeekbarWithIntervals
                 android:id="@+id/seekbarWithIntervals"
                 android:layout_width="match_parent"
@@ -207,7 +285,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="52dp"
                 android:textSize="@dimen/text_size"
-                android:text="EDIT"
+                android:text="Update"
                 android:textAllCaps="true"
                 android:id="@+id/img_editSettings"
                 android:layout_gravity="center_horizontal"

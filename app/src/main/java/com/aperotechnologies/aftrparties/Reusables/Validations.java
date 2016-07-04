@@ -60,7 +60,7 @@ public class Validations {
         String msg;
         if(input.replaceAll("\\s+", " ").trim().equals("") || input.replaceAll("\\s+", " ").trim().equals(" "))
         {
-            msg = "Please enter some value.";
+            msg = "Please fill the Description.";
         }
 //        else if(!matcher.matches())
 //        {
@@ -68,7 +68,7 @@ public class Validations {
 //        }
         else if(words.length > 30){
 
-            msg = "only 30 words allowed.";
+            msg = "Description should be of 30 words only.";
 
         }else{
 
@@ -92,7 +92,6 @@ public class Validations {
         config.put("api_secret", "ylB_rZgnwVT823PH3_HtZo79Sf4");
 
         Cloudinary cloudinary = new Cloudinary("cloudinary://585356451553425:ylB_rZgnwVT823PH3_HtZo79Sf4@dklb21dyh");
-        //new Cloudinary(Utils.cloudinaryUrlFromContext(cont));
         Log.e("cloudinary"," "+cloudinary);
 
 
@@ -300,28 +299,35 @@ public class Validations {
     public static StringBuilder showTime(int hour, int min) {
         StringBuilder time;
         String hours,mins;
-        if (hour == 0) {
+        if (hour == 0)
+        {
             hour += 12;
             format = "AM";
         }
-        else if (hour == 12) {
+        else if (hour == 12)
+        {
             format = "PM";
-        } else if (hour > 12) {
+        } else if (hour > 12)
+        {
             hour -= 12;
             format = "PM";
         } else {
             format = "AM";
         }
 
-        if(hour < 10){
+        if(hour < 10)
+        {
             hours = "0" + hour;
-        }else{
+        }else
+        {
             hours = String.valueOf(hour);
         }
 
-        if(min < 10){
+        if(min < 10)
+        {
             mins = "0" + min;
-        }else{
+        }else
+        {
             mins = String.valueOf(min);
         }
 

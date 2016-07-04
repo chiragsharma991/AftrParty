@@ -14,7 +14,6 @@ import java.util.List;
 public class UserTable {
 
     private String FacebookID;
-    //private String InvitedUser;//check whether have account or not
     private String QuickBloxID;
     private String LinkedInID;
     private String SocialEmail;
@@ -34,11 +33,15 @@ public class UserTable {
     private int Ratings;
     private String ProfileStatus;
     private String DeviceToken;
-    private List<PartiesClass> Parties;
+    private List<PartiesClass> parties;
     private List Images;
+    private String Registrationstatus;
+    private List<PaidGCClass> paidgc;
+    private List<ActivePartyClass> activeparty;
+    private String currentmaskstatus;
 
 
-    @DynamoDBHashKey(attributeName = "FacebookID")
+    @DynamoDBHashKey(attributeName = "facebookid")
     public String getFacebookID() {
         return FacebookID;
     }
@@ -48,7 +51,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "QuickBloxID")
+    @DynamoDBAttribute(attributeName = "quickbloxid")
     public String getQuickBloxID() {
         return QuickBloxID;
     }
@@ -58,7 +61,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "LinkedInID")
+    @DynamoDBAttribute(attributeName = "linkedinid")
     public String getLinkedInID() {
         return LinkedInID;
     }
@@ -68,7 +71,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "SocialEmail")
+    @DynamoDBAttribute(attributeName = "socialemail")
     public String getSocialEmail() {
         return SocialEmail;
     }
@@ -78,7 +81,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "FBUserName")
+    @DynamoDBAttribute(attributeName = "fbusername")
     public String getFBUserName() {
         return FBUserName;
     }
@@ -88,7 +91,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "FBCurrentLocation")
+    @DynamoDBAttribute(attributeName = "fbcurrentlocation")
     public String getFBCurrentLocation() {
         return FBCurrentLocation;
     }
@@ -98,8 +101,8 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "FBHomeLocation")
-    public String FBHomeLocation() {
+    @DynamoDBAttribute(attributeName = "fbhomelocation")
+    public String getFBHomeLocation() {
         return FBHomeLocation;
     }
 
@@ -108,7 +111,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "BirthDate")
+    @DynamoDBAttribute(attributeName = "birthdate")
     public String getBirthDate() {
         return BirthDate;
     }
@@ -116,9 +119,9 @@ public class UserTable {
     public void setBirthDate(String BirthDate) {
         this.BirthDate = BirthDate;
     }
-    
 
-    @DynamoDBAttribute(attributeName = "FBFriendsCount")
+
+    @DynamoDBAttribute(attributeName = "fbfriendscount")
     public int getFBFriendsCount() {
         return FBFriendsCount;
     }
@@ -128,7 +131,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "Gender")
+    @DynamoDBAttribute(attributeName = "gender")
     public String getGender() {
         return Gender;
     }
@@ -138,7 +141,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "ProfilePicUrl")
+    @DynamoDBAttribute(attributeName = "profilepicurl")
     public  List<String> getProfilePicUrl() {
         return ProfilePicUrl;
     }
@@ -147,7 +150,7 @@ public class UserTable {
         this.ProfilePicUrl = ProfilePicUrl;
     }
 
-    @DynamoDBAttribute(attributeName = "LKProfilePicUrl")
+    @DynamoDBAttribute(attributeName = "lkprofilepicurl")
     public String getLKProfilePicUrl() {
         return LKProfilePicUrl;
     }
@@ -157,7 +160,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "LKConnectionsCount")
+    @DynamoDBAttribute(attributeName = "lkconnectionscount")
     public int getLKConnectionsCount() {
         return LKConnectionsCount;
     }
@@ -167,7 +170,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "LKHeadLine")
+    @DynamoDBAttribute(attributeName = "lkheadline")
     public String getLKHeadLine() {
         return LKHeadLine;
     }
@@ -177,7 +180,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "DeviceToken")
+    @DynamoDBAttribute(attributeName = "devicetoken")
     public String getDeviceToken() {
         return DeviceToken;
     }
@@ -187,7 +190,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "Name")
+    @DynamoDBAttribute(attributeName = "name")
     public String getName() {
         return Name;
     }
@@ -197,7 +200,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "Email")
+    @DynamoDBAttribute(attributeName = "email")
     public String getEmail() {
         return Email;
     }
@@ -207,7 +210,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "PhoneNumber")
+    @DynamoDBAttribute(attributeName = "phonenumber")
     public String getPhoneNumber() {
         return PhoneNumber;
     }
@@ -217,7 +220,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "Ratings")
+    @DynamoDBAttribute(attributeName = "ratings")
     public int getRatings() {
         return Ratings;
     }
@@ -227,7 +230,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "ProfileStatus")
+    @DynamoDBAttribute(attributeName = "profilestatus")
     public String getProfileStatus() {
         return ProfileStatus;
     }
@@ -237,7 +240,7 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "Images")
+    @DynamoDBAttribute(attributeName = "images")
     public List getImages() {
         return Images;
     }
@@ -245,15 +248,54 @@ public class UserTable {
     public void setImages(List Images) {
         this.Images = Images;
     }
-//
+
+    @DynamoDBAttribute(attributeName = "registrationstatus")
+    public String getRegistrationStatus() {return Registrationstatus;}
+
+    public void setRegistrationStatus(String Registrationstatus){
+        this.Registrationstatus = Registrationstatus;
+    }
+
+
+    @DynamoDBAttribute(attributeName = "currentmaskstatus")
+    public String getCurrentmaskstatus()
+    {
+        return currentmaskstatus;
+    }
+
+    public void setCurrentmaskstatus(String currentmaskstatus)
+    {
+        this.currentmaskstatus = currentmaskstatus;
+    }
+
+    public List<PaidGCClass> getPaidgc() {
+        return paidgc;
+    }
+
+    public void setPaidgc(List<PaidGCClass> paidgC) {
+        this.paidgc = paidgc;
+    }
+
+
+    public List<ActivePartyClass> getActiveparty() {
+        return activeparty;
+    }
+
+    public void setActiveparty(List<ActivePartyClass> activeparty) {
+        this.activeparty = activeparty;
+    }
 
     public List<PartiesClass> getParties() {
-        return Parties;
+        return parties;
     }
 
-    public void setParties(List<PartiesClass> Parties) {
-        this.Parties = Parties;
+    public void setParties(List<PartiesClass> parties) {
+        this.parties = parties;
     }
+
+
+
+
 }
 
 

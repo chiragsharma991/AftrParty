@@ -15,13 +15,14 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
-import com.aperotechnologies.aftrparties.Login.AsyncAgeCalculation;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
-import com.aperotechnologies.aftrparties.Login.LoginActivity;
+import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
+import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -35,7 +36,7 @@ public class PlayServicesHelper {
     private static final String TAG = "PlayServicesHelper";
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private GoogleCloudMessaging googleCloudMessaging;
-    private Activity context;
+    private Activity cont;
     private String regId;
     Configuration_Parameter m_config;
     LoggedInUserInformation loggedInUserInfo;
@@ -49,17 +50,22 @@ public class PlayServicesHelper {
 
     RequestQueue queue;
 
+    public PlayServicesHelper(Activity cont){
+        checkPlayService();
+    }
 
-    public PlayServicesHelper(Activity context, LoggedInUserInformation loggedInUserInfo) {
-        this.context = context;
+
+
+    public PlayServicesHelper(Activity cont, LoggedInUserInformation loggedInUserInfo) {
+        this.cont = cont;
         this.loggedInUserInfo = loggedInUserInfo;
         m_config = Configuration_Parameter.getInstance();
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
 
-        faceOverlayView = new FaceOverlayView(context);
+        faceOverlayView = new FaceOverlayView(cont);
 //      faceOverlayView.setTag(1);
-        faceOverlayView = (FaceOverlayView) context.findViewById(R.id.face_overlay);
-        queue = Volley.newRequestQueue(context);
+        faceOverlayView = (FaceOverlayView) cont.findViewById(R.id.face_overlay);
+        queue = Volley.newRequestQueue(cont);
 
         //checkPlayService();
         Thread t = new Thread(new CheckPlayServicesLooper());
@@ -71,30 +77,27 @@ public class PlayServicesHelper {
         // GCM registration.
         if (checkPlayServices())
         {
-            googleCloudMessaging = GoogleCloudMessaging.getInstance(context);
+            googleCloudMessaging = GoogleCloudMessaging.getInstance(cont);
             regId = getRegistrationId();
             Log.e("check regId--- "," "+regId);
 
             if (regId.isEmpty())
             {
-            registerInBackground();
+                registerInBackground();
             }
             else
             {
-                if(sharedPreferences.getString(m_config.AWSUserDataDone,"No").equals("Yes"))
+
+
+            Handler h = new Handler(cont.getMainLooper());
+            h.post(new Runnable()
+            {
+                @Override
+                public void run()
                 {
-                    Log.e("call to next activity","");
-                    //GenerikFunctions.hideDialog(m_config.pDialog);
-                    Intent i = new Intent(context, HomePageActivity.class);
-                    context.startActivity(i);
-                      //Calculate Age
-                      //new AsyncAgeCalculation(context).execute();
-//
+                    LoginValidations.checkPendingLoginFlags(cont);
                 }
-                else
-                {
-                    AWSDBOperations.createUser(context, loggedInUserInfo);
-                }
+            });
 
             }
 
@@ -111,18 +114,18 @@ public class PlayServicesHelper {
      * the Google Play Store or enable it in the device's system settings.
      */
     public boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(cont);
         if (resultCode != ConnectionResult.SUCCESS)
         {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode))
             {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, context, PLAY_SERVICES_RESOLUTION_REQUEST)
+                GooglePlayServicesUtil.getErrorDialog(resultCode, cont, PLAY_SERVICES_RESOLUTION_REQUEST)
                         .show();
             }
             else
             {
                 Log.i(TAG, "This device is not supported.");
-                context.finish();
+                cont.finish();
             }
             return false;
         }
@@ -138,7 +141,7 @@ public class PlayServicesHelper {
      */
     private String getRegistrationId()
     {
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);// getGCMPreferences();
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(cont);// getGCMPreferences();
         String registrationId = prefs.getString(m_config.REG_ID, "");
         if (registrationId.isEmpty())
         {
@@ -161,23 +164,34 @@ public class PlayServicesHelper {
                 try {
                     if (googleCloudMessaging == null)
                     {
-                        googleCloudMessaging = GoogleCloudMessaging.getInstance(context);
+                        googleCloudMessaging = GoogleCloudMessaging.getInstance(cont);
                     }
                     regId = googleCloudMessaging.register(ConstsCore.PROJECT_NUMBER);
 
-                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(cont);
                     SharedPreferences.Editor editor = pref.edit();
                     editor.putString(m_config.temp_regId, regId);
                     editor.apply();
                     Log.e("regID"," "+regId);
                     msg = "Device registered, registration ID=" + regId;
 
-                    Handler h = new Handler(context.getMainLooper());
+                    Handler h = new Handler(cont.getMainLooper());
                     h.post(new Runnable() {
                         @Override
                         public void run() {
-                            LoginActivity loginActivity = new LoginActivity();
-                            loginActivity.getDeviceIdAndroid(regId, context);
+
+
+                            if (cont instanceof RegistrationActivity )
+                            {
+                                RegistrationActivity registration = new RegistrationActivity();
+                                registration.getDeviceIdAndroid(regId, cont);
+                            }
+                            else
+                            {
+                                Welcome welcome = new Welcome();
+                                welcome.getDeviceIdAndroid(regId,cont);
+                            }
+
                         }
                     });
 
@@ -202,7 +216,7 @@ public class PlayServicesHelper {
     private SharedPreferences getGCMPreferences() {
         // This sample app persists the registration ID in shared preferences, but
         // how you store the regID in your app is up to you.
-        return context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+        return cont.getSharedPreferences(cont.getPackageName(), Context.MODE_PRIVATE);
     }
 
 

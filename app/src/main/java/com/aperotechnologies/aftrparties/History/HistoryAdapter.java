@@ -1,7 +1,9 @@
 package com.aperotechnologies.aftrparties.History;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.DataSetObserver;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,9 +11,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartiesClass;
 import com.aperotechnologies.aftrparties.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,25 +24,19 @@ import java.util.List;
  */
 public class HistoryAdapter extends BaseAdapter {
 
-    private View.OnClickListener onclick;
     private List<PartiesClass> PartiesList;
-    Context context;
+    Context cont;
+    Configuration_Parameter m_config;
 
 
     //    SQLiteDatabase sdb;
-    public HistoryAdapter(Context context, List<PartiesClass> PartiesList)
+    public HistoryAdapter(Context cont, List<PartiesClass> PartiesList)
     {
-        this.context = context;
+        this.cont = cont;
         this.PartiesList = PartiesList;
+        m_config= Configuration_Parameter.getInstance();
 
-        onclick = new View.OnClickListener() {
 
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                onItemClick(v, (PartiesClass) v.getTag());
-            }
-        };
 
     }
 
@@ -83,7 +82,8 @@ public class HistoryAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, ViewGroup parent)
+    {
         ViewHolder holder = new ViewHolder();
 
         if (convertView == null)
@@ -101,14 +101,55 @@ public class HistoryAdapter extends BaseAdapter {
 
         PartiesClass Parties = new PartiesClass();
         Parties = (PartiesClass) PartiesList.get(position);
-        Log.e("", " " + Parties.getPartyName());
-        Log.e("", " " + Parties.getPartyStatus());
+//        Log.e("", " " + Parties.getPartyName());
+//        Log.e("", " " + Parties.getPartyStatus());
 
-        holder.partyName.setText(Parties.getPartyName());
-        holder.partyStatus.setText(Parties.getPartyStatus());
+      //  Log.e("Party Adapter  " , position + "   " + Parties.getPartyName());
 
-        convertView.setOnClickListener(onclick);
-        convertView.setTag(Parties);
+
+
+
+        holder.partyName.setText(Parties.getPartyname());
+        holder.partyStatus.setText(Parties.getPartystatus());
+
+        final PartiesClass finalParties = Parties;
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Log.e("PartyName"," "+ finalParties.getPartyName());
+//                Log.e("Status"," "+ finalParties.getPartyStatus());
+
+                if(finalParties.getPartystatus().equals("Created")){
+                    Intent i = new Intent(cont,PartyDetails.class);
+                    PartyParceableData party = new PartyParceableData();
+                    party.setPartyId(finalParties.getPartyid());
+                    party.setPartyName(finalParties.getPartyname());
+                    party.setStartTime(finalParties.getStarttime());
+                    party.setEndTime(finalParties.getEndtime());
+                    party.setPartyStatus(finalParties.getPartystatus());
+                    Bundle mBundles = new Bundle();
+                    mBundles.putSerializable(ConstsCore.SER_KEY, party);
+                    i.putExtras(mBundles);
+                    cont.startActivity(i);
+
+                }else{
+                    Intent i = new Intent(cont,PartyDetails.class);
+                    PartyParceableData party = new PartyParceableData();
+                    party.setPartyId(finalParties.getPartyid());
+                    party.setPartyName(finalParties.getPartyname());
+                    party.setStartTime(finalParties.getStarttime());
+                    party.setEndTime(finalParties.getEndtime());
+                    party.setPartyStatus(finalParties.getPartystatus());
+                    Bundle mBundles = new Bundle();
+                    mBundles.putSerializable(ConstsCore.SER_KEY, party);
+                    i.putExtras(mBundles);
+                    cont.startActivity(i);
+                }
+
+
+            }
+        });
+
         return convertView;
     }
 
@@ -118,14 +159,6 @@ public class HistoryAdapter extends BaseAdapter {
         return false;
     }
 
-    protected void onItemClick(View v, PartiesClass partyIdstatus) {
-        Log.e("PartyId "," "+partyIdstatus.getPartyId());
-        Log.e("PartyStatus "," "+partyIdstatus.getPartyStatus());
-//        Intent i = new Intent(context,RequestantsList.class);
-//        i.putExtra("PartyId",partyIdstatus.getPartyId());
-//        context.startActivity(i);
-
-    }
 
     static class ViewHolder
     {

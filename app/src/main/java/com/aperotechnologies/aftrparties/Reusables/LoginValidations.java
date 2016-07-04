@@ -2,9 +2,12 @@ package com.aperotechnologies.aftrparties.Reusables;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,16 +16,21 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.Toast;
 
+import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSLoginOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
+import com.aperotechnologies.aftrparties.Login.AsyncAgeCalculation;
+import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.Login.LoginTableColumns;
+import com.aperotechnologies.aftrparties.Login.OTPActivity;
 import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
+import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
-import com.aperotechnologies.aftrparties.model.Qbloxuser;
 import com.facebook.AccessToken;
 import com.quickblox.auth.QBAuth;
 import com.quickblox.auth.model.QBProvider;
@@ -37,12 +45,11 @@ import com.quickblox.messages.model.QBNotificationChannel;
 import com.quickblox.messages.model.QBSubscription;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.UUID;
-import java.util.regex.Pattern;
+
 
 /**
  * Created by mpatil on 10/05/16.
@@ -50,15 +57,16 @@ import java.util.regex.Pattern;
 public  class LoginValidations
 {
 
+    static int faces=0;
+    static FaceOverlayView faceOverlayView;
 
+    static PlayServicesHelper playServicesHelper;
     //Meghana
     public static boolean isFBLoggedIn()
     {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         return accessToken != null;
-
     }
-
 
     //Meghana
     public static LoggedInUserInformation initialiseLoggedInUser(Context cont)
@@ -114,77 +122,45 @@ public  class LoginValidations
     //function for starting session of quickblox
     public static void QBStartSession(final Context cont)
     {
-        final SharedPreferences sharedpreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        String FBprofilePic = initialiseLoggedInUser(cont).getFB_USER_PROFILE_PIC();
 
+        String profilePic = FBprofilePic;
+        if (profilePic.equals(null) || profilePic.equals(""))
+        {
+            profilePic = "";
+        }
+        else
+        {
+            profilePic = FBprofilePic;
+        }
+        Log.e("fb token", " " + getFBAccessToken().getToken());
 
-//        String token = null;
-//        Long expDate = null;
-//        try {
-//            token = sharedpreferences.getString(m_config.SessionToken,null);
-//            expDate = sharedpreferences.getLong("SessionExpirationDate",0);
-//            // save to secure storage when your application goes offline or to the background
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-//            Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-//            t.start();
-//
-//
-//        }
-//
-//        Date expirationDate = new Date(expDate);
-//        Date currentDate = new Date();
-//        Calendar cal = Calendar.getInstance();
-//        cal.setTime(currentDate);
-//        cal.add(Calendar.HOUR, 2);
-//        Date twoHoursAfter = cal.getTime();
-//
-//        if(token != null && expirationDate != null){
-//            if(expirationDate.before(twoHoursAfter)){
-//                try {
-//                    QBAuth.createFromExistentToken(token, expirationDate);
-//                    QBChatService.init(cont);
-//                    final QBChatService chatService = QBChatService.getInstance();
-//                    m_config.chatService = chatService;
-//                    //if session is not expired give call to PlayServiceHelper
-//                    PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
-//
-//                } catch (BaseServiceException e) {
-//                    e.printStackTrace();
-//                    //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-//                    Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-//                    t.start();
-//                }
-//            }else {
-//                //if session is expired PlayServiceHelper
-//                // recreate session on next start app
-//                //createSession(cont);
-//                new createSession(cont).execute();
-//            }
-//        }else{
-            //for very first time when app is installed and session is not created
-            //createSession(cont);
-            new createSession(cont).execute();
-//                                                                                     }
-
+        Log.e("for very first time, create session","");
+        new createSession(getFBAccessToken().getToken(), profilePic, cont).execute();
     }
+
+
 
     //Harshada
     //function for new session creation
-    private static class createSession extends AsyncTask<String, Void, Void> {
-
+    private static class createSession extends AsyncTask<String, Void, Void>
+    {
         Context cont;
+        String token;
+        String profilePic;
 
-        public createSession(Context cont) {
+        public createSession(String token, String profilePic, Context cont)
+        {
             this.cont = cont;
+            this.token = token;
+            this.profilePic = profilePic;
         }
 
         @Override
-        protected Void doInBackground(String... params) {
+        protected Void doInBackground(String... params)
+        {
 
-            Thread t = new Thread(new CreateSessionLooper(cont));
+            Thread t = new Thread(new CreateSessionLooper(token, profilePic, cont));
             t.start();
 
             return null;
@@ -206,22 +182,26 @@ public  class LoginValidations
     }
 
 
+
     //Harshada
     //function for Login with  Quickblox(FB)
-    private static class loginWithFbQuickBlox extends AsyncTask<String, Void, String> {
+    private static class loginWithFbQuickBlox extends AsyncTask<String, Void, String>
+    {
 
         Context cont;
         String avatarUrl;
         String accessToken;
 
-        public loginWithFbQuickBlox(String accessToken, String avatarUrl, Context cont) {
+        public loginWithFbQuickBlox(String accessToken, String avatarUrl, Context cont)
+        {
             this.cont = cont;
             this.accessToken = accessToken;
             this.avatarUrl = avatarUrl;
         }
 
         @Override
-        protected String doInBackground(String... params) {
+        protected String doInBackground(String... params)
+        {
 
             Thread t = new Thread(new loginWithFbQuickBloxLooper(accessToken, avatarUrl, cont));
             t.start();
@@ -245,21 +225,24 @@ public  class LoginValidations
 
     //Harshada
     //function for profile pic upload in Quickblox user table
-    private static class uploadprofilePic extends AsyncTask<String, Void, String> {
+    public static class uploadprofilePic extends AsyncTask<String, Void, String>
+    {
 
         Context cont;
         QBUser user;
         String avatarUrl;
 
 
-        public uploadprofilePic(QBUser user, String avatarUrl, final Context cont) {
+        public uploadprofilePic(QBUser user, String avatarUrl, final Context cont)
+        {
             this.cont = cont;
             this.user = user;
             this.avatarUrl = avatarUrl;
         }
 
         @Override
-        protected String doInBackground(String... params) {
+        protected String doInBackground(String... params)
+        {
 
             Thread t = new Thread(new uploadprofilePicLooper(user, avatarUrl, cont));
             t.start();
@@ -283,12 +266,14 @@ public  class LoginValidations
 
     //Harshada
     //function for chat login
-    private static class chatLogin extends AsyncTask<String, Void, String> {
+    private static class chatLogin extends AsyncTask<String, Void, String>
+    {
 
         Context cont;
         QBUser user;
 
-        public chatLogin(QBUser user, Context cont) {
+        public chatLogin(QBUser user, Context cont)
+        {
             this.cont = cont;
             this.user = user;
 
@@ -296,7 +281,8 @@ public  class LoginValidations
         }
 
         @Override
-        protected String doInBackground(String... params) {
+        protected String doInBackground(String... params)
+        {
 
             Thread t = new Thread(new chatLoginLooper(user, cont));
             t.start();
@@ -320,27 +306,25 @@ public  class LoginValidations
 
 
     //subscribe deviceId and regId in quickblox for PushNotifications
-    public static class subscribeToPushNotifications extends AsyncTask<String, Void, String> {
+    public static class subscribeToPushNotifications extends AsyncTask<String, Void, String>
+    {
 
         Context cont;
         String regId;
         TelephonyManager mTelephony;
 
-        public subscribeToPushNotifications(String regId, TelephonyManager mTelephony, Activity cont) {
+        public subscribeToPushNotifications(String regId, TelephonyManager mTelephony, Activity cont)
+        {
             this.cont = cont;
             this.regId = regId;
             this.mTelephony = mTelephony;
-
-
-
         }
 
         @Override
-        protected String doInBackground(String... params) {
-
+        protected String doInBackground(String... params)
+        {
             Thread t = new Thread(new subscribeToPushNotificationsLooper(regId,  mTelephony, (Activity) cont));
             t.start();
-
             return null;
         }
 
@@ -354,30 +338,27 @@ public  class LoginValidations
         @Override
         protected void onPostExecute(String profilePic)
         {
-
         }
     }
 
 
-
-
-
-
-    static class CreateSessionLooper implements Runnable {
-
+    static class CreateSessionLooper implements Runnable
+    {
         private Looper myLooper;
         Context cont;
+        String token;
+        String profilePic;
 
-
-
-
-        public CreateSessionLooper(Context cont) {
+        public CreateSessionLooper(String token, String profilePic, Context cont)
+        {
             this.cont = cont;
-
+            this.token = token;
+            this.profilePic = profilePic;
         }
 
         @Override
-        public void run() {
+        public void run()
+        {
             Looper.prepare();
             // code that needed a separated thread
             //createSession(cont);
@@ -397,40 +378,46 @@ public  class LoginValidations
 
                     }
 
-                    QBChatService.init(cont);
-                    final QBChatService chatService = QBChatService.getInstance();
-                    m_config.chatService = chatService;
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    try {
+                        editor.putString(m_config.SessionToken, BaseService.getBaseService().getToken());
+                        editor.putLong("SessionExpirationDate", BaseService.getBaseService().getTokenExpirationDate().getTime());
 
-                    String FBprofilePic = initialiseLoggedInUser(cont).getFB_USER_PROFILE_PIC();
-                    //String LIprofilePic = initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC();
 
-                    String profilePic = FBprofilePic;
-                    if (profilePic.equals(null) || profilePic.equals("")) {
-                        //if (LIprofilePic == null || LIprofilePic.equals("")) {
-                            profilePic = "";
-//                        } else {
-//                            profilePic = LIprofilePic;
-//                        }
-                    } else {
-                        profilePic = FBprofilePic;
+                    } catch (BaseServiceException e) {
+                        e.printStackTrace();
+
+                        Handler h = new Handler(cont.getMainLooper());
+                        h.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                            }
+                        });
                     }
-                    Log.e("fb token", " " + getFBAccessToken().getToken());
 
-                    //loginWithFbQuickBlox(getFBAccessToken().getToken(), profilePic, cont);//"https://graph.facebook.com/129419790774542/picture?type=large");
-
+                    editor.apply();
                     //call to QuickBlox Login
                     new loginWithFbQuickBlox(getFBAccessToken().getToken(), profilePic, cont).execute();//"https://graph.facebook.com/129419790774542/picture?type=large");
-
 
                 }
 
                 @Override
-                public void onError(QBResponseException e) {
+                public void onError(QBResponseException e)
+                {
                     Log.e("createSession", "onerror");
                     e.printStackTrace();
-                    //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Thread t = new Thread(new ToastDispLooper(cont, "Login Failed, Please try again after some time"));
-                    t.start();
+
+                    Handler h = new Handler(cont.getMainLooper());
+                    h.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                        }
+                    });
+
                     GenerikFunctions.hideDialog(m_config.pDialog);
                 }
 
@@ -445,7 +432,8 @@ public  class LoginValidations
     };
 
 
-    static class loginWithFbQuickBloxLooper implements Runnable {
+    static class loginWithFbQuickBloxLooper implements Runnable
+    {
 
         private Looper myLooper;
         Context cont;
@@ -453,7 +441,8 @@ public  class LoginValidations
         String avatarUrl;
 
 
-        public loginWithFbQuickBloxLooper(String accessToken, String avatarUrl, Context cont) {
+        public loginWithFbQuickBloxLooper(String accessToken, String avatarUrl, Context cont)
+        {
             this.cont = cont;
             this.accessToken = accessToken;
             this.avatarUrl = avatarUrl;
@@ -461,7 +450,8 @@ public  class LoginValidations
         }
 
         @Override
-        public void run() {
+        public void run()
+        {
             Looper.prepare();
             // code that needed a separated thread
 
@@ -477,8 +467,45 @@ public  class LoginValidations
                             Log.e("Facebook login","Success"+" ");
                             Log.e("user",""+user);
                             user.setFullName(sharedPreferences.getString(m_config.Entered_User_Name,""));
-                            new uploadprofilePic(user, avatarUrl, cont).execute();
+                            SharedPreferences.Editor editor= sharedPreferences.edit();
+                            editor.putString(m_config.QuickBloxID, String.valueOf(user.getId()));
+                            editor.apply();
+                            /*if(sharedPreferences.getString(m_config.QBLoginDone,"").equals("Yes"))
+                            {
 
+                                // initialize Chat service
+                                try
+                                {
+                                    user.setPassword(BaseService.getBaseService().getToken());
+                                    boolean isLoggedIn = QBChatService.getInstance().isLoggedIn();
+                                    Log.e("isLoggedIn "," "+isLoggedIn);
+                                    if(isLoggedIn)
+                                    {
+                                        //if chat is LoggedIn give a call to PlayServiceHelper
+                                         new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+                                    }
+                                    else
+                                    {
+                                        //call to chatLogin
+                                        //chatLogin(user, cont);
+                                        new chatLogin(user, cont).execute();
+                                    }
+
+                                }
+                                catch (Exception e)
+                                {
+                                    e.printStackTrace();
+                                    //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Thread t = new Thread(new ToastDispLooper(cont, "Login Failed, Please try again after some time"));
+                                    t.start();
+                                    GenerikFunctions.hideDialog(m_config.pDialog);
+                                }
+                            }
+                            else
+                            {*/
+                            new AWSLoginOperations.addUserQuickBloxId(cont, user, avatarUrl).execute();
+
+                            //}
                         }
 
                         @Override
@@ -486,9 +513,16 @@ public  class LoginValidations
                         {
                             Log.e("Facebook login","OnError");
                             e.printStackTrace();
-                            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Thread t = new Thread(new ToastDispLooper(cont, "Login Failed, Please try again after some time"));
-                            t.start();
+                            Handler h = new Handler(cont.getMainLooper());
+                            h.post(new Runnable()
+                            {
+                                @Override
+                                public void run()
+                                {
+                                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                                }
+                            });
+
                             GenerikFunctions.hideDialog(m_config.pDialog);
                         }
                     });
@@ -500,7 +534,8 @@ public  class LoginValidations
     };
 
 
-    static class uploadprofilePicLooper implements Runnable {
+    static class uploadprofilePicLooper implements Runnable
+    {
 
         private Looper myLooper;
         Context cont;
@@ -508,7 +543,8 @@ public  class LoginValidations
         String avatarUrl;
 
 
-        public uploadprofilePicLooper(QBUser user, String avatarUrl, Context cont) {
+        public uploadprofilePicLooper(QBUser user, String avatarUrl, Context cont)
+        {
             this.cont = cont;
             this.user = user;
             this.avatarUrl = avatarUrl;
@@ -516,7 +552,8 @@ public  class LoginValidations
         }
 
         @Override
-        public void run() {
+        public void run()
+        {
             Looper.prepare();
             // code that needed a separated thread
             final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
@@ -527,45 +564,31 @@ public  class LoginValidations
             {
                 @Override
                 public void onSuccess(QBUser user, Bundle args) {
-                    Log.e("user image "," "+user.getCustomData());
-                    Log.e("updated user---",""+user);
+                    //Log.e("user image "," "+user.getCustomData());
+                    Log.e("updated user successfully--"," "+user);
 
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(m_config.QBLoginDone, "Yes");
+                    editor.apply();
 
 
                     if(user.equals(null) || user==null)
                     {
                         //Log.e("primary user",null+"  null");
                     }
-                    else {
+                    else
+                    {
+
+                        // Initialise ChatService
                         try
                         {
                             user.setPassword(BaseService.getBaseService().getToken());
-
-                        }
-                        catch (BaseServiceException e)
-                        {
-                            e.printStackTrace();
-                            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                            // means you have not created a session before
-                            Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                            t.start();
-
-                        }
-
-                        // initialize Chat service
-                        try
-                        {
-
-//                        QBChatService.init(cont);
-//                        final QBChatService chatService = QBChatService.getInstance();
-//                        m_config.chatService = chatService;
-
-                            boolean isLoggedIn = m_config.chatService.isLoggedIn();
+                            boolean isLoggedIn = QBChatService.getInstance().isLoggedIn();
                             Log.e("isLoggedIn "," "+isLoggedIn);
                             if(isLoggedIn)
                             {
                                 //if chat is LoggedIn give a call to PlayServiceHelper
-                                PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+                                new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
                             }
                             else
                             {
@@ -578,9 +601,17 @@ public  class LoginValidations
                         catch (Exception e)
                         {
                             e.printStackTrace();
-                            //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                            Thread t = new Thread(new ToastDispLooper(cont, "Login Failed, Please try again after some time"));
-                            t.start();
+
+                            Handler h = new Handler(cont.getMainLooper());
+                            h.post(new Runnable()
+                            {
+                                @Override
+                                public void run()
+                                {
+                                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                                }
+                            });
+
                             GenerikFunctions.hideDialog(m_config.pDialog);
                         }
                     }
@@ -623,36 +654,15 @@ public  class LoginValidations
             final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
             final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
 
-            m_config.chatService.login(qb_user, new QBEntityCallback()
+            QBChatService.getInstance().login(qb_user, new QBEntityCallback()
             {
                 @Override
                 public void onSuccess(Object o, Bundle bundle)
                 {
                     Log.e("ChatServicelogin","Success ");
 
-                    SharedPreferences.Editor editor= sharedPreferences.edit();
-                    try {
-                        editor.putString(m_config.SessionToken, BaseService.getBaseService().getToken());
-                        editor.putLong("SessionExpirationDate", BaseService.getBaseService().getTokenExpirationDate().getTime());
-
-
-                    } catch (BaseServiceException e) {
-                        e.printStackTrace();
-                        //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                        Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                        t.start();
-                    }
-
-                    editor.apply();
-
-
-                    //QBGroupChatManager groupChatManager  = m_config.chatService.getGroupChatManager();
-                    //QBPrivateChatManager privateChatManager = m_config.chatService.getPrivateChatManager();
-                    //m_config.groupChatManager = groupChatManager;
-                    //m_config.privateChatManager = privateChatManager;
-
                     //call to PlayServiceHelper
-                    PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+                    new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
 
 
                 }
@@ -663,9 +673,19 @@ public  class LoginValidations
                     // errror
                     Log.e("ChatServicelogin","OnError "+e.toString());
                     e.printStackTrace();
-                    Thread t = new Thread(new ToastDispLooper(cont, "Login Failed, Please try again after some time"));
-                    t.start();
-                    GenerikFunctions.hideDialog(m_config.pDialog);
+
+                    Handler h = new Handler(cont.getMainLooper());
+                    h.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                            GenerikFunctions.hideDialog(m_config.pDialog);
+                        }
+                    });
+
+
 
                 }
             });
@@ -705,9 +725,12 @@ public  class LoginValidations
 
             String deviceId;
 
-            if (mTelephony.getDeviceId() != null) {
+            if (mTelephony.getDeviceId() != null)
+            {
                 deviceId = mTelephony.getDeviceId(); //*** use for mobiles
-            } else {
+            }
+            else
+            {
                 deviceId = Settings.Secure.getString(cont.getContentResolver(),
                         Settings.Secure.ANDROID_ID); //*** use for tablets
             }
@@ -716,24 +739,41 @@ public  class LoginValidations
             subscription.setDeviceUdid(deviceId);
             subscription.setRegistrationID(regId);
 
-            QBPushNotifications.createSubscription(subscription, new QBEntityCallback<ArrayList<QBSubscription>>() {
+            QBPushNotifications.createSubscription(subscription, new QBEntityCallback<ArrayList<QBSubscription>>()
+            {
 
                 @Override
-                public void onSuccess(ArrayList<QBSubscription> subscriptions, Bundle args) {
+                public void onSuccess(ArrayList<QBSubscription> subscriptions, Bundle args)
+                {
                     Log.e("subscription","OnSuccess");
                     // Persist the regID - no need to register again.
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString(m_config.REG_ID, regId);
                     editor.apply();
-                    AWSDBOperations.createUser(cont, initialiseLoggedInUser(cont));
+                    //AWSPartyOperations.createUser(cont, initialiseLoggedInUser(cont));
+                    //AWSLoginOperations.addUserDeviceToken(cont,initialiseLoggedInUser(cont));
+                    new AWSLoginOperations.addUserDeviceToken(cont,initialiseLoggedInUser(cont)).execute();
 
                 }
 
                 @Override
-                public void onError(QBResponseException error) {
+                public void onError(QBResponseException e)
+                {
                     Log.e("subscription","onError");
-                    error.printStackTrace();
-                    AWSDBOperations.createUser(cont, initialiseLoggedInUser(cont));
+                    e.printStackTrace();
+
+                    Handler h = new Handler(cont.getMainLooper());
+                    h.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            GenerikFunctions.showToast(cont,"Login Failed, Please try again after some time");
+                        }
+                    });
+
+                    GenerikFunctions.hideDialog(m_config.pDialog);
+
                 }
             });
 
@@ -744,31 +784,10 @@ public  class LoginValidations
         }
     };
 
-    public static class ToastDispLooper implements Runnable
-    {
 
-        private Looper myLooper;
-        Context cont;
-        String message;
 
-        public ToastDispLooper(Context cont, String message)
-        {
-            this.cont = cont;
-            this.message = message;
-        }
 
-        @Override
-        public void run()
-        {
-            Looper.prepare();
-            // code that needed a separated thread
-            Toast.makeText(cont," "+message,Toast.LENGTH_SHORT).show();
 
-            myLooper = Looper.myLooper();
-            Looper.loop();
-            myLooper.quit();
-        }
-    };
 
 
     //Harshada
@@ -816,289 +835,156 @@ public  class LoginValidations
 
 
 
+   /* public static void updateQBProfileImage(String FBID, final String FBProfilePicUrl){
 
+        try {
+            String qbtoken = QBAuth.getBaseService().getToken();
+            Log.e("qbtoken ", qbtoken);
+        } catch (Exception e) {
 
-/*public static void createSession(final Context cont){
+        }
 
-
-        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-        QBAuth.createSession(new QBEntityCallback()
-        {
-            @Override
-            public void onSuccess(Object o, Bundle bundle)
-            {
-                Log.e("createSession", "onsuccess");
-
-                try
-                {
-                    String qbtoken = QBAuth.getBaseService().getToken();
-                    Log.e("New token", qbtoken);
-                }
-                catch (Exception e)
-                {
-
-                }
-
-                QBChatService.init(cont);
-                final QBChatService chatService = QBChatService.getInstance();
-                m_config.chatService = chatService;
-
-                String FBprofilePic = initialiseLoggedInUser(cont).getFB_USER_PROFILE_PIC();
-                String LIprofilePic = initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC();
-
-                String profilePic = FBprofilePic;
-                if(profilePic.equals(null) || profilePic.equals(""))
-                {
-                    if(LIprofilePic == null || LIprofilePic.equals(""))
-                    {
-                        profilePic = "";
-                    }
-                    else
-                    {
-                        profilePic = LIprofilePic;
-                    }
-                }
-                else
-                {
-                    profilePic = FBprofilePic;
-                }
-                Log.e("token", " " + getFBAccessToken().getToken());
-
-
-                loginWithFbQuickBlox(getFBAccessToken().getToken(), profilePic, cont);//"https://graph.facebook.com/129419790774542/picture?type=large");
-                //call to QuickBlox Login
-
-            }
-
-            @Override
-            public void onError(QBResponseException e)
-            {
-                Log.e("createSession","onerror");
-                e.printStackTrace();
-                //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                t.start();
-            }
-
-        });
-
-    }*/
-
-
-    //Harshada
-    //function for Login with  Quickblox(FB)
-    /*public static void loginWithFbQuickBlox(String accessToken, final String avatarUrl, final Context cont)
-    {
-
-        final SharedPreferences sharedpreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-
-        QBUsers.signInUsingSocialProvider(QBProvider.FACEBOOK, String.valueOf(accessToken),
-                null, new QBEntityCallback<QBUser>()
-                {
-                    @Override
-                    public void onSuccess(QBUser user, Bundle args)
-                    {
-                        Log.e("Facebook login","Success"+" ");
-                        Log.e("user",""+user);
-                        user.setFullName(sharedpreferences.getString(m_config.Entered_User_Name,""));
-                        uploadprofilePic(user, avatarUrl, cont);
-
-
-                    }
-
-                    @Override
-                    public void onError(QBResponseException e)
-                    {
-                        Log.e("Facebook login","OnError");
-                        e.printStackTrace();
-                        //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                        Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                        t.start();
-                    }
-                });
-
-    }*/
-
-
-
-    //Harshada
-    //function for chat login
-    /*public static void chatLogin(QBUser qb_user, final Context cont){
-
-        final SharedPreferences sharedpreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-
-        m_config.chatService.login(qb_user, new QBEntityCallback()
-        {
-            @Override
-            public void onSuccess(Object o, Bundle bundle)
-            {
-                Log.e("ChatServicelogin","Success ");
-
-                SharedPreferences.Editor editor= sharedpreferences.edit();
-                try {
-                    editor.putString(m_config.SessionToken,BaseService.getBaseService().getToken());
-                    editor.putLong("SessionExpirationDate",BaseService.getBaseService().getTokenExpirationDate().getTime());
-                } catch (BaseServiceException e) {
-                    e.printStackTrace();
-                    //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                    t.start();
-                }
-
-                editor.apply();
-
-
-                //QBGroupChatManager groupChatManager  = m_config.chatService.getGroupChatManager();
-                //QBPrivateChatManager privateChatManager = m_config.chatService.getPrivateChatManager();
-                //m_config.groupChatManager = groupChatManager;
-                //m_config.privateChatManager = privateChatManager;
-
-                //call to PlayServiceHelper
-                PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
-
-
-            }
-
-            @Override
-            public void onError(QBResponseException e)
-            {
-                // errror
-                Log.e("ChatServicelogin","OnError "+e.toString());
-                e.printStackTrace();
-               // Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                t.start();
-
-            }
-        });
-    }*/
-
-    //Harshada
-    //function for profile pic upload in Quickblox user table
-   /* public static void uploadprofilePic(QBUser user, String avatarUrl, final Context cont)
-    {
-        final SharedPreferences sharedpreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-        user.setCustomData(avatarUrl);
-
-        QBUsers.updateUser(user, new QBEntityCallback<QBUser>()
-        {
+        QBUsers.getUserByFacebookId(FBID, new QBEntityCallback<QBUser>() {
             @Override
             public void onSuccess(QBUser user, Bundle args) {
-                Log.e("user image "," "+user.getCustomData());
-                Log.e("updated user---",""+user);
+                user.setCustomData(FBProfilePicUrl);
+                Log.e("onSuccess"," "+user);
+            }
+
+            @Override
+            public void onError(QBResponseException errors) {
+                errors.printStackTrace();
+                Log.e("onError"," updating user");
+            }
+        });
+
+    }*/
 
 
-                if(user.equals(null) || user==null)
+    public static void FaceDetect(final Context cont)
+    {
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        Activity act = (Activity)cont;
+        faceOverlayView = (FaceOverlayView)act.findViewById(R.id.face_overlay);
+        try
+        {
+            GenerikFunctions.showDialog(m_config.pDialog,"Validationg...");
+            LoggedInUserInformation loggedInUserInformation = initialiseLoggedInUser(cont);
+            // Log.e("Inside try","yes");
+            String  url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
+            Log.e("URL for FB",url+"");
+            if(url.equals(null) || url.equals("") || url.equals("N/A"))
+            {
+                Log.e("Users FB Pic not Avail","Yes");
+                url = "";
+            }
+            else
+            {
+                url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
+            }
+            // Log.e("URL",url);
+            if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
+            {
+                // Log.e("Before Picasso play service","yes");
+                Target mTarget = new Target()
                 {
-                    //Log.e("primary user",null+"  null");
-                }
-                else {
-                    try
+                    @Override
+                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom)
                     {
-                        user.setPassword(BaseService.getBaseService().getToken());
+                        Log.e("FB bitmap loaded ","sucessfully  " + bitmap.toString() );
+                        faces = faceOverlayView.setBitmap(bitmap);
+                        Log.e("No of faces from post",faces+"");
 
-                    }
-                    catch (BaseServiceException e)
-                    {
-                        e.printStackTrace();
-                        //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                        // means you have not created a session before
-                        Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                        t.start();
-
-                    }
-
-                    // initialize Chat service
-                    try
-                    {
-
-//                        QBChatService.init(cont);
-//                        final QBChatService chatService = QBChatService.getInstance();
-//                        m_config.chatService = chatService;
-
-                        boolean isLoggedIn = m_config.chatService.isLoggedIn();
-                        if(isLoggedIn)
+                        if(faces>0)
                         {
-                            //if chat is LoggedIn give a call to PlayServiceHelper
-                            PlayServicesHelper playServicesHelper = new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+                            Log.e("There is face in pic",faces+"");
+                            Log.e("GO for OTP","Yes");
+                            //Set  Face detect flag here to true
+                            SharedPreferences.Editor editorq = sharedPreferences.edit();
+                            editorq.putString(m_config.FaceDetectDone,"Yes");
+                            editorq.apply();
+//                          Intent intent = new Intent(cont,OTPActivity.class);
+//                          cont.startActivity(intent);
                         }
                         else
                         {
-                            //call to chatLogin
-                            //chatLogin(user, cont);
-                            new chatLogin(user, cont).execute();
+                            //Set  Face detect flag here to false
+                            Log.e("There is no face in pic","");
+                            SharedPreferences.Editor editorq = sharedPreferences.edit();
+                            editorq.putString(m_config.FaceDetectDone,"No");
+                            editorq.apply();
+                            GenerikFunctions.showToast(cont,"There is no face in your profile pic");
                         }
-
+                        GenerikFunctions.hideDialog(m_config.pDialog);
                     }
-                    catch (Exception e)
+
+                    @Override
+                    public void onBitmapFailed(Drawable drawable)
                     {
-                        e.printStackTrace();
-                        //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                        Thread t = new Thread(new ToastDispLooper(cont, e.getMessage()));
-                        t.start();
+                        Log.e("On FB bitmap failed",drawable.toString());
                     }
-                }
 
+                    @Override
+                    public void onPrepareLoad(Drawable drawable)
+                    {
+                    }
+                };
 
+                Picasso.with(cont)
+                        .load(url)
+                        .into(mTarget);
+                faceOverlayView.setTag(mTarget);
             }
-
-            @Override
-            public void onError(QBResponseException errors)
-            {
-
-            }
-        });
-
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
-    //subscribe deviceId and regId in quickblox for PushNotifications
-    /*public static void subscribeToPushNotifications(final String regId, TelephonyManager mTelephony, final Activity context) {
+    public static void checkPendingLoginFlags(Context cont)
+    {
+        Log.e("checkPendingLoginFlags","checkPendingLoginFlags");
+        LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
 
-        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-        final SharedPreferences sharedpreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        Log.e("In Check Pending Flags",sharedPreferences.getString(m_config.BasicFBLIValidationsDone,"No")
+        +"    " +sharedPreferences.getString(m_config.FaceDetectDone,"No") +"     " +
+                sharedPreferences.getString(m_config.OTPValidationDone,"No"));
 
-        QBSubscription subscription = new QBSubscription(QBNotificationChannel.GCM);
-        subscription.setEnvironment(QBEnvironment.DEVELOPMENT);
+        if(sharedPreferences.getString(m_config.BasicFBLIValidationsDone,"No").equals("Yes"))
+        {
+            if(sharedPreferences.getString(m_config.FaceDetectDone,"No").equals("Yes"))
+            {
+                if(sharedPreferences.getString(m_config.OTPValidationDone,"No").equals("Yes"))
+                {
 
-        String deviceId;
+                    new AWSLoginOperations.addUserRegStatus(cont,loggedInUserInformation).execute();///only for testing
 
-        if (mTelephony.getDeviceId() != null) {
-            deviceId = mTelephony.getDeviceId(); //*** use for mobiles
-        } else {
-            deviceId = Settings.Secure.getString(context.getContentResolver(),
-                    Settings.Secure.ANDROID_ID); //*** use for tablets
+                  //  GenerikFunctions.hideDialog(m_config.pDialog);
+                }
+                else
+                {
+                    new AWSLoginOperations.addUserRegStatus(cont,loggedInUserInformation).execute();///only for testing
+
+                    //Uncomment this later
+//                    Intent intent = new Intent(cont,OTPActivity.class);
+//                    cont.startActivity(intent);
+                }
+            }
+            else
+            {
+                Log.e("Go for Face Detect","Yes");
+                FaceDetect(cont);
+            }
         }
-        Log.e("deviceId"," "+deviceId +" "+regId);
-
-        subscription.setDeviceUdid(deviceId);
-        subscription.setRegistrationID(regId);
-
-        QBPushNotifications.createSubscription(subscription, new QBEntityCallback<ArrayList<QBSubscription>>() {
-
-            @Override
-            public void onSuccess(ArrayList<QBSubscription> subscriptions, Bundle args) {
-                Log.e("subscription","OnSuccess");
-                // Persist the regID - no need to register again.
-                SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putString(m_config.REG_ID, regId);
-                editor.apply();
-                AWSDBOperations.createUser(context, initialiseLoggedInUser(context));
-
-
-
-            }
-
-            @Override
-            public void onError(QBResponseException error) {
-                Log.e("subscription","onError");
-                error.printStackTrace();
-            }
-        });
-
-    }*/
+        else
+        {
+            new AsyncAgeCalculation(cont).execute();
+        }
+    }
 
 
 }

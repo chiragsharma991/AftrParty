@@ -20,7 +20,7 @@ import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -220,7 +220,7 @@ public class PlayServicesHelper1 {
                     Log.e("subscription","OnSuccess");
                     // Persist the regID - no need to register again.
                     storeRegistrationId(regId);
-                    AWSDBOperations.createUser(context, loggedInUserInfo);
+                    //AWSPartyOperations.createUser(context, loggedInUserInfo);
                 }
 
                 @Override

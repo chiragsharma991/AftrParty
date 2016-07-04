@@ -19,6 +19,8 @@ import com.aperotechnologies.aftrparties.R;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+
 /**
  * Created by hasai on 06/05/16.
  */
@@ -43,11 +45,12 @@ public class GateCrasherActivity extends Activity
 
             cont = this;
             m_config=Configuration_Parameter.getInstance();
+            Crouton.cancelAllCroutons();
+            m_config.foregroundCont = this;
 
-            String StartTime = getIntent().getExtras().getString("StartTime");
 
             listGateCrasher = (ListView) findViewById(R.id.listgatecrasher);
-            new GetData(StartTime).execute();
+            new GetData().execute();
 
 
 
@@ -57,10 +60,6 @@ public class GateCrasherActivity extends Activity
 
     public class GetData extends AsyncTask<Void,Void,Void>
     {
-        String startTime;
-        public GetData(String startTime) {
-            this.startTime = startTime;
-        }
 
         @Override
         protected Void doInBackground(Void... params)
@@ -83,7 +82,7 @@ public class GateCrasherActivity extends Activity
 //
 //                        }
 
-                adapter = new GateCrasherAdapter(GateCrasherActivity.this, result, startTime) {
+                adapter = new GateCrasherAdapter(GateCrasherActivity.this, result) {
 
                 };
 
@@ -104,4 +103,15 @@ public class GateCrasherActivity extends Activity
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
 }

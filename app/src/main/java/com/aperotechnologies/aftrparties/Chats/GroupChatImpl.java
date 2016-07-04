@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBGroupChat;
 import com.quickblox.chat.QBGroupChatManager;
 import com.quickblox.chat.exception.QBChatException;
@@ -43,8 +44,8 @@ public class GroupChatImpl extends QBMessageListenerImpl<QBGroupChat> implements
     private void initManagerIfNeed(){
         if(groupChatManager == null){
 
-            //groupChatManager = m_config.groupChatManager;//QBChatService.getInstance().getGroupChatManager();
-            groupChatManager  = m_config.chatService.getGroupChatManager();
+            groupChatManager = QBChatService.getInstance().getGroupChatManager();
+
 
         }
     }

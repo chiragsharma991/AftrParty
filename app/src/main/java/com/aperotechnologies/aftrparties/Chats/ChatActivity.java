@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -13,8 +16,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
@@ -25,13 +28,7 @@ import com.quickblox.chat.model.QBDialog;
 import com.quickblox.chat.model.QBDialogType;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
-import com.quickblox.core.helper.StringifyArrayList;
 import com.quickblox.core.request.QBRequestGetBuilder;
-import com.quickblox.messages.QBPushNotifications;
-import com.quickblox.messages.model.QBEnvironment;
-import com.quickblox.messages.model.QBEvent;
-import com.quickblox.messages.model.QBNotificationType;
-import com.quickblox.users.model.QBUser;
 
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SmackException;
@@ -40,28 +37,33 @@ import org.jivesoftware.smack.XMPPException;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
 
 
-public class ChatActivity extends Activity  {
+public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = ChatActivity.class.getSimpleName();
-
-    private TextView groupName;
-    private TextView noOfParticipants;
-    private EditText messageEditText;
-    private ListView messagesContainer;
-    private Button sendButton;
-    private ProgressBar progressBar;
-    private ChatAdapter adapter;
-
-
+    Configuration_Parameter m_config;
+    SharedPreferences sharedpreferences;
     private Chat chat;
     private QBDialog dialog;
-    //private KeyboardHandleRelativeLayout keyboardHandleLayout;
-    private RelativeLayout container;
-    Configuration_Parameter m_config;
-    QBUser opponentUser;
+    private TextView groupName;
+    private ProgressBar progressBar;
+    //private ListView messagesContainer;
+    private EditText messageEditText;
+    private Button sendButton;
+    private ChatAdapter adapter;
+    //QBUser opponentUser;
+
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private ListView listView;
+    private ArrayList<QBChatMessage> listadptchatMessages;
+    private int index = 0;
+    private int selCount = 0;
+
+
+
 
     public static void start(Context context, Bundle bundle) {
         Intent intent = new Intent(context, ChatActivity.class);
@@ -73,62 +75,60 @@ public class ChatActivity extends Activity  {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        index = 0;
 
-        opponentUser = new QBUser();
 
-        m_config=Configuration_Parameter.getInstance();
+        m_config = Configuration_Parameter.getInstance();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
+        sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
-        messagesContainer = (ListView) findViewById(R.id.messagesContainer);
-        groupName = (TextView) findViewById(R.id.groupName);
-        noOfParticipants = (TextView) findViewById(R.id.noOfParticipants);
-        messageEditText = (EditText) findViewById(R.id.messageEdit);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        TextView companionLabel = (TextView) findViewById(R.id.companionLabel);
-        Button imgInfo = (Button) findViewById(R.id.imgInfo);
-        Button imgCall = (Button) findViewById(R.id.imgCall);
 
         // Setup opponents info
-        //
         Intent intent = getIntent();
         dialog = (QBDialog) intent.getSerializableExtra(ConstsCore.EXTRA_DIALOG);
-        container = (RelativeLayout) findViewById(R.id.container);
-        if (dialog.getType() == QBDialogType.GROUP) {
-            TextView meLabel = (TextView) findViewById(R.id.meLabel);
-            container.removeView(meLabel);
-            container.removeView(companionLabel);
-            imgInfo.setVisibility(View.VISIBLE);
-            imgCall.setVisibility(View.GONE);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        listView = (ListView) findViewById(R.id.messagesContainer);
+        listadptchatMessages = new ArrayList<>();
+        Log.e("listadptchatMessages"," "+listadptchatMessages);
+        adapter = new ChatAdapter(ChatActivity.this, listadptchatMessages, dialog.getType());
+        listView.setAdapter(adapter);
+        swipeRefreshLayout.setOnRefreshListener(this);
+
+        groupName = (TextView) findViewById(R.id.groupName);
+        messageEditText = (EditText) findViewById(R.id.messageEdit);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+
+
+        if (dialog.getType() == QBDialogType.GROUP)
+        {
             groupName.setText(dialog.getName());
-            noOfParticipants.setText(dialog.getOccupants().size()+" Participants");
 
-
-        } else if (dialog.getType() == QBDialogType.PRIVATE) {
+        }
+        else if (dialog.getType() == QBDialogType.PRIVATE)
+        {
             Integer opponentID = getOpponentIDForPrivateDialog(dialog);
-            opponentUser = ChatService.getInstance().getDialogsUsers().get(opponentID);
-            //companionLabel.setText(ChatService.getInstance().getDialogsUsers().get(opponentID).getFullName());
-            TextView meLabel = (TextView) findViewById(R.id.meLabel);
-            container.removeView(meLabel);
-            container.removeView(companionLabel);
-            imgInfo.setVisibility(View.GONE);
-            imgCall.setVisibility(View.VISIBLE);
-            Log.e("--- ",""+opponentID);
-            if(ChatService.getInstance().getDialogsUsers() == null){
-
-            }else{
+            //opponentUser = ChatService.getInstance().getDialogsUsers().get(opponentID);
+            if(ChatService.getInstance().getDialogsUsers() == null)
+            {
+            }
+            else
+            {
                 groupName.setText(ChatService.getInstance().getDialogsUsers().get(opponentID).getFullName());
 
             }
-            noOfParticipants.setText("");
         }
 
         // Send button
-        //
         sendButton = (Button) findViewById(R.id.chatSendButton);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String messageText = messageEditText.getText().toString().replaceAll("\\s+", " ").trim();
-                if (TextUtils.isEmpty(messageText)) {
+                if (TextUtils.isEmpty(messageText))
+                {
                     return;
                 }
                 sendChatMessage(messageText);
@@ -136,36 +136,21 @@ public class ChatActivity extends Activity  {
             }
         });
 
-        imgInfo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Bundle bundle = new Bundle();
-                bundle.putSerializable(ConstsCore.EXTRA_DIALOG, dialog);
-                //GroupDialogDetailsActivity.start(ChatActivity.this, bundle);
-                //Log.e("bundle "," "+bundle);
-            }
-        });
-
-        imgCall.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //callToUser(opponentUser, QBRTCTypes.QBConferenceType.QB_CONFERENCE_TYPE_AUDIO);
-            }
-        });
 
         initChat();
-        ChatService.getInstance().addConnectionListener(chatConnectionListener);    }
+        ChatService.getInstance().addConnectionListener(chatConnectionListener);
+    }
 
 
-//    private void callToUser(QBUser user, QBRTCTypes.QBConferenceType qbConferenceType) {
-//
-//        List<QBUser> qbUserList = new ArrayList<>();
-//        //qbUserList.add(UserFriendUtils.createQbUser(user));
-//        qbUserList.add(user);
-//        //CallActivity.start(ChatActivity.this, qbUserList, qbConferenceType, null);
-//    }
+    /**
+     * This method is called when swipe refresh is pulled down
+     */
+    @Override
+    public void onRefresh() {
+        index = index + 20;
 
-
+        loadChatHistory(index, "pulling page");
+    }
 
 
     @Override
@@ -185,9 +170,6 @@ public class ChatActivity extends Activity  {
             }
             super.onBackPressed();
 
-            Intent i = new Intent(ChatActivity.this, DialogsActivity.class);
-            startActivity(i);
-            finish();
 
     }
 
@@ -196,6 +178,8 @@ public class ChatActivity extends Activity  {
         ((InputMethodManager) messageEditText.getContext().getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(messageEditText, InputMethodManager.SHOW_IMPLICIT);
     }
 
+
+    //function for sending chat message
     private void sendChatMessage(String messageText) {
         QBChatMessage chatMessage = new QBChatMessage();
         chatMessage.setBody(messageText);
@@ -204,7 +188,6 @@ public class ChatActivity extends Activity  {
 
         try {
             chat.sendMessage(chatMessage);
-            //sendPushNotifications(messageText);
 
         } catch (XMPPException e) {
             Log.e(TAG, "failed to send a message", e);
@@ -215,6 +198,7 @@ public class ChatActivity extends Activity  {
         messageEditText.setText("");
 
         if (dialog.getType() == QBDialogType.PRIVATE) {
+
             showMessage(chatMessage);
         }
     }
@@ -226,9 +210,9 @@ public class ChatActivity extends Activity  {
 
         if (dialog.getType() == QBDialogType.GROUP) {
             chat = new GroupChatImpl(this);//this variable will be use for sending message
+            //progressBar.setVisibility(View.VISIBLE);
             // Join group chat
             //
-            progressBar.setVisibility(View.VISIBLE);
             joinGroupChat();
 
         } else if (dialog.getType() == QBDialogType.PRIVATE) {
@@ -236,7 +220,8 @@ public class ChatActivity extends Activity  {
             chat = new PrivateChatImpl(this, opponentID);//this variable will be use for sending message
             // Load Chat history
             //
-            loadChatHistory();
+            //swipeRefreshLayout.setRefreshing(true);
+            loadChatHistory(index, "loading page");
         }
     }
 
@@ -245,39 +230,67 @@ public class ChatActivity extends Activity  {
 
             @Override
             public void onSuccess(Object o, Bundle bundle) {
-                loadChatHistory();
-                Log.e("Success "," "+o);
+                loadChatHistory(index, "loading page");
+                Log.e("Success "," joinGroupChat");
             }
 
             @Override
             public void onError(QBResponseException e) {
                 AlertDialog.Builder dialog = new AlertDialog.Builder(ChatActivity.this);
                 dialog.setMessage("error when join group chat: " + e.toString()).create().show();
+                //progressBar.setVisibility(View.GONE);
             }
 
 
         });
     }
 
-    public void loadChatHistory() {
+    public void loadChatHistory(final int index, final String check)
+    {
+        swipeRefreshLayout.setRefreshing(true);
+
+        Log.e("index "," count "+index);
+
         QBRequestGetBuilder customObjectRequestBuilder = new QBRequestGetBuilder();
-        customObjectRequestBuilder.setPagesLimit(100);
+        customObjectRequestBuilder.setSkip(index);
+        customObjectRequestBuilder.setLimit(20);
         customObjectRequestBuilder.sortDesc("date_sent");
 
-        QBChatService.getDialogMessages(dialog, customObjectRequestBuilder, new QBEntityCallback<ArrayList<QBChatMessage>>() {
+        QBChatService.getDialogMessages(dialog, customObjectRequestBuilder, new QBEntityCallback<ArrayList<QBChatMessage>>()
+        {
             @Override
-            public void onSuccess(ArrayList<QBChatMessage> messages, Bundle args) {
+            public void onSuccess(ArrayList<QBChatMessage> messages, Bundle args)
+            {
 
-                adapter = new ChatAdapter(ChatActivity.this, new ArrayList<QBChatMessage>());
-                messagesContainer.setAdapter(adapter);
                 Log.e("messages","size "+messages.size());
+                selCount += messages.size();
+                int selVal = selCount - index;
+                Log.e("selVal"," "+selVal);
 
-                for (int i = messages.size() - 1; i >= 0; --i) {
-                    QBChatMessage msg = messages.get(i);
-                    showMessage(msg);
+                if(messages.size() > 0)
+                {
+
+                    for (int i = 0; i < messages.size(); i++)
+                    {
+
+                        QBChatMessage msg = messages.get(i);
+                        listadptchatMessages.add(0, msg);
+
+                    }
+                    adapter.notifyDataSetChanged();
+
+                    if(check == "loading page")
+                    {
+                        scrollDown();
+                    }
+                    else
+                    {
+
+                        listView.setSelection(selVal);
+                    }
+
                 }
-
-                progressBar.setVisibility(View.GONE);
+                swipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
@@ -289,25 +302,33 @@ public class ChatActivity extends Activity  {
         });
     }
 
-    public void showMessage(QBChatMessage message) {
-        adapter.add(message);
+    public void showMessage(QBChatMessage message)
+    {
+        if(adapter != null)
+        {
+            adapter.add(message);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    adapter.notifyDataSetChanged();
+                    scrollDown();
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                adapter.notifyDataSetChanged();
-                //scrollDown();
-            }
-        });
+                }
+            });
+        }
+
     }
 
-    private void scrollDown() {
-        Log.e("messagesContainer.getCount()"," "+(messagesContainer.getCount() - 1));
-        messagesContainer.setSelection(messagesContainer.getCount() - 1);
+    private void scrollDown()
+    {
+        Log.e("messagesContainer.getCount()"," "+(listView.getCount() - 1));
+        listView.setSelection(listView.getCount() - 1);
     }
 
 
-    ConnectionListener chatConnectionListener = new ConnectionListener() {
+
+    ConnectionListener chatConnectionListener = new ConnectionListener()
+    {
         @Override
         public void connected(XMPPConnection connection) {
             Log.i(TAG, "connected");
@@ -325,12 +346,14 @@ public class ChatActivity extends Activity  {
         }
 
         @Override
-        public void connectionClosedOnError(final Exception e) {
+        public void connectionClosedOnError(final Exception e)
+        {
             Log.i(TAG, "connectionClosedOnError: " + e.getLocalizedMessage());
 
             // leave active room
             //
-            if (dialog.getType() == QBDialogType.GROUP) {
+            if (dialog.getType() == QBDialogType.GROUP)
+            {
                 ChatActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -341,14 +364,16 @@ public class ChatActivity extends Activity  {
         }
 
         @Override
-        public void reconnectingIn(final int seconds) {
+        public void reconnectingIn(final int seconds)
+        {
             if (seconds % 5 == 0) {
                 Log.i(TAG, "reconnectingIn: " + seconds);
             }
         }
 
         @Override
-        public void reconnectionSuccessful() {
+        public void reconnectionSuccessful()
+        {
             Log.i(TAG, "reconnectionSuccessful");
 
             // Join active room
@@ -364,37 +389,21 @@ public class ChatActivity extends Activity  {
         }
 
         @Override
-        public void reconnectionFailed(final Exception error) {
+        public void reconnectionFailed(final Exception error)
+        {
             Log.i(TAG, "reconnectionFailed: " + error.getLocalizedMessage());
         }
     };
 
 
-    //
-    // ApplicationSessionStateCallback
-    //
 
-    /*@Override
-    public void onStartSessionRecreation() {
-
-    }
-
-    @Override
-    public void onFinishSessionRecreation(final boolean success) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (success) {
-                    initChat();
-                }
-            }
-        });
-    }*/
-
-    public Integer getOpponentIDForPrivateDialog(QBDialog dialog){
+    public Integer getOpponentIDForPrivateDialog(QBDialog dialog)
+    {
         Integer opponentID = -1;
+        //Log.e("----"," "+dialog.getOccupants());
+
         for(Integer userID : dialog.getOccupants()){
-            if(!userID.equals(m_config.chatService.getUser().getId())){
+            if(!userID.equals(Integer.valueOf(sharedpreferences.getString(m_config.QuickBloxID,"")))){
                 opponentID = userID;
                 Log.e("opponentId ",""+opponentID);
                 break;
@@ -404,54 +413,13 @@ public class ChatActivity extends Activity  {
     }
 
 
-    public StringifyArrayList<Integer> getOccupantidforPushNotification(QBDialog dialog){
-        StringifyArrayList<Integer> userIds = new StringifyArrayList<Integer>();
-        for(Integer userID : dialog.getOccupants()){
-            if(!userID.equals(m_config.chatService.getUser().getId())){
-                userIds.add(userID);
-                Log.e("opponentId ",""+userIds);
-                break;
-            }
-        }
-        return userIds;
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
     }
-
-
-    private void sendPushNotifications(String messageText) {
-
-        StringifyArrayList<Integer> useroccupantIDs = getOccupantidforPushNotification(dialog);
-        Log.e("useroccupantIDs"," "+useroccupantIDs);
-
-        QBEvent event = new QBEvent();
-        event.setUserIds(useroccupantIDs);
-        event.setEnvironment(QBEnvironment.DEVELOPMENT);
-        event.setNotificationType(QBNotificationType.PUSH);
-        HashMap<String, String> data = new HashMap<String, String>();
-        if (dialog.getType() == QBDialogType.GROUP) {
-            data.put("data.message", m_config.chatService.getUser().getFullName() + " @ "+dialog.getName() +" " + messageText);
-        }else{
-            data.put("data.message", m_config.chatService.getUser().getFullName() + " : " +messageText);
-        }
-
-        data.put("data.type", "unreadmsg");
-        event.setMessage(String.valueOf(data));
-
-
-        QBPushNotifications.createEvent(event, new QBEntityCallback<QBEvent>() {
-            @Override
-            public void onSuccess(QBEvent qbEvent, Bundle args) {
-                // sent
-                Log.e("notification ","success");
-            }
-
-            @Override
-            public void onError(QBResponseException errors) {
-                Log.e("notification ","errors");
-            }
-        });
-
-    }
-
 
 
 

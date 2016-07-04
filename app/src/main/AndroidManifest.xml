@@ -2,7 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aperotechnologies.aftrparties">
 
+
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -36,17 +38,23 @@
             android:exported="true" />
 
 
+
+
         <activity
             android:name="com.aperotechnologies.aftrparties.Login.Welcome"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.Login.LoginActivity"
+            android:name="com.aperotechnologies.aftrparties.Login.RegistrationActivity"
             android:screenOrientation="portrait"></activity>
 
 
         <activity
             android:name="com.aperotechnologies.aftrparties.HomePage.HomePageActivity"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name=".TransparentActivity"
             android:screenOrientation="portrait"></activity>
 
 
@@ -55,11 +63,23 @@
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.SettingsActivity"
+            android:name="com.aperotechnologies.aftrparties.Settings.SettingsActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
             android:name="com.aperotechnologies.aftrparties.History.HistoryActivity"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name="com.aperotechnologies.aftrparties.History.PartyDetails"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name=".History.RequestantListActivity"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name=".History.FBProfileWebView"
             android:screenOrientation="portrait"></activity>
 
         <activity
@@ -74,8 +94,6 @@
         <activity
             android:name="com.aperotechnologies.aftrparties.GateCrasher.GateCrasherActivity"
             android:screenOrientation="portrait"></activity>
-
-
 
         <activity
             android:name="com.aperotechnologies.aftrparties.Chats.DialogsActivity"
@@ -93,6 +111,18 @@
         <activity android:name=".InAppPurchase.InAppBillingActivity"
             android:screenOrientation="portrait"></activity>
 
+        <activity android:name=".GateCrasher.RatePartyActivity" />
+
+
+        <!-- Local Notification receiver-->
+
+        <receiver android:name=".GateCrasher.RatingsAlarmReceiver">
+            <intent-filter>
+                <action android:name="android.media.action.DISPLAY_NOTIFICATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
 
 
         <!-- GCM (Push Notifications) setup: http://developer.android.com/google/gcm/gs.html#android-app -->
@@ -106,12 +136,12 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
 
-                <category android:name="com.mpatil.qmute_sample" />
+                <category android:name="com.aperotechnologies.aftrparties" />
             </intent-filter>
         </receiver>
 
         <!-- 2. Add the following intent service: -->
-        <service android:name=".PNotifications.GCMIntentService"/>
+        <service android:name=".PNotifications.GCMIntentService" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -125,12 +155,9 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="ffdd609785d2fe5506254706299413b2c3ea9898" />
-
-        <meta-data android:name="CLOUDINARY_URL" android:value="cloudinary://585356451553425:ylB_rZgnwVT823PH3_HtZo79Sf4@dklb21dyh"/>
-
+        <!--<meta-data android:name="CLOUDINARY_URL" android:value="cloudinary://585356451553425:ylB_rZgnwVT823PH3_HtZo79Sf4@dklb21dyh"/>-->
 
     </application>
-
 
     <permission
         android:name="com.aperotechnologies.aftrparties.permission.C2D_MESSAGE"
@@ -140,15 +167,16 @@
     <!-- 5. Add the following permissions: -->
     <!-- App receives GCM messages. -->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <!-- GCM connects to Google Services. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- GCM requires a Google account. -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <!-- Keeps the processor from sleeping when a message is received. -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <Protected-broadcast android:name="android.location.BOOT_COMPLETED" />
-    <Protected-broadcast android:name="android.location.USER_PRESENT" />
-
-
-    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Access to  device info-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <protected-broadcast android:name="android.location.BOOT_COMPLETED" />
+    <protected-broadcast android:name="android.location.USER_PRESENT" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
@@ -156,11 +184,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="com.android.vending.BILLING" />
-
-
-
-
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.GET_TASKS"/>
 
 </manifest>

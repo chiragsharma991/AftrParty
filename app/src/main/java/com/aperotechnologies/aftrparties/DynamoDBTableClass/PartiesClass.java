@@ -9,30 +9,29 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBDocument
 @DynamoDBDocument
 public class PartiesClass {
 
-    private String PartyId;
-    private String PartyName;
-    private String PartyStatus;
-    private String PartyStartTime;
-    private String PartyEndTime;
+    private String partyid;
+    private String partyname;
+    private String partystatus;
+    private String starttime;
+    private String endtime;
 
 
 
-    public String getPartyId() { return PartyId; }
-    public void setPartyId(String PartyId) { this.PartyId = PartyId; }
 
-    public String getPartyName() { return PartyName; }
-    public void setPartyName(String PartyName) { this.PartyName = PartyName; }
+    public String getPartyid() { return partyid; }
+    public void setPartyid(String partyid) { this.partyid = partyid; }
 
-    public String getPartyStatus() { return PartyStatus; }
-    public void setPartyStatus(String PartyStatus) { this.PartyStatus = PartyStatus; }
+    public String getPartyname() { return partyname; }
+    public void setPartyname(String partyname) { this.partyname = partyname; }
 
-    public String getStartTime() { return PartyStartTime; }
-    public void setStartTime(String PartyStartTime) { this.PartyStartTime = PartyStartTime; }
+    public String getPartystatus() { return partystatus; }
+    public void setPartystatus(String partystatus) { this.partystatus = partystatus; }
 
-    public String getEndTime() { return PartyEndTime; }
-    public void setEndTime(String PartyEndTime) { this.PartyEndTime = PartyEndTime; }
+    public String getStarttime() { return starttime; }
+    public void setStarttime(String starttime) { this.starttime = starttime; }
 
-
+    public String getEndtime() { return endtime; }
+    public void setEndtime(String endtime) { this.endtime = endtime; }
 
 }
 

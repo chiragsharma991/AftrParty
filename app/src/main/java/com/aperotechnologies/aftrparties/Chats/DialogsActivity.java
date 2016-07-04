@@ -1,205 +1,311 @@
 package com.aperotechnologies.aftrparties.Chats;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.R;
+import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.model.QBDialog;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
-
+import com.quickblox.core.request.QBPagedRequestBuilder;
+import com.quickblox.core.request.QBRequestGetBuilder;
+import com.quickblox.users.QBUsers;
+import com.quickblox.users.model.QBUser;
 import java.util.ArrayList;
 import java.util.List;
+import de.keyboardsurfer.android.widget.crouton.Crouton;
 
 
-
-
-
-public class DialogsActivity extends Activity
-{
-
+public class DialogsActivity extends Activity implements AbsListView.OnScrollListener {
     private static final String TAG = DialogsActivity.class.getSimpleName();
-    private ListView dialogsListView;
-    //LoadMoreListView dialogsListView;
-    private ProgressBar progressBar;
-    TextView txtNoChat;
-    Button btnLoadMore;
     Configuration_Parameter m_config;
-    int count = 2;
+    Context cont;
+    private ListView listDialogs;
+    private ProgressBar footerView;
+    DialogsAdapter adapter;
+    private ProgressBar pBar;
+    TextView txtNoChat;
+    private int index = 0;
+    private int count = 10;
+    ArrayList<QBDialog> listadpDialogs;
+    ArrayList<QBUser> dialogusers;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
+    public void onCreate(Bundle savedInstanceState)
+
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialogs_activity);
-        //playServicesHelper = new PlayServicesHelper(this);
-        m_config= Configuration_Parameter.getInstance();
-
-        dialogsListView = (ListView) findViewById(R.id.roomsList);
-        //dialogsListView = (LoadMoreListView) findViewById(R.id.roomsList);
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        txtNoChat = (TextView)findViewById(R.id.nochat);
-        btnLoadMore = (Button)findViewById(R.id.btnloadmore);
-
-//        // Creating a button - Load More
-//        Button btnLoadMore = new Button(this);
-//        btnLoadMore.setText("Load More");
-//
-//        // Adding button to listview at footer
-//        dialogsListView.addFooterView(btnLoadMore);
-        progressBar.setVisibility(View.VISIBLE);
-        // Get dialogs
-        getDialogs(count);
-
-        btnLoadMore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                count = count + 2;
-                getDialogs(count);
-            }
-        });
+        index = 0;
+        count = 10;
 
 
-//        ((LoadMoreListView) getListView())
-//                .setOnLoadMoreListener(new OnLoadMoreListener() {
-//                    public void onLoadMore() {
-//                        count = count + 2;
-//                        getDialogs(count);
-//                    }
-//                });
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
 
-    }
+        m_config = Configuration_Parameter.getInstance();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
+        cont = this;
 
-    private void getDialogs(int count){
-        //progressBar.setVisibility(View.VISIBLE);
+        pBar = (ProgressBar) findViewById(R.id.progressBar1);
+        pBar.setVisibility(View.VISIBLE);
+        txtNoChat = (TextView) findViewById(R.id.nochat);
 
+        listDialogs = (ListView) findViewById(R.id.chatDialogslist);
+        listadpDialogs = new ArrayList<>();
+        dialogusers = new ArrayList<>();
 
-//         QBRequestGetBuilder requestBuilder = new QBRequestGetBuilder();
-//                    requestBuilder.sortAsc("last_message_date_sent");
-//                    QBChatService.getChatDialogs(null, requestBuilder, new QBEntityCallback<ArrayList<QBDialog>>()
-//                    {
-//                        @Override
-//                        public void onSuccess(ArrayList<QBDialog> dialogs, Bundle args)
-//                        {
-//                            progressBar.setVisibility(View.GONE);
-//                            Log.e("dialogs "," "+dialogs);
-//
-//                            buildListView(dialogs);
-//                        }
-//                        @Override
-//                        public void onError(QBResponseException e)
-//                        {
-//                            progressBar.setVisibility(View.GONE);
-//                        }
-//                    });
+        //add the footer before adding the adapter, else the footer will not load!
+        footerView = (ProgressBar) ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.list_footer, null, false);
 
 
-        // Get dialogs
-        //
-        ChatService.getInstance().getDialogs(new QBEntityCallback() {
-            @Override
-            public void onSuccess(Object object, Bundle bundle) {
+        getDialogs(index, count, "loading page");
 
 
-                final ArrayList<QBDialog> dialogs = (ArrayList<QBDialog>)object;
-                Log.e("dialogs "," "+dialogs.size());
-                // build list view
-                //
-                if(dialogs.size() == 0){
-                    progressBar.setVisibility(View.GONE);
-                    txtNoChat.setVisibility(View.VISIBLE);
-                    txtNoChat.setText("No Chat Available");
-                    return;
-                }else{
-                    txtNoChat.setVisibility(View.GONE);
-                }
-
-                buildListView(dialogs);
-            }
-
-            @Override
-            public void onError(QBResponseException e) {
-                e.printStackTrace();
-                progressBar.setVisibility(View.GONE);
-                txtNoChat.setVisibility(View.VISIBLE);
-                txtNoChat.setText("Some Error Occured");
-
-
-            }
-
-
-        },count);
-
-    }
-
-
-    void buildListView(List<QBDialog> dialogs)
-    {
-        final DialogsAdapter adapter = new DialogsAdapter(dialogs, DialogsActivity.this);
-        dialogsListView.setAdapter(adapter);
-        progressBar.setVisibility(View.GONE);
-        // choose dialog
-        dialogsListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        listDialogs.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                if(m_config.notificationManager != null){
+                if(m_config.notificationManager != null)
+                {
                     m_config.notificationManager.cancelAll();
-
                 }
 
                 QBDialog selectedDialog = (QBDialog) adapter.getItem(position);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(ConstsCore.EXTRA_DIALOG, selectedDialog);
                 // Open chat activity
-                //
                 ChatActivity.start(DialogsActivity.this, bundle);
-                finish();
+
+                //if there are unread mesages, on click of dialog set unread message count to zero/blank
+                TextView txtUnreadMessage = (TextView) view.findViewById(R.id.textunreadmessage);
+                txtUnreadMessage.setText("");
+                selectedDialog.setUnreadMessageCount(0);
+                listadpDialogs.remove(position);
+                listadpDialogs.add(position, selectedDialog);
+
+
             }
         });
+
     }
 
-//    @Override
-//    protected void onResume()
-//    {
-//        super.onResume();
-//    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        return true;
+    private void getDialogs(final int index, final int count, final String check) {
+        Log.e("index count ",index+"    "+ count);
+
+        QBRequestGetBuilder requestBuilder1 = new QBRequestGetBuilder();
+        requestBuilder1.setSkip(index);
+        requestBuilder1.setLimit(10);
+        requestBuilder1.sortDesc("last_message_date_sent");
+
+        QBChatService.getInstance().getChatDialogs(null, requestBuilder1, new QBEntityCallback<ArrayList<QBDialog>>()
+        {
+            @Override
+            public void onSuccess(final ArrayList<QBDialog> dialogs, final Bundle args)
+            {
+
+                Log.e("onSuccess","");
+
+                //final int totalEntries = args.getInt("total_entries");
+                if(dialogs.size() > 0)
+                {
+                    // collect all occupants ids
+                    //
+                    List<Integer> usersIDs = new ArrayList<Integer>();
+                    for (QBDialog dialog : dialogs)
+                    {
+
+                        //Log.e(TAG, " " + dialog.getOccupants());
+                        usersIDs.addAll(dialog.getOccupants());
+                    }
+
+                    // Get all occupants info
+                    //
+                    QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder();
+                    requestBuilder.setPage(1);
+                    requestBuilder.setPerPage(usersIDs.size());
+                    //
+                    QBUsers.getUsersByIDs(usersIDs, requestBuilder, new QBEntityCallback<ArrayList<QBUser>>()
+                    {
+                        @Override
+                        public void onSuccess(ArrayList<QBUser> users, Bundle params)
+                        {
+
+                            // Save users
+                            //
+                            Log.e(":dialogusers ", " " + dialogusers.size());
+                            for(int i = 0; i < users.size(); i++)
+                            {
+                                if(!dialogusers.contains(users.get(i))){
+                                    dialogusers.add(users.get(i));
+                                }
+
+                            }
+                            ChatService.getInstance().setDialogsUsers(dialogusers);
+                            Log.e(":dialogusers ", " " + dialogusers.size());
+//
+
+                            try
+                            {
+
+
+                                listDialogs.removeFooterView(footerView);
+
+                                for(int i = 0; i < dialogs.size(); i++)
+                                {
+                                    QBDialog dialog = dialogs.get(i);
+                                    Log.e("Name "," "+dialogs.get(i).getName());
+                                    listadpDialogs.add(dialog);
+
+                                }
+
+                                if(check == "loading page")
+                                {
+                                    setDialogsListAdapter();
+                                }
+                                else
+                                {
+                                    adapter.notifyDataSetChanged();
+                                }
+
+                                if(listadpDialogs.size() < count)
+                                {
+                                    listDialogs.setOnScrollListener(null);
+                                }
+                                else
+                                {
+
+                                    listDialogs.addFooterView(footerView);
+                                    listDialogs.setOnScrollListener(DialogsActivity.this);
+                                }
+
+
+
+                            }
+                            catch (Exception e)
+                            {
+                                Log.e("Outer Exception e", "Yes");
+                                e.printStackTrace();
+                            }
+
+                        }
+
+                        @Override
+                        public void onError(QBResponseException e) {
+                            e.printStackTrace();
+                        }
+
+
+                    });
+                }
+                else
+                {
+
+                    if(listadpDialogs.size() == 0)
+                    {
+                        pBar.setVisibility(View.GONE);
+                        txtNoChat.setVisibility(View.VISIBLE);
+                        txtNoChat.setText("No Chat Available");
+                    }else{
+
+                        listDialogs.removeFooterView(footerView);
+                        adapter.notifyDataSetChanged();
+                        //Toast.makeText(cont,"There are no more dialogs",Toast.LENGTH_SHORT).show();
+                        listDialogs.setOnScrollListener(null);
+                    }
+
+                    return;
+
+                }
+
+            }
+
+
+
+            @Override
+            public void onError(QBResponseException errors) {
+                errors.printStackTrace();
+            }
+        });
+
+
+
+
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        int id = item.getItemId();
-        return super.onOptionsItemSelected(item);
+    private void setDialogsListAdapter() {
+        adapter = new DialogsAdapter(DialogsActivity.this, listadpDialogs);
+        listDialogs.setAdapter(adapter);
+        pBar.setVisibility(View.GONE);
+
+
     }
+
+
 
     @Override
     protected void onResume() {
         super.onResume();
-       // playServicesHelper.checkPlayServices();
+        if(adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
+
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == SCROLL_STATE_IDLE)
+        {
+            index = index + 10;
+            count = count + 10;
+            getDialogs(index, count, "load more");
 
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+    }
 }
 
 
-//4023498  12784139
+
+

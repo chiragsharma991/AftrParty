@@ -18,10 +18,8 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -29,7 +27,6 @@ import android.widget.Toast;
 
 import com.amazonaws.com.google.gson.Gson;
 import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -38,40 +35,28 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSDBOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSLoginOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.Contact;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.ContactTable;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
-import com.aperotechnologies.aftrparties.model.Contact;
-import com.aperotechnologies.aftrparties.model.LIUserInformation;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.aperotechnologies.aftrparties.model.OtpVerifiedResponse;
 import com.aperotechnologies.aftrparties.model.ValidOTPResponse;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
+import de.keyboardsurfer.android.widget.crouton.Crouton;
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
-import retrofit.http.Field;
-
-
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by mpatil on 26/05/16.
@@ -127,13 +112,15 @@ public class OTPActivity extends Activity
 
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         m_config = Configuration_Parameter.getInstance();
-
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
         btn_send = (Button) findViewById(R.id.btn_generate);
         btn_verify = (Button) findViewById(R.id.btn_verify);
         edt_otp = (EditText) findViewById(R.id.edi_otp);
         txt_timer = (TextView) findViewById(R.id.txt_timer);
         edt_mob_no = (EditText) findViewById(R.id.edi_verify_mobileno);
         btn_submit = (Button) findViewById(R.id.btn_submit);
+
 
         //queue = Volley.newRequestQueue(cont);
         lhm = new HashSet<Contact>();
@@ -155,8 +142,6 @@ public class OTPActivity extends Activity
 
         finalContacts = new ArrayList<Contact>();
 
-
-
         Log.e("Shrd Pref inOTPActivity",sharedpreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                 sharedpreferences.getString(m_config.Entered_Email,"N/A") + "   "
                 + sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
@@ -171,6 +156,14 @@ public class OTPActivity extends Activity
 
             }
         };
+
+        Log.e("Shrd Pref in OTP Activity",sharedpreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
+                sharedpreferences.getString(m_config.Entered_Email,"N/A") + "   "
+                + sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
+        getDeviceContatcs();
+//        Intent intent = new Intent(cont, HomePageActivity.class);
+//        startActivity(intent);
+
 
 
 //        //Defining the method
@@ -262,7 +255,6 @@ public class OTPActivity extends Activity
                     edt_mob_no.setVisibility(View.GONE);
                     btn_submit.setVisibility(View.GONE);
                     Log.e("New Mobile No", mobileNumber);
-
                     //Defining the method for regenerating OTP on new mobile no
                     otpRequestApi.getOTP(appkey, customerId, "IN", mobileNumber, "application/x-www-form-urlencoded", new Callback<ValidOTPResponse>() {
                         @Override
@@ -352,13 +344,14 @@ public class OTPActivity extends Activity
                                 //Go for HomePage
 
                               //  getDeviceContatcs();
+                                SharedPreferences.Editor editor= sharedpreferences.edit();
+                                editor.putString(m_config.OTPValidationDone,"Yes");
+                                editor.apply();
+
+                                new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
 
 
-                                Intent intent = new Intent(cont, HomePageActivity.class);
-                                startActivity(intent);
 
-                                //Intent intent = new Intent(cont, OTPActivity.class);
-                                //startActivity(intent);
                             }
                         }
                         catch (Exception e)
@@ -403,15 +396,18 @@ public class OTPActivity extends Activity
         ArrayList<String> contatcs = new ArrayList<String>();
 
         ArrayList<String> NP = new ArrayList<>();
-        if (cur.getCount() > 0) {
-            while (cur.moveToNext()) {
+        if (cur.getCount() > 0)
+        {
+            while (cur.moveToNext())
+            {
                 String id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));
                 name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                 names.add(name);
 
                 Contact contact = new Contact();
 
-                if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+                if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0)
+                {
                     //contatcs.clear();
                     String email = "N/A";
                     Cursor pCur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
@@ -421,7 +417,8 @@ public class OTPActivity extends Activity
                             null,
                             ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
                             new String[]{id}, null);
-                    if (emailCur.getCount() > 0) {
+                    if (emailCur.getCount() > 0)
+                    {
                         emailCur.moveToFirst();
                         email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
 
@@ -429,7 +426,37 @@ public class OTPActivity extends Activity
 
                     emailCur.close();
 
-                    if (pCur.getCount() > 0) {
+
+//                    if(emailCur.getCount() == 1)
+//                    {
+//                        emailCur.moveToFirst();
+//
+//                        email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+//                        String emailType = emailCur.getString(
+//                                emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE));
+//                        Log.e(name,emailType + "   " + email);
+//                    }
+//                    else if (emailCur.getCount() > 1)
+//                    {
+//                        emailCur.moveToFirst();
+//                        do
+//                        {
+//                            email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+//                            String emailType = emailCur.getString(
+//                                    emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE));
+//                            Log.e(name,emailType + "   " + email);
+//
+//                            /*  TYPE_CUSTOM.  TYPE_HOME  TYPE_WORK  TYPE_OTHER  TYPE_MOBILE  */
+//                        }
+//                        while (emailCur.moveToNext());
+//                    }
+//                    emailCur.close();
+
+
+
+
+                    if (pCur.getCount() > 0)
+                    {
                         pCur.moveToFirst();
                         String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                         //  Log.e("Name: " + name, "Phone No: " + phoneNo+"    Email : " + email);
@@ -485,15 +512,45 @@ public class OTPActivity extends Activity
                             null,
                             ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
                             new String[]{id}, null);
+
+                  //  Log.e("emailCur.length",name + "    " + emailCur.getCount() +"   aa");
+
                     if (emailCur.getCount() > 0)
                     {
                         emailCur.moveToFirst();
                         email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+
                     }
 
                     emailCur.close();
 
-                  //  Log.e("Name: " + name, "Phone No: " + phoneNo + "    Email : " + email);
+
+//                    if(emailCur.getCount() == 1)
+//                    {
+//                        emailCur.moveToFirst();
+//
+//                            email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+//                            String emailType = emailCur.getString(
+//                                    emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE));
+//                          //  Log.e(name,emailType + "   " + email);
+//                    }
+//                    else if (emailCur.getCount() > 1)
+//                    {
+//                        emailCur.moveToFirst();
+//                        do
+//                        {
+//                            email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
+//                            String emailType = emailCur.getString(
+//                                    emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE));
+//                        //    Log.e(name,emailType + "   " + email);
+//
+//                            /*  TYPE_CUSTOM.  TYPE_HOME  TYPE_WORK  TYPE_OTHER  TYPE_MOBILE  */
+//                        }
+//                        while (emailCur.moveToNext());
+//                    }
+//                    emailCur.close();
+
+                     //  Log.e("Name: " + name, "Phone No: " + phoneNo + "    Email : " + email);
 
                     contact.setConactNo(phoneNo);
                     contact.setEmail(email);
@@ -538,19 +595,12 @@ public class OTPActivity extends Activity
 
     public void saveContatcs()
     {
-
         Log.e("Inside saveUserData","Yess");
-
-        new RetrieveFeedTask().execute();
-
-
-
-
+        new SaveContactsAsync().execute();
     }
 
 
-
-    class RetrieveFeedTask extends AsyncTask<Void, Void, Void>
+    class SaveContactsAsync extends AsyncTask<Void, Void, Void>
     {
         protected void onPostExecute(Void abc)
         {
@@ -671,21 +721,9 @@ public class OTPActivity extends Activity
                                 {
                                     public void onClick(DialogInterface dialog, int which)
                                     {
-//                                        // do nothing
                                         Log.e("Click of I m sure",", permission request is denied");
                                         Intent intent = new Intent(cont, HomePageActivity.class);
                                         startActivity(intent);
-//                                        if(sharedPreferences.getString(m_config.AWSUserDataDone,"No").equals("Yes"))
-//                                        {
-//                                            GenerikFunctions.hideDialog(m_config.pDialog);
-//                                            Log.e("call to next activity","");
-//                                            Intent i = new Intent(cont, HomePageActivity.class);
-//                                            startActivity(i);
-//                                        }
-//                                        else
-//                                        {
-//                                            AWSDBOperations.createUser(cont, LoginValidations.initialiseLoggedInUser(cont));
-//                                        }
                                     }
                                 }).show();
                     }
@@ -695,22 +733,18 @@ public class OTPActivity extends Activity
                         Log.e("Click of Never ask again",", permission request is denied");
                         Intent intent = new Intent(cont, HomePageActivity.class);
                         startActivity(intent);
-//                        if(sharedPreferences.getString(m_config.AWSUserDataDone,"No").equals("Yes"))
-//                        {
-//                            GenerikFunctions.hideDialog(m_config.pDialog);
-//                            Log.e("call to next activity","");
-//                            Intent i = new Intent(cont, HomePageActivity.class);
-//                            startActivity(i);
-//                        }
-//                        else
-//                        {
-//                            AWSDBOperations.createUser(cont, LoginValidations.initialiseLoggedInUser(cont));
-//                        }
                     }
                 }
                 break;
             }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
     }
 }
 

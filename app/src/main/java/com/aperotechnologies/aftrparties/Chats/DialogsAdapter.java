@@ -1,122 +1,205 @@
 package com.aperotechnologies.aftrparties.Chats;
 
-/**
- * Created by igorkhomenko on 9/12/14.
- */
-
-import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.R;
+
+import com.github.siyamed.shapeimageview.CircularImageView;
 import com.quickblox.chat.model.QBDialog;
 import com.quickblox.chat.model.QBDialogType;
+import com.quickblox.users.model.QBUser;
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
+import java.util.ArrayList;
+
+/**
+ * Created by mpatil on 23/06/16.
+ */
 
 
-public class DialogsAdapter extends BaseAdapter {
-    private List<QBDialog> dataSource;
-    private LayoutInflater inflater;
-    Context cont;
+/**
+ * Created by mpatil on 17/07/15.
+ */
 
-    public DialogsAdapter(List<QBDialog> dataSource, Activity ctx) {
-        this.dataSource = dataSource;
-        this.inflater = LayoutInflater.from(ctx);
-        cont = ctx;
+//Line List Grid View Adapter . User a bridge between gridview and data to be displayed
+// Also click event on shortlist button is handled here
+public class DialogsAdapter extends BaseAdapter
+{
+
+    private Context cont;
+    ArrayList<QBDialog> dialogs;
+
+    SharedPreferences sharedPreferences;
+    Configuration_Parameter m_config=Configuration_Parameter.getInstance();
+    String url = null;
+
+
+    public DialogsAdapter(Context cont, ArrayList<QBDialog> dialogs)
+    {
+        super();
+        this.dialogs = dialogs;
+        this.cont = cont;
+        m_config = Configuration_Parameter.getInstance();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+
+        Log.i("Inside Adapter","Yes");
+
+
     }
 
-    public List<QBDialog> getDataSource() {
-        return dataSource;
+
+    @Override
+    public int getCount()
+    {
+        // TODO Auto-generated method stub
+        return dialogs.size();//dialognames.size();
     }
 
     @Override
-    public long getItemId(int position) {
+    public Object getItem(int position)
+    {
+        return dialogs.get(position);
+    }
+
+    @Override
+    public long getItemId(int position)
+    {
+        // TODO Auto-generated method stub
         return position;
     }
 
-    @Override
-    public Object getItem(int position) {
-        return dataSource.get(position);
+    public static class ViewHolder
+    {
+        TextView roomName, lastMessage, textunreadmessage;
+        CircularImageView grpChatImage;
+
+
     }
 
     @Override
-    public int getCount() {
-        return dataSource.size();
-    }
+    public View getView(final int position, View convertView, ViewGroup parent)
+    {
+        // TODO Auto-generated method stub
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
+        View participentView = convertView;
+        final  ViewHolder view;
 
-        // initIfNeed view
-        //
-        if (convertView == null) {
-            convertView = inflater.inflate(R.layout.list_item_room, null);
-            holder = new ViewHolder();
-            holder.image = (ImageView)convertView.findViewById(R.id.roomImage);
-            holder.name = (TextView)convertView.findViewById(R.id.roomName);
-            holder.lastMessage = (TextView)convertView.findViewById(R.id.lastMessage);
-            holder.groupType = (TextView)convertView.findViewById(R.id.textViewGroupType);
-            holder.unreadmessages = (TextView)convertView.findViewById(R.id.textunreadmessage);
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
+        if (participentView == null)
+        {
+            view = new ViewHolder();
+            LayoutInflater inflater = (LayoutInflater) parent.getContext().getSystemService(cont.LAYOUT_INFLATER_SERVICE);
+            participentView = inflater.inflate(R.layout.dapter_list_diagone, null);
+            view.roomName = (TextView) participentView.findViewById(R.id.roomName);
+            view.lastMessage = (TextView) participentView.findViewById(R.id.lastMessage);
+            view.textunreadmessage = (TextView) participentView.findViewById(R.id.textunreadmessage);
+            view.grpChatImage = (CircularImageView) participentView.findViewById(R.id.grpChatImage);
+
+            participentView.setTag(view);
+        }
+        else
+        {
+            view = (ViewHolder) participentView.getTag();
         }
 
-        // set data
-        //
-        QBDialog dialog = dataSource.get(position);
-        String url = dialog.getPhoto();
-        Log.e("url "," "+url);
+
+        QBDialog dialog = dialogs.get(position);
 
 
-//        if(!url.equals("") || !url.equals(null)) {
-//            Picasso.with(cont).load(url).fit().centerCrop()
-//                    .placeholder(R.drawable.placeholder_user)
-//                    .error(R.drawable.placeholder_user)
-//                    .into(holder.image);
-//        }
+        if(dialog.getType().equals(QBDialogType.GROUP))
+        {
 
+            url = dialog.getPhoto();
+            Log.e("came in group", "");
+            if (url == null || url.equals("") || url.length() == 0)
+            {
+                view.grpChatImage.setImageResource(R.drawable.placeholder_user);
+                view.grpChatImage.setTag(position);
+            }
+            else
+            {
 
-        if(dialog.getType().equals(QBDialogType.GROUP)){
-            holder.name.setText(dialog.getName());
-        }else{
-
-            holder.name.setText(dialog.getName());
-
-            // get opponent name for private dialog
-            //
-            /*Integer opponentID = ChatService.getInstance().getOpponentIDForPrivateDialog(dialog);
+                Picasso.with(cont)
+                        .load(url)
+                        .fit()
+                        .into(view.grpChatImage);
+                view.grpChatImage.setTag(position);
+            }
+        }
+        else if(dialog.getType().equals(QBDialogType.PRIVATE))
+        {
+            Integer opponentID = getPrivateChatoppId(dialogs.get(position));
             QBUser user = ChatService.getInstance().getDialogsUsers().get(opponentID);
-            if(user != null){
-                holder.name.setText(user.getLogin() == null ? user.getFullName() : user.getLogin());
-            }*/
-        }
-//        if (dialog.getLastMessage() != null && StickersManager.isSticker(dialog.getLastMessage())) {
-//            holder.lastMessage.setText("Sticker");
-//        } else {
-//            holder.lastMessage.setText(dialog.getLastMessage());
-//        }
-        holder.lastMessage.setText(dialog.getLastMessage());
-        holder.groupType.setText(dialog.getType().toString());
-        holder.unreadmessages.setText(String.valueOf(dialog.getUnreadMessageCount()));
+            url = user.getCustomData();
+            Log.e("came in private","");
+            if(url == null || url.equals("") || url.length() == 0)
+            {
+                view.grpChatImage.setImageResource(R.drawable.placeholder_user);
+                view.grpChatImage.setTag(position);
+            }
+            else
+            {
+                Picasso.with(cont)
+                        .load(url)
+                        .fit()
+                        .into(view.grpChatImage);
+                view.grpChatImage.setTag(position);
+            }
 
-        return convertView;
+
+        }
+
+
+        view.roomName.setText(dialog.getName());
+        if(dialog.getLastMessage() != null)
+        {
+            view.lastMessage.setText(dialog.getLastMessage());
+        }
+        else
+        {
+            view.lastMessage.setText("");
+        }
+
+        if(dialog.getUnreadMessageCount() != 0)
+        {
+            view.textunreadmessage.setText(String.valueOf(dialog.getUnreadMessageCount()));
+        }
+        else {
+            view.textunreadmessage.setText("");
+        }
+
+
+
+
+        return participentView;
     }
 
-    private static class ViewHolder{
-        ImageView image;
-        TextView name;
-        TextView lastMessage;
-        TextView groupType;
-        TextView unreadmessages;
+
+    public Integer getPrivateChatoppId(QBDialog dialog){
+
+        Integer opponentID = -1;
+        //Log.e("----"," "+dialog.getOccupants());
+
+        for(Integer userID : dialog.getOccupants()){
+            if(!userID.equals(Integer.valueOf(sharedPreferences.getString(m_config.QuickBloxID,"")))){
+                opponentID = userID;
+                //Log.e("opponentId ",""+opponentID);
+                break;
+            }
+        }
+
+        return opponentID;
+
+
     }
 }
+
+

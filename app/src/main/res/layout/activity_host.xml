@@ -70,7 +70,7 @@
                     android:src="@drawable/placeholder_user"
                     app:siBorderWidth="4dp"
                     android:layout_gravity="center"
-                    app:siBorderColor="@color/colorAccent"/>
+                    app:siBorderColor="@color/colorPrimaryDark"/>
 
                 <TextView
                     android:layout_gravity="center_horizontal"

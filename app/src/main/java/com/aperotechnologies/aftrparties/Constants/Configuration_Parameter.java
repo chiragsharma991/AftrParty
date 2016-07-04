@@ -2,6 +2,7 @@ package com.aperotechnologies.aftrparties.Constants;
 
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -41,20 +42,26 @@ public class Configuration_Parameter
     public String Entered_Email = "Email";
     public String Entered_Contact_No = "ContactNo";
     public String LoggedInFBUserID = "";
-    public String FBLoginDone ="FBLoginDone";
-    public String LILoginDone ="LILoginDone";
+    public String FBLoginDone = "FBLoginDone";
+    public String LILoginDone = "LILoginDone";
+    public String QBFBLoginDone = "QBFBLoginDone";
     public String BasicFBLIValidationsDone = "BasicFBLIValidationsDone";
     public String FaceDetectDone = "FaceDetectDone";
+    public String OTPValidationDone = "OTPValidationDone";
+    public String EmailValidationDone = "EmailValidationDone";
+    public String FinalStepDone = "FinalStepDone";
 
 
     //Harshada
+    public String SessionToken = null;
+    public String QBLoginDone = "QBLoginDone";
+    public String QuickBloxID = "QuickBloxId";
     public String REG_ID = "registration_id";
     public String temp_regId = "registration_id";
-    public String QBLoginDone = "QBLoginDone";
     public String AWSUserDataDone = "No";
-    public String SessionToken = null;
+    public Context foregroundCont;
 
-    public List<PartyConversion> pc;
+
 
     /**
      * Create private constructor

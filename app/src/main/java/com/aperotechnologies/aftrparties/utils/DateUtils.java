@@ -16,8 +16,9 @@ public class DateUtils
     private static long MILLIS_VALUE = 1000;
     private static String STRING_TODAY = "Today";
     private static String STRING_YESTERDAY = "Yesterday";
+    private static String format = "";
 
-    public static String longToMessageDate(long dateLong)
+    public static StringBuilder longToMessageDate(long dateLong)
     {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(dateLong * MILLIS_VALUE);
@@ -25,7 +26,7 @@ public class DateUtils
         Locale locale = new Locale("en","IN");
         Date time = calendar.getTime();
         long time1 = calendar.getTimeInMillis();
-        Log.e("time "," "+time);
+        Log.e("time "," "+time+" --- "+time1);
 
         Calendar calendar1 = Calendar.getInstance();
         calendar1.setTimeInMillis(time1);
@@ -34,32 +35,71 @@ public class DateUtils
         String mMonth = getMonth(calendar1.get(Calendar.MONTH));
         int mDay = calendar1.get(Calendar.DAY_OF_MONTH);
 
-        int mHour = getHour(calendar1.get(Calendar.HOUR));
+        int mHour = calendar1.get(Calendar.HOUR_OF_DAY);
         Log.e("mHour"," "+mHour);
-        int mMin = calendar1.get(Calendar.MINUTE) + 30;
-        String finalHour = "";
-        String finalMin = "";
-        if(mMin >= 60){
-            if(mHour == 23){
-                finalHour = "00";
-            }else{
-                finalHour = String.valueOf(mHour + 1);
-            }
-            if(mMin - 60 >= 10){
-                finalMin = String.valueOf(mMin - 60);
-            }else{
-                finalMin = "0" + String.valueOf(mMin - 60);
-            }
+        int mMin = calendar1.get(Calendar.MINUTE);
+//        String finalHour = "";
+//        String finalMin = "";
+//        if(mMin >= 60){
+//            if(mHour == 23){
+//                finalHour = "00";
+//            }else{
+//                finalHour = String.valueOf(mHour + 1);
+//            }
+//            if(mMin - 60 >= 10){
+//                finalMin = String.valueOf(mMin - 60);
+//            }else{
+//                finalMin = "0" + String.valueOf(mMin - 60);
+//            }
+//
+//        }else{
+//            finalHour = String.valueOf(mHour);
+//            finalMin = String.valueOf(mMin);
+//        }
+//        return mMonth+" "+mDay+","+mYear+" "+finalHour+ ":"+finalMin;
 
-        }else{
-            finalHour = String.valueOf(mHour);
-            finalMin = String.valueOf(mMin);
+        StringBuilder value;
+        String hours,mins;
+        if (mHour == 0)
+        {
+            mHour += 12;
+            format = "AM";
+        }
+        else if (mHour == 12)
+        {
+            format = "PM";
+        } else if (mHour > 12)
+        {
+            mHour -= 12;
+            format = "PM";
+        } else
+        {
+            format = "AM";
+        }
+
+        if(mHour < 10)
+        {
+            hours = "0" + mHour;
+        }else
+        {
+            hours = String.valueOf(mHour);
+        }
+
+        if(mMin < 10)
+        {
+            mins = "0" + mMin;
+        }else
+        {
+            mins = String.valueOf(mMin);
         }
 
 
+//        Log.e("time",""+new StringBuilder().append(hour).append(" : ").append(min)
+//                .append(" ").append(format));
+        value = new StringBuilder().append(mMonth).append(" ").append(mDay).append(" ").append(mYear).append(" ").append(hours).append(" : ").append(mins)
+                .append(" ").append(format);
+        return value;
 
-
-        return mMonth+" "+mDay+","+mYear+" "+finalHour+ ":"+finalMin;
     }
 
 

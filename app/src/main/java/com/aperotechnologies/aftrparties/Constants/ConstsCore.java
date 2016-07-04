@@ -3,9 +3,11 @@ package com.aperotechnologies.aftrparties.Constants;
 public class ConstsCore {
 
     public static final String EXTRA_DIALOG = "dialog";
+    public static final String DIALOG_ID = "dialog_id";
+    public static final String DIALOG_TYPE = "dialog_type";
     public static final String PROPERTY_SAVE_TO_HISTORY = "save_to_history";
     public static final String EXTRA_DIALOG_ID = "dialog_id";
-    public static final String PROJECT_NUMBER = "446223844422";
+    public static final String PROJECT_NUMBER = "535559486986";//"446223844422";
     public static final String NEW_PUSH_EVENT = "new-push-event";
     public static final String EXTRA_MESSAGE = "message";
     public static final String GCM_NOTIFICATION = "GCM Notification";
@@ -13,6 +15,7 @@ public class ConstsCore {
     public static final String GCM_INTENT_SERVICE = "GcmIntentService";
     public static final String GCM_SEND_ERROR = "Send error: ";
     public static final String GCM_RECEIVED = "Received: ";
+
 
     public static final int FB_AGE = 16;
     public static final int FB_FRIENDS = 1;
@@ -38,6 +41,13 @@ public class ConstsCore {
     public static final int MY_PERMISSIONS_REQUEST_RWFRMCAM=60;
     public static final int CAMERA_REQUEST = 100;
     public static final int GALLERY_REQUEST = 200;
+    public static final String SER_KEY = "serkey";
+
+
+    public static final int hourVal = 3600000;
+    public static final int weekVal = 604800000;
+    public static final int TwelveHrVal = 43200000;
+
 
 
 

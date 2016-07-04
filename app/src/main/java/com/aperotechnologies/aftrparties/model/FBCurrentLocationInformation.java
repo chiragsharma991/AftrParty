@@ -1,5 +1,7 @@
 package com.aperotechnologies.aftrparties.model;
 
+import java.util.Random;
+
 /**
  * Created by mpatil on 12/05/16.
  */
@@ -30,5 +32,28 @@ public class FBCurrentLocationInformation
     public void setLocationName(String name)
     {
         this.name = name;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        Random r = new Random();
+        int i1 = r.nextInt(80 - 65) + 65;
+        return i1*name.length();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        FBCurrentLocationInformation fbCurrentLocationInformation = (FBCurrentLocationInformation) o;
+        if(this.id.equals(fbCurrentLocationInformation.id) && this.name.equals(fbCurrentLocationInformation.name))
+        {
+            return  true;
+        }
+        else
+        {
+            return false;
+        }
+        //return super.equals(o);
     }
 }

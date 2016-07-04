@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.Age;
 import com.aperotechnologies.aftrparties.Reusables.AgeCalculator;
@@ -90,17 +91,18 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
             if (loggedInUserInformation.getFB_USER_PROFILE_PIC().equals("N/A") || loggedInUserInformation.getFB_USER_PROFILE_PIC().equals(null))
             {
                 hasFBImage = false;
+                ConstsCore.profilePicAvailable = "No";
                 //Check for LI profile Pic
-                if (loggedInUserInformation.getLI_USER_PROFILE_PIC().equals("N/A") || loggedInUserInformation.getLI_USER_PROFILE_PIC().equals(null))
-                {
-                    ConstsCore.profilePicAvailable = "No";
-                    hasLIImage = false;
-                }
-                else
-                {
-                    hasLIImage = true;
-                    ConstsCore.profilePicAvailable = "Yes";
-                }
+//                if (loggedInUserInformation.getLI_USER_PROFILE_PIC().equals("N/A") || loggedInUserInformation.getLI_USER_PROFILE_PIC().equals(null))
+//                {
+//                    ConstsCore.profilePicAvailable = "No";
+//                    hasLIImage = false;
+//                }
+//                else
+//                {
+//                    hasLIImage = true;
+//                    ConstsCore.profilePicAvailable = "Yes";
+//                }
             }
             else
             {
@@ -263,7 +265,10 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                                 editorq.putString(m_config.FaceDetectDone,"Yes");
                                 editorq.apply();
 
-                                Intent intent = new Intent(cont,OTPActivity.class);
+//                                Intent intent = new Intent(cont,OTPActivity.class);
+//                                cont.startActivity(intent);
+
+                                Intent intent = new Intent(cont,HomePageActivity.class);
                                 cont.startActivity(intent);
                             }
                             else

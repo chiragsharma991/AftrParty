@@ -2,6 +2,7 @@ package com.aperotechnologies.aftrparties.Chats;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.quickblox.chat.QBChatService;
@@ -48,7 +49,7 @@ public class ChatService {
     private ChatService() {
         m_config= Configuration_Parameter.getInstance();
 
-        chatService = m_config.chatService;//QBChatService.getInstance();
+        chatService = QBChatService.getInstance();//m_config.chatService;//QBChatService.getInstance();
         chatService.addConnectionListener(chatConnectionListener);
     }
 
@@ -60,22 +61,24 @@ public class ChatService {
         chatService.removeConnectionListener(listener);
     }
 
-    public void getDialogs(final QBEntityCallback callback, int count){
+    /*public void getDialogs(final QBEntityCallback callback, int count){
         // get dialogs
         //
         QBRequestGetBuilder customObjectRequestBuilder = new QBRequestGetBuilder();
-        customObjectRequestBuilder.setPagesLimit(count);
+        //customObjectRequestBuilder.setSkip(index);
+        customObjectRequestBuilder.setPagesLimit(100);
 
         QBChatService.getChatDialogs(null, customObjectRequestBuilder, new QBEntityCallback<ArrayList<QBDialog>>() {
             @Override
             public void onSuccess(final ArrayList<QBDialog> dialogs, Bundle args) {
+
 
                 // collect all occupants ids
                 //
                 List<Integer> usersIDs = new ArrayList<Integer>();
                 for(QBDialog dialog : dialogs){
 
-                    Log.e(TAG," "+dialog.getOccupants());
+                    //Log.e(TAG," "+dialog.getOccupants());
                     usersIDs.addAll(dialog.getOccupants());
                 }
 
@@ -91,7 +94,7 @@ public class ChatService {
 
                         // Save users
                         //
-                        Log.e(":ChatService users"," "+users);
+                        //Log.e(":ChatService users"," "+users);
                         setDialogsUsers(users);
                         callback.onSuccess(dialogs, null);
                     }
@@ -112,7 +115,7 @@ public class ChatService {
             }
 
         });
-    }
+    }*/
 
     private Map<Integer, QBUser> dialogsUsers = new HashMap<Integer, QBUser>();
 
@@ -124,14 +127,14 @@ public class ChatService {
         dialogsUsers.clear();
 
         for (QBUser user : setUsers) {
-            Log.e("---Chatservice user id "," "+user.getId());
+            //Log.e("---Chatservice user id "," "+user.getId());
 
             dialogsUsers.put(user.getId(), user);
         }
     }
 
     public QBUser getCurrentUser(){
-        return m_config.chatService.getUser();
+        return QBChatService.getInstance().getUser();//m_config.chatService.getUser();
     }
 
 

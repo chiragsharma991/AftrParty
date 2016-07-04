@@ -145,6 +145,11 @@ Log.e("Before log face data","Yes");
 
     private int logFaceData()
     {
+        if(mFaces == null)
+        {
+            return 0;
+        }
+
         Log.e("No of Faces from face overlay",mFaces.size()+"");
         float smilingProbability;
         float leftEyeOpenProbability;

@@ -3,6 +3,7 @@ package com.aperotechnologies.aftrparties.Chats;
 import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBPrivateChat;
 import com.quickblox.chat.QBPrivateChatManager;
 import com.quickblox.chat.exception.QBChatException;
@@ -41,7 +42,7 @@ public class PrivateChatImpl extends QBMessageListenerImpl<QBPrivateChat> implem
 
     private void initManagerIfNeed(){
         if(privateChatManager == null){
-            privateChatManager = m_config.privateChatManager;//QBChatService.getInstance().getPrivateChatManager();
+            privateChatManager = QBChatService.getInstance().getPrivateChatManager();
             privateChatManager.addPrivateChatManagerListener(this);
         }
     }

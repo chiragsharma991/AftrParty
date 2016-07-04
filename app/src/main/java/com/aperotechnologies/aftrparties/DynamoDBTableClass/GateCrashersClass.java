@@ -8,19 +8,19 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBDocument
 @DynamoDBDocument
 public class GateCrashersClass {
 
-    private String GateCrasherID;
-    private String GCRequestStatus;
-    private String GCAttendanceStatus;
+    private String gatecrasherid;
+    private String gcrequeststatus;
+    private String gcattendancestatus;
 
 
-    public String getGateCrasherID() { return GateCrasherID; }
-    public void setGateCrasherID(String GateCrasherID) { this.GateCrasherID = GateCrasherID; }
+    public String getGatecrasherid() { return gatecrasherid; }
+    public void setGatecrasherid(String gatecrasherid) { this.gatecrasherid = gatecrasherid; }
 
-    public String getGCRequestStatus() { return GCRequestStatus; }
-    public void setGCRequestStatus(String GCRequestStatus) { this.GCRequestStatus = GCRequestStatus; }
+    public String getGcrequeststatus() { return gcrequeststatus; }
+    public void setGcrequeststatus(String gcrequeststatus) { this.gcrequeststatus = gcrequeststatus; }
 
-    public String getGCAttendanceStatus() { return GCAttendanceStatus; }
-    public void setGCAttendanceStatus(String GCAttendanceStatus) { this.GCAttendanceStatus = GCAttendanceStatus; }
+    public String getGcattendancestatus() { return gcattendancestatus; }
+    public void setGcattendancestatus(String gcattendancestatus) { this.gcattendancestatus = gcattendancestatus; }
 
 
 

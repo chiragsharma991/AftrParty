@@ -1,304 +1,315 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
 
+
+    <!-- Toolbar for HomePage-->
     <LinearLayout
-        android:id="@+id/loginactivity"
-        android:layout_width="fill_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal"
-        android:orientation="vertical">
+        android:visibility="visible"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ll_home_toolbar"   >
 
-
-        <!-- Toolbar for HomePage-->
-        <LinearLayout
-            android:visibility="visible"
-            android:orientation="vertical"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/home_toolbar"
+            android:layout_marginLeft="-16dp"
+            android:layout_alignParentTop="true"
+            android:background="@color/colorPrimaryDark"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/ll_home_toolbar"   >
+            android:layout_height="44dp"
+            android:minHeight="?attr/actionBarSize"   >
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/home_toolbar"
-                android:layout_marginLeft="-16dp"
-                android:layout_alignParentTop="true"
-                android:background="@color/black"
-                android:layout_width="match_parent"
+            <RelativeLayout
+                android:layout_width="fill_parent"
                 android:layout_height="44dp"
-                android:minHeight="?attr/actionBarSize"   >
+                android:id="@+id/toolbar_content"   >
+
+                <ImageButton
+                    android:background="@drawable/logout"
+                    android:id="@+id/btn_logout"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:gravity="center_vertical"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:textSize="20sp"
+                    android:layout_centerInParent="true"
+                    android:text="HOME"
+                    android:id="@+id/activity_title"
+                    android:textColor="#ffffff"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"   />
+
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
+    </LinearLayout>
+
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <LinearLayout
+            android:id="@+id/loginactivity"
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical">
+
+
+
+            <LinearLayout
+                android:layout_margin="10dp"
+                android:weightSum="1"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <com.github.siyamed.shapeimageview.CircularImageView
+                        android:id="@+id/userimage"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:src="@drawable/placeholder_user"
+                        app:siBorderWidth="4dp"
+                        app:siBorderColor="@color/colorAccent"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_marginTop="30dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/user_details"   >
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <TextView
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/black"
+                            android:text="Name : "
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/userName"
+                            android:textSize="16sp"
+                            android:textColor="@color/black"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <TextView
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/black"
+                            android:text="Email : "
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/userEmail"
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/black"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <TextView
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/black"
+                            android:text="Date of Birth : "
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/userDOB"
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/black"
+                            android:text=""
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <TextView
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/black"
+                            android:text="Gender : "
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                        <TextView
+                            android:id="@+id/userGender"
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/black"
+                            android:text=""
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:weightSum="3"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
 
                 <RelativeLayout
-                    android:layout_width="fill_parent"
-                    android:layout_height="44dp"
-                    android:id="@+id/toolbar_content"   >
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" >
 
-                    <ImageButton
-                        android:src="@drawable/logout"
-                        android:id="@+id/btn_logout"
-                        android:layout_width="40dp"
-                        android:layout_height="44dp"
-                        android:gravity="center_vertical"
-                        android:layout_alignParentLeft="true"
-                        android:layout_alignParentStart="true" />
+                    <com.aperotechnologies.aftrparties.utils.ResizableButton
+                        android:id="@+id/btnTips"
+                        android:background="@drawable/circular"
+                        android:textSize="@dimen/text_size"
+                        android:textColor="@color/white"
+                        android:text="Tips"
+                        android:textAllCaps="false"
+                        android:layout_margin="20dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </RelativeLayout>
 
-                    <TextView
-                        android:textSize="20sp"
-                        android:layout_centerInParent="true"
-                        android:text="HOME"
-                        android:id="@+id/activity_title"
-                        android:textColor="#ffffff"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"   />
+                <RelativeLayout
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" >
+
+                    <com.aperotechnologies.aftrparties.utils.ResizableButton
+                        android:id="@+id/btnSettings"
+                        android:background="@drawable/circular"
+                        android:textSize="@dimen/text_size"
+                        android:textColor="@color/white"
+                        android:text="Settings"
+                        android:textAllCaps="false"
+                        android:layout_margin="20dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"  />
 
                 </RelativeLayout>
 
-            </android.support.v7.widget.Toolbar>
-        </LinearLayout>
+                <RelativeLayout
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" >
 
-        <LinearLayout
-            android:layout_margin="10dp"
-            android:weightSum="1"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+                    <com.aperotechnologies.aftrparties.utils.ResizableButton
+                        android:id="@+id/btnChat"
+                        android:background="@drawable/circular"
+                        android:textSize="@dimen/text_size"
+                        android:textColor="@color/white"
+                        android:text="Chat"
+                        android:textAllCaps="false"
+                        android:layout_margin="20dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"  />
 
-            <LinearLayout
-                android:gravity="center"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <com.github.siyamed.shapeimageview.CircularImageView
-                    android:id="@+id/userimage"
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:src="@drawable/placeholder_user"
-                    app:siBorderWidth="4dp"
-                    app:siBorderColor="@color/colorAccent"/>
+                </RelativeLayout>
 
             </LinearLayout>
 
             <LinearLayout
-                android:layout_marginTop="30dp"
-                android:orientation="vertical"
+                android:weightSum="3"
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:id="@+id/user_details"   >
+                android:layout_height="wrap_content" >
 
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
 
-                    <TextView
+                <RelativeLayout
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" >
+
+                    <com.aperotechnologies.aftrparties.utils.ResizableButton
+                        android:id="@+id/btnHistory"
+                        android:background="@drawable/circular"
                         android:textSize="@dimen/text_size"
-                        android:textColor="@color/black"
-                        android:text="Name : "
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:textColor="@color/white"
+                        android:text="History"
+                        android:textAllCaps="false"
+                        android:layout_margin="20dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+                </RelativeLayout>
 
-                    <TextView
-                        android:id="@+id/userName"
-                        android:textSize="16sp"
-                        android:textColor="@color/black"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
+                <RelativeLayout
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" >
 
-
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
-
-                    <TextView
+                    <com.aperotechnologies.aftrparties.utils.ResizableButton
+                        android:id="@+id/btnHost"
+                        android:background="@drawable/circular"
                         android:textSize="@dimen/text_size"
-                        android:textColor="@color/black"
-                        android:text="Email : "
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:textColor="@color/white"
+                        android:text="Host"
+                        android:textAllCaps="false"
+                        android:layout_margin="20dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"  />
 
-                    <TextView
-                        android:id="@+id/userEmail"
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" >
+
+                    <com.aperotechnologies.aftrparties.utils.ResizableButton
+                        android:id="@+id/btnGateCrasher"
+                        android:background="@drawable/circular"
                         android:textSize="@dimen/text_size"
-                        android:textColor="@color/black"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
+                        android:textColor="@color/white"
+                        android:text="Gate Crasher"
+                        android:textAllCaps="false"
+                        android:layout_margin="20dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"  />
 
-
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
-
-                    <TextView
-                        android:textSize="@dimen/text_size"
-                        android:textColor="@color/black"
-                        android:text="Date of Birth : "
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:id="@+id/userDOB"
-                        android:textSize="@dimen/text_size"
-                        android:textColor="@color/black"
-                        android:text=""
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
-
-
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
-
-                    <TextView
-                        android:textSize="@dimen/text_size"
-                        android:textColor="@color/black"
-                        android:text="Gender : "
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <TextView
-                        android:id="@+id/userGender"
-                        android:textSize="@dimen/text_size"
-                        android:textColor="@color/black"
-                        android:text=""
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
+                </RelativeLayout>
 
             </LinearLayout>
 
         </LinearLayout>
-
-        <LinearLayout
-            android:weightSum="3"
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-
-            <RelativeLayout
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" >
-
-                <com.aperotechnologies.aftrparties.utils.ResizableButton
-                    android:id="@+id/btnTips"
-                    android:background="@drawable/circular"
-                    android:textSize="@dimen/text_size"
-                    android:textColor="@color/black"
-                    android:text="Tips"
-                    android:textAllCaps="false"
-                    android:layout_margin="20dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" >
-
-                <com.aperotechnologies.aftrparties.utils.ResizableButton
-                    android:id="@+id/btnSettings"
-                    android:background="@drawable/circular"
-                    android:textSize="@dimen/text_size"
-                    android:textColor="@color/black"
-                    android:text="Settings"
-                    android:textAllCaps="false"
-                    android:layout_margin="20dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"  />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" >
-
-                <com.aperotechnologies.aftrparties.utils.ResizableButton
-                    android:id="@+id/btnChat"
-                    android:background="@drawable/circular"
-                    android:textSize="@dimen/text_size"
-                    android:textColor="@color/black"
-                    android:text="Chat"
-                    android:textAllCaps="false"
-                    android:layout_margin="20dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"  />
-
-            </RelativeLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:weightSum="3"
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-
-
-            <RelativeLayout
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" >
-
-                <com.aperotechnologies.aftrparties.utils.ResizableButton
-                    android:id="@+id/btnHistory"
-                    android:background="@drawable/circular"
-                    android:textSize="@dimen/text_size"
-                    android:textColor="@color/black"
-                    android:text="History"
-                    android:textAllCaps="false"
-                    android:layout_margin="20dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" >
-
-                <com.aperotechnologies.aftrparties.utils.ResizableButton
-                    android:id="@+id/btnHost"
-                    android:background="@drawable/circular"
-                    android:textSize="@dimen/text_size"
-                    android:textColor="@color/black"
-                    android:text="Host"
-                    android:textAllCaps="false"
-                    android:layout_margin="20dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"  />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" >
-
-                <com.aperotechnologies.aftrparties.utils.ResizableButton
-                    android:id="@+id/btnGateCrasher"
-                    android:background="@drawable/circular"
-                    android:textSize="@dimen/text_size"
-                    android:textColor="@color/black"
-                    android:text="Gate Crasher"
-                    android:textAllCaps="false"
-                    android:layout_margin="20dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"  />
-
-            </RelativeLayout>
-
-        </LinearLayout>
-
-
-    </LinearLayout>
-
     </ScrollView>
+
+</LinearLayout>
+

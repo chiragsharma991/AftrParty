@@ -24,14 +24,14 @@ public class PartyTable {
     private String PartyDescription;
     private String BYOB;
     private String PartyAddress;
-    private List<String> PartyLatLong;
+    private List<String> partylatlong;
     private String PartyImage;
     private String MaskStatus;
     private String DialogID;
-    private List<GateCrashersClass> GateCrashers;
+    private List<GateCrashersClass> gatecrashers;
 
 
-    @DynamoDBHashKey(attributeName = "PartyID")
+    @DynamoDBHashKey(attributeName = "partyid")
     public String getPartyID() {
         return PartyID;
     }
@@ -40,7 +40,7 @@ public class PartyTable {
         this.PartyID = PartyID;
     }
 
-    @DynamoDBAttribute(attributeName = "PartyName")
+    @DynamoDBAttribute(attributeName = "partyname")
     public String getPartyName() {
         return PartyName;
     }
@@ -49,7 +49,7 @@ public class PartyTable {
         this.PartyName = PartyName;
     }
 
-    @DynamoDBAttribute(attributeName = "StartTime")
+    @DynamoDBAttribute(attributeName = "starttime")
     public String getStartTime() {
         return StartTime;
     }
@@ -58,7 +58,7 @@ public class PartyTable {
         this.StartTime = StartTime;
     }
 
-    @DynamoDBAttribute(attributeName = "EndTime")
+    @DynamoDBAttribute(attributeName = "endtime")
     public String getEndTime() {
         return EndTime;
     }
@@ -67,7 +67,7 @@ public class PartyTable {
         this.EndTime = EndTime;
     }
 
-    @DynamoDBAttribute(attributeName = "Date")
+    @DynamoDBAttribute(attributeName = "date")
     public String getDate() {
         return Date;
     }
@@ -76,7 +76,7 @@ public class PartyTable {
         this.Date = Date;
     }
 
-    @DynamoDBAttribute(attributeName = "HostFBID")
+    @DynamoDBAttribute(attributeName = "hostfbid")
     public String getHostFBID() {
         return HostFBID;
     }
@@ -85,7 +85,7 @@ public class PartyTable {
         this.HostFBID = HostFBID;
     }
 
-    @DynamoDBAttribute(attributeName = "HostQBID")
+    @DynamoDBAttribute(attributeName = "hostqbid")
     public String getHostQBID() {
         return HostQBID;
     }
@@ -94,7 +94,7 @@ public class PartyTable {
         this.HostQBID = HostQBID;
     }
 
-    @DynamoDBAttribute(attributeName = "HostName")
+    @DynamoDBAttribute(attributeName = "hostname")
     public String getHostName() {
         return HostName;
     }
@@ -103,7 +103,7 @@ public class PartyTable {
         this.HostName = HostName;
     }
 
-    @DynamoDBAttribute(attributeName = "PartyType")
+    @DynamoDBAttribute(attributeName = "partytype")
     public String getPartyType() {
         return PartyType;
     }
@@ -112,7 +112,7 @@ public class PartyTable {
         this.PartyType = PartyType;
     }
 
-    @DynamoDBAttribute(attributeName = "PartyDescription")
+    @DynamoDBAttribute(attributeName = "partydescription")
     public String getPartyDescription() {
         return PartyDescription;
     }
@@ -121,7 +121,7 @@ public class PartyTable {
         this.PartyDescription = PartyDescription;
     }
 
-    @DynamoDBAttribute(attributeName = "BYOB")
+    @DynamoDBAttribute(attributeName = "byob")
     public String getBYOB() {
         return BYOB;
     }
@@ -130,7 +130,7 @@ public class PartyTable {
         this.BYOB = BYOB;
     }
 
-    @DynamoDBAttribute(attributeName = "PartyAddress")
+    @DynamoDBAttribute(attributeName = "partyaddress")
     public String getPartyAddress() {
         return PartyAddress;
     }
@@ -139,16 +139,16 @@ public class PartyTable {
         this.PartyAddress = PartyAddress;
     }
 
-    @DynamoDBAttribute(attributeName = "PartyLatLong")
-    public List<String> getPartyLatLong() {
-        return PartyLatLong;
+    @DynamoDBAttribute(attributeName = "partylatlong")
+    public List<String> getPartylatlong() {
+        return partylatlong;
     }
 
-    public void setPartyLatLong(List<String> PartyLatLong) {
-        this.PartyLatLong = PartyLatLong;
+    public void setPartylatlong(List<String> partylatlong) {
+        this.partylatlong = partylatlong;
     }
 
-    @DynamoDBAttribute(attributeName = "PartyImage")
+    @DynamoDBAttribute(attributeName = "partyimage")
     public String getPartyImage() {
         return PartyImage;
     }
@@ -157,7 +157,7 @@ public class PartyTable {
         this.PartyImage = PartyImage;
     }
 
-    @DynamoDBAttribute(attributeName = "MaskStatus")
+    @DynamoDBAttribute(attributeName = "maskstatus")
     public String getMaskStatus() {
         return MaskStatus;
     }
@@ -166,7 +166,7 @@ public class PartyTable {
         this.MaskStatus = MaskStatus;
     }
 
-    @DynamoDBAttribute(attributeName = "DialogID")
+    @DynamoDBAttribute(attributeName = "dialogid")
     public String getDialogID() {
         return DialogID;
     }
@@ -176,12 +176,12 @@ public class PartyTable {
     }
 
 
-    public List<GateCrashersClass> getGateCrashers() {
-        return GateCrashers;
+    public List<GateCrashersClass> getGatecrashers() {
+        return gatecrashers;
     }
 
-    public void setGateCrashers(List<GateCrashersClass> GateCrashers) {
-        this.GateCrashers = GateCrashers;
+    public void setGatecrashers(List<GateCrashersClass> gatecrashers) {
+        this.gatecrashers = gatecrashers;
     }
 
 }

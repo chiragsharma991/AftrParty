@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <com.github.siyamed.shapeimageview.CircularImageView
+        android:id="@+id/grpChatImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:padding="10dp"
+        android:src="@drawable/placeholder_user"
+        app:siBorderWidth="2dp"
+        android:layout_centerVertical="true"
+        android:scaleType="fitCenter"
+        app:siBorderColor="@color/colorPrimaryDark" />
+
+    <!--<com.makeramen.roundedimageview.RoundedImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/grpChatImage"
+        android:src="@drawable/placeholder_user"
+        android:scaleType="fitCenter"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:paddingLeft="10dp"
+        android:layout_centerVertical="true"
+        app:riv_corner_radius="50dip"
+        app:riv_border_width="2dip"
+        app:riv_border_color="@color/colorPrimaryDark"
+        app:riv_mutate_background="true"
+        app:riv_tile_mode="repeat"
+        app:riv_oval="true" />-->
+
+    <TextView
+        android:padding="10dp"
+        android:layout_marginRight="50dp"
+        android:id="@+id/roomName"
+        android:layout_toRightOf="@+id/grpChatImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:textSize="20sp" />
+
+    <TextView
+        android:padding="10dp"
+        android:layout_marginRight="50dp"
+        android:id="@+id/lastMessage"
+        android:layout_below="@+id/roomName"
+        android:layout_toRightOf="@+id/grpChatImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size" />
+
+    <!--<TextView
+        android:layout_marginLeft="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text=""
+        android:id="@+id/textViewGroupType"
+        android:layout_below="@+id/lastMessage"
+        android:layout_toRightOf="@+id/grpChatImage" />-->
+
+
+    <TextView
+        android:layout_marginRight="10dp"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text=""
+        android:id="@+id/textunreadmessage"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"/>
+
+</RelativeLayout>

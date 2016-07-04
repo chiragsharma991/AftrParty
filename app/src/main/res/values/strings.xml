@@ -9,5 +9,9 @@
     <string name="message_rw_permission">Without this permission the app is unable to access photos on your device. Are you sure you want to deny this permission?</string>
     <string name="snack_rw_permission">To allow photo access, please enable permission in settings.</string>
 
+    <string name="message_fine_location_permission">Without this permission the app is unable to get your location. Are you sure you want to deny this permission?</string>
+    <string name="snack_coarce_location_permission">To allow location access, please enable permission in settings.</string>
+    <string name="message_cf_location_permission">Without this permission the app is unable to to get your location. Are you sure you want to deny this permission?</string>
+
 
 </resources>

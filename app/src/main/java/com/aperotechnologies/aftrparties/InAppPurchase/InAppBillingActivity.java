@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.util.IabHelper;
 import com.aperotechnologies.aftrparties.util.IabResult;
@@ -15,7 +16,8 @@ import com.aperotechnologies.aftrparties.util.Purchase;
 /**
  * Created by hasai on 25/05/16.
  */
-public class InAppBillingActivity extends Activity {
+public class InAppBillingActivity extends Activity
+{
 
         private static final String TAG = "com.aperotechnologies.aftrparties.InAppPurchase.inappbilling";
         IabHelper mHelper;

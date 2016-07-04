@@ -2,6 +2,8 @@ package com.aperotechnologies.aftrparties.Chats;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -13,9 +15,11 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.utils.DateUtils;
 import com.quickblox.chat.model.QBChatMessage;
+import com.quickblox.chat.model.QBDialogType;
 import com.quickblox.users.model.QBUser;
 
 import java.util.List;
@@ -28,15 +32,21 @@ public class ChatAdapter extends BaseAdapter {
 
     private Activity context;
     private final List<QBChatMessage> chatMessages;
+    private QBDialogType dialog_type;
+    Configuration_Parameter m_config;
+    SharedPreferences sharedPreferences;
 
     private enum ChatItemType {
         Message,
         Sticker
     }
 
-    public ChatAdapter(Activity context, List<QBChatMessage> chatMessages) {
+    public ChatAdapter(Activity context, List<QBChatMessage> chatMessages, QBDialogType dialog_type) {
         this.context = context;
         this.chatMessages = chatMessages;
+        this.dialog_type = dialog_type;
+        m_config = Configuration_Parameter.getInstance();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     @Override
@@ -59,16 +69,11 @@ public class ChatAdapter extends BaseAdapter {
 
     @Override
     public int getViewTypeCount() {
-        //Log.e("ChatItemType.values().length ",""+ChatItemType.values().length);
         return ChatItemType.values().length;
     }
 
     @Override
     public int getItemViewType(int position) {
-//        return StickersManager.isSticker(getItem(position).getBody())
-//                ? ChatItemType.Sticker.ordinal()
-//                : ChatItemType.Message.ordinal();
-
         return ChatItemType.Message.ordinal();
     }
 
@@ -97,32 +102,6 @@ public class ChatAdapter extends BaseAdapter {
         }
 
 
-        /*QBUsers.getUser(chatMessage.getSenderId(), new QBEntityCallback<QBUser>() {
-            @Override
-            public void onSuccess(QBUser user, Bundle args) {
-
-                QBUser currentUser = ChatService.getInstance().getCurrentUser();
-                boolean isOutgoing = chatMessage.getSenderId() == null || chatMessage.getSenderId().equals(currentUser.getId());
-                setAlignment(holder, isOutgoing);
-                if (holder.txtMessage != null) {
-                    holder.txtMessage.setText(chatMessage.getBody());
-                }
-                if (chatMessage.getSenderId() != null) {
-                    //holder.txtInfo.setText(chatMessage.getSenderId() + ": " + getTimeText(chatMessage));
-                    holder.txtInfo.setText(user.getFullName() + ": " + DateUtils.longToMessageDate(chatMessage.getDateSent()));
-                } else {
-                    holder.txtInfo.setText(DateUtils.longToMessageDate(chatMessage.getDateSent()));
-                }
-
-            }
-
-            @Override
-            public void onError(QBResponseException e) {
-
-            }
-
-
-        });*/
 
         QBUser currentUser = ChatService.getInstance().getCurrentUser();
         boolean isOutgoing = chatMessage.getSenderId() == null || chatMessage.getSenderId().equals(currentUser.getId());
@@ -130,10 +109,32 @@ public class ChatAdapter extends BaseAdapter {
         if (holder.txtMessage != null) {
             holder.txtMessage.setText(chatMessage.getBody());
         }
-        if (chatMessage.getSenderId() != null) {
-            //holder.txtInfo.setText(chatMessage.getSenderId() + ": " + getTimeText(chatMessage));
-            holder.txtInfo.setText(ChatService.getInstance().getDialogsUsers().get(chatMessage.getSenderId()).getFullName() + ": " + DateUtils.longToMessageDate(chatMessage.getDateSent()));
-        } else {
+
+        if (chatMessage.getSenderId() != null)
+        {
+
+            if(dialog_type == QBDialogType.GROUP)
+            {
+
+                if(chatMessage.getSenderId().equals(currentUser.getId()))
+                {
+                    holder.txtInfo.setText(DateUtils.longToMessageDate(chatMessage.getDateSent()));
+
+                }
+                else
+                {
+
+                    Log.e("----"," "+chatMessage.getSenderId()+"------"+ChatService.getInstance().getDialogsUsers().get(chatMessage.getSenderId()));
+                    holder.txtInfo.setText(ChatService.getInstance().getDialogsUsers().get(chatMessage.getSenderId()).getFullName() + ": " + DateUtils.longToMessageDate(chatMessage.getDateSent()));
+                }
+            }
+            else
+            {
+                holder.txtInfo.setText(DateUtils.longToMessageDate(chatMessage.getDateSent()));
+            }
+        }
+        else
+        {
             holder.txtInfo.setText(DateUtils.longToMessageDate(chatMessage.getDateSent()));
         }
 

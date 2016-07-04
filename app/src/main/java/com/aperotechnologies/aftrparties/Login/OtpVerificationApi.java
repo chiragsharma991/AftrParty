@@ -1,6 +1,7 @@
 package com.aperotechnologies.aftrparties.Login;
 
 import com.aperotechnologies.aftrparties.model.OtpVerifiedResponse;
+import com.aperotechnologies.aftrparties.model.ValidOTPResponse;
 
 import retrofit.Callback;
 import retrofit.http.GET;
@@ -13,7 +14,7 @@ public interface OtpVerificationApi
 
 
     @GET("/")
-    public void getBooks(Callback<OtpVerifiedResponse> response);
+    public void getOtpVerification(Callback<OtpVerifiedResponse> response);
 
 
 }
