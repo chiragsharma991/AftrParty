@@ -1,21 +1,27 @@
 package com.aperotechnologies.aftrparties.DynamoDBTableClass;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.EditText;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
+import com.aperotechnologies.aftrparties.Login.LoginTableColumns;
 import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.Settings.SettingsActivity;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.quickblox.users.model.QBUser;
 
@@ -42,14 +48,15 @@ public class AWSLoginOperations {
         LoggedInUserInformation loggedInUserInfo;
         boolean value = false;
         String from;
+        SQLiteDatabase sqldb;
 
-        public addFBUserInfo(Context cont, LoggedInUserInformation loggedInUserInfo, String from)
+        public addFBUserInfo(Context cont, LoggedInUserInformation loggedInUserInfo, String from,SQLiteDatabase sqldb)
         {
             this.cont = cont;
             this.loggedInUserInfo = loggedInUserInfo;
             this.from = from;
             m_config = Configuration_Parameter.getInstance();
-
+            this.sqldb = sqldb;
             m_config.pDialog = new ProgressDialog(cont);
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         }
@@ -57,10 +64,8 @@ public class AWSLoginOperations {
         @Override
         protected Boolean doInBackground(String... params)
         {
-
             try
             {
-
                 String FacebookID = loggedInUserInfo.getFB_USER_ID();
                 String SocialEmail = loggedInUserInfo.getFB_USER_EMAIL();
 
@@ -78,9 +83,12 @@ public class AWSLoginOperations {
                 String FBHomeLocation = loggedInUserInfo.getFB_USER_HOMETOWN_NAME();
                 String BirthDate = loggedInUserInfo.getFB_USER_BIRTHDATE();
                 int FBFriendsCount;
-                if (loggedInUserInfo.getFB_USER_FRIENDS() == null) {
+                if (loggedInUserInfo.getFB_USER_FRIENDS() == null)
+                {
                     FBFriendsCount = 0;
-                } else {
+                }
+                else
+                {
                     FBFriendsCount = Integer.parseInt(loggedInUserInfo.getFB_USER_FRIENDS());
                 }
                 String Gender = loggedInUserInfo.getFB_USER_GENDER();
@@ -88,19 +96,17 @@ public class AWSLoginOperations {
                 List ProfilePicUrlList = new ArrayList();
                 ProfilePicUrlList.add(FBProfilePicUrl);
 
-
                 String Name = sharedPreferences.getString(m_config.Entered_User_Name, "");
                 String Email = sharedPreferences.getString(m_config.Entered_Email, "");
                 String PhoneNumber = sharedPreferences.getString(m_config.Entered_Contact_No, "");
 
-
                 UserTable selUserData = m_config.mapper.load(UserTable.class, FacebookID);
                 Log.e("selUserClass", " " + selUserData);
 
-                if(selUserData == null){
+                if(selUserData == null)
+                {
                     UserTable user = new UserTable();
                     Log.e("", "Inserting FBUser");
-
                     user.setFacebookID(FacebookID);
                     user.setQuickBloxID("N/A");
                     user.setLinkedInID("N/A");
@@ -121,15 +127,13 @@ public class AWSLoginOperations {
                     user.setProfileStatus("N/A");
                     user.setDeviceToken("N/A");
                     user.setRegistrationStatus("No");
-                    user.setCurrentmaskstatus("No");
+                    user.setcurrentmaskstatus("No");
+                    user.setImageflag("No");
 
                     Log.e("AWS FBUser inserting ", " " + user.toString());
                     m_config.mapper.save(user);
                     Log.e("", "AWS FBUser Inserted ---"+user.getRegistrationStatus());
                     value = true;
-
-
-
                 }
                 else
                 {
@@ -143,7 +147,21 @@ public class AWSLoginOperations {
                     selUserData.setEmail(Email);
                     selUserData.setPhoneNumber(PhoneNumber);
                     ProfilePicUrlList.remove(0);
-                    ProfilePicUrlList.add(0, FBProfilePicUrl);
+                    if(selUserData.getImageflag().equals("Yes"))
+                    {
+
+                    }
+                    else
+                    {
+                        ProfilePicUrlList.add(0, FBProfilePicUrl);
+
+                        String Update = "Update " + LoginTableColumns.USERTABLE + " set "
+                                + LoginTableColumns.FB_USER_PROFILE_PIC  + " = '" + FBProfilePicUrl + "'"
+                                + " where " + LoginTableColumns.FB_USER_ID + " = '" + FacebookID + "'";
+
+                        Log.i("update User  "+ LoginTableColumns.FB_USER_ID , Update);
+                        sqldb.execSQL(Update);
+                    }
                     selUserData.setProfilePicUrl(ProfilePicUrlList);
 
                     Log.e("AWS FBUser updated ", " " + selUserData.toString());
@@ -151,15 +169,10 @@ public class AWSLoginOperations {
                     Log.e("", "AWS FBUser updated");
                     value = true;
                 }
-
-
-            } catch (Exception ex) {
-
+            }
+            catch (Exception ex)
+            {
                 ex.printStackTrace();
-//                Log.e("", "Error retrieving data");
-//                ex.printStackTrace();
-//                GenerikFunctions.hideDialog(m_config.pDialog);
-//                GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                 value = false;
 
             }
@@ -203,7 +216,7 @@ public class AWSLoginOperations {
             else
             {
 
-                Log.e("", "Error retrieving data");
+                Log.e("", "Error retrieving data" +m_config.pDialog.getContext());
                 GenerikFunctions.hideDialog(m_config.pDialog);
                 GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
             }
@@ -261,7 +274,6 @@ public class AWSLoginOperations {
 
             try
             {
-
                 UserTable selUserData = m_config.mapper.load(UserTable.class, FacebookID);
                 Log.e("selUserClass", " " + selUserData);
                 Log.e("", "Inserting LIUser");
@@ -276,9 +288,9 @@ public class AWSLoginOperations {
                 Log.e("", "AWS LIUser Inserted");
                 value = true;
 
-
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Log.e("", "Error retrieving data");
                 ex.printStackTrace();
 //                GenerikFunctions.hideDialog(m_config.pDialog);
@@ -314,12 +326,13 @@ public class AWSLoginOperations {
                 //Harshada
                 LoginValidations.QBStartSession(cont);
 
-            }else{
+            }
+            else
+            {
                 Log.e("", "Error retrieving data");
                 GenerikFunctions.hideDialog(m_config.pDialog);
                 GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
             }
-
         }
     }
 
@@ -566,55 +579,6 @@ public class AWSLoginOperations {
         }
     }
 
-
-    /** update user in UserTable in settings page **/
-    public static void updateUserSettings(String picturePath, EditText edt_usermsgStatus, Context cont)
-    {
-        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-        String FacebookID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
-
-        try
-        {
-            if (picturePath.equals(""))
-            {
-
-                String profileStatus = edt_usermsgStatus.getText().toString().replaceAll("\\s+", " ").trim();
-                UserTable userTable = m_config.mapper.load(UserTable.class, FacebookID);
-                userTable.setProfileStatus(profileStatus);
-                m_config.mapper.save(userTable);
-                GenerikFunctions.showToast(cont, "Profile updated successfully");
-                GenerikFunctions.hideDialog(m_config.pDialog);
-            }
-            else
-            {
-                String url = getUrlfromCloudinary(cont, picturePath);
-                Log.e("url", " " + url);
-
-                String profileStatus = edt_usermsgStatus.getText().toString().replaceAll("\\s+", " ").trim();
-                UserTable userTable = m_config.mapper.load(UserTable.class, FacebookID);
-
-                List ProfilePicUrlList = new ArrayList();
-                if (userTable.getProfilePicUrl() != null)
-                {
-                    ProfilePicUrlList = userTable.getProfilePicUrl();
-                }
-
-                ProfilePicUrlList.add(url);
-
-                userTable.setProfileStatus(profileStatus);
-                userTable.setProfilePicUrl(ProfilePicUrlList);
-                m_config.mapper.save(userTable);
-                GenerikFunctions.showToast(cont, "Profile updated successfully");
-                GenerikFunctions.hideDialog(m_config.pDialog);
-            }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            GenerikFunctions.showToast(cont, "Profile updation failed, Please try again after some time");
-            GenerikFunctions.hideDialog(m_config.pDialog);
-        }
-    }
 
 
     /** create FBUser at time of sending Request **/

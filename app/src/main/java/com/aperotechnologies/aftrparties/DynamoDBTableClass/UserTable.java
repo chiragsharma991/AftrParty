@@ -39,6 +39,7 @@ public class UserTable {
     private List<PaidGCClass> paidgc;
     private List<ActivePartyClass> activeparty;
     private String currentmaskstatus;
+    private String Imageflag;
 
 
     @DynamoDBHashKey(attributeName = "facebookid")
@@ -240,15 +241,6 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "images")
-    public List getImages() {
-        return Images;
-    }
-
-    public void setImages(List Images) {
-        this.Images = Images;
-    }
-
     @DynamoDBAttribute(attributeName = "registrationstatus")
     public String getRegistrationStatus() {return Registrationstatus;}
 
@@ -258,15 +250,16 @@ public class UserTable {
 
 
     @DynamoDBAttribute(attributeName = "currentmaskstatus")
-    public String getCurrentmaskstatus()
+    public String getcurrentmaskstatus()
     {
         return currentmaskstatus;
     }
 
-    public void setCurrentmaskstatus(String currentmaskstatus)
+    public void setcurrentmaskstatus(String currentmaskstatus)
     {
         this.currentmaskstatus = currentmaskstatus;
     }
+
 
     public List<PaidGCClass> getPaidgc() {
         return paidgc;
@@ -276,6 +269,13 @@ public class UserTable {
         this.paidgc = paidgc;
     }
 
+
+    @DynamoDBAttribute(attributeName = "imageflag")
+    public String getImageflag() {return Imageflag;}
+
+    public void setImageflag(String Imageflag){
+        this.Imageflag = Imageflag;
+    }
 
     public List<ActivePartyClass> getActiveparty() {
         return activeparty;

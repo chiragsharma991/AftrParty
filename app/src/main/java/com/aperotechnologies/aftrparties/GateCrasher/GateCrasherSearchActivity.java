@@ -27,6 +27,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -36,6 +37,7 @@ import android.widget.Toast;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 
@@ -48,6 +50,9 @@ import java.util.List;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
+import static com.aperotechnologies.aftrparties.Reusables.Validations.getDateNo;
+import static com.aperotechnologies.aftrparties.Reusables.Validations.getMonthNo;
+
 
 /**
  * Created by hasai on 02/05/16.
@@ -56,7 +61,9 @@ public class GateCrasherSearchActivity extends Activity {
 
 
     TextView txtStartDate;
-    Button btn_SearchGCParty;
+    Button btn_getCurrentLocation , btn_SearchGCParty;
+    CheckBox cb_byobYes, cb_byobNo;
+
     String timeSelection;
 
     //final variables for StartTime in milliseconds
@@ -75,6 +82,7 @@ public class GateCrasherSearchActivity extends Activity {
     Context cont;
     LocationManager locationManager;
     private static final int MY_PERMISSIONS_ACCESS_CF_LOCATION = 3;
+    Location location = null;
 
 
 
@@ -95,29 +103,34 @@ public class GateCrasherSearchActivity extends Activity {
 
 
         // Spinner for Start Now/Later
-        Spinner spn_startTime = (Spinner) findViewById(R.id.spn_startTime);
-        List<String> startTimelist = new ArrayList<String>();
-        startTimelist.add("Now");
-        startTimelist.add("Later");
+//        Spinner spn_startTime = (Spinner) findViewById(R.id.spn_startTime);
+//        List<String> startTimelist = new ArrayList<String>();
+//        startTimelist.add("Now");
+//        startTimelist.add("Later");
+//
+//        // Spinner for BYOB
+//        Spinner spn_byob = (Spinner) findViewById(R.id.spn_byob);
+//        List<String> byobList = new ArrayList<String>();
+//        byobList.add("Yes");
+//        byobList.add("No");
 
-        // Spinner for BYOB
-        Spinner spn_byob = (Spinner) findViewById(R.id.spn_byob);
-        List<String> byobList = new ArrayList<String>();
-        byobList.add("Yes");
-        byobList.add("No");
 
 
-
-        final ArrayAdapter<String> startTime = new ArrayAdapter<String>(GateCrasherSearchActivity.this, R.layout.spinner_item, startTimelist);
-        startTime.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spn_startTime.setAdapter(startTime);
-
-        final ArrayAdapter<String> byob = new ArrayAdapter<String>(GateCrasherSearchActivity.this, R.layout.spinner_item, byobList);
-        byob.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spn_byob.setAdapter(byob);
+//        final ArrayAdapter<String> startTime = new ArrayAdapter<String>(GateCrasherSearchActivity.this, R.layout.spinner_item, startTimelist);
+//        startTime.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spn_startTime.setAdapter(startTime);
+//
+//        final ArrayAdapter<String> byob = new ArrayAdapter<String>(GateCrasherSearchActivity.this, R.layout.spinner_item, byobList);
+//        byob.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spn_byob.setAdapter(byob);
 
 
         txtStartDate = (TextView) findViewById(R.id.txtStartDate);
+        btn_getCurrentLocation = (Button) findViewById(R.id.btn_getlocation);
+        btn_getCurrentLocation.setVisibility(View.GONE);
+        cb_byobYes = (CheckBox) findViewById(R.id.byobyes);
+        cb_byobNo = (CheckBox) findViewById(R.id.byobno);
+
         btn_SearchGCParty = (Button) findViewById(R.id.btn_SearchGCParty);
 
 
@@ -130,7 +143,7 @@ public class GateCrasherSearchActivity extends Activity {
         startHour = calendar.get(Calendar.HOUR_OF_DAY);
         startMin = calendar.get(Calendar.MINUTE);
 
-        txtStartDate.setText(startDate + "-" + getMonthNo(startMon) + "-" + startYear + ", " + showTime(startHour, startMin));
+        txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + showTime(startHour, startMin));
         //current date time in milliseconds
         selected_startTimeVal = getTimeinMs(startDate, startMon, startYear, startHour, startMin);
 
@@ -138,64 +151,89 @@ public class GateCrasherSearchActivity extends Activity {
         //set startdateTime to temporary variables
         tempstartTimeVal[0] = selected_startTimeVal;
 
+        txtStartDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startDateDialog("show");
+            }
+        });
 
         // selection of Spinner Now/Later and start DatePicker
-        spn_startTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//        spn_startTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                timeSelection = parent.getSelectedItem().toString().trim();
+//                if (timeSelection.equals("Later")) {
+//                    startDateDialog("show");
+//
+//                } else {
+//                    //spinner click for Now Selection
+//                    //current date time
+//                    Calendar calendar = Calendar.getInstance();
+//                    int mYear = calendar.get(Calendar.YEAR);
+//                    int mMonth = calendar.get(Calendar.MONTH);
+//                    int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+//                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+//                    int min = calendar.get(Calendar.MINUTE);
+//                    startDate = mDay;
+//                    startMon = mMonth;
+//                    startYear = mYear;
+//                    startHour = hour;
+//                    startMin = min;
+//                    txtStartDate.setText(getDateNo(mDay) + "-" + getMonthNo(mMonth) + "-" + mYear + ", " + showTime(hour, min));
+//                    selected_startTimeVal = getTimeinMs(mDay, mMonth, mYear, hour, min);
+//
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
+//
+//
+//
+//        // spinner selection for BYOB
+//        spn_byob.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                selected_byob = parent.getSelectedItem().toString().trim();
+//                //Log.e("selected_byob "," ---- "+selected_byob);
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
 
+
+        cb_byobYes.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                timeSelection = parent.getSelectedItem().toString().trim();
-                if (timeSelection.equals("Later")) {
-                    startDateDialog("show");
-
-                } else {
-                    //spinner click for Now Selection
-                    //current date time
-                    Calendar calendar = Calendar.getInstance();
-                    int mYear = calendar.get(Calendar.YEAR);
-                    int mMonth = calendar.get(Calendar.MONTH);
-                    int mDay = calendar.get(Calendar.DAY_OF_MONTH);
-                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
-                    int min = calendar.get(Calendar.MINUTE);
-                    startDate = mDay;
-                    startMon = mMonth;
-                    startYear = mYear;
-                    startHour = hour;
-                    startMin = min;
-                    txtStartDate.setText(mDay + "-" + getMonthNo(mMonth) + "-" + mYear + ", " + showTime(hour, min));
-                    selected_startTimeVal = getTimeinMs(mDay, mMonth, mYear, hour, min);
-
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onClick(View v) {
+//
+                cb_byobYes.setChecked(true);
+                cb_byobNo.setChecked(false);
 
             }
         });
 
 
 
-        // spinner selection for BYOB
-        spn_byob.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        cb_byobNo.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selected_byob = parent.getSelectedItem().toString().trim();
-                //Log.e("selected_byob "," ---- "+selected_byob);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
+            public void onClick(View v) {
+//
+                cb_byobNo.setChecked(true);
+                cb_byobYes.setChecked(false);
             }
         });
 
-        // create party button click
-        btn_SearchGCParty.setOnClickListener(new View.OnClickListener()
-        {
+        btn_getCurrentLocation.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
                 //Find Self Location Here
 
                 //this is a check for build version below 23
@@ -223,19 +261,82 @@ public class GateCrasherSearchActivity extends Activity {
                         getSelfLocation();
                     }
                 }
+            }
+        });
 
 
-//                Log.e("selected_startTimeVal"," "+selected_startTimeVal);
-//                GenerikFunctions.showDialog(m_config.pDialog,"Creating Party...");
-//                Intent i = new Intent(GateCrasherSearchActivity.this,GateCrasherActivity.class);
-//                startActivity(i);
-//                GenerikFunctions.hideDialog(m_config.pDialog);
+        // create party button click
+        btn_SearchGCParty.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+
+                if(cb_byobYes.isChecked()){
+                    selected_byob = "Yes";
+                }else{
+                    selected_byob = "No";
+                }
+
+
+                m_config.pDialog.setMessage("Searching Parties");
+                m_config.pDialog.setCancelable(false);
+                m_config.pDialog.show();
+
+                if ((int) Build.VERSION.SDK_INT < 23)
+                {
+                    getSelfLocation();
+                }
+                else {
+                    if (ActivityCompat.checkSelfPermission(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                            &&
+                            ActivityCompat.checkSelfPermission(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        //Permission model implementation
+
+//                Location locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+//                return locationNet;
+
+                        ActivityCompat.requestPermissions((Activity) cont,
+                                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                                MY_PERMISSIONS_ACCESS_CF_LOCATION);
+                    } else {
+                        getSelfLocation();
+                    }
+                }
+
+
+                //Log.e("location"," ----- "+location+" ---- "+selected_byob);
+
+//                if(location == null){
+//                    Toast.makeText(cont,"Current Location not available",Toast.LENGTH_SHORT).show();
+//                    m_config.pDialog.dismiss();
+//                    m_config.pDialog.cancel();
+//                }else{
+//                    Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
+//                    GCParceableData data = new GCParceableData();
+//                    data.setlatitude(String.valueOf(location.getLatitude()));
+//                    data.setlongitude(String.valueOf(location.getLongitude()));
+//                    data.setdistance(sharedPreferences.getString(m_config.Distance,"3"));
+//                    data.setatdatetime(String.valueOf(selected_startTimeVal));
+//                    data.setbyob(selected_byob);
+//                    data.setpreference(sharedPreferences.getString(m_config.GenderPreference,""));
+//                    Bundle mBundles = new Bundle();
+//                    mBundles.putSerializable(ConstsCore.SER_KEY, data);
+//                    i.putExtras(mBundles);
+//                    cont.startActivity(i);
+//
+//                    m_config.pDialog.dismiss();
+//                    m_config.pDialog.cancel();
+//                }
+
+
 
             }
         });
     }
 
     public void getSelfLocation() {
+
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Toast.makeText(GateCrasherSearchActivity.this, "GPS not Available", Toast.LENGTH_LONG).show();
             Log.e("GPS DEisables", "Disabled");
@@ -260,20 +361,35 @@ public class GateCrasherSearchActivity extends Activity {
             alertDialog.setCanceledOnTouchOutside(false);
             alertDialog.show();
         } else {
-            Location location = getLastBestLocation();
+
+
+            location = getLastBestLocation();
             Log.e("Func  ", location.getLatitude() + "     " + location.getLongitude());
 
-            Log.e("selected_startTimeVal", " " + selected_startTimeVal);
+            if(location == null){
+                    Toast.makeText(cont,"Current Location not available",Toast.LENGTH_SHORT).show();
+                    m_config.pDialog.dismiss();
+                    m_config.pDialog.cancel();
+                }else{
+                    Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
+                    GCParceableData data = new GCParceableData();
+                    data.setlatitude(String.valueOf(location.getLatitude()));
+                    data.setlongitude(String.valueOf(location.getLongitude()));
+                    data.setdistance(sharedPreferences.getString(m_config.Distance,"3"));
+                    data.setatdatetime(String.valueOf(selected_startTimeVal));
+                    data.setbyob(selected_byob);
+                    data.setgenderpreference(sharedPreferences.getString(m_config.GenderPreference,""));
+                    Bundle mBundles = new Bundle();
+                    mBundles.putSerializable(ConstsCore.SER_KEY, data);
+                    i.putExtras(mBundles);
+                    cont.startActivity(i);
+
+                    m_config.pDialog.dismiss();
+                    m_config.pDialog.cancel();
+                }
 
 
-            m_config.pDialog.setMessage("Creating Party.");
-            m_config.pDialog.setCancelable(false);
-            m_config.pDialog.show();
 
-            Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
-            startActivity(i);
-            m_config.pDialog.dismiss();
-            m_config.pDialog.cancel();
 
 
         }
@@ -413,55 +529,6 @@ public class GateCrasherSearchActivity extends Activity {
     }
 
 
-    //function for displaying month
-    public static String getMonthNo(int val) {
-        String month = null;
-
-        switch (val) {
-            case 0:
-                month = "01";
-                break;
-            case 1:
-                month = "02";
-                break;
-            case 2:
-                month = "03";
-                break;
-            case 3:
-                month = "04";
-                break;
-            case 4:
-                month = "05";
-                break;
-            case 5:
-                month = "06";
-                break;
-            case 6:
-                month = "07";
-                break;
-            case 7:
-                month = "08";
-                break;
-            case 8:
-                month = "09";
-                break;
-            case 9:
-                month = "10";
-                break;
-            case 10:
-                month = "11";
-                break;
-            case 11:
-                month = "12";
-                break;
-            default:
-                break;
-
-        }
-
-        return month;
-    }
-
     //function for converting values in milliseconds
     public long getTimeinMs(int mDay, int mMonth, int mYear, int hour, int minute){
 
@@ -518,7 +585,7 @@ public class GateCrasherSearchActivity extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         //checks whether selected date and current date is same or not
                         if(getCurrentDate(startDate, startMon, startYear) == false){
-                            Toast.makeText(getApplicationContext(),"Party should be created for current day",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(),"Party can be searched for current day only",Toast.LENGTH_SHORT).show();
                         }else{
                             //call to Start TimePicker
                             startTimeDialog("show");
@@ -572,7 +639,7 @@ public class GateCrasherSearchActivity extends Activity {
                         if (tempstartTimeVal[0] - selected_startTimeVal < 0) {
                             Toast.makeText(getApplication(), "StartTime Should be greater than or equal to currentTime", Toast.LENGTH_SHORT).show();
                         } else {
-                            txtStartDate.setText(startDate + "-" + getMonthNo(startMon) + "-" + startYear + ", " + showTime(startHour, startMin));
+                            txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + showTime(startHour, startMin));
                             selected_startTimeVal = tempstartTimeVal[0];
                             Log.e("selected_startTimeVal", " " + selected_startTimeVal+" "+new Date(selected_startTimeVal));
 

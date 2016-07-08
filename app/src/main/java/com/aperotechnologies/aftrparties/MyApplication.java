@@ -21,6 +21,9 @@ public class MyApplication  extends Application {
     static final String ACCOUNT_KEY = "VLBr2asUuw9uHDFC7qgb";//"VLBr2asUuw9uHDFC7qgb";//"bzbtQDLez742xU468TXt";
     Configuration_Parameter m_config;
 
+    ///
+
+
     @Override
     public void onCreate() {
         // Simply add the handler, and that's it! No need to add any code

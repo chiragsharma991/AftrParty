@@ -134,6 +134,8 @@ public class GroupChatImpl extends QBMessageListenerImpl<QBGroupChat> implements
         // Show message
         Log.w(TAG, "new incoming message: " + chatMessage);
         chatActivity.showMessage(chatMessage);
+        // sets last message at the time of chat
+        m_config.lastMessge = chatMessage.getBody();
     }
 
     @Override

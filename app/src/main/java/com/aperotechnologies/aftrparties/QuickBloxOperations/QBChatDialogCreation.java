@@ -6,14 +6,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.aperotechnologies.aftrparties.Chats.ChatActivity;
 import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
-import com.aperotechnologies.aftrparties.LocalNotifications.LNotificationHelper;
+import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBGroupChatManager;
@@ -24,14 +23,11 @@ import com.quickblox.chat.request.QBDialogRequestBuilder;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.request.QBPagedRequestBuilder;
-import com.quickblox.core.request.QBRequestUpdateBuilder;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by hasai on 15/06/16.
@@ -128,7 +124,7 @@ public class QBChatDialogCreation {
 
                 GenerikFunctions.showToast(cont, "Request has been approved");
                 AWSPartyOperations.updateDialogId(cont, dialog.getDialogId(), GCFBID, GCQBID, PartyID, PartyName);
-                LNotificationHelper.setLNotificationPartyRetention(cont, PartyName, PartyID , dialog.getDialogId(), PartyEndTime);
+                //SetLocalNotifications.setLNotificationPartyRetention(cont, PartyName, PartyID , dialog.getDialogId(), PartyEndTime);
 
 
 

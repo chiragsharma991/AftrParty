@@ -77,9 +77,9 @@ public class OTPActivity extends Activity
     //String appkey = "b22ab60eda70072cd34c507c4870ab3c";
     //String appid = "c31396423a00078697c490cb13a6d99b";
 
-    String customerId = "ou5ncj9j";
-    String appkey = "568ae8a8ba42cc694c28a36b2814fa8f";
-    String appid = "ea5a8657ed73cfb6d6d47c055bb6a484";
+    String customerId = "34f3ccgp";
+    String appkey = "937a0d726bfdd7645016944fe5e91541";
+    String appid = "34a0e74737a5e0e29e20f40206d89b32";
 
     RequestInterceptor requestInterceptor;
     Gson gson;
@@ -112,8 +112,10 @@ public class OTPActivity extends Activity
 
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         m_config = Configuration_Parameter.getInstance();
+
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
+
         btn_send = (Button) findViewById(R.id.btn_generate);
         btn_verify = (Button) findViewById(R.id.btn_verify);
         edt_otp = (EditText) findViewById(R.id.edi_otp);
@@ -160,7 +162,7 @@ public class OTPActivity extends Activity
         Log.e("Shrd Pref in OTP Activity",sharedpreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                 sharedpreferences.getString(m_config.Entered_Email,"N/A") + "   "
                 + sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
-        getDeviceContatcs();
+      //  getDeviceContatcs();
 //        Intent intent = new Intent(cont, HomePageActivity.class);
 //        startActivity(intent);
 
@@ -222,6 +224,9 @@ public class OTPActivity extends Activity
                     @Override
                     public void failure(RetrofitError error)
                     {
+                        countDownTimer.onFinish();
+                        countDownTimer.cancel();
+                        countDownTimer=null;
                         Log.e("Retrofit error", error.toString());
                         error.printStackTrace();
                     }
@@ -308,11 +313,15 @@ public class OTPActivity extends Activity
 
     // - See more at: http://www.theappguruz.com/blog/android-count-timer#sthash.PfD5YcqI.dpuf
 
-    public RestAdapter getHostAdapter(String baseHost)
+    @Override
+    protected void onResume()
     {
-        RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint(baseHost).build();
-        return restAdapter;
+        super.onResume();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
     }
+
+
 
     public void requestOTPStrp2(final String url)
     {
@@ -343,15 +352,12 @@ public class OTPActivity extends Activity
                                 //displayContacts();
                                 //Go for HomePage
 
-                              //  getDeviceContatcs();
+                                getDeviceContatcs();
                                 SharedPreferences.Editor editor= sharedpreferences.edit();
                                 editor.putString(m_config.OTPValidationDone,"Yes");
                                 editor.apply();
 
                                 new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
-
-
-
                             }
                         }
                         catch (Exception e)
@@ -519,7 +525,6 @@ public class OTPActivity extends Activity
                     {
                         emailCur.moveToFirst();
                         email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-
                     }
 
                     emailCur.close();
@@ -598,8 +603,6 @@ public class OTPActivity extends Activity
         Log.e("Inside saveUserData","Yess");
         new SaveContactsAsync().execute();
     }
-
-
     class SaveContactsAsync extends AsyncTask<Void, Void, Void>
     {
         protected void onPostExecute(Void abc)
@@ -635,8 +638,6 @@ public class OTPActivity extends Activity
                 e.printStackTrace();
                 Log.e("Error in AWS"," " +e.toString());
             }
-
-
             return null;
         }
     }
@@ -739,14 +740,13 @@ public class OTPActivity extends Activity
             }
         }
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Crouton.cancelAllCroutons();
-        m_config.foregroundCont = this;
-    }
 }
+
+/* public RestAdapter getHostAdapter(String baseHost)
+    {
+        RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint(baseHost).build();
+        return restAdapter;
+    }*/
 
    /* public void requestOTP()
     {
@@ -825,14 +825,6 @@ public class OTPActivity extends Activity
         //     RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         //     postRequest.setRetryPolicy(policy);
         queue.add(stringRequest);
-
-
-
-
-
-
-
-
 
 
 

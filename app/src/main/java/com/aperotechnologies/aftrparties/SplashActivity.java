@@ -2,30 +2,41 @@ package com.aperotechnologies.aftrparties;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
+import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.android.volley.NetworkResponse;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
-import com.aperotechnologies.aftrparties.Constants.ConstsCore;
-import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
-import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.FacebookSdk;
-import com.quickblox.core.QBSettings;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import io.fabric.sdk.android.Fabric;
@@ -33,8 +44,7 @@ import io.fabric.sdk.android.Fabric;
 /**
  * Created by hasai on 06/05/16.
  */
-public class SplashActivity extends Activity
-{
+public class SplashActivity extends Activity {
     SharedPreferences sharedpreferences;
     Configuration_Parameter m_config;
     Context cont = this;
@@ -45,15 +55,14 @@ public class SplashActivity extends Activity
 //    static final String ACCOUNT_KEY = "VLBr2asUuw9uHDFC7qgb";//"VLBr2asUuw9uHDFC7qgb";//"bzbtQDLez742xU468TXt";
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_splash);
 
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        m_config=Configuration_Parameter.getInstance();
+        m_config = Configuration_Parameter.getInstance();
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
         m_config.pDialog = new ProgressDialog(cont);
@@ -72,6 +81,9 @@ public class SplashActivity extends Activity
 //
 //        QBSettings.getInstance().init(getApplicationContext(), APP_ID, AUTH_KEY, AUTH_SECRET);
 //        QBSettings.getInstance().setAccountKey(ACCOUNT_KEY);
+
+        String value ="How's u?";
+        Log.e("---- "," "+ Html.escapeHtml(value));
 
 
         Thread timer = new Thread()
@@ -127,6 +139,8 @@ public class SplashActivity extends Activity
             }
         };
         timer.start();
+
+
     }
 
     @Override
@@ -144,5 +158,5 @@ public class SplashActivity extends Activity
 
     }
 
-
 }
+

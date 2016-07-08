@@ -6,14 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusableInTouchMode="true"
+    android:background="@android:color/white"
     android:focusable="true"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-<LinearLayout
+    <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/lLyoutHost"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:focusable="true"
@@ -23,11 +24,11 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="40dp">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/drawerSettingsToolbar"
-            android:background="@android:color/black"
+            android:background="@color/colorPrimaryDark"
             android:layout_alignParentTop="true"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
@@ -41,7 +42,7 @@
                 <TextView
                     android:textSize="@dimen/text_size"
                     android:layout_centerInParent="true"
-                    android:text="GATE CRASHER"
+                    android:text="PARTIES"
                     android:id="@+id/activity_title"
                     android:textColor="#ffffff"
                     android:layout_width="wrap_content"
@@ -53,13 +54,34 @@
         </android.support.v7.widget.Toolbar>
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/listgatecrasher"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-    </ListView>
 
-</LinearLayout>
+    <ListView
+        android:layout_marginTop="44dp"
+        android:id="@+id/listgatecrasher"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:dividerHeight="4dp"
+
+        />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:visibility="visible"
+        android:layout_centerInParent="true" />
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/noParties"
+        android:gravity="center"
+        android:text="No Parties Available"
+        android:textSize="@dimen/text_size"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</RelativeLayout>
 
 
 </RelativeLayout>

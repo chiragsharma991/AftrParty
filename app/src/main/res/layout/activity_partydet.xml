@@ -23,7 +23,7 @@
                 android:id="@+id/home_toolbar"
                 android:layout_marginLeft="-16dp"
                 android:layout_alignParentTop="true"
-                android:background="@color/black"
+                android:background="@color/colorPrimaryDark"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:minHeight="?attr/actionBarSize"   >
@@ -299,6 +299,7 @@
                     android:layout_height="10dp"/>
 
                 <Button
+                    android:background="@color/colorPrimaryDark"
                     android:textStyle="bold"
                     android:layout_height="52dp"
                     android:layout_width="200dp"
@@ -307,7 +308,26 @@
                     android:textAllCaps="true"
                     android:id="@+id/btnRequestantList"
                     android:layout_gravity="center_horizontal"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@android:color/white"/>
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+
+            <TextView
+                android:background="@color/colorPrimaryDark"
+                android:textStyle="bold"
+                android:layout_height="52dp"
+                android:layout_width="200dp"
+                android:gravity="center"
+                android:layout_gravity="center_horizontal"
+                android:textSize="@dimen/text_size"
+                android:text="Cancel Request"
+                android:textAllCaps="true"
+                android:id="@+id/btnReqCancel"
+                android:visibility="gone"
+                android:textColor="@android:color/white"/>
 
             </LinearLayout>
 

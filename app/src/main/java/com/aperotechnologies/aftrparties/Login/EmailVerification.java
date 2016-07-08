@@ -5,9 +5,11 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
@@ -30,8 +32,8 @@ public class EmailVerification {
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue((Activity)cont);
-        String url ="http://api.verify-email.org/api.php?usr=harshadaasai&pwd=harshada26&check="+EmailId;
-
+        //String url ="http://api.verify-email.org/api.php?usr=harshadaasai&pwd=harshada26&check="+EmailId;
+        String url ="http://api.verify-email.org/api.php?usr=aperotechnologies&pwd=apero@357&check="+EmailId;
         // prepare the Request
         JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>()
@@ -52,6 +54,9 @@ public class EmailVerification {
         );
 
         // add it to the RequestQueue
+        int socketTimeout = 10000;//60 seconds - change to what you want
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        getRequest.setRetryPolicy(policy);
         queue.add(getRequest);
     }
 

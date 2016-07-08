@@ -83,7 +83,7 @@ public class DialogsActivityOld extends Activity
 
 
                 // Open chat activity
-                ChatActivity.start(DialogsActivityOld.this, bundle);
+                //ChatActivity.start(DialogsActivityOld.this, bundle);
                 //  finish();
             }
         });

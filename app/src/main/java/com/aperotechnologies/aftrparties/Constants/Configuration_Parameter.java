@@ -50,6 +50,9 @@ public class Configuration_Parameter
     public String OTPValidationDone = "OTPValidationDone";
     public String EmailValidationDone = "EmailValidationDone";
     public String FinalStepDone = "FinalStepDone";
+    public String Distance = "3";
+    public String GenderPreference = "";
+    public String PrimaryUrl;
 
 
     //Harshada
@@ -60,6 +63,14 @@ public class Configuration_Parameter
     public String temp_regId = "registration_id";
     public String AWSUserDataDone = "No";
     public Context foregroundCont;
+    //*//Cloudinary Variables
+    public String cloud_name = "dklb21dyh";
+    public String api_key = "585356451553425";
+    public String api_secret = "ylB_rZgnwVT823PH3_HtZo79Sf4";
+    //*//
+    //lastMessge variable is used for updating lastmessage of chat dialog while navigating from ChatActivity to DialogsActivity
+    public String lastMessge = "";
+
 
 
 

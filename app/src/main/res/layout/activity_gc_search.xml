@@ -24,7 +24,7 @@
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/drawerSettingsToolbar"
-                android:background="@android:color/black"
+                android:background="@color/colorPrimaryDark"
                 android:layout_alignParentTop="true"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
@@ -38,7 +38,7 @@
                     <TextView
                         android:textSize="@dimen/text_size"
                         android:layout_centerInParent="true"
-                        android:text="HOST"
+                        android:text="GATE CRASHER"
                         android:id="@+id/activity_title"
                         android:textColor="#ffffff"
                         android:layout_width="wrap_content"
@@ -64,7 +64,7 @@
                     android:layout_width="3dp"  />
 
 
-                <LinearLayout
+                <!--<LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:weightSum="1">
@@ -91,7 +91,7 @@
                         android:id="@+id/spn_startTime"
                         android:layout_weight="0.6"/>
 
-                </LinearLayout>
+                </LinearLayout>-->
 
 
                 <LinearLayout
@@ -99,22 +99,32 @@
                     android:layout_height="wrap_content"
                     android:weightSum="1">
 
-                    <View
+                    <!--<View
                         android:padding="10dp"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
-                        android:layout_weight="0.4"/>
+                        android:layout_weight="0.4"/>-->
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text="Party Start Time :"
+                        android:textSize="@dimen/text_size"
+                        android:layout_weight="0.45"/>
 
                     <TextView
                         android:padding="10dp"
                         android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"
-                        android:paddingLeft="5dp"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
                         android:textSize="@dimen/text_size"
                         android:id="@+id/txtStartDate"
-                        android:layout_weight="0.6"/>
+                        android:layout_weight="0.55"/>
 
                 </LinearLayout>
 
@@ -174,11 +184,11 @@
                         android:padding="10dp"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
-                        android:text="BYOB"
+                        android:text="BYOB :"
                         android:textSize="@dimen/text_size"
-                        android:layout_weight="0.4"/>
+                        android:layout_weight="0.45"/>
 
-                    <Spinner
+                    <!--<Spinner
                         android:padding="10dp"
                         android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"
@@ -187,7 +197,35 @@
                         android:layout_width="0dp"
                         android:textSize="@dimen/text_size"
                         android:id="@+id/spn_byob"
-                        android:layout_weight="0.6"/>
+                        android:layout_weight="0.6"/>-->
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="0.55"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
+
+                        <CheckBox
+                            android:enabled="true"
+                            android:id="@+id/byobyes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="YES"
+                            android:checked="true" />
+
+
+                        <CheckBox
+                            android:enabled="true"
+                            android:layout_marginLeft="10dp"
+                            android:id="@+id/byobno"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NO"
+                            android:checked="false" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -197,18 +235,36 @@
                     android:layout_width="3dp"  />
 
 
+                <Button
+                    android:background="@color/white"
+                    android:padding="10dp"
+                    android:layout_height="52dp"
+                    android:layout_width="wrap_content"
+                    android:textSize="@dimen/text_size"
+                    android:text="Get Current Location"
+                    android:textAllCaps="false"
+                    android:id="@+id/btn_getlocation"
+                    android:layout_gravity="center_horizontal"
+                    android:textColor="@android:color/black"/>
+
+
+
+                <View
+                    android:layout_height="5dp"
+                    android:layout_width="3dp"  />
 
 
                 <Button
+                    android:background="@color/colorPrimaryDark"
                     android:textStyle="bold"
                     android:layout_height="52dp"
                     android:layout_width="200dp"
                     android:textSize="@dimen/text_size"
-                    android:text="SEARCH PARTY"
+                    android:text="GET PARTIES"
                     android:textAllCaps="true"
                     android:id="@+id/btn_SearchGCParty"
                     android:layout_gravity="center_horizontal"
-                    android:textColor="@android:color/black"/>
+                    android:textColor="@android:color/white"/>
 
             </LinearLayout>
         </ScrollView>

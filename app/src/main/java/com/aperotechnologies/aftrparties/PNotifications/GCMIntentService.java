@@ -21,6 +21,7 @@ import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.MyLifecycleHandler;
 import com.aperotechnologies.aftrparties.R;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.quickblox.chat.QBChatService;
 
 import java.util.Random;
 
@@ -139,7 +140,6 @@ public class GCMIntentService extends IntentService {
 
             }
 
-
         }else {
             //when request is send to host and it is received by host
             if (messagetype.equals("requestSend")) {
@@ -216,7 +216,7 @@ public class GCMIntentService extends IntentService {
                 .setContentTitle("AftrParties")
                 .setContentText(message);
 
-        mBuilder.setContentIntent(contentIntent);
+        //mBuilder.setContentIntent(contentIntent);
         mBuilder.setAutoCancel(true);
 
         notificationManager.notify(notId, mBuilder.build());

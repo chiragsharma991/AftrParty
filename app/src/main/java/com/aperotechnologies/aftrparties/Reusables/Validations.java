@@ -12,6 +12,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.EditText;
 
+import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.android.Utils;
@@ -37,6 +38,7 @@ import java.util.regex.Pattern;
 public class Validations {
 
     private static String format = "";
+    private static Configuration_Parameter m_config;
 
     public static String getUniqueId(Context cont)
     {
@@ -85,14 +87,16 @@ public class Validations {
     public static String getUrlfromCloudinary(Context cont, String picturePath){
 
         Log.e("picturePath"," "+picturePath);
+
+        m_config = Configuration_Parameter.getInstance();
         String url = "";
         Map config = new HashMap();
-        config.put("cloud_name", "dklb21dyh");
-        config.put("api_key", "585356451553425");
-        config.put("api_secret", "ylB_rZgnwVT823PH3_HtZo79Sf4");
+        config.put("cloud_name", m_config.cloud_name);
+        config.put("api_key", m_config.api_key);
+        config.put("api_secret", m_config.api_secret);
 
         Cloudinary cloudinary = new Cloudinary("cloudinary://585356451553425:ylB_rZgnwVT823PH3_HtZo79Sf4@dklb21dyh");
-        Log.e("cloudinary"," "+cloudinary);
+        //Log.e("cloudinary"," "+cloudinary);
 
 
 
@@ -102,6 +106,11 @@ public class Validations {
             cloudinary.uploader().upload(picturePath, ObjectUtils.asMap("public_id", Id));
             //fetch image from cloudinary
             url = cloudinary.url().generate(String.valueOf(Id));
+
+//            cloudinary.uploader().destroy(Id,
+//                    ObjectUtils.emptyMap());
+
+            Log.e("public_id"," "+Id+" "+url);
         }
         catch (IOException e)
         {
@@ -109,6 +118,31 @@ public class Validations {
         }
 
         return url;
+    }
+
+    public static void deleteImagefromCloudinary(String Public_Id){
+
+        Log.e("public_id"," "+Public_Id);
+
+        m_config = Configuration_Parameter.getInstance();
+        Map config = new HashMap();
+        config.put("cloud_name", m_config.cloud_name);
+        config.put("api_key", m_config.api_key);
+        config.put("api_secret", m_config.api_secret);
+
+        Cloudinary cloudinary = new Cloudinary("cloudinary://585356451553425:ylB_rZgnwVT823PH3_HtZo79Sf4@dklb21dyh");
+
+        try {
+            cloudinary.uploader().destroy(Public_Id,
+                   ObjectUtils.emptyMap());
+
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
 
@@ -413,5 +447,25 @@ public class Validations {
         return flag;
 
     }
+
+
+    public static String getDateNo(int val) {
+        String date;
+
+        if(val < 10){
+            date = "0" +String.valueOf(val);
+        }else{
+            date = String.valueOf(val);
+        }
+
+
+        return date;
+    }
+
+
+
+
+
+
 
 }

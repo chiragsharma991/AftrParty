@@ -10,17 +10,21 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.GateCrasher.PartyConversion;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
+import com.aperotechnologies.aftrparties.History.PartyDetails;
 import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.Login.AsyncAgeCalculation;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
+import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
 import com.aperotechnologies.aftrparties.R;
@@ -265,8 +269,8 @@ public class AWSPartyOperations {
         {
 
             try {
-
-                user = m_config.mapper.load(UserTable.class, LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID());
+                String HostFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+                user = m_config.mapper.load(UserTable.class, HostFBID);
                 value = true;
 
             }catch (Exception ex) {
@@ -307,10 +311,6 @@ public class AWSPartyOperations {
                 Log.e("MainActivity---", "Party inserted");
 
                 new addPartiestoUserTable(user, partyTable, cont, "Created", "CreateParty", null, null).execute();
-
-
-
-
 
             }else{
                 Log.e("", "Error retrieving data");
@@ -479,10 +479,11 @@ public class AWSPartyOperations {
 
             try {
                 PartyTable selPartyTable = m_config.mapper.load(PartyTable.class, partytable.getPartyID());
+                String GCFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
 
                 if (selPartyTable.getGatecrashers() == null) {
                     GateCrashersClass GateCrashers = new GateCrashersClass();
-                    GateCrashers.setGatecrasherid(LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID());
+                    GateCrashers.setGatecrasherid(GCFBID);
                     GateCrashers.setGcrequeststatus(Status);
                     GateCrashers.setGcattendancestatus("No");
 
@@ -495,7 +496,7 @@ public class AWSPartyOperations {
                 } else {
                     //add new entry to existing array
                     GateCrashersClass GateCrashers = new GateCrashersClass();
-                    GateCrashers.setGatecrasherid(LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID());
+                    GateCrashers.setGatecrasherid(GCFBID);
                     GateCrashers.setGcrequeststatus(Status);
                     GateCrashers.setGcattendancestatus("No");
 
@@ -870,12 +871,23 @@ public class AWSPartyOperations {
             Log.e("--onPostEx- updatePartiesinUserTable"," "+v);
 
             if(v == true) {
-                t.setText(Status);
 
-                if (DialogID == null || DialogID.equals(null) || DialogID.equals("") || DialogID.equals("N/A")) {
-                    QBChatDialogCreation.createGroupChat(PartyName, PartyImage, gateCrasherQBID, gateCrasherFBID, partyID, cont, PartyEndTime);
-                } else {
-                    QBChatDialogCreation.updateGroupChat(PartyName, DialogID, gateCrasherQBID, gateCrasherFBID, partyID, cont);
+                if (cont instanceof PartyDetails)
+                {//when GC Cancel Party Request after Approval
+
+                    t.setVisibility(View.GONE);
+                    Toast.makeText(cont,"Party request has been cancelled",Toast.LENGTH_SHORT).show();
+
+
+                }else {
+
+                    t.setText(Status);
+
+                    if (DialogID == null || DialogID.equals(null) || DialogID.equals("") || DialogID.equals("N/A")) {
+                        QBChatDialogCreation.createGroupChat(PartyName, PartyImage, gateCrasherQBID, gateCrasherFBID, partyID, cont, PartyEndTime);
+                    } else {
+                        QBChatDialogCreation.updateGroupChat(PartyName, DialogID, gateCrasherQBID, gateCrasherFBID, partyID, cont);
+                    }
                 }
 
 

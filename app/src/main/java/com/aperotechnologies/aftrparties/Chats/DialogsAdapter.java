@@ -3,6 +3,8 @@ package com.aperotechnologies.aftrparties.Chats;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -121,7 +123,7 @@ public class DialogsAdapter extends BaseAdapter
             Log.e("came in group", "");
             if (url == null || url.equals("") || url.length() == 0)
             {
-                view.grpChatImage.setImageResource(R.drawable.placeholder_user);
+                view.grpChatImage.setImageResource(R.drawable.placeholder_group);
                 view.grpChatImage.setTag(position);
             }
             else
@@ -161,6 +163,7 @@ public class DialogsAdapter extends BaseAdapter
         view.roomName.setText(dialog.getName());
         if(dialog.getLastMessage() != null)
         {
+
             view.lastMessage.setText(dialog.getLastMessage());
         }
         else

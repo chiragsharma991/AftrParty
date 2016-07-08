@@ -24,7 +24,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/drawerSettingsToolbar"
-            android:background="@android:color/black"
+            android:background="@color/colorPrimaryDark"
             android:layout_alignParentTop="true"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
@@ -38,7 +38,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
                 <TextView
                     android:textSize="@dimen/text_size"
                     android:layout_centerInParent="true"
-                    android:text=""
+                    android:text="Requestants"
                     android:id="@+id/activity_title"
                     android:textColor="#ffffff"
                     android:layout_width="wrap_content"

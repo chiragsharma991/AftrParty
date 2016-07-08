@@ -44,6 +44,7 @@ public class QBPushNotifications {
 
 
         JSONObject json = new JSONObject();
+        String GCFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
         try {
             json.put("message", username +" has sent you request for "+partyName+" Party");
             json.put("type","requestSend");
@@ -52,7 +53,7 @@ public class QBPushNotifications {
             json.put("HostQBID", HostQBID);//Host QB Id
             json.put("HostFBID",HostFBID);//Host FB Id
             json.put("GCQBID", sharedPreferences.getString(m_config.QuickBloxID,""));//RequestantQBID
-            json.put("GCFBID", LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID());//RequestantFBID
+            json.put("GCFBID", GCFBID);//RequestantFBID
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -98,15 +99,17 @@ public class QBPushNotifications {
 
 
         JSONObject json = new JSONObject();
+        String HostFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+
         try {
-            json.put("message",  "You request has been approved for "+partyName);
+            json.put("message",  "Your request has been approved for "+partyName);
             json.put("type","requestApproved");
             // custom parameters
             json.put("PartyID", PartyID);//approval for Party
             json.put("GCQBID", GCQBID);//GCQBId(Approved ID)
             json.put("GCFBID",GCFBID);//GCFBId(Approved ID)
             json.put("HostQBID", sharedPreferences.getString(m_config.QuickBloxID,""));//HostQBID
-            json.put("HostFBID", LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID());//HostFBID
+            json.put("HostFBID", HostFBID);//HostFBID
 
         } catch (Exception e) {
             e.printStackTrace();

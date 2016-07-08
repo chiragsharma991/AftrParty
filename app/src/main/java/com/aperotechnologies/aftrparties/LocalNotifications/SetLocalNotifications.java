@@ -7,14 +7,15 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
+
 /**
  * Created by hasai on 04/07/16.
  */
-public class LNotificationHelper {
+public class SetLocalNotifications {
 
 
 
-
+    // set Local Notification for party retention
     public static void setLNotificationPartyRetention(Context cont, String PartyName, String PartyId, String DialogId, String PartyEndTime)
     {
         Long currentTimeMillis = System.currentTimeMillis();
@@ -22,10 +23,12 @@ public class LNotificationHelper {
 
         AlarmManager alarmManager = (AlarmManager) cont.getSystemService(Context.ALARM_SERVICE);
 
-        Intent notificationIntent = new Intent("android.media.action.DISPLAY_NOTIFICATION");
+//        Intent notificationIntent = new Intent("android.media.action.DISPLAY_NOTIFICATION");
+        Intent notificationIntent = new Intent(cont, RatingsAlarmReceiver.class);
         notificationIntent.putExtra("PartyName",PartyName);
         notificationIntent.putExtra("PartyId",PartyId);
         notificationIntent.putExtra("DialogId",DialogId);
+        notificationIntent.putExtra("from","PartyRetention");
 
 
         Log.e("NotificationHelper "," PartyName "+" "+PartyId+" "+DialogId);

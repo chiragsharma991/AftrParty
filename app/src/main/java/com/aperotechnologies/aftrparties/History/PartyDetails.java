@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -13,16 +14,23 @@ import android.widget.TextView;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.ActivePartyClass;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
@@ -37,6 +45,7 @@ public class PartyDetails extends Activity
     CircularImageView imgParty;
     TextView txtpartyName, txthostName, txtpartyDesc, txtpartyAddress, txtpartyStartTime, txtpartyEndTime;
     Button btnRequestant;
+    TextView btnReqCancel;
     PartyTable party;
     RadioButton rdbtnByobyes, rdbtnByobNo;
 
@@ -45,6 +54,12 @@ public class PartyDetails extends Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_partydet);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build();
+        StrictMode.setThreadPolicy(policy);
 
         m_config = Configuration_Parameter.getInstance();
         Crouton.cancelAllCroutons();
@@ -59,6 +74,7 @@ public class PartyDetails extends Activity
         txtpartyStartTime = (TextView)findViewById(R.id.partystarttime);
         txtpartyEndTime = (TextView)findViewById(R.id.partyendtime);
         btnRequestant = (Button)findViewById(R.id.btnRequestantList);
+        btnReqCancel = (TextView)findViewById(R.id.btnReqCancel);
         rdbtnByobyes = (RadioButton) findViewById(R.id.byobYes);
         rdbtnByobNo = (RadioButton) findViewById(R.id.byobNo);
 
@@ -108,8 +124,6 @@ public class PartyDetails extends Activity
 
                 url = "";
 //
-            }else{
-                url = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_PROFILE_PIC();
             }
 
             if(!url.equals("") || !url.equals(null) || !url.equals("N/A")){
@@ -127,10 +141,34 @@ public class PartyDetails extends Activity
         }
 
 
+//        long milliSeconds= Long.parseLong(party.getStartTime());
+//        Date d = new Date(milliSeconds);
+//        Calendar cal1 = Calendar.getInstance();//compares party date using its starttime
+//        Calendar cal2 = Calendar.getInstance();//compares current date
+//        cal1.setTime(d);
+//        cal2.setTime(new Date());
+//
+//
+//        boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+//                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH);
+
+        Long currentTime = System.currentTimeMillis();
+
+
         if(PartyStatus.equals("Created")){
-            btnRequestant.setVisibility(View.VISIBLE);
+            btnRequestant.setText("Requestant");
+            btnReqCancel.setVisibility(View.GONE);
+        }else if(PartyStatus.equals("Approved")){
+            btnRequestant.setText("Host");
+            //if(currentTime < Long.parseLong(party.getEndTime())){
+                btnReqCancel.setVisibility(View.VISIBLE);
+            //}else{
+                btnReqCancel.setVisibility(View.GONE);
+            //}
+
         }else{
-            btnRequestant.setVisibility(View.GONE);
+            btnRequestant.setText("Host");
+            btnReqCancel.setVisibility(View.GONE);
         }
 
 
@@ -138,20 +176,69 @@ public class PartyDetails extends Activity
             @Override
             public void onClick(View v) {
 
-                Log.e("----- "," "+PartyID);
-                Intent i = new Intent(cont,RequestantListActivity.class);
-                PartyParceableData party1 = new PartyParceableData();
-                party1.setPartyId(PartyID);
-                party1.setPartyName(PartyName);
-                party1.setStartTime(PartyStartTime);
-                party1.setEndTime(PartyEndTime);
-                party1.setPartyStatus(PartyStatus);
-                Bundle mBundles = new Bundle();
-                mBundles.putSerializable(ConstsCore.SER_KEY, party1);
-                i.putExtras(mBundles);
-                cont.startActivity(i);
+                if(btnRequestant.getText().equals("Requestant")){
+                    Log.e("----- "," "+PartyID);
+                    Intent i = new Intent(cont,RequestantListActivity.class);
+                    PartyParceableData party1 = new PartyParceableData();
+                    party1.setPartyId(PartyID);
+                    party1.setPartyName(PartyName);
+                    party1.setStartTime(PartyStartTime);
+                    party1.setEndTime(PartyEndTime);
+                    party1.setPartyStatus(PartyStatus);
+                    Bundle mBundles = new Bundle();
+                    mBundles.putSerializable(ConstsCore.SER_KEY, party1);
+                    i.putExtras(mBundles);
+                    cont.startActivity(i);
+                }else{
+
+                }
+
             }
         });
+
+
+        btnReqCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //check for Paid/Unpaid user
+                String GCID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+
+                Log.e("1111"," ");
+                try
+                {
+                    UserTable user = m_config.mapper.load(UserTable.class, GCID);
+                    List<ActivePartyClass> ActivePartyList = user.getActiveparty();
+                    List<PaidGCClass> PaidGC =  user.getPaidgc();
+                    if (PaidGC == null)
+                    {
+                        //Unpaid user
+                        new AWSPartyOperations.updateGCinPartyTable(GCID, PartyID, "Cancelled", cont, btnReqCancel).execute();
+                        Log.e("2222"," ");
+
+                    }
+                    else
+                    {
+                        //Paid User
+                        new AWSPartyOperations.updateGCinPartyTable(GCID, PartyID, "Cancelled", cont, btnReqCancel).execute();
+                        // remove party from ActiveParty list
+                        Log.e("33333"," ");
+                        if(ActivePartyList != null){
+                            ActivePartyClass ActiveParty = ActivePartyList.get(0);
+                            ActivePartyList.remove(0);
+                            user.setActiveparty(ActivePartyList);
+                            m_config.mapper.save(user);
+                        }
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
 
 
     }

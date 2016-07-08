@@ -9,24 +9,31 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -37,30 +44,47 @@ import android.widget.Toast;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSLoginOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
+import com.aperotechnologies.aftrparties.Login.LoginTableColumns;
+import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
+import com.aperotechnologies.aftrparties.Login.Welcome;
+import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.Age;
 import com.aperotechnologies.aftrparties.Reusables.AgeCalculator;
 import com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.aperotechnologies.aftrparties.utils.SeekbarWithIntervals;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.github.siyamed.shapeimageview.CircularImageView;
+import com.quickblox.chat.QBChatService;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.exception.QBResponseException;
+import com.quickblox.core.server.BaseService;
+import com.quickblox.users.QBUsers;
+import com.quickblox.users.model.QBUser;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import static com.aperotechnologies.aftrparties.Reusables.Validations.decodeFile;
 import static com.aperotechnologies.aftrparties.Reusables.Validations.getImageUri;
@@ -93,11 +117,21 @@ public class SettingsActivity extends Activity
 
     FaceOverlayView faceOverlayView;
     List<String> valid;
-    ArrayList<String> validPics;
+    public static ArrayList<String> validPics;
    // GridView images;
     LinearLayout lineimg;
     String user_name,user_gender,user_status,user_mask_unmask,user_profilepic,user_age;
     String[] imagesArray;
+    Handler h;
+    ProgressDialog progressDialog;
+
+    DBHelper helper;
+    SQLiteDatabase sqldb;
+    UserTable userTable;
+
+    String ImageFlag;
+    RecyclerView recyclerView;
+    Activity act = this;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -106,7 +140,10 @@ public class SettingsActivity extends Activity
         cont  = this;
         m_config = Configuration_Parameter.getInstance();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-        m_config.pDialog = new ProgressDialog(cont);
+       // m_config.pDialog = new ProgressDialog(cont);
+
+        helper= DBHelper.getInstance(cont);
+        sqldb=helper.getWritableDatabase();
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -115,18 +152,25 @@ public class SettingsActivity extends Activity
         edt_usermsgStatus = (EditTextPopUpFixed) findViewById(R.id.edt_usermsgStatus);
         edt_Age = (EditTextPopUpFixed) findViewById(R.id.edt_Age);
         edt_userName = (EditTextPopUpFixed) findViewById(R.id.edt_userName);
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(SettingsActivity.this, LinearLayoutManager.HORIZONTAL, false));
 
         //txtrangeseekbarval = (TextView) findViewById(R.id.txtrangeseekbarval);
         txtseekbarval = (TextView) findViewById(R.id.txtseekbarval);
         //rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeseekbar);
         SeekBar = (SeekBar) findViewById(R.id.seekbar);
         //images = (GridView)findViewById(R.id.imggrid);
-        lineimg = (LinearLayout)findViewById(R.id.lineimages);
+     //   lineimg = (LinearLayout)findViewById(R.id.lineimages);
 
         //List<String> seekbarIntervals = getIntervals();
         //getSeekbarWithIntervals().setIntervals(seekbarIntervals);
         img_editSettings = (Button) findViewById(R.id.img_editSettings);
         faceOverlayView =(FaceOverlayView) findViewById(R.id.face_overlay);
+
+        progressDialog = new ProgressDialog(SettingsActivity.this);
+        progressDialog.setMessage("Loading....");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
 
         // Spinner for Mask/UnMask
         spn_mask = (Spinner) findViewById(R.id.spn_maskStatus);
@@ -154,15 +198,38 @@ public class SettingsActivity extends Activity
 
         Bundle b=this.getIntent().getExtras();
         imagesArray = b.getStringArray("images");
-        valid =  Arrays.asList(imagesArray);
-        validPics = (ArrayList<String>) valid;
+        validPics = new ArrayList<String>();
+
+        for(int i=0;i<imagesArray.length;i++)
+        {
+            validPics.add(imagesArray[i]);
+            Log.e("Received images",validPics.get(i));
+        }
+
 
         if(imagesArray.length<5)
         {
             Log.e("Get LocalImages","Yes");
         }
 
-        setUserInfo();
+        Thread thread = new Thread()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    setUserInfo();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        thread.start();
+
         /*1111*/
 
     final int stepSize = 1;
@@ -187,130 +254,142 @@ public class SettingsActivity extends Activity
         }
     });
 
+
+
     imguser.setOnClickListener(new View.OnClickListener()
     {
         @Override
         public void onClick(View v)
         {
-            AlertDialog.Builder builderSingle = new AlertDialog.Builder(SettingsActivity.this);
 
-            builderSingle.setTitle("Add Photo");
-            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                    SettingsActivity.this, android.R.layout.select_dialog_item);
-            arrayAdapter.add("Camera");
-            arrayAdapter.add("Gallery");
+            int listCount = recyclerView.getAdapter().getItemCount();
+            if(listCount == 5)
+            {
+                Toast.makeText(cont,"Only 5 images are allowed. Please remove atleast one image first to upload new",Toast.LENGTH_LONG).show();
+            }
+            else
+            {
 
-            builderSingle.setNegativeButton("Cancel",
-                    new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
+                AlertDialog.Builder builderSingle = new AlertDialog.Builder(SettingsActivity.this);
+
+                builderSingle.setTitle("Add Photo");
+                final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+                        SettingsActivity.this, android.R.layout.select_dialog_item);
+                arrayAdapter.add("Camera");
+                arrayAdapter.add("Gallery");
+
+                builderSingle.setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener()
                         {
-                            dialog.dismiss();
-                        }
-                    });
-
-            builderSingle.setAdapter(arrayAdapter,
-                    new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
-
-                            if(which==0)
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
                             {
-                                if ((int) Build.VERSION.SDK_INT < 23)
-                                {
-                                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                    fileUri = getOutputMediaFileUri(ConstsCore.MEDIA_TYPE_IMAGE);
-                                    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-                                    intent.putExtra("return-data", true);
-                                    // start the image capture Intent
-                                    startActivityForResult(intent, ConstsCore.CAMERA_REQUEST);
-                                }
-                                else
-                                {
+                                dialog.dismiss();
+                            }
+                        });
 
-                                    int permissionCheck = ContextCompat.checkSelfPermission(SettingsActivity.this,
-                                            android.Manifest.permission.CAMERA);
-
-                                    if(permissionCheck== PackageManager.PERMISSION_GRANTED)
+                builderSingle.setAdapter(arrayAdapter,
+                        new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                if(which==0)
+                                {
+                                    if ((int) Build.VERSION.SDK_INT < 23)
                                     {
-                                        permissionCheck = ContextCompat.checkSelfPermission(SettingsActivity.this,
-                                                android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-                                        //here
-                                        int permissioncheckRead= ContextCompat.checkSelfPermission(SettingsActivity.this,
-                                                android.Manifest.permission.READ_EXTERNAL_STORAGE);
-
-                                        if(permissionCheck == PackageManager.PERMISSION_GRANTED && permissioncheckRead == PackageManager.PERMISSION_GRANTED)
-                                        {
-                                            //Open Camera Here
-                                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                                            fileUri = getOutputMediaFileUri(ConstsCore.MEDIA_TYPE_IMAGE);
-                                            intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-                                            intent.putExtra("return-data", true);
-                                            // start the image capture Intent
-                                            startActivityForResult(intent, ConstsCore.CAMERA_REQUEST);
-                                        }
-                                        else
-                                        {
-                                            //Get Permission for read and write
-                                            Log.i("Have camera but ","Not RW for camera permision");
-                                            Log.i("Ask for camera RW perm","Yes");
-                                            ActivityCompat.requestPermissions(SettingsActivity.this,
-                                                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
-                                                    ConstsCore.MY_PERMISSIONS_REQUEST_RWFRMCAM);
-                                        }
+                                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                        fileUri = getOutputMediaFileUri(ConstsCore.MEDIA_TYPE_IMAGE);
+                                        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+                                        intent.putExtra("return-data", true);
+                                        // start the image capture Intent
+                                        startActivityForResult(intent, ConstsCore.CAMERA_REQUEST);
                                     }
                                     else
                                     {
-                                        // Log.i("Dont have camera permission", "Else bliock");
-                                        ActivityCompat.requestPermissions(SettingsActivity.this,
-                                                new String[]{android.Manifest.permission.CAMERA},
-                                                ConstsCore.MY_PERMISSIONS_REQUEST_CAMERA);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if ((int) Build.VERSION.SDK_INT < 23)
-                                {
-                                    Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                    i.setType("image/*");
-                                    startActivityForResult(i, ConstsCore.GALLERY_REQUEST);
 
+                                        int permissionCheck = ContextCompat.checkSelfPermission(SettingsActivity.this,
+                                                android.Manifest.permission.CAMERA);
+
+                                        if(permissionCheck== PackageManager.PERMISSION_GRANTED)
+                                        {
+                                            permissionCheck = ContextCompat.checkSelfPermission(SettingsActivity.this,
+                                                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+                                            //here
+                                            int permissioncheckRead= ContextCompat.checkSelfPermission(SettingsActivity.this,
+                                                    android.Manifest.permission.READ_EXTERNAL_STORAGE);
+
+                                            if(permissionCheck == PackageManager.PERMISSION_GRANTED && permissioncheckRead == PackageManager.PERMISSION_GRANTED)
+                                            {
+                                                //Open Camera Here
+                                                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                                                fileUri = getOutputMediaFileUri(ConstsCore.MEDIA_TYPE_IMAGE);
+                                                intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+                                                intent.putExtra("return-data", true);
+                                                // start the image capture Intent
+                                                startActivityForResult(intent, ConstsCore.CAMERA_REQUEST);
+                                            }
+                                            else
+                                            {
+                                                //Get Permission for read and write
+                                                Log.i("Have camera but ","Not RW for camera permision");
+                                                Log.i("Ask for camera RW perm","Yes");
+                                                ActivityCompat.requestPermissions(SettingsActivity.this,
+                                                        new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                                                        ConstsCore.MY_PERMISSIONS_REQUEST_RWFRMCAM);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            // Log.i("Dont have camera permission", "Else bliock");
+                                            ActivityCompat.requestPermissions(SettingsActivity.this,
+                                                    new String[]{android.Manifest.permission.CAMERA},
+                                                    ConstsCore.MY_PERMISSIONS_REQUEST_CAMERA);
+                                        }
+                                    }
                                 }
                                 else
                                 {
-                                    Log.i("Ask for Read permission","Yes Ask ");
-                                    Log.i("Check for Read permission", "Yes check");
-
-                                    int permissionCheck = ContextCompat.checkSelfPermission(SettingsActivity.this,
-                                            android.Manifest.permission.READ_EXTERNAL_STORAGE);
-
-                                    Log.i("permission Check",permissionCheck+"   aaa");
-
-                                    if(permissionCheck==PackageManager.PERMISSION_GRANTED)
+                                    if ((int) Build.VERSION.SDK_INT < 23)
                                     {
                                         Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                                         i.setType("image/*");
                                         startActivityForResult(i, ConstsCore.GALLERY_REQUEST);
+
                                     }
                                     else
                                     {
-                                        ActivityCompat.requestPermissions(SettingsActivity.this,
-                                                new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
-                                                ConstsCore.MY_PERMISSIONS_REQUEST_R);
+                                        Log.i("Ask for Read permission","Yes Ask ");
+                                        Log.i("Check for Read permission", "Yes check");
+
+                                        int permissionCheck = ContextCompat.checkSelfPermission(SettingsActivity.this,
+                                                android.Manifest.permission.READ_EXTERNAL_STORAGE);
+
+                                        Log.i("permission Check",permissionCheck+"   aaa");
+
+                                        if(permissionCheck==PackageManager.PERMISSION_GRANTED)
+                                        {
+                                            Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                            i.setType("image/*");
+                                            startActivityForResult(i, ConstsCore.GALLERY_REQUEST);
+                                        }
+                                        else
+                                        {
+                                            ActivityCompat.requestPermissions(SettingsActivity.this,
+                                                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                                                    ConstsCore.MY_PERMISSIONS_REQUEST_R);
+                                        }
                                     }
                                 }
                             }
-                        }
-                    });
+                        });
 
-            builderSingle.show();
+                builderSingle.show();
+            }
         }
     });
+
 
     // spinner selection for Gender
     spn_Gender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -363,37 +442,76 @@ public class SettingsActivity extends Activity
         {
         }
      });
+
     }
 
     public void getFBProfilePictures()
     {
+        Log.e("Valid Pics ",validPics.size()+"");
+
+//        for(int i=0;i<validPics.size();i++)
+//        {
+//            Log.e("Valid Pics getFBProfilePictures",validPics.get(i)+"");
+//        }
+     //   lineimg.removeAllViews();
+
+        Log.e("Removed all  objects","Yes");
+
+        RecyclerViewAdapter  adapter = new RecyclerViewAdapter(SettingsActivity.this, validPics,imguser);
+        recyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+
+
+
         for(int i=0;i<validPics.size();i++)
         {
+          //  Log.e("Inside for",i + "   " + validPics.get(i));
             ImageView img = new CircularImageView(SettingsActivity.this);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(150, 150);
             params.setMargins(10,10,10,10);
             params.gravity = Gravity.RIGHT;
             img.setLayoutParams(params);
-            Picasso.with(SettingsActivity.this)
-                    .load((String) validPics.get(i))
-                    .into(img);
 
-            lineimg.addView(img);
-            final int  p =i;
-            img.setOnClickListener(new View.OnClickListener()
+            if(validPics.get(i).toString().contains("http") || validPics.get(i).toString().contains("https"))
             {
-                @Override
-                public void onClick(View v)
-                {
-                    Toast.makeText(SettingsActivity.this,"Image at position "+ p +"  clicked",Toast.LENGTH_LONG).show();
-                }
-            });
+                Picasso.with(SettingsActivity.this)
+                        .load((String) validPics.get(i))
+                        .into(img);
+            }
+            else
+            {
+                Uri uri = Uri.fromFile(new File(validPics.get(i)));
+                Picasso.with(SettingsActivity.this).load(uri)
+                        .into(img);
+            }
+        }
+
+        if(progressDialog.isShowing())
+        {
+            progressDialog.dismiss();
+            progressDialog.cancel();
         }
     }
 
+
     public void setUserInfo()
     {
-        UserTable userTable = m_config.mapper.load(UserTable.class, FacebookID);
+
+        Log.e("Inside setUserInfo","setUserInfo");
+//        progressDialog.setMessage("Loading");
+//        progressDialog.setCancelable(false);
+//        progressDialog.show();
+
+        try
+        {
+            userTable = m_config.mapper.load(UserTable.class, FacebookID);
+
+        }
+        catch(Exception e)
+        {
+           e.printStackTrace();
+        }
+        Log.e("Inside setUserInfo","setUserInfo");
         if(userTable == null)
         {
         }
@@ -401,10 +519,12 @@ public class SettingsActivity extends Activity
         {
             //user_name,user_gender,user_status,user_mask_unmask
             user_name = sharedPreferences.getString(m_config.Entered_User_Name,"");
+            user_status = "N/A";
+            Log.e("Status ",userTable.getProfileStatus() +"   aa");
             user_status = userTable.getProfileStatus();
-            user_mask_unmask = userTable.getCurrentmaskstatus()+"";
+            user_mask_unmask = userTable.getcurrentmaskstatus()+"";
             user_profilepic = userTable.getProfilePicUrl().get(0);
-
+            Log.e("User_profilepicurl",user_profilepic);
             user_gender = sharedPreferences.getString("Gender","");
             seekbarVal = sharedPreferences.getString("Distance","1");
             String DOB = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_BIRTHDATE();
@@ -424,83 +544,212 @@ public class SettingsActivity extends Activity
                 Log.e("Date COnversion error",e.toString());
             }
 
-            edt_userName.setText(user_name);
-            edt_Age.setText(user_age);
-            edt_Age.setEnabled(false);
+             h = new Handler(cont.getMainLooper());
+             h.post(new Runnable()
+             {
+                @Override
+                public void run()
+                {
+                    Log.e("Inside setUserInfo","setUserInfo  11");
 
-            if(user_status.equals("N/A"))
+                    edt_userName.setText(user_name);
+                    edt_Age.setText(user_age);
+                    edt_Age.setEnabled(false);
+                }
+             });
+
+            if(user_status.equals("N/A") || user_status.equals(null) || user_status.length() == 0 || user_status.equals("") || user_status == null)
             {
-                edt_usermsgStatus.setHint("Enter  your status message");
+                h = new Handler(cont.getMainLooper());
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Log.e("Inside setUserInfo","setUserInfo  22");
+                        edt_usermsgStatus.setHint("Enter  your status message");
+                    }
+                });
             }
             else
             {
-                edt_usermsgStatus.setText(user_status);
+                h = new Handler(cont.getMainLooper());
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Log.e("Inside setUserInfo","setUserInfo  22");
+                        edt_usermsgStatus.setText(user_status);
+                    }
+                });
             }
 
             if(user_mask_unmask.equals("Yes"))
             {
-                spn_mask.setSelection(1);
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Log.e("Inside setUserInfo","setUserInfo  33");
+                        spn_mask.setSelection(1);
+                    }
+                });
             }
             else  if(user_mask_unmask.equals("No"))
             {
-                spn_mask.setSelection(2);
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Log.e("Inside setUserInfo","setUserInfo  44");
+                        spn_mask.setSelection(2);
+                    }
+                });
             }
             else
             {
-                spn_mask.setSelection(0);
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Log.e("Inside setUserInfo","setUserInfo  44");
+                        spn_mask.setSelection(0);
+
+                    }
+                });
+
             }
+            Log.e("Inside setUserInfo","setUserInfo  55");
 
             if(user_profilepic.equals("N/A"))
             {
-                Picasso.with(cont).load(R.drawable.placeholder_user).fit().centerCrop()
-                        .placeholder(R.drawable.placeholder_user)
-                        .error(R.drawable.placeholder_user)
-                        .into(imguser);
+                h.post(new Runnable() {
+                    @Override
+                    public void run()
+                    {
+                        Picasso.with(cont).load(R.drawable.placeholder_user).fit().centerCrop()
+                                .placeholder(R.drawable.placeholder_user)
+                                .error(R.drawable.placeholder_user)
+                                .into(imguser);
+
+                    }
+
+                });
             }
             else
             {
-                Picasso.with(cont).load(user_profilepic).fit().centerCrop()
-                        .placeholder(R.drawable.placeholder_user)
-                        .error(R.drawable.placeholder_user)
-                        .into(imguser);
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+
+                        Picasso.with(cont).load(user_profilepic).fit().centerCrop()
+                                .placeholder(R.drawable.placeholder_user)
+                                .error(R.drawable.placeholder_user)
+                                .into(imguser);
+                        m_config.PrimaryUrl = user_profilepic;
+                        imguser.setTag("0");
+                    }
+                });
+
             }
 
             if(user_gender.equals("Female"))
             {
-                spn_Gender.setSelection(2);
+
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        spn_Gender.setSelection(2);
+
+                    }
+                });
             }
             else if(user_gender.equals("Male"))
             {
-                spn_Gender.setSelection(1);
+
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        spn_Gender.setSelection(1);
+
+                    }
+                });
             }
             else
             {
-                spn_Gender.setSelection(0);
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        spn_Gender.setSelection(0);
+
+                    }
+                });
             }
 
             if(seekbarVal.equals(""))
             {
-                String maxText = String.valueOf(2);
-                //txtrangeseekbarval.setText(maxText);
-                txtseekbarval.setText(maxText);
-                //rangeSeekBar.setSelectedMaxValue(2);
-                SeekBar.setProgress(2);
-                //getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
-                selectedDistVal = Integer.parseInt(seekbarVal);
+
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        String maxText = String.valueOf(2);
+                        //txtrangeseekbarval.setText(maxText);
+                        txtseekbarval.setText(maxText);
+                        //rangeSeekBar.setSelectedMaxValue(2);
+                        SeekBar.setProgress(2);
+                        //getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
+                        selectedDistVal = Integer.parseInt(seekbarVal);
+                    }
+                });
+
+
             }
             else
             {
-                Log.e("came here"," ");
-                //txtrangeseekbarval.setText(seekbarVal);
-                txtseekbarval.setText(seekbarVal);
-                int value = Integer.parseInt(seekbarVal);
-                //rangeSeekBar.setSelectedMaxValue(value);
-                SeekBar.setProgress(value);
-                //getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
-                selectedDistVal = Integer.parseInt(seekbarVal);
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Log.e("came here"," ");
+                        //txtrangeseekbarval.setText(seekbarVal);
+                        txtseekbarval.setText(seekbarVal);
+                        int value = Integer.parseInt(seekbarVal);
+                        //rangeSeekBar.setSelectedMaxValue(value);
+                        SeekBar.setProgress(value);
+                        //getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
+                        selectedDistVal = Integer.parseInt(seekbarVal);
+                    }
+                });
             }
+            h.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    getFBProfilePictures();
+                }
+            });
 
-            getFBProfilePictures();
+//            progressDialog.dismiss();
+
+//            progressDialog.cancel();
+            m_config.pDialog.dismiss();
+            m_config.pDialog.cancel();
         }
     }
 
@@ -516,69 +765,201 @@ public class SettingsActivity extends Activity
         }};
     }
 
-    /*private SeekbarWithIntervals getSeekbarWithIntervals()
-
-    {
-        if (seekbarWithIntervals == null)
-        {
-
-
-            Log.e("---------------","");
-            seekbarWithIntervals = (SeekbarWithIntervals) findViewById(R.id.seekbarWithIntervals);
-
-            seekbarWithIntervals.setProgress(Integer.parseInt(seekbarVal));
-            selectedDistVal = Integer.parseInt(seekbarVal);
-
-        }
-
-
-        seekbarWithIntervals.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
-        {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-            {
-
-                selectedDistVal = progress;
-                progress = progress + 1;
-                Log.e("progress"," "+progress);
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
-
-
-
-
-        return seekbarWithIntervals;
-    }*/
+//    private SeekbarWithIntervals getSeekbarWithIntervals()
+//
+//    {
+//        if (seekbarWithIntervals == null)
+//        {
+//            Log.e("---------------","");
+//            seekbarWithIntervals = (SeekbarWithIntervals) findViewById(R.id.seekbarWithIntervals);//
+//            seekbarWithIntervals.setProgress(Integer.parseInt(seekbarVal));
+//            selectedDistVal = Integer.parseInt(seekbarVal);//
+//        }
+//
+//        seekbarWithIntervals.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+//        {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+//            {
+//                selectedDistVal = progress;
+//                progress = progress + 1;
+//                Log.e("progress"," "+progress);//
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar) {
+//
+//            }
+//        });
+//
+//        return seekbarWithIntervals;
+//    }
 
     private void editSettings()
     {
         Log.e("picturePath "," "+picturePath);
-        String profileStatus = edt_usermsgStatus.getText().toString().replaceAll("\\s+", " ").trim();
+        String profileStatus = "N/A";
+        if(edt_usermsgStatus.getText().toString().trim().length() ==0  || edt_usermsgStatus.getText().toString().trim().equals(""))
+        {
+            profileStatus = "N/A";
+        }
+        else
+        {
+            profileStatus = edt_usermsgStatus.getText().toString().replaceAll("\\s+", " ").trim();
+
+        }
+
+        Log.e("Profile Statis",profileStatus);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("ProfileStatus",profileStatus);
         editor.putString("Gender",selected_Gender);
         editor.putString("Distance", txtseekbarval.getText().toString());
         // editor.putString("Distance", String.valueOf(selectedDistVal));
         editor.apply();
-        AWSLoginOperations.updateUserSettings(picturePath, edt_usermsgStatus, cont);
+
+        int index = 0;
+        Log.e("M_config.primaryurl",m_config.PrimaryUrl+"  aa");
+        Log.e("validPics.get(0)",validPics.get(0));
+        if(m_config.PrimaryUrl.equals(validPics.get(0)))
+        {
+
+        }
+        else
+        {
+            for(int i=0;i<validPics.size();i++)
+            {
+                if(m_config.PrimaryUrl.equals(validPics.get(i)))
+                {
+                    index = i;
+                    break;
+                }
+            }
+            String temp = validPics.get(0);
+            validPics.set(0,m_config.PrimaryUrl);
+            validPics.set(index,temp);
+        }
+
+        for(int i=0;i<validPics.size();i++)
+        {
+            Log.e("Before upload   "+i,validPics.get(i));
+        }
+
+        ImageFlag = "Yes";
+
+        updateUserSettings(m_config.PrimaryUrl, profileStatus, cont,validPics,ImageFlag);
+    }
+
+    public void updateQBProfilePic(String fbId,final String profileStatus, final String pic)
+    {
+        QBUsers.getUserByFacebookId(fbId, new QBEntityCallback<QBUser>()
+        {
+            @Override
+            public void onSuccess(QBUser user, Bundle args)
+            {
+                user.setCustomData(pic);
+
+                QBUsers.updateUser(user, new QBEntityCallback<QBUser>()
+                {
+                    @Override
+                    public void onSuccess(QBUser user, Bundle args)
+                    {
+                        Log.e("Before restart","Yes");
+                        GenerikFunctions.showToast(cont, "Profile updated successfully");
+
+                        Log.e("Updating view","yes");
+                        Log.e("Valid Pics size","Yes "+validPics.size());
+
+                        recyclerView.setAdapter(null);
+                        RecyclerViewAdapter  adapter = new RecyclerViewAdapter(SettingsActivity.this, validPics,imguser);
+                        recyclerView.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
+
+                        edt_usermsgStatus.setText(profileStatus);
+                        m_config.pDialog.dismiss();
+
+                    }
+
+                    @Override
+                    public void onError(QBResponseException errors)
+                    {
+                        m_config.pDialog.dismiss();
+                    }
+                });
+
+
+
+
+
+
+            }
+
+            @Override
+            public void onError(QBResponseException errors)
+            {
+
+                m_config.pDialog.dismiss();
+            }
+        });
+    }
+
+
+
+    /** update user in UserTable in settings page **/
+    public  void updateUserSettings(String picturePath, String profileStatus, Context cont, ArrayList<String> validPics, String ImagesFlag)
+    {
+
+        String[] images = new String[validPics.size()];
+        for(int i=0;i<validPics.size();i++)
+        {
+            Log.e("updateUserSettings    "+i,validPics.get(i));
+            images[i] =validPics.get(i);
+        }
+
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        String FacebookID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+
+        try
+        {
+            //Update SQLIte table profile pic
+
+            String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
+
+                    LoginTableColumns.FB_USER_PROFILE_PIC + " = '" + validPics.get(0) + "'  where "
+                    + LoginTableColumns.FB_USER_ID + " = '" + FacebookID + "'";
+
+            Log.i("update User  "+ LoginTableColumns.FB_USER_ID , updateUser);
+            sqldb.execSQL(updateUser);
+
+            //Update AWS user entry
+
+
+
+            UserTable userTable = m_config.mapper.load(UserTable.class, FacebookID);
+
+            userTable.setProfileStatus(profileStatus);
+            userTable.setProfilePicUrl(validPics);
+            userTable.setImageflag("Yes");
+            m_config.mapper.save(userTable);
+
+            updateQBProfilePic(FacebookID,profileStatus,validPics.get(0));
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            GenerikFunctions.showToast(cont, "Profile updation failed, Please try again after some time");
+            GenerikFunctions.hideDialog(m_config.pDialog);
+        }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         super.onActivityResult(requestCode, resultCode, data);
-
 
         if (resultCode == RESULT_OK)
         {
@@ -587,7 +968,6 @@ public class SettingsActivity extends Activity
                 // Camera click
                 try
                 {
-
                     Bitmap myTest = decodeFile(fileUri.getPath());
                     Uri tempUri = getImageUri(getApplicationContext(), myTest);
                     picturePath = getpath(tempUri);
@@ -610,30 +990,29 @@ public class SettingsActivity extends Activity
                     {
                         validPics.add(picturePath);
                         getFBProfilePictures();
+
+                        picturePath = Validations.getUrlfromCloudinary(cont,picturePath);
+                        m_config.PrimaryUrl = picturePath;
+                        Log.e("New URL",picturePath+"");
+                        validPics.set((validPics.size()-1),picturePath);
+
+                        imguser.setImageBitmap(finalbitmap);
+                        imguser.setTag(""+(validPics.size()-1));
                     }
                     else
                     {
-
+                        picturePath = "N/A";
                     }
-
-                    for(int i=0;i<validPics.size();i++)
-                    {
-                        Log.e("Valid Pics   " + i,(String)validPics.get(i));
-                    }
-
-                    imguser.setImageBitmap(finalbitmap);
                 }
                 catch (Exception e)
                 {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
-
-            } else if (requestCode == ConstsCore.GALLERY_REQUEST)
+            }
+            else if (requestCode == ConstsCore.GALLERY_REQUEST)
             {
                 // Gallery Selection
-
                 Uri selectedImage = data.getData();
                 String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
@@ -643,7 +1022,6 @@ public class SettingsActivity extends Activity
 
                 int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
                 picturePath = cursor.getString(columnIndex);
-                Log.e("PicturePath",picturePath);
                 BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                 Bitmap bitmap = BitmapFactory.decodeFile(picturePath,bmOptions);
                 int value = 0;
@@ -658,26 +1036,24 @@ public class SettingsActivity extends Activity
                 Bitmap finalbitmap = null;
                 finalbitmap = Bitmap.createScaledBitmap(bitmap,value,value,true);
 
-
                 int faces = faceOverlayView.setBitmap(finalbitmap);
-                Log.e("Faces",faces+"  " + picturePath);
+
                 if(faces>0)
                 {
                     validPics.add(picturePath+"");
+
+                    picturePath = Validations.getUrlfromCloudinary(cont,picturePath);
+                    validPics.set((validPics.size()-1),picturePath);
+                    m_config.PrimaryUrl = picturePath;
+
+                    imguser.setImageBitmap(finalbitmap);
+                    imguser.setTag(""+(validPics.size()-1));
                     getFBProfilePictures();
                 }
                 else
                 {
-
+                    picturePath = "N/A";
                 }
-
-                for(int i=0;i<validPics.size();i++)
-                {
-                    Log.e("Valid Pics   " + i,(String)validPics.get(i));
-                }
-
-                imguser.setImageBitmap(finalbitmap);
-
             }
         }
     }
@@ -855,10 +1231,12 @@ public class SettingsActivity extends Activity
         }
     }
 
-
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         super.onBackPressed();
+        Intent intent = new Intent(cont, HomePageActivity.class);
+        startActivity(intent);
     }
 }
 

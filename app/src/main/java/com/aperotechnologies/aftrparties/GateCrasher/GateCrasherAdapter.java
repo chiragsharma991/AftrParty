@@ -15,16 +15,21 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.PaginatedScanList;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartiesClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.SearchedParties;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,7 +43,7 @@ public class GateCrasherAdapter extends BaseAdapter
 {
 
     //private View.OnClickListener onclick;
-    private PaginatedScanList<PartyTable> result;
+    private JSONArray result;//PaginatedScanList<PartyTable> result;
     Context cont;
     UserTable currentUser;
     String reqStartTime;
@@ -50,20 +55,14 @@ public class GateCrasherAdapter extends BaseAdapter
 
 
     //    SQLiteDatabase sdb;
-    public GateCrasherAdapter(Context context, PaginatedScanList<PartyTable> result)
+    public GateCrasherAdapter(Context context, JSONArray result)//PaginatedScanList<PartyTable> result)
     {
         this.cont = context;
         this.result = result;
         //   this.reqStartTime = reqStartTime;
         m_config = Configuration_Parameter.getInstance();
 
-        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                .detectDiskReads()
-                .detectDiskWrites()
-                .detectNetwork()
-                .penaltyLog()
-                .penaltyDeath()
-                .build());
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().build());
 
         pc = new ArrayList<PartyConversion>();
 
@@ -97,12 +96,17 @@ public class GateCrasherAdapter extends BaseAdapter
 
     @Override
     public int getCount() {
-        return result.size();
+        return result.length();//size();
     }
 
     @Override
     public Object getItem(int position) {
-        return result.get(position);
+        try {
+            return result.get(position);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
@@ -118,25 +122,44 @@ public class GateCrasherAdapter extends BaseAdapter
     @Override
     public View getView(int position, View convertView, final ViewGroup parent)
     {
-        ViewHolder holder = new ViewHolder();
-        if (convertView == null)
+        ViewHolder holder;
+        View participentView = convertView;
+
+        if (participentView == null)
         {
+            holder = new ViewHolder();
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            convertView = inflater.inflate(R.layout.adapter_gatecrasher, parent, false);
-            holder.partyName =  (TextView) convertView.findViewById(R.id.partyname);
-            holder.btn_Request = (Button) convertView.findViewById(R.id.btn_Request);
-            convertView.setTag(holder);
+            participentView = inflater.inflate(R.layout.adapter_gatecrasher, parent, false);
+            holder.partyName =  (TextView) participentView.findViewById(R.id.partyname);
+            holder.partydesc =  (TextView) participentView.findViewById(R.id.desc);
+            holder.psTime =  (TextView) participentView.findViewById(R.id.sTime);
+            holder.peTime =  (TextView) participentView.findViewById(R.id.eTime);
+            holder.pByob =  (TextView) participentView.findViewById(R.id.byob);
+            holder.btn_Request = (Button) participentView.findViewById(R.id.btn_Request);
+
+            participentView.setTag(holder);
         }
         else
         {
-            holder = (ViewHolder) convertView.getTag();
+            holder = (ViewHolder) participentView.getTag();
         }
 
-        final PartyTable party = result.get(position);
+        SearchedParties party = null;
+        Gson gson = new Gson();
 
+        try {
+
+            party = gson.fromJson(result.get(position).toString(), SearchedParties.class);
+            Log.e(""," "+party.getPartyName());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String GCFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
         if(position == 0)
         {
-            UserTable user = m_config.mapper.load(UserTable.class, LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID());
+            UserTable user = m_config.mapper.load(UserTable.class, GCFBID);
             List<PartiesClass> p =  user.getParties();
 
             if(p == null || p.size() == 0)
@@ -159,18 +182,18 @@ public class GateCrasherAdapter extends BaseAdapter
                     pconv.setEndtime(p.get(i).getEndtime());
 
                     Calendar cal1 = Calendar.getInstance();
-                    Calendar cal2 = Calendar.getInstance();
+                    Calendar currentDay = Calendar.getInstance();
                     cal1.setTime(pconv.getConvertedstarttime());
-                    cal2.setTime(new Date());
+                    currentDay.setTime(new Date());
 
 
-                    boolean sameDay = cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                            cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR) && cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH);
+                    boolean sameDay = cal1.get(Calendar.YEAR) == currentDay.get(Calendar.YEAR) &&
+                            cal1.get(Calendar.DAY_OF_YEAR) == currentDay.get(Calendar.DAY_OF_YEAR) && cal1.get(Calendar.MONTH) == currentDay.get(Calendar.MONTH);
                     Log.e("sameDay   " + i, " " + sameDay);
 
-
                     //stores parties data of user in PartyConversion array for current date
-                    if (sameDay == true)
+                    //if (sameDay == true)
+                    if(currentDay.getTimeInMillis() <= Long.parseLong(pconv.getEndtime()))
                     {
                         pc.add(pconv);
                         Log.e("pc---- " + " " + pconv.getPartyname() + " " + pconv.getPartystatus(), "aa");
@@ -183,13 +206,30 @@ public class GateCrasherAdapter extends BaseAdapter
             }
         }
 
+        String StartTime = party.getStartTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(Long.parseLong(StartTime));
+        String partystrDate = Validations.getMonthNo(calendar.get(Calendar.MONTH)) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR) + " " + Validations.showTime(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+
+        String EndDate = party.getEndTime();
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTimeInMillis(Long.parseLong(EndDate));
+        String partyendDate = Validations.getMonthNo(calendar1.get(Calendar.MONTH)) + "/" + calendar1.get(Calendar.DAY_OF_MONTH) + "/" + calendar1.get(Calendar.YEAR) + " " + Validations.showTime(calendar1.get(Calendar.HOUR_OF_DAY), calendar1.get(Calendar.MINUTE));
+
+
         //Log.e("Filtered Array Size",m_config.pc.size() + "   aa");
         holder.btn_Request.setText("Request");
         holder.partyName.setText(party.getPartyName());
+        holder.partydesc.setText(party.getPartyDescription().trim());
+        holder.psTime.setText("ST : "+partystrDate);
+        holder.peTime.setText("ET : "+partyendDate);
+        holder.pByob.setText("BYOB : "+party.getBYOB());
 
 
+        //pc is array for todays party
         for(int i=0;i < pc.size();i++)
         {
+            //check whether response party(party) and todays party(pc) are same
             if(party.getPartyID().equals(pc.get(i).getPartyid()))
             {
                 //set status of party based on PartyConversion array
@@ -199,6 +239,7 @@ public class GateCrasherAdapter extends BaseAdapter
 
 
         final ViewHolder finalHolder = holder;
+        final SearchedParties finalParty = party;
         holder.btn_Request.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -210,11 +251,16 @@ public class GateCrasherAdapter extends BaseAdapter
 
                 if(b.getText().toString().trim().equals("Request"))
                 {
-
-                    Log.e("PartyName  " , finalHolder.partyName.getText() + " Check Conditions here  aa"+"  "+party.getPartyName());
+                    Log.e("PartyName  " , finalHolder.partyName.getText() + " Check Conditions here  aa"+"  "+ finalParty.getPartyName());
                     Long currentReqTime = System.currentTimeMillis();
-                    sendGCReqtoHost(currentReqTime, party, pc, b, cont);
+                    String PartyId = finalParty.getPartyID();
+                    try {
+                        PartyTable partytable = m_config.mapper.load(PartyTable.class, PartyId);
+                        Log.e("party ID "," "+partytable.getPartyID());
+                        sendGCReqtoHost(currentReqTime, partytable, pc, b, cont);
+                    }catch (Exception e){
 
+                    }
 
                 }
                 else
@@ -229,8 +275,8 @@ public class GateCrasherAdapter extends BaseAdapter
         });
 
 
-        convertView.setTag(party.getPartyID());
-        return convertView;
+        //convertView.setTag(party.getPartyID());
+        return participentView;
     }
 
 
@@ -254,7 +300,7 @@ public class GateCrasherAdapter extends BaseAdapter
     static class ViewHolder
     {
 
-        private TextView partyName;
+        private TextView partyName, partydesc, psTime, peTime, pByob;
         private Button btn_Request;
 
     }
@@ -263,7 +309,13 @@ public class GateCrasherAdapter extends BaseAdapter
     {
         Long currentTimeMillis = System.currentTimeMillis();
         Log.e("Current Time Millis",currentTimeMillis + "");
-        PartyTable party = result.get(position);
+        PartyTable party = null;
+        try {
+            party = (PartyTable) result.get(position);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Log.e("=====","======");
         Log.e("Party Name",party.getPartyName());
         Log.e("Party Host",party.getHostName());
@@ -330,10 +382,11 @@ public class GateCrasherAdapter extends BaseAdapter
 
     public void sendGCReqtoHost(Long currentReqTime, PartyTable party, List<PartyConversion> pc, Button b, Context cont) {
 
-        UserTable user = m_config.mapper.load(UserTable.class, LoginValidations.initialiseLoggedInUser(AWSPartyOperations.cont).getFB_USER_ID());
+        String FBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+        UserTable user = m_config.mapper.load(UserTable.class, FBID);
         List<PaidGCClass> PaidGC = new ArrayList<>();
         PaidGC = user.getPaidgc();
-        Log.e("user.getActiveParty()", " " + user.getActiveparty());
+        Log.e("user.getActiveParty()", " " + user.getActiveparty()+" "+(user.getActiveparty() == null));
 
         //check whether any party of user have been approved or not for the day
         if (user.getActiveparty() == null) {

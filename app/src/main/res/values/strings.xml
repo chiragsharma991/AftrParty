@@ -13,5 +13,10 @@
     <string name="snack_coarce_location_permission">To allow location access, please enable permission in settings.</string>
     <string name="message_cf_location_permission">Without this permission the app is unable to to get your location. Are you sure you want to deny this permission?</string>
 
+    <!--<string name="&amp;">&amp;</string>
+    <string name="&gt;">&gt;</string>
+    <string name="&lt;">&lt;</string>
+    <string name="&quot;">&quot;</string>
+    <string name="&apos;">&apos;</string>-->
 
 </resources>

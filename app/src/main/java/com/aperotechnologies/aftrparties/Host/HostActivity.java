@@ -35,6 +35,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -62,7 +63,9 @@ import java.util.List;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
 import static com.aperotechnologies.aftrparties.Reusables.Validations.decodeFile;
+import static com.aperotechnologies.aftrparties.Reusables.Validations.getDateNo;
 import static com.aperotechnologies.aftrparties.Reusables.Validations.getImageUri;
+import static com.aperotechnologies.aftrparties.Reusables.Validations.getMonthNo;
 import static com.aperotechnologies.aftrparties.Reusables.Validations.getOutputMediaFileUri;
 
 /**
@@ -75,6 +78,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     CircularImageView imgParty;
     TextView uploadPartyImage, txtStartDate, txtEndDate;
     EditText edt_PartyName, edt_Description, edt_Address;
+    EditText edt_address, edt_street,edt_city,edt_state, edt_pincode;
     Button btn_createParty;
     String timeSelection;
 
@@ -83,6 +87,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     long selected_endTimeVal;
 
     String selected_byob;
+    CheckBox cb_byobYes, cb_byobNo;
 
 
 
@@ -124,27 +129,28 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         imgParty = (CircularImageView) findViewById(R.id.partyImage);
         uploadPartyImage = (TextView) findViewById(R.id.uploadPartyImage);
 
-        // Spinner for Start Now/Later
-        Spinner spn_startTime = (Spinner) findViewById(R.id.spn_startTime);
-        List<String> startTimelist = new ArrayList<String>();
-        startTimelist.add("Now");
-        startTimelist.add("Later");
+
+//        // Spinner for Start Now/Later
+//        Spinner spn_startTime = (Spinner) findViewById(R.id.spn_startTime);
+//        List<String> startTimelist = new ArrayList<String>();
+//        startTimelist.add("Now");
+//        startTimelist.add("Later");
 
         // Spinner for BYOB
-        Spinner spn_byob = (Spinner) findViewById(R.id.spn_byob);
-        List<String> byobList = new ArrayList<String>();
-        byobList.add("Yes");
-        byobList.add("No");
+//        Spinner spn_byob = (Spinner) findViewById(R.id.spn_byob);
+//        List<String> byobList = new ArrayList<String>();
+//        byobList.add("Yes");
+//        byobList.add("No");
 
 
 
-        final ArrayAdapter<String> startTime = new ArrayAdapter<String>(HostActivity.this, R.layout.spinner_item, startTimelist);
-        startTime.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spn_startTime.setAdapter(startTime);
+//        final ArrayAdapter<String> startTime = new ArrayAdapter<String>(HostActivity.this, R.layout.spinner_item, startTimelist);
+//        startTime.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spn_startTime.setAdapter(startTime);
 
-        final ArrayAdapter<String> byob = new ArrayAdapter<String>(HostActivity.this, R.layout.spinner_item, byobList);
-        byob.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spn_byob.setAdapter(byob);
+//        final ArrayAdapter<String> byob = new ArrayAdapter<String>(HostActivity.this, R.layout.spinner_item, byobList);
+//        byob.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spn_byob.setAdapter(byob);
 
 
         lLyoutHost = (LinearLayout) findViewById(R.id.lLyoutHost);
@@ -152,7 +158,15 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         txtEndDate = (TextView) findViewById(R.id.txtEndDate);
         edt_PartyName = (EditText) findViewById(R.id.edt_PartyName);
         edt_Description = (EditText) findViewById(R.id.edt_Description);
+        //For Location
+        edt_address = (EditText) findViewById(R.id.edt_Partyaddress);
+        edt_street =  (EditText) findViewById(R.id.edt_street);
+        edt_city =  (EditText) findViewById(R.id.edt_city);
+        edt_state =  (EditText) findViewById(R.id.edt_state);
+        edt_pincode =  (EditText) findViewById(R.id.edt_pincode);
         edt_Address = (EditText) findViewById(R.id.edt_Partyaddress);
+        cb_byobYes = (CheckBox) findViewById(R.id.byobyes);
+        cb_byobNo = (CheckBox) findViewById(R.id.byobno);
         btn_createParty = (Button) findViewById(R.id.btn_CreateParty);
 
         //Code to clear Focus from editText
@@ -168,6 +182,8 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                 return false;
             }
         });
+
+
 
 
 //        //Code to clear Focus from editText
@@ -200,6 +216,25 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 //                return false;
 //            }
 //        });
+
+        cb_byobYes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cb_byobYes.setChecked(true);
+                cb_byobNo.setChecked(false);
+
+            }
+        });
+
+
+
+        cb_byobNo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cb_byobNo.setChecked(true);
+                cb_byobYes.setChecked(false);
+            }
+        });
 
         uploadPartyImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -338,7 +373,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         startHour = calendar.get(Calendar.HOUR_OF_DAY);
         startMin = calendar.get(Calendar.MINUTE);
 
-        txtStartDate.setText(startDate + "-" + Validations.getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
+        txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
         //current date time in milliseconds
         selected_startTimeVal = getTimeinMs(startDate, startMon, startYear, startHour, startMin);
 
@@ -349,7 +384,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         endHour = calendar.get(Calendar.HOUR_OF_DAY);
         endMin = calendar.get(Calendar.MINUTE);
 
-        txtEndDate.setText(endDate + "-" + Validations.getMonthNo(endMon) + "-" + endYear + ", " + Validations.showTime(endHour, endMin));
+        txtEndDate.setText(getDateNo(endDate) + "-" + getMonthNo(endMon) + "-" + endYear + ", " + Validations.showTime(endHour, endMin));
         //current date time in milliseconds
         selected_endTimeVal = getTimeinMs(endDate, endMon, endYear, endHour, endMin);
 
@@ -357,40 +392,48 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         tempstartTimeVal[0] = selected_startTimeVal;
         tempendTimeVal[0] = selected_endTimeVal;
 
-        // selection of Spinner Now/Later and start DatePicker
-        spn_startTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
+        txtStartDate.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                timeSelection = parent.getSelectedItem().toString().trim();
-                if (timeSelection.equals("Later")) {
-                    startDateDialog("show");
-
-                } else {
-                    //spinner click for Now Selection
-                    //current date time
-                    Calendar calendar = Calendar.getInstance();
-                    int mYear = calendar.get(Calendar.YEAR);
-                    int mMonth = calendar.get(Calendar.MONTH);
-                    int mDay = calendar.get(Calendar.DAY_OF_MONTH);
-                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
-                    int min = calendar.get(Calendar.MINUTE);
-                    startDate = mDay;
-                    startMon = mMonth;
-                    startYear = mYear;
-                    startHour = hour;
-                    startMin = min;
-                    txtStartDate.setText(mDay + "-" + Validations.getMonthNo(mMonth) + "-" + mYear + ", " + Validations.showTime(hour, min));
-                    selected_startTimeVal = getTimeinMs(mDay, mMonth, mYear, hour, min);
-
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
+            public void onClick(View v) {
+                startDateDialog("show");
             }
         });
+
+
+        // selection of Spinner Now/Later and start DatePicker
+//        spn_startTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                timeSelection = parent.getSelectedItem().toString().trim();
+//                if (timeSelection.equals("Later")) {
+//                    startDateDialog("show");
+//
+//                } else {
+//                    //spinner click for Now Selection
+//                    //current date time
+//                    Calendar calendar = Calendar.getInstance();
+//                    int mYear = calendar.get(Calendar.YEAR);
+//                    int mMonth = calendar.get(Calendar.MONTH);
+//                    int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+//                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+//                    int min = calendar.get(Calendar.MINUTE);
+//                    startDate = mDay;
+//                    startMon = mMonth;
+//                    startYear = mYear;
+//                    startHour = hour;
+//                    startMin = min;
+//                    txtStartDate.setText(getDateNo(mDay) + "-" + getMonthNo(mMonth) + "-" + mYear + ", " + Validations.showTime(hour, min));
+//                    selected_startTimeVal = getTimeinMs(mDay, mMonth, mYear, hour, min);
+//
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
 
         // selection of end date textfield
         txtEndDate.setOnClickListener(new View.OnClickListener() {
@@ -401,210 +444,150 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         });
 
         // spinner selection for BYOB
-        spn_byob.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selected_byob = parent.getSelectedItem().toString().trim();
-                //Log.e("selected_byob "," ---- "+selected_byob);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+//        spn_byob.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                selected_byob = parent.getSelectedItem().toString().trim();
+//                //Log.e("selected_byob "," ---- "+selected_byob);
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
 
         // create party button click
         btn_createParty.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                if(cb_byobYes.isChecked()){
+                    selected_byob = "Yes";
+                }else{
+                    selected_byob = "No";
+                }
+
+                Log.e("selected_byob"," "+selected_byob);
+
                 edt_PartyName.clearFocus();
                 edt_Description.clearFocus();
-                edt_Address.clearFocus();
+                //edt_Address.clearFocus();
                 InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 
                 GenerikFunctions.showDialog(m_config.pDialog,"Creating Party...");
 
-
                 String val = Validations.checkWordsCount(edt_Description.getText().toString());
                 String msg = "";
-                int msglength=0;
-                if(picturePath.equals("")){
-                    msg += "Please upload Image" + "\n";
-                    msglength++;
-                }
+                int msglength = 0;
 
-                 if (selected_endTimeVal - selected_startTimeVal == 0)
+//                if(picturePath.equals(""))
+//                {
+//                    msg += "Please upload Image." + "\n";
+//                    msglength++;
+//                }
+
+                if (selected_endTimeVal - selected_startTimeVal == 0)
                 {
-                    msg += "StartTime & EndTime cannot be same. It should be greater than one hour" + "\n";
+                    msg += "PartyStartTime & PartyEndTime cannot be same. It should be greater than one hour." + "\n";
                     msglength++;
-                    //Toast.makeText(getApplicationContext(), "StartTime & EndTime cannot be same. It should be greater than one hour", Toast.LENGTH_SHORT).show();
-
+                    
                 }
                 else if (selected_endTimeVal < selected_startTimeVal)
                 {
-                    msg += "EndTime should be greater than StartTime" + "\n";
+                    msg += "PartyEndTime should be greater than StartTime." + "\n";
                     msglength++;
-                    //Toast.makeText(getApplicationContext(), " EndTime should be greater than StartTime", Toast.LENGTH_SHORT).show();
+                   
                 }
                 else if (selected_endTimeVal - selected_startTimeVal < ConstsCore.hourVal)
                 {
-                    msg += "EndTime should be greater than 1 hour" + "\n";
+                    msg += "PartyEndTime should be greater than 1 hour." + "\n";
                     msglength++;
-                    //Toast.makeText(getApplicationContext(), " EndTime should be greater than 1 hour ", Toast.LENGTH_SHORT).show();
+                    
                 }
                 else if (selected_endTimeVal - selected_startTimeVal > ConstsCore.TwelveHrVal)
                 {
-                    msg += "EndTime cannot be greater than 12 hours" + "\n";
+                    msg += "PartyEndTime cannot be greater than 12 hours." + "\n";
                     msglength++;
-                    // Toast.makeText(getApplicationContext(), " EndTime cannot be greater than 12 hours ", Toast.LENGTH_SHORT).show();
                 }
 
                 if(edt_PartyName.getText().toString().replaceAll("\\s+", " ").trim().equals("") || edt_PartyName.getText().toString().replaceAll("\\s+", " ").trim().equals(" "))
                 {
-                    //Toast.makeText(getApplicationContext(), "Please enter proper address", Toast.LENGTH_SHORT).show();
-                    //edt_PartyName.setError("Please fill Party Name");
-                    msg += "Please fill Party Name"+ "\n";
+                    //msg += "Please fill Party Name."+ "\n";
+                    edt_PartyName.setError("Please fill Party Name");
                     msglength++;
                 }
 
                 if(!val.equals("true")) {
-                    //edt_Description.setError(val);
-                    msg += val + "\n";
+                    edt_Description.setError(val);
+                    //msg += val + "\n";
                     msglength++;
-                    //Toast.makeText(getApplicationContext(), " "+val, Toast.LENGTH_SHORT).show();
                 }
-
-                if(edt_Address.getText().toString().replaceAll("\\s+", " ").trim().equals("") || edt_Address.getText().toString().replaceAll("\\s+", " ").trim().equals(" "))
+                
+                if(edt_address.getText().toString().length()==0)
                 {
-                    //Toast.makeText(getApplicationContext(), "Please enter proper address", Toast.LENGTH_SHORT).show();
-                    //edt_Address.setError("Please fill the Address");
-                    msg += "Please fill the Address"+ "\n";
+                    //msg += "Please fill the Address."+ "\n";
                     msglength++;
+                    edt_address.setError("Please Enter Address");
+                }
+                if(edt_street.getText().toString().length()==0)
+                {
+                    //msg += "Please fill the Address"+ "\n";
+                    msglength++;
+                    edt_street.setError("Please Enter Street Name.");
+                }
+                if(edt_city.getText().toString().length()==0)
+                {
+                    //msg += "Please fill the Address"+ "\n";
+                    msglength++;
+                    edt_city.setError("Please Enter City Name");
+                }
+                if(edt_state.getText().toString().length()==0)
+                {
+                    //msg += "Please fill the Address"+ "\n";
+                    msglength++;
+                    edt_state.setError("Please Enter State Name");
+                }
+                if(edt_pincode.getText().toString().length()==0)
+                {
+                    //msg += "Please fill the Address"+ "\n";
+                    msglength++;
+                    edt_pincode.setError("Please Enter PIN code");
                 }
 
+                if(msglength == 0)
+                {
+                    String Address = edt_address.getText().toString().trim();
+                    Log.e("address",Address);
+                    String street = edt_street.getText().toString().trim();
+                    String city  = edt_city.getText().toString().trim();
+                    String state = edt_state.getText().toString().trim();
+                    String pin = edt_pincode.getText().toString().trim();
 
+                    String newAddress = Address +", " + street +", " + city+ ", " + state + ", " + pin;
+                    Log.i("Entered Address ", newAddress);
+                    newAddress = newAddress.replace(" ", "+");
+                    Log.i("Processed Address ", newAddress);
 
-                if(msglength == 0){
-                    getLatLong();
+                    getLatLong(newAddress,0);
+                }
+                else
+                {
 
-                }else{
-                    if(msg.equals("")){
-
-                    }else {
-                        Toast.makeText(getApplicationContext(), " " + msg, Toast.LENGTH_LONG).show();
-                    }
-
+                    Toast.makeText(getApplicationContext(), " " + msg, Toast.LENGTH_LONG).show();
                     GenerikFunctions.hideDialog(m_config.pDialog);
                 }
-                //Log.e(""," "+timeSelection);
-//                    Log.e("selected_byob"," "+selected_byob);
-//                    Log.e("selected_startTimeVal"," "+selected_startTimeVal);
-//                    Log.e("selected_endTimeVal"," "+selected_endTimeVal);
-
 
 
             }
+
 
         });
 
     }
 
-//    // calendar function
-//    private Calendar getCalendar() {
-//        /** Current Day data using calendar*/
-//        final Calendar calendar = Calendar.getInstance();
-//        return calendar;
-//    }
-//
-//    // function for displaying time in AM/PM
-//    public StringBuilder showTime(int hour, int min) {
-//        StringBuilder time;
-//        String hours,mins;
-//        if (hour == 0) {
-//            hour += 12;
-//            format = "AM";
-//        }
-//        else if (hour == 12) {
-//            format = "PM";
-//        } else if (hour > 12) {
-//            hour -= 12;
-//            format = "PM";
-//        } else {
-//            format = "AM";
-//        }
-//
-//        if(hour < 10){
-//            hours = "0" + hour;
-//        }else{
-//            hours = String.valueOf(hour);
-//        }
-//
-//        if(min < 10){
-//            mins = "0" + min;
-//        }else{
-//            mins = String.valueOf(min);
-//        }
-//
-//
-////        Log.e("time",""+new StringBuilder().append(hour).append(" : ").append(min)
-////                .append(" ").append(format));
-//        time = new StringBuilder().append(hours).append(" : ").append(mins)
-//                .append(" ").append(format);
-//        return time;
-//    }
-//
-//
-//    //function for displaying month
-//    public static String getMonthNo(int val) {
-//        String month = null;
-//
-//        switch (val) {
-//            case 0:
-//                month = "01";
-//                break;
-//            case 1:
-//                month = "02";
-//                break;
-//            case 2:
-//                month = "03";
-//                break;
-//            case 3:
-//                month = "04";
-//                break;
-//            case 4:
-//                month = "05";
-//                break;
-//            case 5:
-//                month = "06";
-//                break;
-//            case 6:
-//                month = "07";
-//                break;
-//            case 7:
-//                month = "08";
-//                break;
-//            case 8:
-//                month = "09";
-//                break;
-//            case 9:
-//                month = "10";
-//                break;
-//            case 10:
-//                month = "11";
-//                break;
-//            case 11:
-//                month = "12";
-//                break;
-//            default:
-//                break;
-//
-//        }
-//
-//        return month;
-//    }
+
 
     //function for converting values in milliseconds
     public long getTimeinMs(int mDay, int mMonth, int mYear, int hour, int minute){
@@ -716,7 +699,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                         if (tempstartTimeVal[0] - selected_startTimeVal < 0) {
                             Toast.makeText(getApplication(), "StartTime Should be greater than or equal to currentTime", Toast.LENGTH_SHORT).show();
                         } else {
-                            txtStartDate.setText(startDate + "-" + Validations.getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
+                            txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
                             selected_startTimeVal = tempstartTimeVal[0];
                             Log.e("selected_startTimeVal", " " + selected_startTimeVal+" "+new Date(selected_startTimeVal));
 
@@ -832,7 +815,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                         } else {
 
                             selected_endTimeVal = tempendTimeVal[0];
-                            txtEndDate.setText(endDate + "-" + Validations.getMonthNo(endMon) + "-" + endYear + ", " + Validations.showTime(endHour, endMin));
+                            txtEndDate.setText(getDateNo(endDate) + "-" + getMonthNo(endMon) + "-" + endYear + ", " + Validations.showTime(endHour, endMin));
 
                         }
                     }
@@ -855,48 +838,36 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     }
 
 
-//    //function for comparing dates
-//    public boolean getCurrentDate(int startDate, int startMon, int startYear){
-//        Boolean flag = null;
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//        Calendar c = Validations.getCalendar();
-//        int day  = c.get(Calendar.DAY_OF_MONTH);
-//        int mon = c.get(Calendar.MONTH);//mMonth;
-//        int year = c.get(Calendar.YEAR);//mYear;
-//        String date = year+"-"+Validations.getMonthNo(mon)+"-"+day;
-//        String startdate = startYear+"-"+Validations.getMonthNo(startMon)+"-"+startDate;
-//        try {
-//            Date date1 = sdf.parse(date);
-//            Date date2 = sdf.parse(startdate);
-//            if(date1.compareTo(date2)==0){
-//                flag = true;
-//            }else{
-//                flag = false;
-//            }
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-//        return flag;
-//
-//    }
 
-    public void getLatLong(){
-        String Address = edt_Address.getText().toString().trim();
-        //Log.i("Entered Address ", Address);
-        Address = Address.replace(" ", "+");
-        //Log.i("Processed Address ", Address);
 
-        GeocodingLocation locationAddress = new GeocodingLocation();
-        locationAddress.getAddressFromLocation(Address,
-                getApplicationContext(), new GeocoderHandler());
+    public void getLatLong(String newAddress,int iteration)
+    {
+        try
+        {
+            GeocodingLocation locationAddress = new GeocodingLocation();
+            locationAddress.getAddressFromLocation(newAddress,getApplicationContext(), new GeocoderHandler(iteration));
+
+        }
+        catch(Exception e)
+        {
+            Log.e("Excep 11",e.toString());
+            e.printStackTrace();
+        }
     }
 
-
-    private class GeocoderHandler extends Handler {
+    private class GeocoderHandler extends Handler
+    {
+        int iteration;
+        public GeocoderHandler(int iteration)
+        {
+            this.iteration = iteration;
+        }
         @Override
-        public void handleMessage(Message message) {//
+        public void handleMessage(Message message)
+        {
             String locationAddress;
-            switch (message.what) {
+            switch (message.what)
+            {
                 case 1:
                     Bundle bundle = message.getData();
                     locationAddress = bundle.getString("address");
@@ -907,20 +878,60 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
             Log.e("Location Address",""+locationAddress );
 
-            if(locationAddress == null){
-                Toast.makeText(getApplicationContext(), "Unable to get Latitude and Longitude for this address location.",Toast.LENGTH_SHORT).show();
+            if(locationAddress == null)
+            {
+                switch(iteration)
+                {
+                    case 0 : {
+                        String street = edt_street.getText().toString().trim();
+                        String city  = edt_city.getText().toString().trim();
+                        String state = edt_state.getText().toString().trim();
+                        String pin = edt_pincode.getText().toString().trim();
+
+                        String newAddress = street +", " + city+ ", " + state + ", " + pin;
+                        Log.i("Entered Address with " + iteration , newAddress);
+                        newAddress = newAddress.replace(" ", "+");
+                        Log.i("Processed Address ", newAddress);
+                        iteration++;
+                        getLatLong(newAddress,iteration);
+                    }
+                    break;
+
+                    case 1 : {
+                        String city  = edt_city.getText().toString().trim();
+                        String state = edt_state.getText().toString().trim();
+                        String pin = edt_pincode.getText().toString().trim();
+
+                        String newAddress =  city+ ", " + state + ", " + pin;
+                        Log.i("Entered Address with " + iteration, newAddress);
+                        newAddress = newAddress.replace(" ", "+");
+                        Log.i("Processed Address ", newAddress);
+                        iteration++;
+                        getLatLong(newAddress,iteration);
+                    }
+                    break;
+
+                    case 2 : {
+                        Toast.makeText(getApplicationContext(), "Unable to get Latitude and Longitude for this address location.",Toast.LENGTH_SHORT).show();
+                        GenerikFunctions.hideDialog(m_config.pDialog);
+                    }
+                    break;
+
+                }
                 //edt_Address.setError("Unable to get Latitude and Longitude for this address location.");
-                GenerikFunctions.hideDialog(m_config.pDialog);
-            }else{
+            }
+            else
+            {
+                Log.e("Store Party to AWS","Yes");
+                Toast.makeText(HostActivity.this,"Store Party to AWS",Toast.LENGTH_LONG);
                 new AWSPartyOperations.createParty(cont, initialiseParty(cont, locationAddress)).execute();
-
-
             }
 
             //lblLatLang.setText("GeoLocation  " + locationAddress);
 
         }
     }
+
 
 
 
@@ -1167,6 +1178,8 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
     public PartyTable initialiseParty(Context cont, String locationAddress)
     {
+
+        String HostFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
         List latlong = new ArrayList();
         latlong.add(locationAddress.split(" ")[0]);
         latlong.add(locationAddress.split(" ")[1]);
@@ -1177,7 +1190,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         party.setStartTime(String.valueOf(selected_startTimeVal));
         party.setEndTime(String.valueOf(selected_endTimeVal));
         //party.setDate("");
-        party.setHostFBID(LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID());
+        party.setHostFBID(HostFBID);
         party.setHostQBID(sharedPreferences.getString(m_config.QuickBloxID,""));//String.valueOf(m_config.chatService.getUser().getId()));
         party.setHostName(sharedPreferences.getString(m_config.Entered_User_Name, ""));
         //party.setPartyType("");

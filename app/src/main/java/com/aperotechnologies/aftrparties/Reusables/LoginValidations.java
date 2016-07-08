@@ -470,42 +470,9 @@ public  class LoginValidations
                             SharedPreferences.Editor editor= sharedPreferences.edit();
                             editor.putString(m_config.QuickBloxID, String.valueOf(user.getId()));
                             editor.apply();
-                            /*if(sharedPreferences.getString(m_config.QBLoginDone,"").equals("Yes"))
-                            {
-
-                                // initialize Chat service
-                                try
-                                {
-                                    user.setPassword(BaseService.getBaseService().getToken());
-                                    boolean isLoggedIn = QBChatService.getInstance().isLoggedIn();
-                                    Log.e("isLoggedIn "," "+isLoggedIn);
-                                    if(isLoggedIn)
-                                    {
-                                        //if chat is LoggedIn give a call to PlayServiceHelper
-                                         new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
-                                    }
-                                    else
-                                    {
-                                        //call to chatLogin
-                                        //chatLogin(user, cont);
-                                        new chatLogin(user, cont).execute();
-                                    }
-
-                                }
-                                catch (Exception e)
-                                {
-                                    e.printStackTrace();
-                                    //Toast.makeText(cont,e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    Thread t = new Thread(new ToastDispLooper(cont, "Login Failed, Please try again after some time"));
-                                    t.start();
-                                    GenerikFunctions.hideDialog(m_config.pDialog);
-                                }
-                            }
-                            else
-                            {*/
                             new AWSLoginOperations.addUserQuickBloxId(cont, user, avatarUrl).execute();
 
-                            //}
+
                         }
 
                         @Override
@@ -785,11 +752,6 @@ public  class LoginValidations
     };
 
 
-
-
-
-
-
     //Harshada
     //function for chat logout
     public static void chatLogout(){
@@ -904,8 +866,8 @@ public  class LoginValidations
                             SharedPreferences.Editor editorq = sharedPreferences.edit();
                             editorq.putString(m_config.FaceDetectDone,"Yes");
                             editorq.apply();
-//                          Intent intent = new Intent(cont,OTPActivity.class);
-//                          cont.startActivity(intent);
+                            Intent intent = new Intent(cont,OTPActivity.class);
+                            cont.startActivity(intent);
                         }
                         else
                         {
@@ -951,7 +913,7 @@ public  class LoginValidations
         Configuration_Parameter m_config = Configuration_Parameter.getInstance();
 
         Log.e("In Check Pending Flags",sharedPreferences.getString(m_config.BasicFBLIValidationsDone,"No")
-        +"    " +sharedPreferences.getString(m_config.FaceDetectDone,"No") +"     " +
+                +"    " +sharedPreferences.getString(m_config.FaceDetectDone,"No") +"     " +
                 sharedPreferences.getString(m_config.OTPValidationDone,"No"));
 
         if(sharedPreferences.getString(m_config.BasicFBLIValidationsDone,"No").equals("Yes"))
@@ -963,15 +925,15 @@ public  class LoginValidations
 
                     new AWSLoginOperations.addUserRegStatus(cont,loggedInUserInformation).execute();///only for testing
 
-                  //  GenerikFunctions.hideDialog(m_config.pDialog);
+                    //  GenerikFunctions.hideDialog(m_config.pDialog);
                 }
                 else
                 {
-                    new AWSLoginOperations.addUserRegStatus(cont,loggedInUserInformation).execute();///only for testing
+                    // new AWSLoginOperations.addUserRegStatus(cont,loggedInUserInformation).execute();///only for testing
 
                     //Uncomment this later
-//                    Intent intent = new Intent(cont,OTPActivity.class);
-//                    cont.startActivity(intent);
+                    Intent intent = new Intent(cont,OTPActivity.class);
+                    cont.startActivity(intent);
                 }
             }
             else
@@ -985,6 +947,9 @@ public  class LoginValidations
             new AsyncAgeCalculation(cont).execute();
         }
     }
+
+
+
 
 
 }

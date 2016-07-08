@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -107,6 +108,7 @@ public class ChatAdapter extends BaseAdapter {
         boolean isOutgoing = chatMessage.getSenderId() == null || chatMessage.getSenderId().equals(currentUser.getId());
         setAlignment(holder, isOutgoing);
         if (holder.txtMessage != null) {
+            Log.e("---- html---"," "+chatMessage.getBody() +" " +Html.escapeHtml(chatMessage.getBody()));
             holder.txtMessage.setText(chatMessage.getBody());
         }
 

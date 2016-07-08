@@ -63,6 +63,8 @@ public class PrivateChatImpl extends QBMessageListenerImpl<QBPrivateChat> implem
     public void processMessage(QBPrivateChat chat, QBChatMessage message) {
         Log.w(TAG, "new incoming message: " + message);
         chatActivity.showMessage(message);
+        // sets last message at the time of chat
+        m_config.lastMessge = message.getBody();
     }
 
     @Override
@@ -75,6 +77,7 @@ public class PrivateChatImpl extends QBMessageListenerImpl<QBPrivateChat> implem
         if(!createdLocally){
             privateChat = incomingPrivateChat;
             privateChat.addMessageListener(PrivateChatImpl.this);
+
         }
 
         Log.w(TAG, "private chat created: " + incomingPrivateChat.getParticipant() + ", createdLocally:" + createdLocally);

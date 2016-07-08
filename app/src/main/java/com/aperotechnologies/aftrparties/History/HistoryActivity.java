@@ -50,6 +50,13 @@ public class HistoryActivity extends Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build();
+        StrictMode.setThreadPolicy(policy);
+
         cont = this;
         m_config = Configuration_Parameter.getInstance();
         Crouton.cancelAllCroutons();
@@ -57,11 +64,7 @@ public class HistoryActivity extends Activity
         index = 0;
         count = 10;
 
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-                .detectAll()
-                .penaltyLog()
-                .build();
-        StrictMode.setThreadPolicy(policy);
+
 
 
         listHistory = (ListView) findViewById(R.id.listhistory);

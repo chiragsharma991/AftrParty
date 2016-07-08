@@ -19,14 +19,21 @@ public class TransparentActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        String from = getIntent().getExtras().getString("from");
+
+        if(from.equals("PartyRetention")){
+            alertPartyRetentionDialog(from);
+        }
+
+    }
 
 
-
+    //Alert Dialog for Party Retention
+    private void alertPartyRetentionDialog(String from) {
 
         String PartyName = getIntent().getExtras().getString("PartyName");
         String PartyId = getIntent().getExtras().getString("PartyId");
         final String DialogId = getIntent().getExtras().getString("DialogId");
-
         Log.e("RatingsAlarmReceiver "," PartyName "+" "+PartyId+" "+DialogId);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -37,7 +44,16 @@ public class TransparentActivity extends Activity {
         alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                if(QBChatService.getInstance() == null){
+                    //Go for login
+                    //ask for inapp purchase
 
+
+                }else{
+
+                    QBChatDialogCreation.deleteGroupDialog(DialogId);
+
+                }
                 finish();
 
             }
@@ -47,11 +63,14 @@ public class TransparentActivity extends Activity {
             public void onClick(DialogInterface dialog, int which) {
 
                 if(QBChatService.getInstance() == null){
-                    // Go for login
-                    //ask for inapp purchase
+                    //Go for login
+
+
+
                 }else{
-                    //ask for inapp purchase
-                    QBChatDialogCreation.deleteGroupDialog("57750bcba0eb470b7000001b");
+
+                    QBChatDialogCreation.deleteGroupDialog(DialogId);
+
                 }
 
                 finish();
@@ -61,15 +80,13 @@ public class TransparentActivity extends Activity {
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 
+
     }
+
+
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
+    public void onBackPressed() {
+        return;
     }
-
-
-
-
 }

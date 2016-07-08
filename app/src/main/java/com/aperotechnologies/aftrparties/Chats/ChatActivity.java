@@ -61,21 +61,25 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
     private ArrayList<QBChatMessage> listadptchatMessages;
     private int index = 0;
     private int selCount = 0;
+    String lastMessage = "";
+    private int totalMessagesCount = 0;
 
 
 
 
-    public static void start(Context context, Bundle bundle) {
-        Intent intent = new Intent(context, ChatActivity.class);
-        intent.putExtras(bundle);
-        context.startActivity(intent);
-    }
+//    public static void start(Context context, Bundle bundle) {
+//        Intent intent = new Intent(context, ChatActivity.class);
+//        intent.putExtras(bundle);
+//        context.startActivity(intent);
+//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         index = 0;
+        totalMessagesCount = 0;
+
 
 
         m_config = Configuration_Parameter.getInstance();
@@ -87,6 +91,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
         // Setup opponents info
         Intent intent = getIntent();
         dialog = (QBDialog) intent.getSerializableExtra(ConstsCore.EXTRA_DIALOG);
+        m_config.lastMessge = dialog.getLastMessage();
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         listView = (ListView) findViewById(R.id.messagesContainer);
@@ -163,12 +168,30 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
     @Override
     public void onBackPressed() {
 
+        QBDialog selectedDialog = (QBDialog) getIntent().getSerializableExtra(ConstsCore.EXTRA_DIALOG);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(ConstsCore.EXTRA_DIALOG, selectedDialog);
+        // Open chat activity
+        //ChatActivity.start(DialogsActivity.this, bundle);
+
+        Intent resultIntent = new Intent();
+        resultIntent.putExtras(bundle);
+        if(m_config.lastMessge == null || m_config.lastMessge.equals(null)){
+            resultIntent.putExtra("lastmessage", "");
+        }else{
+            resultIntent.putExtra("lastmessage", m_config.lastMessge);
+        }
+
+        resultIntent.putExtra("position", getIntent().getExtras().getString("position"));
+        setResult(Activity.RESULT_OK, resultIntent);
             try {
                 chat.release();
             } catch (XMPPException e) {
                 Log.e(TAG, "failed to release chat", e);
             }
             super.onBackPressed();
+
+
 
 
     }
@@ -220,7 +243,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
             chat = new PrivateChatImpl(this, opponentID);//this variable will be use for sending message
             // Load Chat history
             //
-            //swipeRefreshLayout.setRefreshing(true);
+            swipeRefreshLayout.setRefreshing(true);
             loadChatHistory(index, "loading page");
         }
     }
@@ -262,6 +285,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
             public void onSuccess(ArrayList<QBChatMessage> messages, Bundle args)
             {
 
+                totalMessagesCount = totalMessagesCount + messages.size();
                 Log.e("messages","size "+messages.size());
                 selCount += messages.size();
                 int selVal = selCount - index;
@@ -276,8 +300,11 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
                         QBChatMessage msg = messages.get(i);
                         listadptchatMessages.add(0, msg);
 
+
                     }
                     adapter.notifyDataSetChanged();
+                    m_config.lastMessge = listadptchatMessages.get(totalMessagesCount - 1).getBody();
+
 
                     if(check == "loading page")
                     {
@@ -287,6 +314,11 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
                     {
 
                         listView.setSelection(selVal);
+                    }
+
+                }else{
+                    if(totalMessagesCount == 0){
+                        m_config.lastMessge = "";
                     }
 
                 }

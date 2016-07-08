@@ -66,7 +66,7 @@
 
 
 
-            <LinearLayout
+            <!--<LinearLayout
                 android:layout_margin="10dp"
                 android:weightSum="1"
                 android:orientation="vertical"
@@ -306,7 +306,156 @@
 
                 </RelativeLayout>
 
-            </LinearLayout>
+            </LinearLayout>-->
+
+
+
+
+
+
+
+
+                <LinearLayout
+                    android:layout_marginTop="20dp"
+                    android:weightSum="2"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+
+                    <RelativeLayout
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" >
+
+                        <com.aperotechnologies.aftrparties.utils.ResizableButton
+                            android:id="@+id/btnHost"
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/white"
+                            android:text="Host"
+                            android:textAllCaps="false"
+                            android:layout_width="150dp"
+                            android:layout_centerInParent="true"
+                            android:layout_height="150dp"  />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" >
+
+                        <com.aperotechnologies.aftrparties.utils.ResizableButton
+                            android:id="@+id/btnGateCrasher"
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/white"
+                            android:text="Gate Crasher"
+                            android:textAllCaps="false"
+                            android:layout_width="150dp"
+                            android:layout_centerInParent="true"
+                            android:layout_height="150dp"  />
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+
+
+                <View android:layout_height="10dp"
+                    android:layout_width="10dp"/>
+
+
+                <LinearLayout
+                    android:weightSum="4"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+
+
+                    <RelativeLayout
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" >
+
+                        <com.aperotechnologies.aftrparties.utils.ResizableButton
+                            android:id="@+id/btnSettings"
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/white"
+                            android:text="Settings"
+                            android:textAllCaps="false"
+                            android:layout_centerInParent="true"
+                            android:layout_width="90dp"
+                            android:layout_height="90dp"  />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" >
+
+                        <com.aperotechnologies.aftrparties.utils.ResizableButton
+                            android:id="@+id/btnChat"
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/white"
+                            android:text="Chat"
+                            android:textAllCaps="false"
+                            android:layout_centerInParent="true"
+                            android:layout_width="90dp"
+                            android:layout_height="90dp"  />
+
+                    </RelativeLayout>
+
+
+                    <RelativeLayout
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" >
+
+                        <com.aperotechnologies.aftrparties.utils.ResizableButton
+                            android:id="@+id/btnHistory"
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/white"
+                            android:text="History"
+                            android:textAllCaps="false"
+                            android:layout_centerInParent="true"
+                            android:layout_width="90dp"
+                            android:layout_height="90dp" />
+                    </RelativeLayout>
+
+
+                    <RelativeLayout
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content" >
+
+                        <com.aperotechnologies.aftrparties.utils.ResizableButton
+                            android:id="@+id/btnTips"
+                            android:textSize="@dimen/text_size"
+                            android:textColor="@color/white"
+                            android:text="Tips"
+                            android:textAllCaps="false"
+                            android:layout_centerInParent="true"
+                            android:layout_width="90dp"
+                            android:layout_height="90dp" />
+                    </RelativeLayout>
+
+                    <com.aperotechnologies.aftrparties.Login.FaceOverlayView
+                        xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:id="@+id/face_overlay"
+                        android:layout_width="300dp"
+                        android:layout_height="300dp"
+                        android:background="@android:color/white"
+                        android:visibility="gone"
+                        />
+
+
+
+                </LinearLayout>
+
+
+
 
         </LinearLayout>
     </ScrollView>

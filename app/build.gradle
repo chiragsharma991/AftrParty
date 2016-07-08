@@ -81,10 +81,15 @@ dependencies {
     compile 'com.yahoo.mobile.client.android.util.rangeseekbar:rangeseekbar-library:0.1.0'
     compile 'com.google.android.gms:play-services-vision:8.1.0'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
-    compile files('libs/glide-3.6.0.jar')
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
+
+    compile 'com.github.kikoso:SwipeableCards:1.1-RELEASE@aar'
     //compile 'com.makeramen:roundedimageview:2.2.1'
     compile('de.keyboardsurfer.android.widget:crouton:1.8.5@aar') {
         // exclusion is not necessary, but generally a good idea.
         exclude group: 'com.google.android', module: 'support-v4'
     }
+
 }

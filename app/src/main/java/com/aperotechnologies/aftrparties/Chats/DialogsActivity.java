@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -103,19 +104,54 @@ public class DialogsActivity extends Activity implements AbsListView.OnScrollLis
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(ConstsCore.EXTRA_DIALOG, selectedDialog);
                 // Open chat activity
-                ChatActivity.start(DialogsActivity.this, bundle);
+                //ChatActivity.start(DialogsActivity.this, bundle);
 
-                //if there are unread mesages, on click of dialog set unread message count to zero/blank
-                TextView txtUnreadMessage = (TextView) view.findViewById(R.id.textunreadmessage);
-                txtUnreadMessage.setText("");
-                selectedDialog.setUnreadMessageCount(0);
-                listadpDialogs.remove(position);
-                listadpDialogs.add(position, selectedDialog);
+                Intent i = new Intent(DialogsActivity.this, ChatActivity.class);
+                i.putExtras(bundle);
+                i.putExtra("position",String.valueOf(position));
+                startActivityForResult(i,1);
+
+//                //if there are unread mesages, on click of dialog set unread message count to zero/blank
+//                TextView txtUnreadMessage = (TextView) view.findViewById(R.id.textunreadmessage);
+//                txtUnreadMessage.setText("");
+//                selectedDialog.setUnreadMessageCount(0);
+//                listadpDialogs.remove(position);
+//                listadpDialogs.add(position, selectedDialog);
 
 
             }
         });
 
+
+    }
+
+    //Meghana
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case (1) : {
+                if (resultCode == Activity.RESULT_OK) {
+                    QBDialog selectedDialog = (QBDialog) data.getSerializableExtra(ConstsCore.EXTRA_DIALOG);
+                    String newText = data.getStringExtra("lastmessage");
+                    String position = data.getStringExtra("position");
+                    Log.e("newText", " "+newText+" ");
+                    if(!newText.equals(null) || newText != null)
+                    {
+                        if(newText.length() != 0) {
+                            selectedDialog.setLastMessage(newText);
+                            selectedDialog.setUnreadMessageCount(0);
+                            listadpDialogs.set(Integer.parseInt(position), selectedDialog);
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    // TODO Update your TextView.
+                }
+                break;
+            }
+        }
     }
 
 

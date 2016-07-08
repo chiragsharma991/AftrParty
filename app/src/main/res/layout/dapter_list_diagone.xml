@@ -11,7 +11,7 @@
         android:id="@+id/grpChatImage"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:padding="10dp"
+        android:layout_margin="20dp"
         android:src="@drawable/placeholder_user"
         app:siBorderWidth="2dp"
         android:layout_centerVertical="true"
@@ -35,9 +35,10 @@
         app:riv_oval="true" />-->
 
     <TextView
-        android:padding="10dp"
         android:layout_marginRight="50dp"
         android:id="@+id/roomName"
+        android:maxLines="1"
+        android:layout_marginTop="22dp"
         android:layout_toRightOf="@+id/grpChatImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,11 +46,12 @@
         android:textSize="20sp" />
 
     <TextView
-        android:padding="10dp"
         android:layout_marginRight="50dp"
         android:id="@+id/lastMessage"
+        android:maxLines="1"
         android:layout_below="@+id/roomName"
         android:layout_toRightOf="@+id/grpChatImage"
+        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="@dimen/text_size" />

@@ -24,7 +24,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/drawerSettingsToolbar"
-            android:background="@android:color/black"
+            android:background="@color/colorPrimaryDark"
             android:layout_alignParentTop="true"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
@@ -64,8 +64,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
         android:layout_height="wrap_content"
         android:id="@+id/progressBar"
         android:visibility="visible"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerInParent="true" />
 
     <TextView
         android:visibility="gone"

@@ -173,8 +173,6 @@ public class RegistrationActivity extends Activity
         sqldb=helper.getWritableDatabase();
         m_config.pDialog = new ProgressDialog(cont);
 
-
-
         //Meghana
         //UI Components
         edt_usr_name = (EditText) findViewById(R.id.edt_usr_name);
@@ -223,7 +221,7 @@ public class RegistrationActivity extends Activity
 
         try
         {
-            Log.e("Shrd Pref in Login",sharedpreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
+          Log.e("Shrd Pref in Login",sharedpreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
           sharedpreferences.getString(m_config.Entered_Email,"N/A") + "   "
                     + sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
         }
@@ -273,7 +271,6 @@ public class RegistrationActivity extends Activity
 
                 try
                 {
-
                    // setLIUserProfile("");
                 }
                 catch (Exception e)
@@ -316,7 +313,6 @@ public class RegistrationActivity extends Activity
                     {
                         Log.e("Linked In Error", error.toString());
                         //GenerikFunctions.showToast(cont,"Li Error  onApiError  "+ error.toString());
-
                         try
                         {
                             setLIUserProfile("");
@@ -393,7 +389,6 @@ public class RegistrationActivity extends Activity
                 Log.e("LI lastName", liUserInformation.getLastName());
 
                 Log.e("--------"," "+liPictureData);
-
 
 
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
@@ -566,9 +561,9 @@ public class RegistrationActivity extends Activity
 
 
 
-                        processLogin();
+                           processLogin();
 
-                      //  EmailVerification(sharedpreferences.getString(m_config.Entered_Email,"Email"));
+                         //EmailVerification(sharedpreferences.getString(m_config.Entered_Email,"Email"));
                     }
                     else
                     {
@@ -603,8 +598,7 @@ public class RegistrationActivity extends Activity
             loginManager.logInWithReadPermissions(RegistrationActivity.this, permissions);
 
 //            ArrayList<String> publish_perm = new ArrayList<>();
-//            publish_perm.add("publish_actions");
-//
+//            publish_perm.add("publish_actions");//
 //           loginManager.logInWithPublishPermissions(RegistrationActivity.this,publish_perm);
 
             Log.e("Inside start login", "yes");
@@ -621,10 +615,10 @@ public class RegistrationActivity extends Activity
     //Ask for declined FB permissions
     public void askForDeclinedFBPermissions(ArrayList<String> declined_perm)
     {
-        for (int i = 0; i < declined_perm.size(); i++)
-        {
-            Log.e("From dec perm func", declined_perm.get(i));
-        }
+//        for (int i = 0; i < declined_perm.size(); i++)
+//        {
+//            Log.e("From dec perm func", declined_perm.get(i));
+//        }
 
         loginManager.logInWithReadPermissions(RegistrationActivity.this, declined_perm);
         FacebookDataRetieval();
@@ -654,23 +648,21 @@ public class RegistrationActivity extends Activity
 
 //                    Intent intent = new Intent(cont,Success.class);
 //                    cont.startActivity(intent);
-
-
                  //   https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
 
 //                    // App code
-                    Log.e("Login Success", "Yes");
+                    Log.e("FB Login Success", "Yes");
                     token = loginResult.getAccessToken();
                     Log.e("AccessToken", token.toString() + "    " +token);
 
                     Set<String> given_perm = token.getPermissions();
                     iterator = given_perm.iterator();
 
-                    while (iterator.hasNext())
-                    {
-                        String perm_name = iterator.next().toString();
-                        Log.e("Given Permission in: ", perm_name + " ");
-                    }
+//                    while (iterator.hasNext())
+//                    {
+//                        String perm_name = iterator.next().toString();
+//                        Log.e("Given Permission in: ", perm_name + " ");
+//                    }
 
                     ArrayList<String> declined_permissions = new ArrayList<String>();
                     Set<String> declined_perm = token.getDeclinedPermissions();
@@ -786,12 +778,13 @@ public class RegistrationActivity extends Activity
 //                        addFriends.requestInvitableFriends(cont,token);
 
                         fbUserInformation = gson.fromJson(object.toString(), FbUserInformation.class);
-                        Log.e("User Information --->","Information");
+                        Log.e("User FB Information --->","Information");
                         Log.e("getFbId Id: " , fbUserInformation.getFbId());
-//                        Log.e("getGender: " , fbUserInformation.getGender());
-//                        Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
-//                        Log.e("getEmail: " ,fbUserInformation.getEmail());
-//                        Log.e("getBirthday: " ,fbUserInformation.getBirthday());
+//                      Log.e("getGender: " , fbUserInformation.getGender());
+//                      Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
+//                      Log.e("getEmail: " ,fbUserInformation.getEmail());
+//                      Log.e("getBirthday: " ,fbUserInformation.getBirthday());
+
 
                         if(fbUserInformation.getBirthday().equals(null))
                         {
@@ -824,9 +817,9 @@ public class RegistrationActivity extends Activity
                         {
                             fBCurrentLocationInformation = new FBCurrentLocationInformation();
                         }
-                        Log.e("CUrrent Location --->","Details");
-                        Log.e("getLocationId Id: " , fBCurrentLocationInformation.getLocationId());
-                        Log.e("getLocationName " , fBCurrentLocationInformation.getLocationName());
+//                        Log.e("CUrrent Location --->","Details");
+//                        Log.e("getLocationId Id: " , fBCurrentLocationInformation.getLocationId());
+//                        Log.e("getLocationName " , fBCurrentLocationInformation.getLocationName());
                         if(fbUserInformation.getFbHomelocationInformation() != null)
                         {
                             fbHomelocationInformation = new FbHomelocationInformation();
@@ -844,9 +837,9 @@ public class RegistrationActivity extends Activity
                             fbHomelocationInformation = new FbHomelocationInformation();
                         }
 
-                        Log.e("Home Location --->","Details");
-                        Log.e("getLocationId Id: " , fbHomelocationInformation.getLocationId() +"  aa");
-                        Log.e("getLocationName " , fbHomelocationInformation.getLocationName()+"  aa");
+//                        Log.e("Home Location --->","Details");
+//                        Log.e("getLocationId Id: " , fbHomelocationInformation.getLocationId() +"  aa");
+//                        Log.e("getLocationName " , fbHomelocationInformation.getLocationName()+"  aa");
 
                         if(fbUserInformation.getFbProfilePictureData().equals(null))
                         {
@@ -857,10 +850,10 @@ public class RegistrationActivity extends Activity
                         {
                             fbProfilePictureData=fbUserInformation.getFbProfilePictureData();
                         }
-
-                        Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
-
-                        Log.e("Empty Fields","Yes   " + emptyFields +"    aa");
+//
+//                        Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
+//
+//                        Log.e("Empty Fields","Yes   " + emptyFields +"    aa");
 
                         if(emptyFields.equals(""))
                         {
@@ -876,13 +869,42 @@ public class RegistrationActivity extends Activity
                             }
                             else
                             {
-                                //Clear and insert Here
-                                sqldb.delete(LoginTableColumns.USERTABLE, LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'", null);
-                                storeUserInDb();
+                              //Update User Entry
+
+                                String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
+                                        LoginTableColumns.FB_USER_NAME + " = '" + fbUserInformation.getFbUserName().trim() + "', " +
+                                        LoginTableColumns.FB_USER_GENDER + " = '" + fbUserInformation.getGender().trim() + "', " +
+                                LoginTableColumns.FB_USER_BIRTHDATE + " = '" + fbUserInformation.getBirthday().trim() + "', " +
+                                LoginTableColumns.FB_USER_EMAIL + " = '" + fbUserInformation.getEmail().trim() + "', " +
+                                LoginTableColumns.FB_USER_HOMETOWN_ID + " = '" + fbHomelocationInformation.getLocationId().trim() + "', " +
+                                LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + fbHomelocationInformation.getLocationName().trim() + "', " +
+                                LoginTableColumns.FB_USER_CURRENT_LOCATION_ID + " = '" + fBCurrentLocationInformation.getLocationId().trim() + "', " +
+                                LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + fBCurrentLocationInformation.getLocationName().trim() + "'  where "
+                                 + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
+
+                                Log.i("update User  "+ LoginTableColumns.FB_USER_ID , updateUser);
+                                sqldb.execSQL(updateUser);
+
+
+
+                                loggedInUserInfo = new LoggedInUserInformation();
+
+                                loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
+                                loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
+                                loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
+                                loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+                                loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
+                              //  loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
+                                loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
+                                loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
+                                loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
+                                loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
+
+
+                                getFbFriendsCount();
+
                             }
                             cursor.close();
-
-
                         }
                         else
                         {
@@ -920,7 +942,7 @@ public class RegistrationActivity extends Activity
         Log.i("Inserted User ", fbUserInformation.getFbId().trim() + "   " +
                 fbHomelocationInformation.getLocationId() +"   aa   " + fbHomelocationInformation.getLocationName());
 
-        loggedInUserInfo =new LoggedInUserInformation();
+        loggedInUserInfo = new LoggedInUserInformation();
 
         loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
         loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
@@ -934,9 +956,14 @@ public class RegistrationActivity extends Activity
         loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
 
         /******/
+        getFbFriendsCount();
 
+    }
+
+    private void getFbFriendsCount()
+    {
         //Total No of friends
-        new GraphRequest(   AccessToken.getCurrentAccessToken(),
+        new GraphRequest(AccessToken.getCurrentAccessToken(),
                 "/me/friends",    null,
                 HttpMethod.GET,
                 new GraphRequest.Callback()
@@ -947,20 +974,19 @@ public class RegistrationActivity extends Activity
                         try
                         {
                             JSONObject graphObject = response.getJSONObject();
-                            Log.e("graphObject",graphObject.toString());
-                            //        JSONArray dataArray = graphObject.getJSONArray("data");
-                            //        JSONObject paging = graphObject.getJSONObject("paging");
+                            //Log.e("graphObject",graphObject.toString());
+
                             JSONObject summary = graphObject.getJSONObject("summary");
                             String totCount = summary.getString("total_count");
-                            Log.e("Summary  totCount ", summary + "      " + totCount);
+                           // Log.e("Summary  totCount ", summary + "      " + totCount);
 
                             total_friends_count = (Integer.parseInt(totCount.trim()));
 
                             String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
                                     FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
-                            Log.i("User Query  : ", Query);
+                           // Log.i("User Query  : ", Query);
                             Cursor cursor = sqldb.rawQuery(Query, null);
-                            Log.e("Cursor count",cursor.getCount()+"");
+                           // Log.e("Cursor count",cursor.getCount()+"");
 
                             if(cursor.getCount() == 0)
                             {
@@ -971,16 +997,15 @@ public class RegistrationActivity extends Activity
                                         + LoginTableColumns.FB_USER_FRIENDS  + " = '" + total_friends_count + "'"
                                         + " where " + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
 
-                                Log.i("update User  "+ LoginTableColumns.FB_USER_ID , Update);
+                                //Log.i("update User  "+ LoginTableColumns.FB_USER_ID , Update);
                                 sqldb.execSQL(Update);
 
 
                                 //AWS Storage of FB Data
                                 Log.e("Before FB AWS Storage","Yes");
                                 LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
-                                Log.e("Info in storage",loggedInUserInformation.getFB_USER_BIRTHDATE() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
-                                new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Registration").execute();
-
+                                Log.e("FB Info in storage",loggedInUserInformation.getFB_USER_BIRTHDATE() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
+                                new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Registration",sqldb).execute();
 
                             }
 

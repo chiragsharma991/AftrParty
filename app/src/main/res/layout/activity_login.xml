@@ -105,11 +105,11 @@
            <Button
                android:gravity="center"
                android:layout_margin="10dp"
-               android:background="@color/black"
+               android:background="@color/colorPrimaryDark"
                android:layout_height="wrap_content"
                android:layout_width="match_parent"
                android:textSize="25sp"
-               android:text="Login"
+               android:text="Register"
                android:textColor="@color/white"
                android:textAllCaps="false"
                android:id="@+id/btn_login"

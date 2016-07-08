@@ -57,17 +57,20 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
         m_config = Configuration_Parameter.getInstance();
         faceOverlayView = (FaceOverlayView) ((Activity)cont).findViewById(R.id.face_overlay);
 
-
         Log.e("Shrd Pref in AsyncAgeCalc",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                 sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "
                 + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
+
+        Log.e("frnds count  li conn count",loggedInUserInformation.getFB_USER_FRIENDS() + "    " +loggedInUserInformation.getLI_USER_CONNECTIONS());
+
     }
 
     @Override
     protected Boolean doInBackground(Void... params)
     {
         //String dtStart=params[0];
-       String  dtStart = loggedInUserInformation.getFB_USER_BIRTHDATE();
+
+        String  dtStart = loggedInUserInformation.getFB_USER_BIRTHDATE();
         SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
         try
         {
@@ -114,7 +117,6 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
             //Connection Count
             if (Integer.parseInt(loggedInUserInformation.getFB_USER_FRIENDS()) >= ConstsCore.FB_FRIENDS)
             {
-
                 if (Integer.parseInt(loggedInUserInformation.getLI_USER_CONNECTIONS()) < ConstsCore.LI_CONNECTIONS)
                 {
                     //fb valid  li invalid
@@ -132,7 +134,6 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
             {
                 ConstsCore.validFriendsCount = "No";
             }
-
 
           //  Log.e("Before Conditions check priflefald ageflag friendsflag", ConstsCore.profilePicAvailable + "    " + ConstsCore.ValidAge + "    " + ConstsCore.validFriendsCount);
             if (ConstsCore.profilePicAvailable.equals("No"))
@@ -152,7 +153,6 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                 //Have profile picture
                 if (ConstsCore.ValidAge.equals("No"))
                 {
-
                     Handler h = new Handler(cont.getMainLooper());
                     h.post(new Runnable()
                     {
@@ -265,11 +265,11 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                                 editorq.putString(m_config.FaceDetectDone,"Yes");
                                 editorq.apply();
 
-//                                Intent intent = new Intent(cont,OTPActivity.class);
-//                                cont.startActivity(intent);
-
-                                Intent intent = new Intent(cont,HomePageActivity.class);
+                                Intent intent = new Intent(cont,OTPActivity.class);
                                 cont.startActivity(intent);
+
+//                                Intent intent = new Intent(cont,HomePageActivity.class);
+//                                cont.startActivity(intent);
                             }
                             else
                             {
@@ -280,8 +280,10 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                                 editorq.apply();
                                 GenerikFunctions.showToast(cont,"There is no face in your profile pic");
                             }
-                            GenerikFunctions.hideDialog(m_config.pDialog);
-                        }
+                            m_config.pDialog.dismiss();
+                            m_config.pDialog.cancel();
+
+                          }
 
                         @Override
                         public void onBitmapFailed(Drawable drawable)

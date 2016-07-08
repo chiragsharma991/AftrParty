@@ -669,8 +669,37 @@ public class Welcome extends Activity
                             else
                             {
                                 //Clear and insert Here
-                                sqldb.delete(LoginTableColumns.USERTABLE, LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'", null);
-                                storeUserInDb();
+                                //Update User Entry
+
+                                String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
+                                        LoginTableColumns.FB_USER_NAME + " = '" + fbUserInformation.getFbUserName().trim() + "', " +
+                                        LoginTableColumns.FB_USER_GENDER + " = '" + fbUserInformation.getGender().trim() + "', " +
+                                        LoginTableColumns.FB_USER_BIRTHDATE + " = '" + fbUserInformation.getBirthday().trim() + "', " +
+                                        LoginTableColumns.FB_USER_EMAIL + " = '" + fbUserInformation.getEmail().trim() + "', " +
+                                        LoginTableColumns.FB_USER_HOMETOWN_ID + " = '" + fbHomelocationInformation.getLocationId().trim() + "', " +
+                                        LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + fbHomelocationInformation.getLocationName().trim() + "', " +
+                                        LoginTableColumns.FB_USER_CURRENT_LOCATION_ID + " = '" + fBCurrentLocationInformation.getLocationId().trim() + "', " +
+                                        LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + fBCurrentLocationInformation.getLocationName().trim() + "'  where "
+                                        + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
+
+                                Log.i("update User  "+ LoginTableColumns.FB_USER_ID , updateUser);
+                                sqldb.execSQL(updateUser);
+
+                                loggedInUserInfo =new LoggedInUserInformation();
+
+                                loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
+                                loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
+                                loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
+                                loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+                                loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
+                                //  loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
+                                loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
+                                loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
+                                loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
+                                loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
+
+
+                                getFbFriendsCount();
                             }
                             cursor.close();
                         }
@@ -680,6 +709,9 @@ public class Welcome extends Activity
                             GenerikFunctions.hideDialog(m_config.pDialog);
                             GenerikFunctions.showToast(cont,"Please specify your "+ emptyFields + " in Facebook");
                         }
+
+
+
                     }
                 });
 
@@ -725,7 +757,12 @@ public class Welcome extends Activity
         /******/
 
         //Total No of friends
-        new GraphRequest(   AccessToken.getCurrentAccessToken(),
+        getFbFriendsCount();
+    }
+    private void getFbFriendsCount()
+    {
+        //Total No of friends
+        new GraphRequest(AccessToken.getCurrentAccessToken(),
                 "/me/friends",    null,
                 HttpMethod.GET,
                 new GraphRequest.Callback()
@@ -735,9 +772,6 @@ public class Welcome extends Activity
                         Log.e(" user friends list", response + "");
                         try
                         {
-
-
-
                             JSONObject graphObject = response.getJSONObject();
                             Log.e("graphObject",graphObject.toString());
                             //        JSONArray dataArray = graphObject.getJSONArray("data");
@@ -756,7 +790,6 @@ public class Welcome extends Activity
 
                             if(cursor.getCount() == 0)
                             {
-                                GenerikFunctions.hideDialog(m_config.pDialog);
                             }
                             else
                             {
@@ -771,9 +804,7 @@ public class Welcome extends Activity
                                 Log.e("Before FB AWS Storage","Yes");
                                 LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
                                 Log.e("Info in storage",loggedInUserInformation.getFB_USER_BIRTHDATE() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
-                                new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Login").execute();
-
-
+                                new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Welcome",sqldb).execute();
 
                             }
 
@@ -789,6 +820,7 @@ public class Welcome extends Activity
                         }
                         catch (Exception e)
                         {
+                            GenerikFunctions.hideDialog(m_config.pDialog);
                             System.out.println("Exception=" + e);
                             e.printStackTrace();
                         }

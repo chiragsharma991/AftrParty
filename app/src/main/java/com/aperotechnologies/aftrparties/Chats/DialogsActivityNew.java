@@ -93,7 +93,7 @@ public class DialogsActivityNew extends Activity
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(ConstsCore.EXTRA_DIALOG, selectedDialog);
                 // Open chat activity
-                ChatActivity.start(DialogsActivityNew.this, bundle);
+                //ChatActivity.start(DialogsActivityNew.this, bundle);
 
                 //if there are unread mesages, on click of dialog set unread message count to zero/blank
                 TextView txtUnreadMessage = (TextView) view.findViewById(R.id.textunreadmessage);

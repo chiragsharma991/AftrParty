@@ -1,16 +1,15 @@
 package com.aperotechnologies.aftrparties.HomePage;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -20,16 +19,18 @@ import android.widget.TextView;
 
 import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
-import com.aperotechnologies.aftrparties.LocalNotifications.LNotificationHelper;
+import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Settings.SettingsActivity;
 import com.aperotechnologies.aftrparties.TipsActivity;
+import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.aperotechnologies.aftrparties.utils.ResizableButton;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -45,6 +46,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
@@ -56,21 +58,29 @@ public class HomePageActivity extends Activity
 
     ImageButton btn_logout;
     CircularImageView imguser;
+    TextView txt_Header;
     TextView txtuserName, txtuserEmail, txtuserDOB, txtuserGender;
     Context cont;
     SharedPreferences sharedPreferences;
     Configuration_Parameter m_config;
     ResizableButton btnTips, btnSettings, btnChat, btnHistory,  btnHost, btnGateCrasher;
+    LoggedInUserInformation loggedInUserInformation;
     ArrayList<String> profilePics, validPics;
     int i=0;
     String url;
     FaceOverlayView faceOverlayView;
+
 
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.activity_homepage);
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build();
+        StrictMode.setThreadPolicy(policy);
 
         cont = this;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
@@ -78,51 +88,65 @@ public class HomePageActivity extends Activity
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
         btn_logout = (ImageButton) findViewById(R.id.btn_logout);
+        txt_Header = (TextView) findViewById(R.id.activity_title);
 
-///
-        LNotificationHelper.setLNotificationPartyRetention(cont, "PartyHarsha", "123456", "fsdfsdf45345345345","14545345345");
-        ///
-        imguser = (CircularImageView) findViewById(R.id.userimage);
-        txtuserName = (TextView) findViewById(R.id.userName);
-        txtuserEmail = (TextView) findViewById(R.id.userEmail);
-        txtuserDOB = (TextView) findViewById(R.id.userDOB);
-        txtuserGender = (TextView) findViewById(R.id.userGender);
+
+
+//        imguser = (CircularImageView) findViewById(R.id.userimage);
+//        txtuserName = (TextView) findViewById(R.id.userName);
+//        txtuserEmail = (TextView) findViewById(R.id.userEmail);
+//        txtuserDOB = (TextView) findViewById(R.id.userDOB);
+//        txtuserGender = (TextView) findViewById(R.id.userGender);
         btnTips = (ResizableButton) findViewById(R.id.btnTips);
         btnSettings = (ResizableButton) findViewById(R.id.btnSettings);
         btnChat = (ResizableButton) findViewById(R.id.btnChat);
         btnHistory = (ResizableButton) findViewById(R.id.btnHistory);
         btnHost = (ResizableButton) findViewById(R.id.btnHost);
         btnGateCrasher = (ResizableButton) findViewById(R.id.btnGateCrasher);
-
         faceOverlayView = (FaceOverlayView)findViewById(R.id.face_overlay);
 
-        txtuserName.setText(sharedPreferences.getString(m_config.Entered_User_Name,""));
-        txtuserEmail.setText(sharedPreferences.getString(m_config.Entered_Email,""));
-        txtuserDOB.setText(LoginValidations.initialiseLoggedInUser(cont).getFB_USER_BIRTHDATE());
-        txtuserGender.setText(LoginValidations.initialiseLoggedInUser(cont).getFB_USER_GENDER());
+        loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
 
-        String url = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_PROFILE_PIC();
 
-        if(url.equals(null) || url.equals("") || url.equals("N/A"))
-        {
-            //if(LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC() == null || LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC().equals("") || LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC().equals("N/A")) {
-                url = "";
-//            }else{
-//                url = LoginValidations.initialiseLoggedInUser(cont).getLI_USER_PROFILE_PIC();
-//            }
-        }
-        else
-        {
-            url = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_PROFILE_PIC();
+//        txtuserName.setText(sharedPreferences.getString(m_config.Entered_User_Name,""));
+//        txtuserEmail.setText(sharedPreferences.getString(m_config.Entered_Email,""));
+//        txtuserDOB.setText(loggedInUserInformation.getFB_USER_BIRTHDATE());
+//        txtuserGender.setText(loggedInUserInformation.getFB_USER_GENDER());
+
+//        String url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
+//
+//        if(url.equals(null) || url.equals("") || url.equals("N/A"))
+//        {
+//            url = "";
+//        }
+//        else
+//        {
+//            url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
+//        }
+//
+//        if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
+//        {
+//            Picasso.with(cont).load(url).fit().centerCrop()
+//                    .placeholder(R.drawable.placeholder_user)
+//                    .error(R.drawable.placeholder_user)
+//                    .into(imguser);
+//        }
+
+
+        //if(sharedPreferences.getString(m_config.Entered_User_Name,"").equals("")){
+        try {
+            UserTable user = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
+            txt_Header.setText("Welcome " + user.getName());
+        }catch (Exception e){
+
         }
 
-        if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
-        {
-            Picasso.with(cont).load(url).fit().centerCrop()
-                    .placeholder(R.drawable.placeholder_user)
-                    .error(R.drawable.placeholder_user)
-                    .into(imguser);
-        }
+//        }else{
+//            txt_Header.setText("Welcome " +sharedPreferences.getString(m_config.Entered_User_Name,""));
+//        }
+
+
+
 
         btn_logout.setOnClickListener(new View.OnClickListener()
         {
@@ -166,9 +190,9 @@ public class HomePageActivity extends Activity
             public void onClick(View v)
             {
                 Log.e("----"," came here");
+                new AsyncFBFaces().execute();
 
-                getFBProfilePictures();
-//
+
             }
         });
 
@@ -237,6 +261,95 @@ public class HomePageActivity extends Activity
         alertDialogBuilder.show();
     }
 
+
+
+
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
+    }
+
+
+    public class AsyncFBFaces extends AsyncTask<Void,Void,Void>
+    {
+        UserTable selUserData =null;
+
+        @Override
+        protected void onPreExecute()
+        {
+//            progressDialog = ProgressDialog.show(HomePageActivity.this,"Loading","Loading User Images");
+//            progressDialog.setCancelable(false);
+
+
+            m_config.pDialog.setMessage("Loading");
+            m_config.pDialog.setCancelable(false);
+            m_config.pDialog.show();
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids)
+        {
+            try
+            {
+                selUserData = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
+                Log.e("selUserClass", " " + selUserData);
+            }
+            catch (Exception e)
+            {
+                m_config.pDialog.dismiss();
+
+            }
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid)
+        {
+            super.onPostExecute(aVoid);
+            if(selUserData == null)
+            {
+                m_config.pDialog.dismiss();
+            }
+            else
+            {
+                if(selUserData.getImageflag().equals("Yes"))
+                {
+                    List<String> image = selUserData.getProfilePicUrl();
+
+                    String[] images = new String[image.size()];
+                    for(int q=0;q<image.size();q++)
+                    {
+
+                        images[q]=image.get(q);
+                        Log.e("Images",images[q]);
+                    }
+                    m_config.pDialog.dismiss();
+
+                    Intent i = new Intent(cont, SettingsActivity.class);
+                    Bundle b=new Bundle();
+                    b.putStringArray("images", images);
+                    //i.putStringArrayListExtra("img",validPics);
+                    i.putExtras(b);
+                    cont.startActivity(i);
+                }
+                else
+                {
+                    getFBProfilePictures();
+                }
+            }
+
+
+
+        }
+    }
+
     public void getFBProfilePictures()
     {
         GraphRequest request1 = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(),
@@ -267,16 +380,20 @@ public class HomePageActivity extends Activity
                                     break;
                                 }
                             }
+
+
+                            for(int i=0;i<profilePics.size();i++)
+                            {
+                                Log.e("Index PP "+ i,profilePics.get(i));
+                            }
+                            FaceDetectteo(0);
                         }
                         catch(Exception e)
                         {
+                            m_config.pDialog.dismiss();
+
                         }
-                        for(int i=0;i<profilePics.size();i++)
-                        {
-                            Log.e("Index PP "+ i,profilePics.get(i));
-                        }
-                        FaceDetectteo(0);
-                        //  FaceDetect();
+
                     }
                 });
 
@@ -295,7 +412,6 @@ public class HomePageActivity extends Activity
         {
             validPics.clear();
         }
-
         if(index >= profilePics.size())
         {
             Log.e("In outer if","Yes");
@@ -305,77 +421,99 @@ public class HomePageActivity extends Activity
             {
                 test[p] = validPics.get(p);
             }
-            for(int  p=0;p<test.length;p++)
-            {
-                Log.e("Index "+i,test[p]);
-            }
+
+            m_config.pDialog.dismiss();
             Intent i = new Intent(HomePageActivity.this, SettingsActivity.class);
             Bundle b=new Bundle();
             b.putStringArray("images", test);
+            //i.putStringArrayListExtra("img",validPics);
             i.putExtras(b);
             startActivity(i);
         }
         else
         {
-            do
+
+            if(validPics.size() == 5)
             {
-                url = profilePics.get(index);
-                if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
+                Log.e("In outer if","Yes");
+                String[] test = new String[validPics.size()];
+
+                for(int  p=0;p<validPics.size();p++)
                 {
-                    Target mTarget = new Target()
-                    {
-                        @Override
-                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom)
-                        {
-                            //  Log.e("FB bitmap loaded  " + k,"sucessfully  " + bitmap.toString() );
-                            int faces = faceOverlayView.setBitmap(bitmap);
-                         //   Log.e("No of faces from post",faces+"");
-                            if(faces>0)
-                            {
-                           //      Log.e("Index  " + i,"Faces :  "+faces);
-                                //Set  Face detect flag here to true
-                                validPics.add(url);
-                                i++;
-                                FaceDetectteo(i);
-                                //  Log.e("Valid Pics size in if",validPics.size()+"");
-                            }
-                            else
-                            {
-                                //Set  Face detect flag here to false
-                                i++;
-                                FaceDetectteo(i);
-
-                            }
-                        }
-
-                        @Override
-                        public void onBitmapFailed(Drawable drawable)
-                        {
-                            Log.e("On FB bitmap failed",drawable.toString());
-                        }
-
-                        @Override
-                        public void onPrepareLoad(Drawable drawable)
-                        {
-                        }
-                    };
-
-                    Picasso.with(cont)
-                            .load(url)
-                            .into(mTarget);
-                    faceOverlayView.setTag(mTarget);
+                    test[p] = validPics.get(p);
                 }
 
-            }while(profilePics.size()==index);
-        }
-    }
+                m_config.pDialog.dismiss();
+                Intent i = new Intent(HomePageActivity.this, SettingsActivity.class);
+                Bundle b=new Bundle();
+                b.putStringArray("images", test);
+                //i.putStringArrayListExtra("img",validPics);
+                i.putExtras(b);
+                startActivity(i);
+            }
+            else
+            {
+                do
+                {
+                    url = profilePics.get(index);
+                    if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
+                    {
+                        Target mTarget = new Target()
+                        {
+                            @Override
+                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom)
+                            {
+                                //  Log.e("FB bitmap loaded  " + k,"sucessfully  " + bitmap.toString() );
+                                int faces = faceOverlayView.setBitmap(bitmap);
+                                //   Log.e("No of faces from post",faces+"");
+                                if(faces>0)
+                                {
+                                    //Log.e("Index  " + i,"Faces :  "+faces);
+                                    //Set  Face detect flag here to true
+                                    if(validPics.size()==5)
+                                    {
+                                        i++;
+                                        FaceDetectteo(i);
+                                    }
+                                    else
+                                    {
+                                        validPics.add(url);
+                                        i++;
+                                        FaceDetectteo(i);
+                                    }
+                                    //  Log.e("Valid Pics size in if",validPics.size()+"");
+                                }
+                                else
+                                {
+                                    //Set  Face detect flag here to false
+                                    i++;
+                                    FaceDetectteo(i);
+                                }
+                            }
 
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-        Crouton.cancelAllCroutons();
-        m_config.foregroundCont = this;
+                            @Override
+                            public void onBitmapFailed(Drawable drawable)
+                            {
+                                Log.e("On FB bitmap failed",drawable.toString());
+                                m_config.pDialog.dismiss();
+                            }
+
+                            @Override
+                            public void onPrepareLoad(Drawable drawable)
+                            {
+                            }
+                        };
+
+                        Picasso.with(cont)
+                                .load(url)
+                                .into(mTarget);
+                        faceOverlayView.setTag(mTarget);
+                    }
+
+                }while(profilePics.size()==index);
+            }
+
+        }
     }
 
 
