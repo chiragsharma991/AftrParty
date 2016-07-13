@@ -51,7 +51,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
     private TextView groupName;
     private ProgressBar progressBar;
     //private ListView messagesContainer;
-    private EditText messageEditText;
+    private EditText edt_message;
     private Button sendButton;
     private ChatAdapter adapter;
     //QBUser opponentUser;
@@ -100,9 +100,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
         adapter = new ChatAdapter(ChatActivity.this, listadptchatMessages, dialog.getType());
         listView.setAdapter(adapter);
         swipeRefreshLayout.setOnRefreshListener(this);
-
         groupName = (TextView) findViewById(R.id.groupName);
-        messageEditText = (EditText) findViewById(R.id.messageEdit);
+        edt_message = (EditText) findViewById(R.id.messageEdit);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
 
@@ -128,15 +127,21 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
 
         // Send button
         sendButton = (Button) findViewById(R.id.chatSendButton);
+        sendButton.setVisibility(View.INVISIBLE);
+        edt_message.setVisibility(View.INVISIBLE);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String messageText = messageEditText.getText().toString().replaceAll("\\s+", " ").trim();
+                String messageText = edt_message.getText().toString().replaceAll("\\s+", " ").trim();
                 if (TextUtils.isEmpty(messageText))
                 {
                     return;
                 }
                 sendChatMessage(messageText);
+                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(inputManager != null){
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
 
             }
         });
@@ -198,7 +203,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
 
 
     private void showKeyboard() {
-        ((InputMethodManager) messageEditText.getContext().getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(messageEditText, InputMethodManager.SHOW_IMPLICIT);
+        ((InputMethodManager) edt_message.getContext().getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(edt_message, InputMethodManager.SHOW_IMPLICIT);
     }
 
 
@@ -218,7 +223,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
             Log.e(TAG, "failed to send a message", sme);
         }
 
-        messageEditText.setText("");
+        edt_message.setText("");
 
         if (dialog.getType() == QBDialogType.PRIVATE) {
 
@@ -231,6 +236,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
 
     private void initChat() {
 
+
+
         if (dialog.getType() == QBDialogType.GROUP) {
             chat = new GroupChatImpl(this);//this variable will be use for sending message
             //progressBar.setVisibility(View.VISIBLE);
@@ -239,11 +246,11 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
             joinGroupChat();
 
         } else if (dialog.getType() == QBDialogType.PRIVATE) {
+            swipeRefreshLayout.setRefreshing(true);
+
             Integer opponentID = getOpponentIDForPrivateDialog(dialog);
             chat = new PrivateChatImpl(this, opponentID);//this variable will be use for sending message
             // Load Chat history
-            //
-            swipeRefreshLayout.setRefreshing(true);
             loadChatHistory(index, "loading page");
         }
     }
@@ -271,7 +278,6 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
     public void loadChatHistory(final int index, final String check)
     {
         swipeRefreshLayout.setRefreshing(true);
-
         Log.e("index "," count "+index);
 
         QBRequestGetBuilder customObjectRequestBuilder = new QBRequestGetBuilder();
@@ -304,6 +310,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
                     }
                     adapter.notifyDataSetChanged();
                     m_config.lastMessge = listadptchatMessages.get(totalMessagesCount - 1).getBody();
+                    sendButton.setVisibility(View.VISIBLE);
+                    edt_message.setVisibility(View.VISIBLE);
 
 
                     if(check == "loading page")
@@ -320,6 +328,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
                     if(totalMessagesCount == 0){
                         m_config.lastMessge = "";
                     }
+                    sendButton.setVisibility(View.VISIBLE);
+                    edt_message.setVisibility(View.VISIBLE);
 
                 }
                 swipeRefreshLayout.setRefreshing(false);

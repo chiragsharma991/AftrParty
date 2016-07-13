@@ -50,6 +50,7 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
     <ListView
+
         android:layout_marginTop="44dp"
         android:id="@+id/listhistory"
         android:layout_width="match_parent"

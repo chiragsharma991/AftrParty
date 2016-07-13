@@ -10,13 +10,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/lLyoutHost"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:focusable="true"
-        android:focusableInTouchMode="true">
+        android:orientation="vertical" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -45,8 +41,6 @@
                     android:layout_height="wrap_content"   />
                 </RelativeLayout>
 
-
-
             </android.support.v7.widget.Toolbar>
         </LinearLayout>
 
@@ -55,6 +49,7 @@
             android:layout_height="match_parent">
 
             <LinearLayout
+               android:id="@+id/lLyoutHost"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -161,11 +156,39 @@
 
 
 
-                <View
-                    android:layout_height="5dp"
-                    android:layout_width="3dp"  />
 
                 <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text="Party End Time :"
+                        android:textSize="@dimen/text_size"
+                        android:layout_weight="0.455"/>
+
+                    <TextView
+                        android:text="Select End Time"
+                        android:padding="10dp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginRight="5dp"
+                        android:paddingLeft="5dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:textSize="@dimen/text_size"
+                        android:id="@+id/edtEndDate"
+                        android:layout_weight="0.55"/>
+
+
+                </LinearLayout>
+
+                <!--<LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:weightSum="1">
@@ -193,14 +216,7 @@
                         android:layout_weight="0.55"/>
 
 
-                    <!--<TimePicker
-                        android:id="@+id/endTimePicker"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:layout_weight="0.5"/>-->
-
-                </LinearLayout>
+                </LinearLayout>-->
 
 
 
@@ -275,6 +291,9 @@
                         android:id="@+id/edt_Description"
                         android:layout_weight="0.55"/>
 
+
+
+
                 </LinearLayout>
 
                 <View
@@ -346,7 +365,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:weightSum="1">
 
                     <TextView
@@ -356,24 +375,85 @@
                         android:padding="10dp"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
-                        android:text="Party Address"
+                        android:text="Party Location :"
+                        android:textSize="@dimen/text_size"
+                        android:layout_weight="0.455"/>
+
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="0.55"
+                        android:orientation="vertical"
+                        android:weightSum="1">
+
+                        <CheckBox
+                            android:enabled="true"
+                            android:id="@+id/cbgetLocation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Get Current Address"
+                            android:checked="false" />
+
+
+                        <CheckBox
+                            android:enabled="true"
+                            android:id="@+id/cbEnterAddress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Enter Address"
+                            android:checked="false" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_height="5dp"
+                    android:layout_width="3dp"  />
+
+
+                <LinearLayout
+                    android:id="@+id/llayoutenterAddress"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                <LinearLayout
+                   android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text=""
                         android:textSize="@dimen/text_size"
                         android:layout_weight="0.45"/>
 
 
                     <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                        android:singleLine="true"
                         android:textCursorDrawable="@null"
                         android:padding="10dp"
                         android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"
                         android:hint="Building No./Name"
-                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
+                        android:inputType="textCapSentences|textAutoComplete"
+                        android:nextFocusDown="@+id/edt_street"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
                         android:textSize="@dimen/text_size"
                         android:id="@+id/edt_Partyaddress"
                         android:layout_weight="0.55"/>
                 </LinearLayout>
+
 
                 <View
                     android:layout_height="5dp"
@@ -397,12 +477,14 @@
 
 
                     <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                        android:singleLine="true"
                         android:textCursorDrawable="@null"
                         android:padding="10dp"
                         android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"
                         android:hint="Street/Area/Landmark"
-                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
+                        android:inputType="textCapSentences|textAutoComplete"
+                        android:nextFocusDown="@+id/edt_city"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
                         android:textSize="@dimen/text_size"
@@ -433,12 +515,14 @@
 
 
                     <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                        android:singleLine="true"
                         android:textCursorDrawable="@null"
                         android:padding="10dp"
                         android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"
                         android:hint="City"
-                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
+                        android:inputType="textCapSentences|textAutoComplete"
+                        android:nextFocusDown="@+id/edt_state"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
                         android:textSize="@dimen/text_size"
@@ -468,12 +552,14 @@
 
 
                     <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                        android:singleLine="true"
                         android:textCursorDrawable="@null"
                         android:padding="10dp"
                         android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"
                         android:hint="State"
-                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
+                        android:inputType="textCapSentences|textAutoComplete"
+                        android:nextFocusDown="@+id/edt_pincode"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
                         android:textSize="@dimen/text_size"
@@ -504,22 +590,62 @@
 
 
                     <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                        android:singleLine="true"
                         android:textCursorDrawable="@null"
                         android:padding="10dp"
                         android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"
                         android:hint="PIN Code"
-                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
+                        android:inputType="textCapSentences|textAutoComplete"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
                         android:textSize="@dimen/text_size"
                         android:id="@+id/edt_pincode"
                         android:layout_weight="0.55"/>
                 </LinearLayout>
+                </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/llayoutGetLocation"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text=""
+                        android:textSize="@dimen/text_size"
+                        android:layout_weight="0.45"/>
+
+
+                    <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                        android:textCursorDrawable="@null"
+                        android:padding="10dp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginRight="5dp"
+                        android:hint="PartyAddress"
+                        android:inputType="textCapSentences|textAutoComplete|textMultiLine"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:textSize="@dimen/text_size"
+                        android:id="@+id/edt_locationAddress"
+                        android:layout_weight="0.55"/>
+                </LinearLayout>
+                </LinearLayout>
 
                 <View
-                    android:layout_height="5dp"
+                    android:layout_height="15dp"
                     android:layout_width="3dp"  />
 
                 <Button

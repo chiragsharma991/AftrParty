@@ -28,7 +28,9 @@ public class PartyTable {
     private String PartyImage;
     private String MaskStatus;
     private String DialogID;
+    private String PartyStatus;
     private List<GateCrashersClass> gatecrashers;
+
 
 
     @DynamoDBHashKey(attributeName = "partyid")
@@ -173,6 +175,15 @@ public class PartyTable {
 
     public void setDialogID(String DialogID) {
         this.DialogID = DialogID;
+    }
+
+    @DynamoDBAttribute(attributeName = "partystatus")
+    public String getPartyStatus() {
+        return PartyStatus;
+    }
+
+    public void setPartyStatus(String PartyStatus) {
+        this.PartyStatus = PartyStatus;
     }
 
 

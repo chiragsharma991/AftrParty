@@ -378,7 +378,7 @@ public class GateCrasherSearchActivity extends Activity {
                     data.setdistance(sharedPreferences.getString(m_config.Distance,"3"));
                     data.setatdatetime(String.valueOf(selected_startTimeVal));
                     data.setbyob(selected_byob);
-                    data.setgenderpreference(sharedPreferences.getString(m_config.GenderPreference,""));
+                    data.setgenderpreference(sharedPreferences.getString(m_config.GenderPreference,"N/A"));
                     Bundle mBundles = new Bundle();
                     mBundles.putSerializable(ConstsCore.SER_KEY, data);
                     i.putExtras(mBundles);

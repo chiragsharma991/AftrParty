@@ -13,7 +13,7 @@ public class GCParceableData implements Serializable
     private String distance;
     private String atdatetime;
     private String byob;
-    private String preference;
+    private String genderpreference;
 
 
 
@@ -32,6 +32,6 @@ public class GCParceableData implements Serializable
     public String getbyob() { return byob; }
     public void setbyob(String byob) { this.byob = byob; }
 
-    public String getgenderpreference() { return preference;}
-    public void setgenderpreference(String preference){ this.preference = preference; }
+    public String getgenderpreference() { return genderpreference;}
+    public void setgenderpreference(String genderpreference){ this.genderpreference = genderpreference; }
 }

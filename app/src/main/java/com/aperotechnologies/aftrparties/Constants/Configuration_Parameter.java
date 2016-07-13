@@ -51,7 +51,7 @@ public class Configuration_Parameter
     public String EmailValidationDone = "EmailValidationDone";
     public String FinalStepDone = "FinalStepDone";
     public String Distance = "3";
-    public String GenderPreference = "";
+    public String GenderPreference = "N/A";
     public String PrimaryUrl;
 
 

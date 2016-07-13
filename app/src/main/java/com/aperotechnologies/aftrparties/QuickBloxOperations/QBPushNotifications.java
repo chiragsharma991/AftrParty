@@ -137,4 +137,60 @@ public class QBPushNotifications {
     }
 
 
+
+    //PushNotification to Guest after Party Cancellation
+    public static void sendCancelledPN(String GCFBID, String GCQBID, String PartyID, String partyName, Context cont) {
+
+        m_config = Configuration_Parameter.getInstance();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+
+
+        // recipients
+        StringifyArrayList<Integer> userIds = new StringifyArrayList<Integer>();
+        userIds.add(Integer.valueOf(GCQBID));
+        QBEvent event = new QBEvent();
+
+        event.setUserIds(userIds);
+        event.setEnvironment(QBEnvironment.DEVELOPMENT);
+        event.setNotificationType(QBNotificationType.PUSH);
+
+
+        JSONObject json = new JSONObject();
+        String HostFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+
+        try {
+            json.put("message",  "");
+            json.put("type","requestApproved");
+            // custom parameters
+            json.put("PartyID", PartyID);//approval for Party
+            json.put("GCQBID", GCQBID);//GCQBId(Approved ID)
+            json.put("GCFBID",GCFBID);//GCFBId(Approved ID)
+            json.put("HostQBID", sharedPreferences.getString(m_config.QuickBloxID,""));//HostQBID
+            json.put("HostFBID", HostFBID);//HostFBID
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        event.setMessage(json.toString());
+
+
+
+
+        com.quickblox.messages.QBPushNotifications.createEvent(event, new QBEntityCallback<QBEvent>() {
+            @Override
+            public void onSuccess(QBEvent qbEvent, Bundle args) {
+                // sent
+                Log.e("notification ","success "+qbEvent);
+
+            }
+
+            @Override
+            public void onError(QBResponseException errors) {
+                Log.e("notification ","errors");
+            }
+        });
+
+    }
+
 }

@@ -18,8 +18,10 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -64,7 +66,7 @@ import retrofit.RetrofitError;
 public class OTPActivity extends Activity
 {
 
-    Button btn_send, btn_verify, btn_submit;
+    Button btn_generate, btn_verify, btn_submit;
     EditText edt_otp, edt_mob_no;
     RequestQueue queue;
     Context cont = this;
@@ -77,9 +79,9 @@ public class OTPActivity extends Activity
     //String appkey = "b22ab60eda70072cd34c507c4870ab3c";
     //String appid = "c31396423a00078697c490cb13a6d99b";
 
-    String customerId = "34f3ccgp";
-    String appkey = "937a0d726bfdd7645016944fe5e91541";
-    String appid = "34a0e74737a5e0e29e20f40206d89b32";
+    String customerId = "cn9m6qq3";
+    String appkey = "1f075fb4f3c91d022b9e6adddac31e20";
+    String appid = "eb108c70c5251235251ab2c015045206";
 
     RequestInterceptor requestInterceptor;
     Gson gson;
@@ -105,6 +107,7 @@ public class OTPActivity extends Activity
 
     private static final  int MY_PERMISSIONS_REQUEST_READ_CONTATCS = 1;
 
+
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
@@ -116,17 +119,16 @@ public class OTPActivity extends Activity
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
 
-        btn_send = (Button) findViewById(R.id.btn_generate);
+        // btn_generate = (Button) findViewById(R.id.btn_generate);
         btn_verify = (Button) findViewById(R.id.btn_verify);
         edt_otp = (EditText) findViewById(R.id.edi_otp);
         txt_timer = (TextView) findViewById(R.id.txt_timer);
         edt_mob_no = (EditText) findViewById(R.id.edi_verify_mobileno);
         btn_submit = (Button) findViewById(R.id.btn_submit);
 
-
         //queue = Volley.newRequestQueue(cont);
         lhm = new HashSet<Contact>();
-
+        countDownTimer=null;
         edt_otp.setRawInputType(Configuration.KEYBOARD_12KEY);
 
         mobileNumber = sharedpreferences.getString(m_config.Entered_Contact_No,"N/A");
@@ -162,78 +164,20 @@ public class OTPActivity extends Activity
         Log.e("Shrd Pref in OTP Activity",sharedpreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                 sharedpreferences.getString(m_config.Entered_Email,"N/A") + "   "
                 + sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
-      //  getDeviceContatcs();
-//        Intent intent = new Intent(cont, HomePageActivity.class);
-//        startActivity(intent);
 
 
+        GenerateOTP();
 
-//        //Defining the method
-//        api.getOTP(appkey,customerId,"IN",mobileNumber/*,"application/x-www-form-urlencoded"*/,new Callback<ValidOTPResponse>()
+//        btn_generate.setOnClickListener(new View.OnClickListener()
 //        {
 //            @Override
-//            public void success(ValidOTPResponse validOTPResponse, retrofit.client.Response response)
+//            public void onClick(View v)
 //            {
 //
-//                Log.e("validOTP Response",validOTPResponse.getMobileNumber() + "   " + validOTPResponse.getVerificationId() + "   "
-//                + validOTPResponse.getResponseCode() + "   " + validOTPResponse.getVerificationStatus());
 //
-//            }
-//
-//            @Override
-//            public void failure(RetrofitError error)
-//            {
-//                Log.e("Retrofit error",error.toString());
-//                error.printStackTrace();
+//                // requestOTP();
 //            }
 //        });
-
-        btn_send.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                Log.e("Btn send clicked", "Yes");
-                //Defining the method
-                otpRequestApi.getOTP(appkey, customerId, "IN", mobileNumber, "application/x-www-form-urlencoded", new Callback<ValidOTPResponse>() {
-                    @Override
-                    public void success(ValidOTPResponse validOTPResponse, retrofit.client.Response response)
-                    {
-                        Log.e("validOTP Response", validOTPResponse.getMobileNumber() + "   " + validOTPResponse.getVerificationId() + "   "
-                                + validOTPResponse.getResponseCode() + "   " + validOTPResponse.getSmsCLI() + "   " + validOTPResponse.getTimeout());
-
-                        verfication_Id = validOTPResponse.getVerificationId().trim();
-
-                        countDownTimer = new CountDownTimer(90000, 1000)
-                        {
-                            public void onTick(long millisUntilFinished)
-                            {
-                                txt_timer.setText("seconds remaining: " + millisUntilFinished / 1000);
-                            }
-
-                            public void onFinish()
-                            {
-                                edt_mob_no.setVisibility(View.VISIBLE);
-                                edt_mob_no.setText(sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
-                                btn_submit.setVisibility(View.VISIBLE);
-                                txt_timer.setText("Time out ... ! Regenerate OTP");
-                            }
-                        }.start();
-                    }
-
-                    @Override
-                    public void failure(RetrofitError error)
-                    {
-                        countDownTimer.onFinish();
-                        countDownTimer.cancel();
-                        countDownTimer=null;
-                        Log.e("Retrofit error", error.toString());
-                        error.printStackTrace();
-                    }
-                });
-                // requestOTP();
-            }
-        });
 
 
         btn_submit.setOnClickListener(new View.OnClickListener()
@@ -244,7 +188,8 @@ public class OTPActivity extends Activity
                 Log.e(" btn_submit clicked", "Yes");
                 mobileNumber = edt_mob_no.getText().toString().trim();
                 Log.e("Mobile No", mobileNumber);
-                if(mobileNumber.equals(sharedpreferences.getString(m_config.Entered_Contact_No,"N/A")))
+
+                if(mobileNumber.trim().equals(sharedpreferences.getString(m_config.Entered_Contact_No,"N/A")))
                 {
                     Log.e("Same As previous mobile","request for fallback");
                     edt_mob_no.setVisibility(View.GONE);
@@ -256,7 +201,7 @@ public class OTPActivity extends Activity
                 }
                 else
                 {
-                  //  Log.e("Not Same As previous mobile no","New OTP Cycle");
+                    //  Log.e("Not Same As previous mobile no","New OTP Cycle");
                     edt_mob_no.setVisibility(View.GONE);
                     btn_submit.setVisibility(View.GONE);
                     Log.e("New Mobile No", mobileNumber);
@@ -268,23 +213,29 @@ public class OTPActivity extends Activity
 //                            Log.e("validOTP Response for fallback", validOTPResponse.getMobileNumber() + "   " + validOTPResponse.getVerificationId() + "   "
 //                                    + validOTPResponse.getResponseCode() + "   " + validOTPResponse.getSmsCLI() + "   " + validOTPResponse.getTimeout());
                             verfication_Id = validOTPResponse.getVerificationId().trim();
-
-
-                            countDownTimer = new CountDownTimer(90000, 1000)
+                            if(countDownTimer!=null)
                             {
-                                public void onTick(long millisUntilFinished)
+                                countDownTimer.cancel();
+                                countDownTimer = null;
+                            }
+                            if(countDownTimer==null)
+                            {
+                                countDownTimer = new CountDownTimer(90001, 1000)
                                 {
-                                    txt_timer.setText("seconds remaining: " + millisUntilFinished / 1000);
-                                }
+                                    public void onTick(long millisUntilFinished)
+                                    {
+                                        txt_timer.setText(""+millisUntilFinished / 1000);
+                                    }
 
-                                public void onFinish()
-                                {
-                                    edt_mob_no.setVisibility(View.VISIBLE);
-                                    edt_mob_no.setText(sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
-                                    btn_submit.setVisibility(View.VISIBLE);
-                                    txt_timer.setText("Time out ... ! Regenerate OTP");
-                                }
-                            }.start();
+                                    public void onFinish()
+                                    {
+                                        edt_mob_no.setVisibility(View.VISIBLE);
+                                        edt_mob_no.setText(sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
+                                        btn_submit.setVisibility(View.VISIBLE);
+                                        txt_timer.setText("Time out ... ! Regenerate OTP");
+                                    }
+                                }.start();
+                            }
                         }
 
                         @Override
@@ -321,12 +272,85 @@ public class OTPActivity extends Activity
         m_config.foregroundCont = this;
     }
 
+    public void GenerateOTP()
+    {
+        Log.e("Btn send clicked", "Yes");
+        //Defining the method
+        otpRequestApi.getOTP(appkey, customerId, "IN", mobileNumber, "application/x-www-form-urlencoded", new Callback<ValidOTPResponse>() {
+            @Override
+            public void success(ValidOTPResponse validOTPResponse, retrofit.client.Response response)
+            {
+                Log.e("validOTP Response", validOTPResponse.getMobileNumber() + "   " + validOTPResponse.getVerificationId() + "   "
+                        + validOTPResponse.getResponseCode() + "   " + validOTPResponse.getSmsCLI() + "   " + validOTPResponse.getTimeout());
 
+                if(validOTPResponse.getResponseCode().equals("508"))
+                {
+                    Toast.makeText(OTPActivity.this,"Limits finished",Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    verfication_Id = validOTPResponse.getVerificationId().trim();
+                    if(countDownTimer==null)
+                    {
+                        countDownTimer = new CountDownTimer(90000, 1000)
+                        {
+                            public void onTick(long millisUntilFinished)
+                            {
+                                txt_timer.setText("seconds remaining: " + millisUntilFinished / 1000);
+                            }
 
+                            public void onFinish()
+                            {
+                                edt_mob_no.setVisibility(View.VISIBLE);
+                                edt_mob_no.setText(sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
+                                btn_submit.setVisibility(View.VISIBLE);
+                                txt_timer.setText("Time out ... ! Regenerate OTP");
+                            }
+                        }.start();
+                    }
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error)
+            {
+                countDownTimer.onFinish();
+                countDownTimer.cancel();
+                countDownTimer=null;
+                Log.e("Retrofit error", error.toString());
+                error.printStackTrace();
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(OTPActivity.this);
+        alertDialogBuilder
+                .setTitle("Exit")
+                .setMessage("Are you sure you want to exit?")
+                .setCancelable(false)
+                .setNegativeButton("No", null)
+                .setPositiveButton("Yes",
+                        new DialogInterface.OnClickListener()
+                        {
+                            public void onClick(DialogInterface dialog, int id)
+                            {
+                                finish();
+//                                Intent intent = new Intent(Intent.ACTION_MAIN);
+//                                intent.addCategory(Intent.CATEGORY_HOME);
+//                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                startActivity(intent);
+                                Intent intent = new Intent(OTPActivity.this,RegistrationActivity.class);
+                                startActivity(intent);
+                            }
+                        });
+        alertDialogBuilder.show();
+    }
     public void requestOTPStrp2(final String url)
     {
         // String url="http://apifv.foneverify.com/U2opia_Verify/v1.0/trial/update?appKey=" + appkey + "&customerId=" +  customerId +   "&verificationId="+verfication_Id+"&code="+otpText;
-
         final StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>()
                 {
@@ -335,7 +359,8 @@ public class OTPActivity extends Activity
                     {
                         Log.i("OTP Receive response", response);
                         //Parse JSON Data
-                        try {
+                        try
+                        {
                             otpVerifiedResponse = gson.fromJson(response.toString(), OtpVerifiedResponse.class);
                             Log.e("", otpVerifiedResponse.getVerificationId() + "");
                             Log.e("", otpVerifiedResponse.getVerificationStatus() + "");
@@ -343,21 +368,48 @@ public class OTPActivity extends Activity
                             if (otpVerifiedResponse.getVerificationStatus().equals("WRONG_OTP_PROVIDED"))
                             {
                                 GenerikFunctions.showToast(cont, "Enter Correct OTP");
+                                edt_otp.setText("");
                             }
                             else if (otpVerifiedResponse.getVerificationStatus().equals("VERIFICATION_COMPLETED"))
                             {
+                                countDownTimer.cancel();
                                 countDownTimer = null;
                                 GenerikFunctions.showToast(cont, "Verification Done");
+                                txt_timer.setText("");
+
                                 //Fetch Contacts Here
-                                //displayContacts();
                                 //Go for HomePage
-
                                 getDeviceContatcs();
-                                SharedPreferences.Editor editor= sharedpreferences.edit();
-                                editor.putString(m_config.OTPValidationDone,"Yes");
-                                editor.apply();
 
-                                new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
+                            }
+                            else if(otpVerifiedResponse.getVerificationStatus().equals("TRYING_FALLBACK_SMS_NOT_DELIVERED"))
+                            {
+                                Log.e("Restart timer","Yes");
+                                countDownTimer.cancel();
+                                countDownTimer=null;
+
+                                countDownTimer = new CountDownTimer(90001, 1000)
+                                {
+                                    public void onTick(long millisUntilFinished)
+                                    {
+                                        txt_timer.setText("seconds remaining: " + millisUntilFinished / 1000);
+                                    }
+
+                                    public void onFinish()
+                                    {
+                                        edt_mob_no.setVisibility(View.VISIBLE);
+                                        edt_mob_no.setText(sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
+                                        btn_submit.setVisibility(View.VISIBLE);
+                                        txt_timer.setText("Time out ... ! Regenerate OTP");
+                                    }
+                                }.start();
+                            }
+                            else if(otpVerifiedResponse.getVerificationStatus().equals("VERIFICATION_FAILED"))
+                            {
+                                Toast.makeText(OTPActivity.this,"Verification failed. Please check your mobile no",Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(OTPActivity.this,RegistrationActivity.class);
+                                startActivity(intent);
+                                finish();
                             }
                         }
                         catch (Exception e)
@@ -383,7 +435,6 @@ public class OTPActivity extends Activity
 
                 return params;
             }
-
         };
         int socketTimeout = 5000;//5 seconds
         RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
@@ -397,7 +448,7 @@ public class OTPActivity extends Activity
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, ContactsContract.Contacts.SORT_KEY_PRIMARY
                 + " ASC");
         int index = 0;
-        Toast.makeText(OTPActivity.this, "Cursor Count " + cur.getCount(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(OTPActivity.this, "Cursor Count " + cur.getCount(), Toast.LENGTH_SHORT).show();
         ArrayList<String> names = new ArrayList<String>();
         ArrayList<String> contatcs = new ArrayList<String>();
 
@@ -427,39 +478,9 @@ public class OTPActivity extends Activity
                     {
                         emailCur.moveToFirst();
                         email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-
                     }
 
                     emailCur.close();
-
-
-//                    if(emailCur.getCount() == 1)
-//                    {
-//                        emailCur.moveToFirst();
-//
-//                        email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-//                        String emailType = emailCur.getString(
-//                                emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE));
-//                        Log.e(name,emailType + "   " + email);
-//                    }
-//                    else if (emailCur.getCount() > 1)
-//                    {
-//                        emailCur.moveToFirst();
-//                        do
-//                        {
-//                            email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-//                            String emailType = emailCur.getString(
-//                                    emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE));
-//                            Log.e(name,emailType + "   " + email);
-//
-//                            /*  TYPE_CUSTOM.  TYPE_HOME  TYPE_WORK  TYPE_OTHER  TYPE_MOBILE  */
-//                        }
-//                        while (emailCur.moveToNext());
-//                    }
-//                    emailCur.close();
-
-
-
 
                     if (pCur.getCount() > 0)
                     {
@@ -519,48 +540,18 @@ public class OTPActivity extends Activity
                             ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
                             new String[]{id}, null);
 
-                  //  Log.e("emailCur.length",name + "    " + emailCur.getCount() +"   aa");
+                    //  Log.e("emailCur.length",name + "    " + emailCur.getCount() +"   aa");
 
                     if (emailCur.getCount() > 0)
                     {
                         emailCur.moveToFirst();
                         email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
                     }
-
                     emailCur.close();
-
-
-//                    if(emailCur.getCount() == 1)
-//                    {
-//                        emailCur.moveToFirst();
-//
-//                            email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-//                            String emailType = emailCur.getString(
-//                                    emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE));
-//                          //  Log.e(name,emailType + "   " + email);
-//                    }
-//                    else if (emailCur.getCount() > 1)
-//                    {
-//                        emailCur.moveToFirst();
-//                        do
-//                        {
-//                            email = emailCur.getString(emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
-//                            String emailType = emailCur.getString(
-//                                    emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.TYPE));
-//                        //    Log.e(name,emailType + "   " + email);
-//
-//                            /*  TYPE_CUSTOM.  TYPE_HOME  TYPE_WORK  TYPE_OTHER  TYPE_MOBILE  */
-//                        }
-//                        while (emailCur.moveToNext());
-//                    }
-//                    emailCur.close();
-
-                     //  Log.e("Name: " + name, "Phone No: " + phoneNo + "    Email : " + email);
-
                     contact.setConactNo(phoneNo);
                     contact.setEmail(email);
                     contact.setName(name);
-                  //  Log.e("Name: " + name, "Phone No: " + phoneNo + "    Email : " + email);
+                    //  Log.e("Name: " + name, "Phone No: " + phoneNo + "    Email : " + email);
 
                 }
 
@@ -570,11 +561,11 @@ public class OTPActivity extends Activity
             {
                 if (Validations.isValidEmailId(ct.name))
                 {
-                  //  Log.e("Dont Add ", ct.name);
+                    //  Log.e("Dont Add ", ct.name);
                 }
                 else
                 {
-                   // Log.e("All ", ct.name);
+                    // Log.e("All ", ct.name);
                     NP.add(ct.toString());
                     finalContacts.add(ct);
                 }
@@ -586,7 +577,7 @@ public class OTPActivity extends Activity
                 Log.e("Contatct  " + i,NP.get(i));
             }
 
-            Toast.makeText(OTPActivity.this, "Conacts Count " + NP.size(), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(OTPActivity.this, "Conacts Count " + NP.size(), Toast.LENGTH_SHORT).show();
 
             saveContatcs();
 
@@ -601,7 +592,7 @@ public class OTPActivity extends Activity
     public void saveContatcs()
     {
         Log.e("Inside saveUserData","Yess");
-        new SaveContactsAsync().execute();
+          new SaveContactsAsync().execute();
     }
     class SaveContactsAsync extends AsyncTask<Void, Void, Void>
     {
@@ -609,6 +600,15 @@ public class OTPActivity extends Activity
         {
             // TODO: check this.exception
             // TODO: do something with the feed
+            SharedPreferences.Editor editor= sharedpreferences.edit();
+            editor.putString(m_config.OTPValidationDone,"Yes");
+            editor.apply();
+            Log.e("--- "," loggedInUserInformation    "+loggedInUserInformation.getFB_USER_ID());
+            new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
+
+//            Intent intent = new Intent(cont, HomePageActivity.class);
+//            startActivity(intent);
+
         }
 
         @Override
@@ -663,9 +663,6 @@ public class OTPActivity extends Activity
             }
             else
             {
-//                mTelephony = (TelephonyManager) context.getSystemService(
-//                        Context.TELEPHONY_SERVICE);
-//                new LoginValidations.subscribeToPushNotifications(regId,mTelephony, context).execute();
 
                 displayContacts();
                 Log.e("If Permission is granted","");
@@ -685,14 +682,8 @@ public class OTPActivity extends Activity
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 {
-
                     displayContacts();
-//                    Log.e("Permission request is accepted","");
-//                    mTelephony = (TelephonyManager) cont.getSystemService(
-//                            Context.TELEPHONY_SERVICE);
-//                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(cont);
-//                    String regId = pref.getString(m_config.temp_regId,"");
-//                    new LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont).execute();
+
                 }
                 else
                 {
@@ -723,8 +714,14 @@ public class OTPActivity extends Activity
                                     public void onClick(DialogInterface dialog, int which)
                                     {
                                         Log.e("Click of I m sure",", permission request is denied");
-                                        Intent intent = new Intent(cont, HomePageActivity.class);
-                                        startActivity(intent);
+
+                                        SharedPreferences.Editor editor= sharedpreferences.edit();
+                                        editor.putString(m_config.OTPValidationDone,"Yes");
+                                        editor.apply();
+                                        Log.e("--- "," loggedInUserInformation    "+loggedInUserInformation.getFB_USER_ID());
+                                        new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
+//                                        Intent intent = new Intent(cont, HomePageActivity.class);
+//                                        startActivity(intent);
                                     }
                                 }).show();
                     }
@@ -732,8 +729,14 @@ public class OTPActivity extends Activity
                     {
                         //user has denied with `Never Ask Again`
                         Log.e("Click of Never ask again",", permission request is denied");
-                        Intent intent = new Intent(cont, HomePageActivity.class);
-                        startActivity(intent);
+
+                        SharedPreferences.Editor editor= sharedpreferences.edit();
+                        editor.putString(m_config.OTPValidationDone,"Yes");
+                        editor.apply();
+                        Log.e("--- "," loggedInUserInformation    "+loggedInUserInformation.getFB_USER_ID());
+                        new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
+//                        Intent intent = new Intent(cont, HomePageActivity.class);
+//                        startActivity(intent);
                     }
                 }
                 break;
@@ -741,174 +744,3 @@ public class OTPActivity extends Activity
         }
     }
 }
-
-/* public RestAdapter getHostAdapter(String baseHost)
-    {
-        RestAdapter restAdapter = new RestAdapter.Builder().setEndpoint(baseHost).build();
-        return restAdapter;
-    }*/
-
-   /* public void requestOTP()
-    {
-        String url="http://apifv.foneverify.com/U2opia_Verify/v1.0/trial/sms";
-        Log.e("URL 1",url);
-
-        StringRequest stringRequest =  new StringRequest(Request.Method.POST, url, new Response.Listener<String>()
-        {
-            @Override
-            public void onResponse(String response)
-            {
-                //  Log.d(TAG, response);
-
-                Log.i("OTP Generated Response", response);
-                //Parse JSON Data
-                try
-                {
-                    JSONObject imageObject = new JSONObject(response);
-                    verfication_Id=imageObject.getString("verificationId")+"";
-                    mobileNumber=imageObject.getString("mobileNumber")+"";
-                    String responseCode=imageObject.getInt("responseCode")+"";
-                    String timeout=imageObject.getString("timeout")+"";
-                    String smsCLI=imageObject.getString("smsCLI")+"";
-                    Log.e("Verification code",""+verfication_Id);
-                }
-                catch(Exception e)
-                {
-                    e.printStackTrace();
-                }
-
-
-
-            }
-        }, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse(VolleyError error)
-            {
-                Log.e("Volley Error",error.toString());
-                error.printStackTrace();
-
-                //  Log.e(TAG, error.getLocalizedMessage());
-            }
-        })
-        {
-            @Override
-            protected Map<String,String> getParams()
-            {
-                Map<String,String> params = new HashMap<String, String>();
-                params.put("appKey",appkey);
-                params.put("customerId",customerId);
-                params.put("isoCountryCode","IN");
-                //params.put("msisdn","9987936766                                                                                                                                                                 ");
-                params.put("msisdn",mobileNumber);
-                params.put("Content-Type","application/x-www-form-urlencoded");
-                return params;
-            }
-
-            @Override
-            protected Response<String> parseNetworkResponse(NetworkResponse response)
-            {
-                if (response.headers == null)
-                {
-                    // cant just set a new empty map because the member is final.
-                    response = new NetworkResponse(
-                            response.statusCode,
-                            response.data,
-                            Collections.<String, String>emptyMap(), // this is the important line, set an empty but non-null map.
-                            response.notModified,
-                            response.networkTimeMs);
-                }
-                return super.parseNetworkResponse(response);
-            }
-        };
-        //     int socketTimeout = 5000;//5 seconds
-        //     RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        //     postRequest.setRetryPolicy(policy);
-        queue.add(stringRequest);
-
-
-
-
-
-
-
-
-//        postRequest = new StringRequest(Request.Method.POST, url,
-//                new Response.Listener<String>()
-//                {
-//                    @Override
-//                    public void onResponse(String response)
-//                    {
-//                        Log.i("OTP Generated Response", response);
-//                        //Parse JSON Data
-//                        try
-//                        {
-//                            JSONObject imageObject = new JSONObject(response);
-//                            verfication_Id=imageObject.getString("verificationId")+"";
-//                            mobileNumber=imageObject.getString("mobileNumber")+"";
-//                            String responseCode=imageObject.getInt("responseCode")+"";
-//                            String timeout=imageObject.getString("timeout")+"";
-//                            String smsCLI=imageObject.getString("smsCLI")+"";
-//                            Log.e("Verification code",""+verfication_Id);
-//                        }
-//                        catch(Exception e)
-//                        {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                },
-//                new Response.ErrorListener()
-//                {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error)
-//                    {
-//                        error.printStackTrace();
-//                        Log.e("Error",error+"");
-//                    }
-//                }
-//        ) {
-//            @Override
-//            protected Map<String,String> getParams()
-//            {
-//                Map<String,String> params = new HashMap<String, String>();
-//                params.put("appKey",appkey);
-//                params.put("customerId",customerId);
-//                params.put("isoCountryCode","IN");
-//                //params.put("msisdn","9987936766                                                                                                                                                                 ");
-//                params.put("msisdn",mobileNumber);
-//                params.put("Content-Type","application/x-www-form-urlencoded");
-//                return params;
-//            }
-//        };
-////        int socketTimeout = 5000;//5 seconds
-////        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-////        postRequest.setRetryPolicy(policy);
-//        queue.add(postRequest);
-    }*/
-
-//Retrofit Code for OTP Verification
-//  Creating a RestAdapter
-//                adapter = new RestAdapter.Builder()
-//                        .setEndpoint(newPrimaryUrl) //Setting the Root URL
-//                        .build(); //Finally building the adapter
-//
-//                //Creating an object of our api interface
-//                otpVerificatioApi = adapter.create(OtpVerificationApi.class);
-//
-//                otpVerificatioApi.getOtpVerification(new Callback<OtpVerifiedResponse>()
-//                {
-//                    @Override
-//                    public void success(OtpVerifiedResponse otpVerifiedResponse, retrofit.client.Response response)
-//                    {
-//                        Log.e("Response",response.getBody() +"   " +response.toString()+ response.getStatus());
-//                        Log.e("OtpVerifiedResponse", otpVerifiedResponse.getMobileNumber() +"   "
-//                                + otpVerifiedResponse.getVerificationStatus() + "      " +otpVerifiedResponse.getResponseCode() +  "    "
-//                                + otpVerifiedResponse.getVerificationId());
-//                    }
-//
-//                    @Override
-//                    public void failure(RetrofitError error) {
-//                        Log.e("OTP Verification Error",error.toString());
-//                        error.printStackTrace();
-//                    }
-//                });

@@ -246,27 +246,45 @@ public class GateCrasherAdapter extends BaseAdapter
             public void onClick(View v)
             {
 
+
                 Button b = (Button) v;
                 //Log.e("Click Of Button",b.getText()  + "   aa");
 
                 if(b.getText().toString().trim().equals("Request"))
                 {
+                    GenerikFunctions.sDialog(cont, "Sending Request for Party");
                     Log.e("PartyName  " , finalHolder.partyName.getText() + " Check Conditions here  aa"+"  "+ finalParty.getPartyName());
                     Long currentReqTime = System.currentTimeMillis();
                     String PartyId = finalParty.getPartyID();
+
+
                     try {
+
                         PartyTable partytable = m_config.mapper.load(PartyTable.class, PartyId);
-                        Log.e("party ID "," "+partytable.getPartyID());
+                        //Log.e("party ID "," "+partytable.getPartyID());
                         sendGCReqtoHost(currentReqTime, partytable, pc, b, cont);
                     }catch (Exception e){
-
+                        e.printStackTrace();
+                        GenerikFunctions.showToast(cont, "Unable to send request, Please try again after some time.");
+                        GenerikFunctions.hDialog();
                     }
 
                 }
                 else
                 {
-                    Log.e("Dont Allow request For  " , finalHolder.partyName.getText() + " aa");
+                    String stateparty = b.getText().toString().trim();
+                    if(stateparty.equals("Created")){
+                        GenerikFunctions.showToast(cont, "Your cannot send request to this party.");
+                    }else  if(stateparty.equals("Pending")){
+                        GenerikFunctions.showToast(cont, "Your have already send request to this party.");
+                    }else  if(stateparty.equals("Declined")){
+                        GenerikFunctions.showToast(cont, "Your request for this party have been declined.");
+                    }else  if(stateparty.equals("Approved")){
+                        GenerikFunctions.showToast(cont, "Your request for this party have been approved.");
+                    }
 
+                    Log.e("Dont Allow request For  " , finalHolder.partyName.getText() + " aa");
+                    GenerikFunctions.hDialog();
                 }
 
             }
@@ -386,22 +404,36 @@ public class GateCrasherAdapter extends BaseAdapter
         UserTable user = m_config.mapper.load(UserTable.class, FBID);
         List<PaidGCClass> PaidGC = new ArrayList<>();
         PaidGC = user.getPaidgc();
-        Log.e("user.getActiveParty()", " " + user.getActiveparty()+" "+(user.getActiveparty() == null));
+
+        //Log.e("user.getActiveParty()", " " + user.getActiveparty()+" "+(user.getActiveparty() == null));
 
         //check whether any party of user have been approved or not for the day
-        if (user.getActiveparty() == null) {
+        if (user.getActiveparty() == null)
+        {
             // if there is no active party
             Log.e("if there is no active party", "");
             new AWSPartyOperations.addPartiestoUserTable(user, party, cont, "Pending", "GateCrasherReq", pc, b).execute();
-        } else {
+        }
+        else
+        {
+            /**/
+            String Endblocktime = user.getActiveparty().get(0).getEndblocktime();
+            Calendar calendar1 = Calendar.getInstance();
+            calendar1.setTimeInMillis(Long.parseLong(Endblocktime));
+            String PartyEndBlockTime = Validations.getMonthNo(calendar1.get(Calendar.MONTH)) + "/" + calendar1.get(Calendar.DAY_OF_MONTH) + "/" + calendar1.get(Calendar.YEAR) + " " + Validations.showTime(calendar1.get(Calendar.HOUR_OF_DAY), calendar1.get(Calendar.MINUTE));
+/**/
             //if there is an active party
             Log.e("if there is an active party", "");
-            //check for Paid statuss
-            if (PaidGC == null) {
+            //check for Paid status
+            if (PaidGC == null)
+            {
+
+
+
                 //UnPaidUser
                 Log.e("UnPaid User","");
                 // if there is any active party
-                if (currentReqTime > Long.parseLong(user.getActiveparty().get(0).getEndblocktime())) {
+                if (currentReqTime > Long.parseLong(Endblocktime)) {
                     //if currentTime is greater than approved party BlockEndTime
                     Log.e("if there is any active party ---- ", "if currentTime is greater than approved party BlockEndTime");
                     new AWSPartyOperations.addPartiestoUserTable(user, party, cont, "Pending", "GateCrasherReq", pc, b).execute();
@@ -409,7 +441,8 @@ public class GateCrasherAdapter extends BaseAdapter
                 } else {
                     //if currentTime is less than approved party BlockEndTime
                     Log.e("if there is any active party ---- ", "if currentTime is less than approved party BlockEndTime");
-                    GenerikFunctions.showToast(cont, "You are already approved for another party");
+                    GenerikFunctions.showToast(cont, "You are already approved for another party. You have been blocked till "+PartyEndBlockTime);
+                    GenerikFunctions.hDialog();
                 }
 
 
@@ -419,11 +452,12 @@ public class GateCrasherAdapter extends BaseAdapter
                 String SubscriptionTime = PaidGC.get(0).getSubscriptiondate();
                 if (currentReqTime > Long.parseLong(SubscriptionTime)) {
                     GenerikFunctions.showToast(cont, "Your subscription has been expired");
+                    GenerikFunctions.hDialog();
 
                 } else {
                     //Within subscription Time
                     // if there is any active party
-                    if (currentReqTime > Long.parseLong(user.getActiveparty().get(0).getEndblocktime())) {
+                    if (currentReqTime > Long.parseLong(Endblocktime)) {
                         //if currentTime is greater than approved party BlockEndTime
                         Log.e("if there is any active party ---- ", "if currentTime is greater than approved party BlockEndTime");
                         new AWSPartyOperations.addPartiestoUserTable(user, party, cont, "Pending", "GateCrasherReq", pc, b).execute();
@@ -431,7 +465,8 @@ public class GateCrasherAdapter extends BaseAdapter
                     } else {
                         //if currentTime is less than approved party BlockEndTime
                         Log.e("if there is any active party ---- ", "if currentTime is less than approved party BlockEndTime");
-                        GenerikFunctions.showToast(cont, "You are already approved for another party");
+                        GenerikFunctions.showToast(cont, "You are already approved for another party. You have been blocked till "+PartyEndBlockTime);
+                        GenerikFunctions.hDialog();
                     }
 
                 }

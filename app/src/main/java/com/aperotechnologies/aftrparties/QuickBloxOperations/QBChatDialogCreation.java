@@ -143,6 +143,7 @@ public class QBChatDialogCreation {
 
     public static void updateGroupChat(final String PartyName, String DialogID, final String GCQBID, final String GCFBID, final String PartyID, final Context cont)
     {
+        //578382b1a28f9ace8100000b
 
         Log.e("GCQBID"," "+GCQBID+" DialogID "+DialogID+" ");
 

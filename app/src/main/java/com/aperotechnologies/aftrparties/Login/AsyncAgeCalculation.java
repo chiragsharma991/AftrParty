@@ -160,6 +160,12 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                         public void run()
                         {
                             GenerikFunctions.showToast(cont, "Invalid age");
+
+                            if(RegistrationActivity.reg_pd.isShowing())
+                            {
+                                RegistrationActivity.reg_pd.dismiss();
+                            }
+
                         }
                     });
                 }
@@ -174,6 +180,10 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                             @Override
                             public void run()
                             {
+                                if(RegistrationActivity.reg_pd.isShowing())
+                                {
+                                    RegistrationActivity.reg_pd.dismiss();
+                                }
                                 GenerikFunctions.showToast(cont, "Face book friends count is less than " + ConstsCore.FB_FRIENDS);
                             }
                         });
@@ -188,6 +198,10 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                                 @Override
                                 public void run()
                                 {
+                                    if(RegistrationActivity.reg_pd.isShowing())
+                                    {
+                                        RegistrationActivity.reg_pd.dismiss();
+                                    }
                                     GenerikFunctions.showToast(cont, "LI conn count is less than " + ConstsCore.LI_CONNECTIONS);
                                 }
                             });
@@ -229,6 +243,7 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                 {
                     Log.e("Users FB Pic not Avail","Yes");
                     url = "";
+
 //                    if( loggedInUserInformation.getLI_USER_PROFILE_PIC() == null || loggedInUserInformation.equals("") || loggedInUserInformation.getLI_USER_PROFILE_PIC().equals("N/A") )
 //                    {
 //                        url = "";
@@ -243,7 +258,7 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                     url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
                 }
 
-                // Log.e("URL",url);
+                 Log.e("URL in async",url);
                 if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
                 {
                     // Log.e("Before Picasso play service","yes");
@@ -258,13 +273,20 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
 
                             if(faces>0)
                             {
-                                Log.e("There is face in pic",faces+"");
+                              //  Log.e("There is face in pic",faces+"");
                                 Log.e("GO for OTP","Yes");
                                 //Set  Face detect flag here to true
                                 SharedPreferences.Editor editorq = sharedPreferences.edit();
                                 editorq.putString(m_config.FaceDetectDone,"Yes");
                                 editorq.apply();
 
+                                Log.e("Here at OTP Activity from Async","Yes");
+
+                                if(RegistrationActivity.reg_pd.isShowing())
+                                {
+                                    RegistrationActivity.reg_pd.dismiss();
+                                }
+                                faces = 0;
                                 Intent intent = new Intent(cont,OTPActivity.class);
                                 cont.startActivity(intent);
 
@@ -273,6 +295,11 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                             }
                             else
                             {
+                                faces = 0;
+                                if(RegistrationActivity.reg_pd.isShowing())
+                                {
+                                    RegistrationActivity.reg_pd.dismiss();
+                                }
                                 //Set  Face detect flag here to false
                                 Log.e("There is no face in pic","");
                                 SharedPreferences.Editor editorq = sharedPreferences.edit();
@@ -280,8 +307,6 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                                 editorq.apply();
                                 GenerikFunctions.showToast(cont,"There is no face in your profile pic");
                             }
-                            m_config.pDialog.dismiss();
-                            m_config.pDialog.cancel();
 
                           }
 
@@ -305,6 +330,10 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
             }
             catch(Exception e)
             {
+                if(RegistrationActivity.reg_pd.isShowing())
+                {
+                    RegistrationActivity.reg_pd.dismiss();
+                }
                 e.printStackTrace();
             }
         }

@@ -154,7 +154,6 @@ public class ChatAdapter extends BaseAdapter {
     private void setAlignment(ViewHolder holder, boolean isOutgoing) {
         if (!isOutgoing) {
 
-
             LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) holder.contentWithBG.getLayoutParams();
             layoutParams.gravity = Gravity.LEFT;
             holder.contentWithBG.setLayoutParams(layoutParams);
@@ -167,6 +166,7 @@ public class ChatAdapter extends BaseAdapter {
             layoutParams = (LinearLayout.LayoutParams) holder.txtInfo.getLayoutParams();
             layoutParams.gravity = Gravity.LEFT;
             holder.txtInfo.setLayoutParams(layoutParams);
+
             if (holder.txtMessage != null) {
                 holder.contentWithBG.setBackgroundResource(R.drawable.incoming_message_bg);
                 layoutParams = (LinearLayout.LayoutParams) holder.txtMessage.getLayoutParams();

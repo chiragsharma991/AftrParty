@@ -28,6 +28,8 @@ import com.aperotechnologies.aftrparties.Login.AsyncAgeCalculation;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.Login.LoginTableColumns;
 import com.aperotechnologies.aftrparties.Login.OTPActivity;
+import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
+import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
@@ -133,7 +135,7 @@ public  class LoginValidations
         {
             profilePic = FBprofilePic;
         }
-        Log.e("fb token", " " + getFBAccessToken().getToken());
+       // Log.e("fb token", " " + getFBAccessToken().getToken());
 
         Log.e("for very first time, create session","");
         new createSession(getFBAccessToken().getToken(), profilePic, cont).execute();
@@ -202,6 +204,7 @@ public  class LoginValidations
         @Override
         protected String doInBackground(String... params)
         {
+
 
             Thread t = new Thread(new loginWithFbQuickBloxLooper(accessToken, avatarUrl, cont));
             t.start();
@@ -366,31 +369,49 @@ public  class LoginValidations
             final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
             final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
 
-            QBAuth.createSession(new QBEntityCallback() {
+            QBAuth.createSession(new QBEntityCallback()
+            {
                 @Override
-                public void onSuccess(Object o, Bundle bundle) {
+                public void onSuccess(Object o, Bundle bundle)
+                {
                     Log.e("createSession", "onsuccess");
 
-                    try {
+                    try
+                    {
                         String qbtoken = QBAuth.getBaseService().getToken();
                         Log.e("qbtoken ", qbtoken);
-                    } catch (Exception e) {
+                    }
+                    catch (Exception e)
+                    {
 
                     }
 
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    try {
+                    try
+                    {
                         editor.putString(m_config.SessionToken, BaseService.getBaseService().getToken());
                         editor.putLong("SessionExpirationDate", BaseService.getBaseService().getTokenExpirationDate().getTime());
 
 
-                    } catch (BaseServiceException e) {
+                    }
+                    catch (BaseServiceException e)
+                    {
                         e.printStackTrace();
 
                         Handler h = new Handler(cont.getMainLooper());
-                        h.post(new Runnable() {
+                        h.post(new Runnable()
+                        {
                             @Override
-                            public void run() {
+                            public void run()
+                            {
+                                if(RegistrationActivity.reg_pd.isShowing())
+                                {
+                                    RegistrationActivity.reg_pd.dismiss();
+                                }
+                                if(Welcome.wl_pd.isShowing())
+                                {
+                                    Welcome.wl_pd.dismiss();
+                                }
                                 GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                             }
                         });
@@ -414,16 +435,21 @@ public  class LoginValidations
                         @Override
                         public void run()
                         {
+                            if(RegistrationActivity.reg_pd.isShowing())
+                            {
+                                RegistrationActivity.reg_pd.dismiss();
+                            }
+                            if(Welcome.wl_pd.isShowing())
+                            {
+                                Welcome.wl_pd.dismiss();
+                            }
                             GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                         }
                     });
 
-                    GenerikFunctions.hideDialog(m_config.pDialog);
+                   // GenerikFunctions.hideDialog(m_config.pDialog);
                 }
-
             });
-
-
 
             myLooper = Looper.myLooper();
             Looper.loop();
@@ -464,6 +490,7 @@ public  class LoginValidations
                         @Override
                         public void onSuccess(QBUser user, Bundle args)
                         {
+
                             Log.e("Facebook login","Success"+" ");
                             Log.e("user",""+user);
                             user.setFullName(sharedPreferences.getString(m_config.Entered_User_Name,""));
@@ -472,7 +499,28 @@ public  class LoginValidations
                             editor.apply();
                             new AWSLoginOperations.addUserQuickBloxId(cont, user, avatarUrl).execute();
 
-
+                            Handler h = new Handler(cont.getMainLooper());
+                            h.post(new Runnable()
+                            {
+                                @Override
+                                public void run()
+                                {
+                                    if(RegistrationActivity.reg_pd!=null)
+                                    {
+                                        if(RegistrationActivity.reg_pd.isShowing())
+                                        {
+                                            Log.e("PD is showing from ","loginWithFbQuickBloxLooper");
+                                        }
+                                    }
+                                    if(Welcome.wl_pd!=null)
+                                    {
+                                        if(Welcome.wl_pd.isShowing())
+                                        {
+                                            Log.e("PD is showing from ","loginWithFbQuickBloxLooper");
+                                        }
+                                    }
+                                }
+                            });
                         }
 
                         @Override
@@ -486,11 +534,26 @@ public  class LoginValidations
                                 @Override
                                 public void run()
                                 {
+                                    if(RegistrationActivity.reg_pd!=null)
+                                    {
+                                        if(RegistrationActivity.reg_pd.isShowing())
+                                        {
+                                            RegistrationActivity.reg_pd.dismiss();
+                                        }
+                                    }
+                                    if(Welcome.wl_pd!=null)
+                                    {
+                                        if(Welcome.wl_pd.isShowing())
+                                        {
+                                            Welcome.wl_pd.dismiss();
+                                        }
+                                    }
+
                                     GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                                 }
                             });
 
-                            GenerikFunctions.hideDialog(m_config.pDialog);
+                          //  GenerikFunctions.hideDialog(m_config.pDialog);
                         }
                     });
 
@@ -503,12 +566,10 @@ public  class LoginValidations
 
     static class uploadprofilePicLooper implements Runnable
     {
-
         private Looper myLooper;
         Context cont;
         QBUser user;
         String avatarUrl;
-
 
         public uploadprofilePicLooper(QBUser user, String avatarUrl, Context cont)
         {
@@ -545,7 +606,6 @@ public  class LoginValidations
                     }
                     else
                     {
-
                         // Initialise ChatService
                         try
                         {
@@ -563,7 +623,6 @@ public  class LoginValidations
                                 //chatLogin(user, cont);
                                 new chatLogin(user, cont).execute();
                             }
-
                         }
                         catch (Exception e)
                         {
@@ -575,24 +634,57 @@ public  class LoginValidations
                                 @Override
                                 public void run()
                                 {
+                                    if(RegistrationActivity.reg_pd!=null)
+                                    {
+                                        if(RegistrationActivity.reg_pd.isShowing())
+                                        {
+                                            RegistrationActivity.reg_pd.dismiss();
+                                        }
+                                    }
+                                    if(Welcome.wl_pd!=null)
+                                    {
+                                        if(Welcome.wl_pd.isShowing())
+                                        {
+                                            Welcome.wl_pd.dismiss();
+                                        }
+                                    }
                                     GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                                 }
                             });
 
-                            GenerikFunctions.hideDialog(m_config.pDialog);
+                           // GenerikFunctions.hideDialog(m_config.pDialog);
                         }
                     }
-
-
                 }
 
                 @Override
                 public void onError(QBResponseException errors)
                 {
-
+                    Handler h = new Handler(cont.getMainLooper());
+                    h.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            if(RegistrationActivity.reg_pd!=null)
+                            {
+                                if(RegistrationActivity.reg_pd.isShowing())
+                                {
+                                    RegistrationActivity.reg_pd.dismiss();
+                                }
+                            }
+                            if(Welcome.wl_pd!=null)
+                            {
+                                if(Welcome.wl_pd.isShowing())
+                                {
+                                    Welcome.wl_pd.dismiss();
+                                }
+                            }
+                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                        }
+                    });
                 }
             });
-
 
             myLooper = Looper.myLooper();
             Looper.loop();
@@ -641,16 +733,33 @@ public  class LoginValidations
                     Log.e("ChatServicelogin","OnError "+e.toString());
                     e.printStackTrace();
 
+
+
+
                     Handler h = new Handler(cont.getMainLooper());
                     h.post(new Runnable()
                     {
                         @Override
                         public void run()
                         {
+                            if(RegistrationActivity.reg_pd!=null)
+                            {
+                                if(RegistrationActivity.reg_pd.isShowing())
+                                {
+                                    RegistrationActivity.reg_pd.dismiss();
+                                }
+                            }
+                            if(Welcome.wl_pd!=null)
+                            {
+                                if(Welcome.wl_pd.isShowing())
+                                {
+                                    Welcome.wl_pd.dismiss();
+                                }
+                            }
                             GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
-                            GenerikFunctions.hideDialog(m_config.pDialog);
                         }
                     });
+
 
 
 
@@ -735,11 +844,25 @@ public  class LoginValidations
                         @Override
                         public void run()
                         {
+                            if(RegistrationActivity.reg_pd!=null)
+                            {
+                                if(RegistrationActivity.reg_pd.isShowing())
+                                {
+                                    RegistrationActivity.reg_pd.dismiss();
+                                }
+                            }
+                            if(Welcome.wl_pd!=null)
+                            {
+                                if(Welcome.wl_pd.isShowing())
+                                {
+                                    Welcome.wl_pd.dismiss();
+                                }
+                            }
                             GenerikFunctions.showToast(cont,"Login Failed, Please try again after some time");
                         }
                     });
 
-                    GenerikFunctions.hideDialog(m_config.pDialog);
+                    //GenerikFunctions.hideDialog(m_config.pDialog);
 
                 }
             });
@@ -795,8 +918,6 @@ public  class LoginValidations
         });
     }
 
-
-
    /* public static void updateQBProfileImage(String FBID, final String FBProfilePicUrl){
 
         try {
@@ -822,7 +943,6 @@ public  class LoginValidations
 
     }*/
 
-
     public static void FaceDetect(final Context cont)
     {
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
@@ -838,7 +958,7 @@ public  class LoginValidations
             Log.e("URL for FB",url+"");
             if(url.equals(null) || url.equals("") || url.equals("N/A"))
             {
-                Log.e("Users FB Pic not Avail","Yes");
+              // Log.e("Users FB Pic not Avail","Yes");
                 url = "";
             }
             else
@@ -873,12 +993,39 @@ public  class LoginValidations
                         {
                             //Set  Face detect flag here to false
                             Log.e("There is no face in pic","");
+                            Handler h = new Handler(cont.getMainLooper());
+                            h.post(new Runnable()
+                            {
+                                @Override
+                                public void run()
+                                {
+                                    if(RegistrationActivity.reg_pd!=null)
+                                    {
+                                        if(RegistrationActivity.reg_pd.isShowing())
+                                        {
+                                            RegistrationActivity.reg_pd.dismiss();
+                                        }
+                                    }
+                                    if(Welcome.wl_pd!=null)
+                                    {
+                                        if(Welcome.wl_pd.isShowing())
+                                        {
+                                            Welcome.wl_pd.dismiss();
+                                        }
+                                    }
+                                }
+                            });
+//                            if(RegistrationActivity.reg_pd.isShowing())
+//                            {
+//                                RegistrationActivity.reg_pd.dismiss();
+//                            }
+
                             SharedPreferences.Editor editorq = sharedPreferences.edit();
                             editorq.putString(m_config.FaceDetectDone,"No");
                             editorq.apply();
                             GenerikFunctions.showToast(cont,"There is no face in your profile pic");
                         }
-                        GenerikFunctions.hideDialog(m_config.pDialog);
+                       // GenerikFunctions.hideDialog(m_config.pDialog);
                     }
 
                     @Override
@@ -929,9 +1076,27 @@ public  class LoginValidations
                 }
                 else
                 {
-                    // new AWSLoginOperations.addUserRegStatus(cont,loggedInUserInformation).execute();///only for testing
+                   //  new AWSLoginOperations.addUserRegStatus(cont,loggedInUserInformation).execute();///only for testing
 
                     //Uncomment this later
+
+
+                    if(RegistrationActivity.reg_pd!=null)
+                    {
+                        if(RegistrationActivity.reg_pd.isShowing())
+                        {
+                            RegistrationActivity.reg_pd.dismiss();
+                        }
+                    }
+                    if(Welcome.wl_pd!=null)
+                    {
+                        if(Welcome.wl_pd.isShowing())
+                        {
+                            Welcome.wl_pd.dismiss();
+                        }
+                    }
+                    Log.e("Here at OTP Activity","Yes");
+
                     Intent intent = new Intent(cont,OTPActivity.class);
                     cont.startActivity(intent);
                 }
@@ -947,9 +1112,4 @@ public  class LoginValidations
             new AsyncAgeCalculation(cont).execute();
         }
     }
-
-
-
-
-
 }

@@ -12,6 +12,43 @@
     android:id="@+id/layout_parent_login"
     tools:context=".Login.LoginActivity">
 
+    <!-- Toolbar for Login-->
+    <LinearLayout
+        android:visibility="visible"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ll_reg_toolbar"   >
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/home_toolbar"
+            android:layout_marginLeft="-16dp"
+            android:layout_alignParentTop="true"
+            android:background="@color/colorPrimaryDark"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:minHeight="?attr/actionBarSize"   >
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="44dp"
+                android:id="@+id/toolbar_content"   >
+
+
+                <TextView
+                    android:textSize="20sp"
+                    android:layout_centerInParent="true"
+                    android:text="REGISTRATION"
+                    android:id="@+id/activity_title"
+                    android:textColor="#ffffff"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"   />
+
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
+    </LinearLayout>
+
        <LinearLayout
            android:id="@+id/line_login"
            android:layout_width="fill_parent"
@@ -19,18 +56,29 @@
            android:layout_gravity="center_vertical"
            android:layout_centerVertical="true"
            android:orientation="vertical"
+           android:layout_below="@+id/ll_reg_toolbar"
            android:focusableInTouchMode="true">
 
-           <ImageView
+           <!--<ImageView
                android:layout_height="200dp"
                android:layout_width="match_parent"
                android:layout_marginLeft="20dp"
                android:layout_marginRight="20dp"
                android:layout_gravity="center_horizontal"
                android:background="@drawable/ic_launcher"
-               android:id="@+id/img_app_logo_one"/>
+               android:id="@+id/img_app_logo_one"/>-->
 
+           <TextView
+               android:layout_centerInParent="true"
+               android:layout_height="wrap_content"
+               android:layout_width="wrap_content"
+               android:layout_gravity="center_horizontal"
+               android:text="Aftrparties"
+               android:textSize="50dp"/>
 
+           <View
+               android:layout_width="match_parent"
+               android:layout_height="10dp"/>
 
 
            <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed

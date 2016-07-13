@@ -21,6 +21,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.aperotechnologies.aftrparties.Host.HostActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
@@ -28,6 +29,10 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.FacebookSdk;
+import com.linkedin.platform.LISessionManager;
+import com.linkedin.platform.errors.LIAuthError;
+import com.linkedin.platform.listeners.AuthListener;
+import com.linkedin.platform.utils.Scope;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +53,7 @@ public class SplashActivity extends Activity {
     SharedPreferences sharedpreferences;
     Configuration_Parameter m_config;
     Context cont = this;
+    String LIToken;
 
 //    static final String APP_ID = "40454";//"34621";
 //    static final String AUTH_KEY = "GXzMGfcx-pAQOBP";//"sYpuKrOrGT4pG6d";//"q6aK9sm6GCSmtru";
@@ -82,8 +88,7 @@ public class SplashActivity extends Activity {
 //        QBSettings.getInstance().init(getApplicationContext(), APP_ID, AUTH_KEY, AUTH_SECRET);
 //        QBSettings.getInstance().setAccountKey(ACCOUNT_KEY);
 
-        String value ="How's u?";
-        Log.e("---- "," "+ Html.escapeHtml(value));
+
 
 
         Thread timer = new Thread()
@@ -135,6 +140,7 @@ public class SplashActivity extends Activity {
                         Intent intent = new Intent(cont,Welcome.class);
                         cont.startActivity(intent);
                     }
+
                 }
             }
         };
@@ -156,6 +162,55 @@ public class SplashActivity extends Activity {
     protected void onPause() {
         super.onPause();
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        //For LI
+        LISessionManager.getInstance(getApplicationContext()).onActivityResult(this, requestCode, resultCode, data);
+        Log.i("Request Code phase 2", requestCode + "   " + resultCode + "  " + data);
+        Log.e("Token from start", LIToken + "");
+        if (LIToken == null)
+        {
+            Log.e("LI TOken Null","Yes");
+        }
+    }
+
+    private static Scope buildScope()
+    {
+        return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
+    }
+
+    public  void startLinkedInProcess()
+    {
+        Log.e("In startLinkedInProcess","Yes");
+        LISessionManager.getInstance(cont).init((Activity)cont, buildScope(), new AuthListener()
+        {
+            @Override
+            public void onAuthSuccess()
+            {
+                LIToken = LISessionManager.getInstance(cont).getSession().getAccessToken().getValue().toString();
+                Log.e("LI Token",LIToken+"");
+                //  GenerikFunctions.showToast(cont,"success   Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
+            }
+
+            @Override
+            public void onAuthError(LIAuthError error)
+            {
+                Log.e("LI Login Error",error.toString()+"");
+                if(error.toString().trim().contains("USER_CANCELLED"))
+                {
+
+                    startLinkedInProcess();
+                }
+                else //if(error.toString().trim().contains("UNKNOWN_ERROR"))
+                {
+                    Log.e("Inside Else","Yes");
+                    //GenerikFunctions.showToast(cont, "failed  linked in login " + error.toString());
+                }
+            }
+        }, true);
     }
 
 }

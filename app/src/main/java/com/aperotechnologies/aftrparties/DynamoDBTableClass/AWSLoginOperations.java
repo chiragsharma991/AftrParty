@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.EditText;
@@ -127,7 +128,7 @@ public class AWSLoginOperations {
                     user.setProfileStatus("N/A");
                     user.setDeviceToken("N/A");
                     user.setRegistrationStatus("No");
-                    user.setcurrentmaskstatus("No");
+                    user.setcurrentmaskstatus("Mask");
                     user.setImageflag("No");
 
                     Log.e("AWS FBUser inserting ", " " + user.toString());
@@ -146,14 +147,14 @@ public class AWSLoginOperations {
                     selUserData.setName(Name);
                     selUserData.setEmail(Email);
                     selUserData.setPhoneNumber(PhoneNumber);
-                    ProfilePicUrlList.remove(0);
+                    //ProfilePicUrlList.remove(0);
                     if(selUserData.getImageflag().equals("Yes"))
                     {
 
                     }
                     else
                     {
-                        ProfilePicUrlList.add(0, FBProfilePicUrl);
+                        ProfilePicUrlList.set(0, FBProfilePicUrl);
 
                         String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                                 + LoginTableColumns.FB_USER_PROFILE_PIC  + " = '" + FBProfilePicUrl + "'"
@@ -172,6 +173,21 @@ public class AWSLoginOperations {
             }
             catch (Exception ex)
             {
+
+
+                Handler h = new Handler(cont.getMainLooper());
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        if(RegistrationActivity.reg_pd.isShowing())
+                        {
+                            RegistrationActivity.reg_pd.dismiss();
+                        }
+
+                    }
+                });
                 ex.printStackTrace();
                 value = false;
 
@@ -210,14 +226,17 @@ public class AWSLoginOperations {
                 }
                 else
                 {
-                    Welcome.startLinkedInProcess();
+                   // Welcome.startLinkedInProcess();
                 }
             }
             else
             {
 
                 Log.e("", "Error retrieving data" +m_config.pDialog.getContext());
-                GenerikFunctions.hideDialog(m_config.pDialog);
+                if(RegistrationActivity.reg_pd.isShowing())
+                {
+                    RegistrationActivity.reg_pd.dismiss();
+                }
                 GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
             }
 
@@ -293,19 +312,26 @@ public class AWSLoginOperations {
             {
                 Log.e("", "Error retrieving data");
                 ex.printStackTrace();
-//                GenerikFunctions.hideDialog(m_config.pDialog);
-//                GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                Handler h = new Handler(cont.getMainLooper());
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        if(RegistrationActivity.reg_pd.isShowing())
+                        {
+                            RegistrationActivity.reg_pd.dismiss();
+                        }
+                    }
+                });
                 value = false;
             }
 
-            finally {
-
+            finally
+            {
                 return value;
-
             }
-
         }
-
 
         @Override
         protected void onPreExecute()
@@ -330,7 +356,10 @@ public class AWSLoginOperations {
             else
             {
                 Log.e("", "Error retrieving data");
-                GenerikFunctions.hideDialog(m_config.pDialog);
+                if(RegistrationActivity.reg_pd.isShowing())
+                {
+                    RegistrationActivity.reg_pd.dismiss();
+                }
                 GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
             }
         }
@@ -350,7 +379,6 @@ public class AWSLoginOperations {
             this.loggedInUserInfo = loggedInUserInfo;
             m_config = Configuration_Parameter.getInstance();
 
-            m_config.pDialog = new ProgressDialog(cont);
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         }
 
@@ -374,6 +402,20 @@ public class AWSLoginOperations {
 
             }
             catch (Exception ex) {
+                Handler h = new Handler(cont.getMainLooper());
+
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        if(RegistrationActivity.reg_pd.isShowing())
+                        {
+                            RegistrationActivity.reg_pd.dismiss();
+                        }
+                    }
+                });
+
                 Log.e("", "Error retrieving data");
                 ex.printStackTrace();
 //                GenerikFunctions.hideDialog(m_config.pDialog);
@@ -382,7 +424,8 @@ public class AWSLoginOperations {
 
             }
 
-            finally {
+            finally
+            {
 
                 return value;
             }
@@ -406,7 +449,10 @@ public class AWSLoginOperations {
             else
             {
                 Log.e("", "Error retrieving data");
-                GenerikFunctions.hideDialog(m_config.pDialog);
+                if(RegistrationActivity.reg_pd.isShowing())
+                {
+                    RegistrationActivity.reg_pd.dismiss();
+                }
                 GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
             }
         }
@@ -429,7 +475,6 @@ public class AWSLoginOperations {
             this.avatarUrl = avatarUrl;
             m_config = Configuration_Parameter.getInstance();
 
-            m_config.pDialog = new ProgressDialog(cont);
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         }
 
@@ -442,7 +487,8 @@ public class AWSLoginOperations {
             String FacebookID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
             String QuickBloxID = sharedPreferences.getString(m_config.QuickBloxID,"");
 
-            try{
+            try
+            {
                 UserTable selUserData = m_config.mapper.load(UserTable.class, FacebookID);
                 Log.e("selUserClass", " " + selUserData);
                 Log.e("", "Inserting QuickBloxId");
@@ -454,7 +500,20 @@ public class AWSLoginOperations {
                 value = true;
 
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
+                Handler h = new Handler(cont.getMainLooper());
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        if(RegistrationActivity.reg_pd.isShowing())
+                        {
+                            RegistrationActivity.reg_pd.dismiss();
+                        }
+                    }
+                });
                 Log.e("", "Error retrieving data");
                 ex.printStackTrace();
 //                GenerikFunctions.hideDialog(m_config.pDialog);
@@ -486,8 +545,12 @@ public class AWSLoginOperations {
             }
             else
             {
+                if(RegistrationActivity.reg_pd.isShowing())
+                {
+                    RegistrationActivity.reg_pd.dismiss();
+                }
                 Log.e("", "Error retrieving data");
-                GenerikFunctions.hideDialog(m_config.pDialog);
+             //   GenerikFunctions.hideDialog(m_config.pDialog);
                 GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
             }
         }
@@ -505,7 +568,6 @@ public class AWSLoginOperations {
             this.cont = cont;
             this.loggedInUserInfo = loggedInUserInfo;
             m_config = Configuration_Parameter.getInstance();
-            m_config.pDialog = new ProgressDialog(cont);
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         }
 
@@ -517,6 +579,8 @@ public class AWSLoginOperations {
 
             try
             {
+                Log.e("--111111- "," loggedInUserInfo    "+loggedInUserInfo.getFB_USER_ID());
+
                 UserTable selUserData = m_config.mapper.load(UserTable.class, FacebookID);
                 Log.e("", "Inserting RegistrationStatus");
                 if (selUserData.getRegistrationStatus().equals("No"))
@@ -537,6 +601,19 @@ public class AWSLoginOperations {
 //                GenerikFunctions.hideDialog(m_config.pDialog);
 //                GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                 value = false;
+                Handler h = new Handler(cont.getMainLooper());
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        if(RegistrationActivity.reg_pd.isShowing())
+                        {
+                            RegistrationActivity.reg_pd.dismiss();
+                        }
+                        GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                    }
+                });
 
 
             }
@@ -573,7 +650,19 @@ public class AWSLoginOperations {
             else
             {
                 Log.e("", "Error retrieving data");
-                GenerikFunctions.hideDialog(m_config.pDialog);
+               // GenerikFunctions.hideDialog(m_config.pDialog);
+                Handler h = new Handler(cont.getMainLooper());
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        if(RegistrationActivity.reg_pd.isShowing())
+                        {
+                            RegistrationActivity.reg_pd.dismiss();
+                        }
+                    }
+                });
                 GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
             }
         }

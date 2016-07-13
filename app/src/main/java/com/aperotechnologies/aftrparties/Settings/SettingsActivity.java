@@ -86,6 +86,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+
 import static com.aperotechnologies.aftrparties.Reusables.Validations.decodeFile;
 import static com.aperotechnologies.aftrparties.Reusables.Validations.getImageUri;
 import static com.aperotechnologies.aftrparties.Reusables.Validations.getOutputMediaFileUri;
@@ -105,10 +107,10 @@ public class SettingsActivity extends Activity
     //    RangeSeekBar rangeSeekBar;
     SeekBar SeekBar;
     SeekbarWithIntervals seekbarWithIntervals = null;
-    String seekbarVal = "1";
+    String seekbarVal = "";
     Spinner spn_Gender, spn_mask;
     Button img_editSettings;
-    String selected_Gender, selected_maskStatus = "mask";
+    String selected_Gender, selected_maskStatus = "Mask";
     String FacebookID;
     int selectedDistVal = 1;
     Uri fileUri;
@@ -123,7 +125,7 @@ public class SettingsActivity extends Activity
     String user_name,user_gender,user_status,user_mask_unmask,user_profilepic,user_age;
     String[] imagesArray;
     Handler h;
-    ProgressDialog progressDialog;
+    //ProgressDialog progressDialog;
 
     DBHelper helper;
     SQLiteDatabase sqldb;
@@ -132,13 +134,18 @@ public class SettingsActivity extends Activity
     String ImageFlag;
     RecyclerView recyclerView;
     Activity act = this;
+
+    public  static ProgressDialog sett_pd;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        cont  = this;
         m_config = Configuration_Parameter.getInstance();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
+        cont  = this;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
        // m_config.pDialog = new ProgressDialog(cont);
 
@@ -155,27 +162,20 @@ public class SettingsActivity extends Activity
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(SettingsActivity.this, LinearLayoutManager.HORIZONTAL, false));
 
-        //txtrangeseekbarval = (TextView) findViewById(R.id.txtrangeseekbarval);
-        txtseekbarval = (TextView) findViewById(R.id.txtseekbarval);
-        //rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeseekbar);
-        SeekBar = (SeekBar) findViewById(R.id.seekbar);
-        //images = (GridView)findViewById(R.id.imggrid);
-     //   lineimg = (LinearLayout)findViewById(R.id.lineimages);
 
-        //List<String> seekbarIntervals = getIntervals();
-        //getSeekbarWithIntervals().setIntervals(seekbarIntervals);
+        txtseekbarval = (TextView) findViewById(R.id.txtseekbarval);
+
+        SeekBar = (SeekBar) findViewById(R.id.seekbar);
+
         img_editSettings = (Button) findViewById(R.id.img_editSettings);
         faceOverlayView =(FaceOverlayView) findViewById(R.id.face_overlay);
 
-        progressDialog = new ProgressDialog(SettingsActivity.this);
-        progressDialog.setMessage("Loading....");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+        sett_pd = new ProgressDialog(this);
 
         // Spinner for Mask/UnMask
         spn_mask = (Spinner) findViewById(R.id.spn_maskStatus);
         List<String> maskList = new ArrayList<String>();
-        maskList.add("Select Mask Status");
+        //maskList.add("Select Mask Status");
         maskList.add("Mask");
         maskList.add("Unmask");
 
@@ -232,7 +232,7 @@ public class SettingsActivity extends Activity
 
         /*1111*/
 
-    final int stepSize = 1;
+    final int stepSize = 10;
     SeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
     {
         @Override
@@ -413,9 +413,9 @@ public class SettingsActivity extends Activity
         {
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(edt_usermsgStatus.getWindowToken(), 0);
-            m_config.pDialog.setMessage("Updating User");
-            m_config.pDialog.setCancelable(false);
-            m_config.pDialog.show();
+//            m_config.pDialog.setMessage("Updating User");
+//            m_config.pDialog.setCancelable(false);
+//            m_config.pDialog.show();
             editSettings();
         }
     });
@@ -435,6 +435,7 @@ public class SettingsActivity extends Activity
             }
             else
             {
+                selected_maskStatus = "Mask";
             }
         }
         @Override
@@ -462,7 +463,6 @@ public class SettingsActivity extends Activity
         adapter.notifyDataSetChanged();
 
 
-
         for(int i=0;i<validPics.size();i++)
         {
           //  Log.e("Inside for",i + "   " + validPics.get(i));
@@ -486,11 +486,11 @@ public class SettingsActivity extends Activity
             }
         }
 
-        if(progressDialog.isShowing())
-        {
-            progressDialog.dismiss();
-            progressDialog.cancel();
-        }
+//        if(progressDialog.isShowing())
+//        {
+//            progressDialog.dismiss();
+//            progressDialog.cancel();
+//        }
     }
 
 
@@ -523,10 +523,12 @@ public class SettingsActivity extends Activity
             Log.e("Status ",userTable.getProfileStatus() +"   aa");
             user_status = userTable.getProfileStatus();
             user_mask_unmask = userTable.getcurrentmaskstatus()+"";
+
+
             user_profilepic = userTable.getProfilePicUrl().get(0);
             Log.e("User_profilepicurl",user_profilepic);
-            user_gender = sharedPreferences.getString("Gender","");
-            seekbarVal = sharedPreferences.getString("Distance","1");
+            user_gender = sharedPreferences.getString(m_config.GenderPreference,"");
+            seekbarVal = sharedPreferences.getString(m_config.Distance,"");
             String DOB = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_BIRTHDATE();
 
             SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
@@ -554,6 +556,7 @@ public class SettingsActivity extends Activity
 
                     edt_userName.setText(user_name);
                     edt_Age.setText(user_age);
+                    edt_userName.setEnabled(false);
                     edt_Age.setEnabled(false);
                 }
              });
@@ -585,7 +588,7 @@ public class SettingsActivity extends Activity
                 });
             }
 
-            if(user_mask_unmask.equals("Yes"))
+            if(user_mask_unmask.equals("Mask"))
             {
                 h.post(new Runnable()
                 {
@@ -593,36 +596,38 @@ public class SettingsActivity extends Activity
                     public void run()
                     {
                         Log.e("Inside setUserInfo","setUserInfo  33");
-                        spn_mask.setSelection(1);
-                    }
-                });
-            }
-            else  if(user_mask_unmask.equals("No"))
-            {
-                h.post(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        Log.e("Inside setUserInfo","setUserInfo  44");
-                        spn_mask.setSelection(2);
-                    }
-                });
-            }
-            else
-            {
-                h.post(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        Log.e("Inside setUserInfo","setUserInfo  44");
                         spn_mask.setSelection(0);
 
                     }
                 });
-
             }
+            else  if(user_mask_unmask.equals("Unmask"))
+            {
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        Log.e("Inside setUserInfo","setUserInfo  44");
+                        spn_mask.setSelection(1);
+                        spn_mask.setEnabled(false);
+                    }
+                });
+            }
+//            else
+//            {
+//                h.post(new Runnable()
+//                {
+//                    @Override
+//                    public void run()
+//                    {
+//                        Log.e("Inside setUserInfo","setUserInfo  44");
+//                        spn_mask.setSelection(0);
+//
+//                    }
+//                });
+//
+//            }
             Log.e("Inside setUserInfo","setUserInfo  55");
 
             if(user_profilepic.equals("N/A"))
@@ -706,17 +711,15 @@ public class SettingsActivity extends Activity
                     @Override
                     public void run()
                     {
-                        String maxText = String.valueOf(2);
+                        String maxText = String.valueOf(10);
                         //txtrangeseekbarval.setText(maxText);
                         txtseekbarval.setText(maxText);
                         //rangeSeekBar.setSelectedMaxValue(2);
-                        SeekBar.setProgress(2);
+                        SeekBar.setProgress(10);
                         //getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
-                        selectedDistVal = Integer.parseInt(seekbarVal);
+                        //selectedDistVal = Integer.parseInt(seekbarVal);
                     }
                 });
-
-
             }
             else
             {
@@ -732,7 +735,7 @@ public class SettingsActivity extends Activity
                         //rangeSeekBar.setSelectedMaxValue(value);
                         SeekBar.setProgress(value);
                         //getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
-                        selectedDistVal = Integer.parseInt(seekbarVal);
+                        //selectedDistVal = Integer.parseInt(seekbarVal);
                     }
                 });
             }
@@ -748,8 +751,17 @@ public class SettingsActivity extends Activity
 //            progressDialog.dismiss();
 
 //            progressDialog.cancel();
-            m_config.pDialog.dismiss();
-            m_config.pDialog.cancel();
+//            m_config.pDialog.dismiss();
+//            m_config.pDialog.cancel();
+
+            if(HomePageActivity.hp_pd!=null)
+            {
+                if(HomePageActivity.hp_pd.isShowing())
+                {
+                    HomePageActivity.hp_pd.dismiss();
+                }
+            }
+
         }
     }
 
@@ -802,10 +814,12 @@ public class SettingsActivity extends Activity
 
     private void editSettings()
     {
-        Log.e("picturePath "," "+picturePath);
+        sett_pd.setMessage("Updating User Information");
+        sett_pd.setCancelable(false);
+        sett_pd.show();
+        Log.e("picturePath ", " " + picturePath);
         String profileStatus = "N/A";
-        if(edt_usermsgStatus.getText().toString().trim().length() ==0  || edt_usermsgStatus.getText().toString().trim().equals(""))
-        {
+        if (edt_usermsgStatus.getText().toString().trim().length() == 0 || edt_usermsgStatus.getText().toString().trim().equals("")) {
             profileStatus = "N/A";
         }
         else
@@ -814,45 +828,47 @@ public class SettingsActivity extends Activity
 
         }
 
-        Log.e("Profile Statis",profileStatus);
+        Log.e("Profile Statis", profileStatus);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("ProfileStatus",profileStatus);
-        editor.putString("Gender",selected_Gender);
-        editor.putString("Distance", txtseekbarval.getText().toString());
+        editor.putString("ProfileStatus", profileStatus);
+        if(selected_Gender.equals("Select Gender")){
+            editor.putString(m_config.GenderPreference, "N/A");
+        }else{
+            editor.putString(m_config.GenderPreference, selected_Gender);
+        }
+
+        editor.putString(m_config.Distance, txtseekbarval.getText().toString());
         // editor.putString("Distance", String.valueOf(selectedDistVal));
         editor.apply();
 
         int index = 0;
-        Log.e("M_config.primaryurl",m_config.PrimaryUrl+"  aa");
-        Log.e("validPics.get(0)",validPics.get(0));
-        if(m_config.PrimaryUrl.equals(validPics.get(0)))
-        {
+        Log.e("M_config.primaryurl", m_config.PrimaryUrl + "  aa");
+        Log.e("validPics.get(0)", validPics.get(0));
+        if (m_config.PrimaryUrl.equals(validPics.get(0))) {
 
-        }
-        else
-        {
-            for(int i=0;i<validPics.size();i++)
-            {
-                if(m_config.PrimaryUrl.equals(validPics.get(i)))
-                {
+        } else {
+            for (int i = 0; i < validPics.size(); i++) {
+                if (m_config.PrimaryUrl.equals(validPics.get(i))) {
                     index = i;
                     break;
                 }
             }
             String temp = validPics.get(0);
-            validPics.set(0,m_config.PrimaryUrl);
-            validPics.set(index,temp);
+            validPics.set(0, m_config.PrimaryUrl);
+            validPics.set(index, temp);
         }
 
-        for(int i=0;i<validPics.size();i++)
-        {
-            Log.e("Before upload   "+i,validPics.get(i));
+        for (int i = 0; i < validPics.size(); i++) {
+            Log.e("Before upload   " + i, validPics.get(i));
         }
 
         ImageFlag = "Yes";
 
-        updateUserSettings(m_config.PrimaryUrl, profileStatus, cont,validPics,ImageFlag);
+        updateUserSettings(m_config.PrimaryUrl, profileStatus, cont, validPics, ImageFlag);
+
     }
+
+
 
     public void updateQBProfilePic(String fbId,final String profileStatus, final String pic)
     {
@@ -880,29 +896,30 @@ public class SettingsActivity extends Activity
                         adapter.notifyDataSetChanged();
 
                         edt_usermsgStatus.setText(profileStatus);
-                        m_config.pDialog.dismiss();
-
+                        if(sett_pd.isShowing())
+                        {
+                            sett_pd.dismiss();
+                        }
                     }
 
                     @Override
                     public void onError(QBResponseException errors)
                     {
-                        m_config.pDialog.dismiss();
+                        if(sett_pd.isShowing())
+                        {
+                            sett_pd.dismiss();
+                        }
                     }
                 });
-
-
-
-
-
-
             }
 
             @Override
             public void onError(QBResponseException errors)
             {
-
-                m_config.pDialog.dismiss();
+                if(sett_pd.isShowing())
+                {
+                    sett_pd.dismiss();
+                }
             }
         });
     }
@@ -943,6 +960,7 @@ public class SettingsActivity extends Activity
 
             userTable.setProfileStatus(profileStatus);
             userTable.setProfilePicUrl(validPics);
+            userTable.setcurrentmaskstatus(selected_maskStatus);
             userTable.setImageflag("Yes");
             m_config.mapper.save(userTable);
 
@@ -950,6 +968,11 @@ public class SettingsActivity extends Activity
         }
         catch(Exception e)
         {
+            if(sett_pd.isShowing())
+            {
+                sett_pd.dismiss();
+            }
+
             e.printStackTrace();
             GenerikFunctions.showToast(cont, "Profile updation failed, Please try again after some time");
             GenerikFunctions.hideDialog(m_config.pDialog);
@@ -1237,6 +1260,13 @@ public class SettingsActivity extends Activity
         super.onBackPressed();
         Intent intent = new Intent(cont, HomePageActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Crouton.cancelAllCroutons();
+        m_config.foregroundCont = this;
     }
 }
 

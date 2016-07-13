@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -23,10 +24,16 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSLoginOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
@@ -103,7 +110,7 @@ public class Welcome extends Activity
     TelephonyManager mTelephony;
 
 
-    ProgressDialog progressDialog;
+    public static  ProgressDialog wl_pd = null;
 
     public void onCreate(Bundle savedInstanceState)
     {
@@ -119,15 +126,24 @@ public class Welcome extends Activity
         helper= DBHelper.getInstance(cont);
         sqldb=helper.getWritableDatabase();
 
+        // Initialize the Amazon Cognito credentials provider
+        final CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+                getApplicationContext(),
+                "us-east-1:bd2ea8c9-5aa9-4e32-b8e5-20235fc7f4ac", // Identity Pool ID
+                Regions.US_EAST_1 // Region
+        );
+
+        m_config.ddbClient = new AmazonDynamoDBClient(credentialsProvider);
+        m_config.mapper = new DynamoDBMapper(m_config.ddbClient);
+
         btn_login = (Button) findViewById(R.id.btn_login);
         btn_register = (Button) findViewById(R.id.btn_register);
         faceOverlayView = (FaceOverlayView) ((Activity)cont).findViewById(R.id.face_overlay);
-
+        wl_pd = new ProgressDialog(this);
+        RegistrationActivity.reg_pd = null;
         //FB Variables
         callbackManager = CallbackManager.Factory.create();
         loginManager = LoginManager.getInstance();
-
-        m_config.pDialog = new ProgressDialog(cont);
 
         permissions = new ArrayList<>();
         permissions.add("public_profile");
@@ -139,9 +155,8 @@ public class Welcome extends Activity
         permissions.add("user_photos");
 
 
-            Log.e("Shrd Pref in Welcome",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
+         Log.e("Shrd Pref in Welcome",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                     sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "  + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
-
 
 
         btn_register.setOnClickListener(new View.OnClickListener()
@@ -151,8 +166,7 @@ public class Welcome extends Activity
             {
                 Intent i = new Intent(getApplicationContext(), RegistrationActivity.class);
                 startActivity(i);
-                //   Intent intent = new Intent(cont, HomePageActivity.class);
-                //      startActivity(intent);
+
             }
         });
 
@@ -162,20 +176,12 @@ public class Welcome extends Activity
             public void onClick(View v)
             {
                 Log.e("Shrd Pref in Welcome on login click",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
-                        sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "  + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
+                        sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "  + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A")+"    "+
+                        sharedPreferences.getString(m_config.LoggedInFBUserID,"N/A"));
 
 
-
-                if(sharedPreferences.getString(m_config.Entered_User_Name,"N/A").equals("N/A"))
+                if(sharedPreferences.getString(m_config.LoggedInFBUserID,"N/A").equals("N/A"))
                 {
-                    Log.e("Inside if","Launch registration");
-                    Intent intent = new Intent(Welcome.this,RegistrationActivity.class);
-                    startActivity(intent);
-                }
-                else
-                {
-                    Log.e("11","11");
-                    //FB Login First
                     linkedinStart = "";
                     try
                     {
@@ -189,6 +195,38 @@ public class Welcome extends Activity
                         e.printStackTrace();
                     }
                 }
+                else
+                {
+                    LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
+                    Log.e("Info in storage",loggedInUserInformation.getFB_USER_ID() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
+
+                    new checkFBUserInfo(loggedInUserInformation).execute();
+                }
+
+
+//                if(sharedPreferences.getString(m_config.Entered_User_Name,"N/A").equals("N/A"))
+//                {
+//                    Log.e("Inside if","Launch registration");
+//                    Intent intent = new Intent(Welcome.this,RegistrationActivity.class);
+//                    startActivity(intent);
+//                }
+//                else
+//                {
+//                    Log.e("11","11");
+//                    //FB Login First
+//                    linkedinStart = "";
+//                    try
+//                    {
+//                        loginManager.logInWithReadPermissions(Welcome.this, permissions);
+//                        Log.e("Inside start login", "yes");
+//                        FacebookDataRetieval();
+//                    }
+//                    catch (Exception e)
+//                    {
+//                        Log.e("External Exception", e.toString());
+//                        e.printStackTrace();
+//                    }
+//                }
             }
         });
     }
@@ -215,8 +253,6 @@ public class Welcome extends Activity
             if (Token == null)
             {
                 GenerikFunctions.showToast(cont,"LI Login Failed");
-                GenerikFunctions.hideDialog(m_config.pDialog);
-                m_config.pDialog.dismiss();
 
                 try
                 {
@@ -432,7 +468,8 @@ public class Welcome extends Activity
         Log.e("Inside FB data retreive","Yes");
         linkedinStart="";
 
-        Log.e("Inside FB data retreive","Yes   " +linkedinStart +"   aa  " +loginManager.getLoginBehavior().toString());
+        //Log.e("Inside FB data retreive","Yes   " +linkedinStart +"   aa  " +loginManager.getLoginBehavior().toString());
+
 
         try
         {
@@ -451,11 +488,11 @@ public class Welcome extends Activity
                         Set<String> given_perm = token.getPermissions();
                         iterator = given_perm.iterator();
 
-                        while (iterator.hasNext())
-                        {
-                            String perm_name = iterator.next().toString();
-                            Log.e("Given Permission in: ", perm_name + " ");
-                        }
+//                        while (iterator.hasNext())
+//                        {
+//                            String perm_name = iterator.next().toString();
+//                            Log.e("Given Permission in: ", perm_name + " ");
+//                        }
 
                         ArrayList<String> declined_permissions = new ArrayList<String>();
                         Set<String> declined_perm = token.getDeclinedPermissions();
@@ -482,6 +519,10 @@ public class Welcome extends Activity
                     {
                         Log.e("Login onCancel", "Yes");
                         GenerikFunctions.showToast(cont,"Please provide permissions for app login");
+                        if(wl_pd.isShowing())
+                        {
+                            wl_pd.dismiss();
+                        }
                     }
 
                     @Override
@@ -490,6 +531,10 @@ public class Welcome extends Activity
                         error.printStackTrace();
                         Log.e("Login error", "error" + error.toString());
 
+                        if(wl_pd.isShowing())
+                        {
+                            wl_pd.dismiss();
+                        }
                         if (error instanceof FacebookAuthorizationException)
                         {
                             if (AccessToken.getCurrentAccessToken() != null)
@@ -510,6 +555,10 @@ public class Welcome extends Activity
         }
         catch(Exception e)
         {
+            if(wl_pd.isShowing())
+            {
+                wl_pd.dismiss();
+            }
             Log.e("Error in print ",e.toString());
             e.printStackTrace();
         }
@@ -567,8 +616,10 @@ public class Welcome extends Activity
                     @Override
                     public void onCompleted(JSONObject object, GraphResponse response)
                     {
+                        wl_pd.setMessage("Loading Data...");
+                        wl_pd.setCancelable(false);
+                        wl_pd.show();
                         String emptyFields="";
-                        GenerikFunctions.showDialog(m_config.pDialog, "Loading...");
 
                         // Application code
                         Log.i("Me Request", object.toString());
@@ -590,7 +641,7 @@ public class Welcome extends Activity
                             fbUserInformation.setBirthday("N/A");
                         }
 
-                        Log.e("getBirthday : " , fbUserInformation.getBirthday());
+                      //  Log.e("getBirthday : " , fbUserInformation.getBirthday());
 
                         if(fbUserInformation.getEmail().equals(null))
                         {
@@ -616,15 +667,15 @@ public class Welcome extends Activity
                         {
                             fBCurrentLocationInformation = new FBCurrentLocationInformation();
                         }
-                        Log.e("CUrrent Location --->","Details");
-                        Log.e("getLocationId Id: " , fBCurrentLocationInformation.getLocationId());
-                        Log.e("getLocationName " , fBCurrentLocationInformation.getLocationName());
+//                        Log.e("CUrrent Location --->","Details");
+//                        Log.e("getLocationId Id: " , fBCurrentLocationInformation.getLocationId());
+//                        Log.e("getLocationName " , fBCurrentLocationInformation.getLocationName());
                         if(fbUserInformation.getFbHomelocationInformation() != null)
                         {
                             fbHomelocationInformation = new FbHomelocationInformation();
                             if(fbHomelocationInformation.equals(fbUserInformation.getFbHomelocationInformation()))
                             {
-                                Log.e("Both Home Location ","Is Empty");
+                               // Log.e("Both Home Location ","Is Empty");
                             }
                             else
                             {
@@ -636,9 +687,9 @@ public class Welcome extends Activity
                             fbHomelocationInformation = new FbHomelocationInformation();
                         }
 
-                        Log.e("Home Location --->","Details");
-                        Log.e("getLocationId Id: " , fbHomelocationInformation.getLocationId() +"  aa");
-                        Log.e("getLocationName " , fbHomelocationInformation.getLocationName()+"  aa");
+//                        Log.e("Home Location --->","Details");
+//                        Log.e("getLocationId Id: " , fbHomelocationInformation.getLocationId() +"  aa");
+//                        Log.e("getLocationName " , fbHomelocationInformation.getLocationName()+"  aa");
 
                         if(fbUserInformation.getFbProfilePictureData().equals(null))
                         {
@@ -652,7 +703,7 @@ public class Welcome extends Activity
 
                         Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
 
-                        Log.e("Empty Fields","Yes   " + emptyFields +"    aa");
+                     //   Log.e("Empty Fields","Yes   " + emptyFields +"    aa");
 
                         if(emptyFields.equals(""))
                         {
@@ -706,12 +757,12 @@ public class Welcome extends Activity
                         else
                         {
 //                            Log.e("emptyFields " ,emptyFields);
-                            GenerikFunctions.hideDialog(m_config.pDialog);
+                            if(wl_pd.isShowing())
+                            {
+                                wl_pd.dismiss();
+                            }
                             GenerikFunctions.showToast(cont,"Please specify your "+ emptyFields + " in Facebook");
                         }
-
-
-
                     }
                 });
 
@@ -804,7 +855,10 @@ public class Welcome extends Activity
                                 Log.e("Before FB AWS Storage","Yes");
                                 LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
                                 Log.e("Info in storage",loggedInUserInformation.getFB_USER_BIRTHDATE() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
-                                new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Welcome",sqldb).execute();
+
+                                new checkFBUserInfo(loggedInUserInformation).execute();
+                               // new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Welcome",sqldb).execute();
+
 
                             }
 
@@ -820,7 +874,10 @@ public class Welcome extends Activity
                         }
                         catch (Exception e)
                         {
-                            GenerikFunctions.hideDialog(m_config.pDialog);
+                            if(wl_pd.isShowing())
+                            {
+                                wl_pd.dismiss();
+                            }
                             System.out.println("Exception=" + e);
                             e.printStackTrace();
                         }
@@ -829,112 +886,227 @@ public class Welcome extends Activity
         ).executeAsync();
     }
 
-    private static Scope buildScope()
+
+    public void updateUserTableAndPrefs(UserTable user)
     {
-        return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
+        String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
+                LoginTableColumns.FB_USER_NAME + " = '" + user.getFBUserName() + "', " +
+                LoginTableColumns.FB_USER_GENDER + " = '" + user.getGender().trim() + "', " +
+                LoginTableColumns.FB_USER_BIRTHDATE + " = '" + user.getBirthDate().trim() + "', " +
+                LoginTableColumns.FB_USER_EMAIL + " = '" + user.getSocialEmail().trim() + "', " +
+                LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + user.getFBHomeLocation().trim() + "', " +
+                LoginTableColumns.FB_USER_PROFILE_PIC + " = '" + user.getProfilePicUrl().get(0) + "', " +
+                LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + user.getFBCurrentLocation().trim() + "'  where "
+                + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
+
+        Log.i("update User "+user.getFacebookID().trim(), updateUser);
+        sqldb.execSQL(updateUser);
+
+        String Update = "Update " + LoginTableColumns.USERTABLE + " set "
+                + LoginTableColumns.LI_USER_ID  + " = '" + user.getLinkedInID() + "', "
+                + LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + user.getLKProfilePicUrl().toString() + "', "
+                + LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + user.getLKConnectionsCount() + "', "
+                + LoginTableColumns.LI_USER_HEADLINE + " = '" + user.getLKHeadLine() + "' "
+                + " where " + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
+
+        Log.i("update User "+ user.getFacebookID().trim() , Update);
+        sqldb.execSQL(Update);
+
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(m_config.Entered_User_Name,user.getName());
+        editor.putString(m_config.Entered_Email,user.getEmail());
+        editor.putString(m_config.Entered_Contact_No,user.getPhoneNumber());
+        editor.putString(m_config.LoggedInFBUserID, user.getFacebookID().trim());
+        editor.putString(m_config.FBLoginDone,"Yes");
+        editor.putString(m_config.LILoginDone,"Yes");
+        editor.putString(m_config.EmailValidationDone,"Yes");
+        editor.putString(m_config.BasicFBLIValidationsDone,"Yes");
+        editor.putString(m_config.OTPValidationDone,"Yes");
+        editor.putString(m_config.FaceDetectDone,"Yes");
+        editor.putString(m_config.FinalStepDone,"Yes");
+        editor.apply();
+
+        Log.e("Updated all flags","yes");
+        LoginValidations.QBStartSession(cont);
+
+        //Start QB Session Here
+//
+//        Intent intent = new Intent(cont, HomePageActivity.class);
+//        startActivity(intent);
+
+
     }
 
-    public static void startLinkedInProcess()
+    //Check whether user exists at AWS or not
+    public class checkFBUserInfo extends AsyncTask<Void, Void, Void>
     {
-        linkedinStart="Yes";
-        Log.e("In startLinkedInProcess","Yes");
-        LISessionManager.getInstance(cont).init((Activity)cont, buildScope(), new AuthListener()
+        UserTable selUserData = null;
+        LoggedInUserInformation loggedInUserInformation;
+        public checkFBUserInfo(LoggedInUserInformation loggedInUserInformation)
         {
-            @Override
-            public void onAuthSuccess()
-            {
-                Token = LISessionManager.getInstance(cont).getSession().getAccessToken().getValue().toString();
-                Log.e("LI Token",Token+"");
-                //  GenerikFunctions.showToast(cont,"success   Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
-            }
+            this.loggedInUserInformation = loggedInUserInformation;
+        }
 
-            @Override
-            public void onAuthError(LIAuthError error)
-            {
-                Log.e("LI Login Error",error.toString()+"");
-                GenerikFunctions.showToast(cont, "failed  linked in " + error.toString());
-                if(error.toString().trim().contains("USER_CANCELLED"))
-                {
-                    GenerikFunctions.showToast(cont, "Please accept permissions " );
-                    linkedinStart="Yes";
-                    startLinkedInProcess();
-                }
-                else //if(error.toString().trim().contains("UNKNOWN_ERROR"))
-                {
-                    Log.e("Inside Else","Yes");
-                    //GenerikFunctions.showToast(cont, "failed  linked in login " + error.toString());
-                }
-            }
-        }, true)
-        ;
-    }
-
-    //Callback function for Android M Permission
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
-    {
-        Log.e("grantResults.length"," "+grantResults.length+" "+grantResults[0]);
-
-        switch (requestCode)
+        @Override
+        protected Void doInBackground(Void... params)
         {
-            case MY_PERMISSIONS_REQUEST_READ_PHONE_STATE:
+           // Log.e("11","11");
+           // Log.e("From logged in ser  info for checkFBUserInfo",loggedInUserInformation.getFB_USER_ID()+"");
+
+            selUserData = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
+            Log.e("selUserClass from Async", " " + selUserData);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v)
+        {
+            if(selUserData != null)
             {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                Log.e("User exists in AWS","Yes");
+                //Check login done flag
+                if(selUserData.getRegistrationStatus().equals("Yes"))
                 {
-                    Log.e("Permission request is accepted","");
-                    mTelephony = (TelephonyManager) cont.getSystemService(
-                            Context.TELEPHONY_SERVICE);
-                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(cont);
-                    String regId = pref.getString(m_config.temp_regId,"");
-                    new LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont).execute();
+                    Log.e("User registration status in AWS","Yes");
+                    //Registration is already done
+                    updateUserTableAndPrefs(selUserData);
                 }
                 else
                 {
-                    // permission denied
-                    Log.e("Permission request is denied","");
-                    final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-
-                    boolean should = ActivityCompat.shouldShowRequestPermissionRationale((Activity) cont, Manifest.permission.READ_PHONE_STATE);
-                    if(should)
+                    if(wl_pd.isShowing())
                     {
-                        //user denied without Never ask again, just show rationale explanation
-                        new android.app.AlertDialog.Builder(Welcome.this)
-                                .setTitle("Permission Denied")
-                                .setMessage("Without this permission the app will be unable to receive Push Notifications.Are you sure you want to deny this permission?")
-                                .setPositiveButton("RE-TRY", new DialogInterface.OnClickListener()
-                                {
-                                    public void onClick(DialogInterface dialog, int which)
-                                    {
-                                        // continue with delete
-                                        Log.e("Click of Retry, If permission request is denied",",ask request for permission again");
-                                        ActivityCompat.requestPermissions((Activity) cont,
-                                                new String[]{Manifest.permission.READ_PHONE_STATE},
-                                                MY_PERMISSIONS_REQUEST_READ_PHONE_STATE);
-
-                                    }
-                                })
-                                .setNegativeButton("I'M SURE", new DialogInterface.OnClickListener()
-                                {
-                                    public void onClick(DialogInterface dialog, int which)
-                                    {
-                                        // do nothing
-                                        Log.e("Click of I m sure",", permission request is denied");
-                                        LoginValidations.checkPendingLoginFlags(cont);
-                                    }
-                                })
-                                .show();
+                        wl_pd.dismiss();
                     }
-                    else
-                    {
-                        //user has denied with `Never Ask Again`
-                        Log.e("Click of Never ask again",", permission request is denied");
-                        LoginValidations.checkPendingLoginFlags(cont);
-                    }
+                    Log.e("User registration status in AWS","No");
+                    Toast.makeText(cont,"Your Registration Process is incomplete. Please Complete...",Toast.LENGTH_LONG).show();
+                    Intent i = new Intent(Welcome.this, RegistrationActivity.class);
+                    startActivity(i);
+                    finish();
                 }
-                break;
+            }
+            else
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+                Log.e("User not exists in AWS","No");
+                //If not exists then call  normal registration flow
+                Toast.makeText(cont,"Your Registration Process Is imcomplete. Please Complete...",Toast.LENGTH_LONG).show();
+                Intent i = new Intent(Welcome.this, RegistrationActivity.class);
+                startActivity(i);
+                finish();
             }
         }
     }
+
+//    private static Scope buildScope()
+//    {
+//        return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
+//    }
+//
+//    public static void startLinkedInProcess()
+//    {
+//        linkedinStart="Yes";
+//        Log.e("In startLinkedInProcess","Yes");
+//        LISessionManager.getInstance(cont).init((Activity)cont, buildScope(), new AuthListener()
+//        {
+//            @Override
+//            public void onAuthSuccess()
+//            {
+//                Token = LISessionManager.getInstance(cont).getSession().getAccessToken().getValue().toString();
+//                Log.e("LI Token",Token+"");
+//                //  GenerikFunctions.showToast(cont,"success   Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
+//            }
+//
+//            @Override
+//            public void onAuthError(LIAuthError error)
+//            {
+//                Log.e("LI Login Error",error.toString()+"");
+//                GenerikFunctions.showToast(cont, "failed  linked in " + error.toString());
+//                if(error.toString().trim().contains("USER_CANCELLED"))
+//                {
+//                    GenerikFunctions.showToast(cont, "Please accept permissions " );
+//                    linkedinStart="Yes";
+//                    startLinkedInProcess();
+//                }
+//                else //if(error.toString().trim().contains("UNKNOWN_ERROR"))
+//                {
+//                    Log.e("Inside Else","Yes");
+//                    //GenerikFunctions.showToast(cont, "failed  linked in login " + error.toString());
+//                }
+//            }
+//        }, true)
+//        ;
+//    }
+
+//    //Callback function for Android M Permission
+//    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+//    {
+//        Log.e("grantResults.length"," "+grantResults.length+" "+grantResults[0]);
+//
+//        switch (requestCode)
+//        {
+//            case MY_PERMISSIONS_REQUEST_READ_PHONE_STATE:
+//            {
+//                // If request is cancelled, the result arrays are empty.
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+//                {
+//                    Log.e("Permission request is accepted","");
+//                    mTelephony = (TelephonyManager) cont.getSystemService(
+//                            Context.TELEPHONY_SERVICE);
+//                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(cont);
+//                    String regId = pref.getString(m_config.temp_regId,"");
+//                    new LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont).execute();
+//                }
+//                else
+//                {
+//                    // permission denied
+//                    Log.e("Permission request is denied","");
+//                    final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+//
+//                    boolean should = ActivityCompat.shouldShowRequestPermissionRationale((Activity) cont, Manifest.permission.READ_PHONE_STATE);
+//                    if(should)
+//                    {
+//                        //user denied without Never ask again, just show rationale explanation
+//                        new android.app.AlertDialog.Builder(Welcome.this)
+//                                .setTitle("Permission Denied")
+//                                .setMessage("Without this permission the app will be unable to receive Push Notifications.Are you sure you want to deny this permission?")
+//                                .setPositiveButton("RE-TRY", new DialogInterface.OnClickListener()
+//                                {
+//                                    public void onClick(DialogInterface dialog, int which)
+//                                    {
+//                                        // continue with delete
+//                                        Log.e("Click of Retry, If permission request is denied",",ask request for permission again");
+//                                        ActivityCompat.requestPermissions((Activity) cont,
+//                                                new String[]{Manifest.permission.READ_PHONE_STATE},
+//                                                MY_PERMISSIONS_REQUEST_READ_PHONE_STATE);
+//
+//                                    }
+//                                })
+//                                .setNegativeButton("I'M SURE", new DialogInterface.OnClickListener()
+//                                {
+//                                    public void onClick(DialogInterface dialog, int which)
+//                                    {
+//                                        // do nothing
+//                                        Log.e("Click of I m sure",", permission request is denied");
+//                                        LoginValidations.checkPendingLoginFlags(cont);
+//                                    }
+//                                })
+//                                .show();
+//                    }
+//                    else
+//                    {
+//                        //user has denied with `Never Ask Again`
+//                        Log.e("Click of Never ask again",", permission request is denied");
+//                        LoginValidations.checkPendingLoginFlags(cont);
+//                    }
+//                }
+//                break;
+//            }
+//        }
+//    }
 
     //function for enabling TelephonyManager for fetching deviceId
     public void getDeviceIdAndroid(String regId, Activity context)
@@ -970,16 +1142,25 @@ public class Welcome extends Activity
                 new LoginValidations.subscribeToPushNotifications(regId,mTelephony, context).execute();
                 Log.e("If Permission is granted","");
             }
-
         }
-
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
+
+        // Initialize the Amazon Cognito credentials provider
+        final CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
+                getApplicationContext(),
+                "us-east-1:bd2ea8c9-5aa9-4e32-b8e5-20235fc7f4ac", // Identity Pool ID
+                Regions.US_EAST_1 // Region
+        );
+
+        m_config.ddbClient = new AmazonDynamoDBClient(credentialsProvider);
+        m_config.mapper = new DynamoDBMapper(m_config.ddbClient);
     }
 
 }

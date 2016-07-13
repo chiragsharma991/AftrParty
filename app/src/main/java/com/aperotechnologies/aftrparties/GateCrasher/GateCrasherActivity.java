@@ -101,7 +101,7 @@ public class GateCrasherActivity extends Activity
                 obj.put("distance",  parcedata.getdistance());
                 obj.put("atdatetime",  Long.parseLong(parcedata.getatdatetime()));
                 obj.put("byob", parcedata.getbyob());
-                obj.put("preference", "");//parcedata.getgenderpreference());
+                obj.put("preference", parcedata.getgenderpreference());
 
 
             } catch (JSONException e) {
@@ -112,7 +112,7 @@ public class GateCrasherActivity extends Activity
 
             queue = Volley.newRequestQueue(GateCrasherActivity.this);
 
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(  Request.Method.POST, url, obj,
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, obj,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {

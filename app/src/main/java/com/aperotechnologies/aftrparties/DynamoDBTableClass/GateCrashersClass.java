@@ -11,6 +11,9 @@ public class GateCrashersClass {
     private String gatecrasherid;
     private String gcrequeststatus;
     private String gcattendancestatus;
+    private String gclkid;
+    private String gcqbid;
+    private String gcfbprofilepic;
 
 
     public String getGatecrasherid() { return gatecrasherid; }
@@ -22,6 +25,14 @@ public class GateCrashersClass {
     public String getGcattendancestatus() { return gcattendancestatus; }
     public void setGcattendancestatus(String gcattendancestatus) { this.gcattendancestatus = gcattendancestatus; }
 
+    public String getgclkid() { return gclkid; }
+    public void setgclkid(String gclkid) { this.gclkid = gclkid; }
+
+    public String getgcqbid() { return gcqbid; }
+    public void setgcqbid(String gcqbid) { this.gcqbid = gcqbid; }
+
+    public String getgcfbprofilepic() { return gcfbprofilepic; }
+    public void setgcfbprofilepic(String gcfbprofilepic) { this.gcfbprofilepic = gcfbprofilepic; }
 
 
 }

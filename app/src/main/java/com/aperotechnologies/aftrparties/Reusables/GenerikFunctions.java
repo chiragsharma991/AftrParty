@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -12,6 +13,7 @@ import android.widget.Toast;
 public class GenerikFunctions
 {
 
+    static ProgressDialog progressDialog = null;
     //Check Network availability
     public static boolean chkStatus(Context cont)
     {
@@ -41,6 +43,35 @@ public class GenerikFunctions
             if (pDialog.isShowing()) {
                 pDialog.dismiss();
                 pDialog.cancel();
+            }
+        }
+    }
+
+
+
+    public static void sDialog(Context cont, String message){
+        Log.e("progressDialog in sDialog "+progressDialog," ");
+        if(progressDialog == null){
+            progressDialog = new ProgressDialog(cont);
+            progressDialog.setMessage(message);
+            progressDialog.setCancelable(false);
+            if (!progressDialog.isShowing()) {
+                progressDialog.show();
+            }
+        }
+
+
+
+    }
+
+    public static void hDialog(){
+        Log.e("progressDialog in hDialog "+progressDialog," ");
+        if(progressDialog != null) {
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
+                progressDialog.cancel();
+                progressDialog = null;
+                Log.e("progressDialog  "+progressDialog," ");
             }
         }
     }

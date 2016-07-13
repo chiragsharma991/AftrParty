@@ -1,6 +1,7 @@
 package com.aperotechnologies.aftrparties.HomePage;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -69,7 +70,7 @@ public class HomePageActivity extends Activity
     int i=0;
     String url;
     FaceOverlayView faceOverlayView;
-
+    public static ProgressDialog hp_pd = null;
 
     public void onCreate(Bundle savedInstanceState)
     {
@@ -90,6 +91,7 @@ public class HomePageActivity extends Activity
         btn_logout = (ImageButton) findViewById(R.id.btn_logout);
         txt_Header = (TextView) findViewById(R.id.activity_title);
 
+        hp_pd= new ProgressDialog(this);
 
 
 //        imguser = (CircularImageView) findViewById(R.id.userimage);
@@ -285,9 +287,14 @@ public class HomePageActivity extends Activity
 //            progressDialog.setCancelable(false);
 
 
-            m_config.pDialog.setMessage("Loading");
-            m_config.pDialog.setCancelable(false);
-            m_config.pDialog.show();
+//            m_config.pDialog.setMessage("Loading");
+//            m_config.pDialog.setCancelable(false);
+//            if(!m_config.pDialog.isShowing())
+//            m_config.pDialog.show();
+
+            hp_pd.setMessage("Loading");
+            hp_pd.setCancelable(false);
+            hp_pd.show();
             super.onPreExecute();
         }
 
@@ -301,7 +308,8 @@ public class HomePageActivity extends Activity
             }
             catch (Exception e)
             {
-                m_config.pDialog.dismiss();
+              //  m_config.pDialog.dismiss();
+                hp_pd.dismiss();
 
             }
 
@@ -315,7 +323,8 @@ public class HomePageActivity extends Activity
             super.onPostExecute(aVoid);
             if(selUserData == null)
             {
-                m_config.pDialog.dismiss();
+                //m_config.pDialog.dismiss();
+                hp_pd.dismiss();
             }
             else
             {
@@ -330,7 +339,7 @@ public class HomePageActivity extends Activity
                         images[q]=image.get(q);
                         Log.e("Images",images[q]);
                     }
-                    m_config.pDialog.dismiss();
+                   // m_config.pDialog.dismiss();
 
                     Intent i = new Intent(cont, SettingsActivity.class);
                     Bundle b=new Bundle();
@@ -344,8 +353,6 @@ public class HomePageActivity extends Activity
                     getFBProfilePictures();
                 }
             }
-
-
 
         }
     }
@@ -390,8 +397,8 @@ public class HomePageActivity extends Activity
                         }
                         catch(Exception e)
                         {
-                            m_config.pDialog.dismiss();
-
+                          //  m_config.pDialog.dismiss();
+                            hp_pd.dismiss();
                         }
 
                     }
@@ -422,7 +429,8 @@ public class HomePageActivity extends Activity
                 test[p] = validPics.get(p);
             }
 
-            m_config.pDialog.dismiss();
+          //  m_config.pDialog.dismiss();
+
             Intent i = new Intent(HomePageActivity.this, SettingsActivity.class);
             Bundle b=new Bundle();
             b.putStringArray("images", test);
@@ -443,7 +451,7 @@ public class HomePageActivity extends Activity
                     test[p] = validPics.get(p);
                 }
 
-                m_config.pDialog.dismiss();
+               // m_config.pDialog.dismiss();
                 Intent i = new Intent(HomePageActivity.this, SettingsActivity.class);
                 Bundle b=new Bundle();
                 b.putStringArray("images", test);
@@ -495,7 +503,8 @@ public class HomePageActivity extends Activity
                             public void onBitmapFailed(Drawable drawable)
                             {
                                 Log.e("On FB bitmap failed",drawable.toString());
-                                m_config.pDialog.dismiss();
+                               // m_config.pDialog.dismiss();
+
                             }
 
                             @Override
@@ -515,6 +524,5 @@ public class HomePageActivity extends Activity
 
         }
     }
-
 
 }

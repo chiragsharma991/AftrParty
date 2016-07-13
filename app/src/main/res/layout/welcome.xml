@@ -5,7 +5,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_gravity="center"  >
 
+    <!-- Toolbar for Welcome-->
+    <LinearLayout
+        android:visibility="visible"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ll_welcome_toolbar"   >
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/home_toolbar"
+            android:layout_marginLeft="-16dp"
+            android:layout_alignParentTop="true"
+            android:background="@color/colorPrimaryDark"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:minHeight="?attr/actionBarSize"   >
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="44dp"
+                android:id="@+id/toolbar_content"   >
+
+
+                <TextView
+                    android:textSize="20sp"
+                    android:layout_centerInParent="true"
+                    android:text="WELCOME"
+                    android:id="@+id/activity_title"
+                    android:textColor="#ffffff"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"   />
+
+            </RelativeLayout>
+
+        </android.support.v7.widget.Toolbar>
+    </LinearLayout>
+
     <Button
+        android:layout_below="@+id/ll_welcome_toolbar"
         android:background="@color/colorPrimaryDark"
         android:textColor="@color/white"
         android:layout_width="match_parent"

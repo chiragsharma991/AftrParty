@@ -13,10 +13,12 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -45,6 +47,7 @@ import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSLoginOperations;
 
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.MyLifecycleHandler;
 import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
@@ -153,7 +156,7 @@ public class RegistrationActivity extends Activity
     private static final  int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
     String regId;
     String verifyStatus = "0";
-    ProgressDialog progressDialog;
+    public static ProgressDialog reg_pd = null;
 
     public void onCreate(Bundle savedInstanceState)
     {
@@ -171,7 +174,9 @@ public class RegistrationActivity extends Activity
         gson=new Gson();
         helper= DBHelper.getInstance(cont);
         sqldb=helper.getWritableDatabase();
-        m_config.pDialog = new ProgressDialog(cont);
+        Welcome.wl_pd = null;
+        reg_pd = new ProgressDialog(this);
+        reg_pd.setCancelable(false);
 
         //Meghana
         //UI Components
@@ -237,6 +242,24 @@ public class RegistrationActivity extends Activity
             edt_usr_phone.setText(sharedpreferences.getString(m_config.Entered_Contact_No, "Contact No"));
         }
 
+        edt_usr_email.setOnFocusChangeListener(new View.OnFocusChangeListener()
+        {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus)
+            {
+                if(hasFocus)
+                {
+                   // Log.e("Has focus","Has Focus");
+                }
+                else
+                {
+                    Log.e("removedfocus","yes");
+                    String enteredmail = edt_usr_email.getText().toString().trim()+"";
+                    edt_usr_email.setText(enteredmail);
+                }
+            }
+        });
+
 //        if(sharedpreferences.getString(m_config.FBLoginDone,"").equals("") || sharedpreferences.getString(m_config.FBLoginDone,"").equals("No"))
 //        {
 //            linkedinStart="";
@@ -265,10 +288,6 @@ public class RegistrationActivity extends Activity
             Log.e("Token from start", Token + "");
             if (Token == null)
             {
-                GenerikFunctions.showToast(cont,"LI Login Failed");
-                GenerikFunctions.hideDialog(m_config.pDialog);
-                m_config.pDialog.dismiss();
-
                 try
                 {
                    // setLIUserProfile("");
@@ -371,7 +390,7 @@ public class RegistrationActivity extends Activity
                     liPictureData = new LIPictureData();
                 }
                 Log.e("LI Pic Info ", liPictureData.get_total() + "     " + liPictureData.getvalues().size() +  "    " + liPictureData.getvalues().get(0));
-        }
+          }
 
             String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
                     FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
@@ -384,12 +403,10 @@ public class RegistrationActivity extends Activity
             }
             else
             {
-
                 Log.e("LI firstName", liUserInformation.getFirstName());
                 Log.e("LI lastName", liUserInformation.getLastName());
 
                 Log.e("--------"," "+liPictureData);
-
 
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                         + LoginTableColumns.LI_USER_ID  + " = '" + liUserInformation.getId() + "', "
@@ -418,17 +435,20 @@ public class RegistrationActivity extends Activity
                 //AWSLoginOperations.addLIUserInfo(cont,loggedInUserInformation);
                 new AWSLoginOperations.addLIUserInfo(cont,loggedInUserInformation).execute();
 
-
-
                 Log.e("Shrd Pref aftr LILginDne",sharedpreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                         sharedpreferences.getString(m_config.Entered_Email,"N/A") + "   "
                         + sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
-
             }
         }
         catch (Exception e)
         {
+            if(reg_pd.isShowing())
+            {
+                reg_pd.dismiss();
+            }
+            Toast.makeText(cont,"Linked In Login Failed",Toast.LENGTH_LONG).show();
             e.printStackTrace();
+
         }
     }
 
@@ -458,11 +478,14 @@ public class RegistrationActivity extends Activity
                 .setNegativeButton("No", null)
                 .setPositiveButton("Yes",
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
+                            public void onClick(DialogInterface dialog, int id)
+                            {
                                 finish();
-                                Intent intent = new Intent(Intent.ACTION_MAIN);
-                                intent.addCategory(Intent.CATEGORY_HOME);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                Intent intent = new Intent(Intent.ACTION_MAIN);
+//                                intent.addCategory(Intent.CATEGORY_HOME);
+//                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                startActivity(intent);
+                                Intent intent = new Intent(RegistrationActivity.this,Welcome.class);
                                 startActivity(intent);
                             }
                         });
@@ -519,7 +542,8 @@ public class RegistrationActivity extends Activity
     public void validateUserInput()
     {
         //CHeck for empty or invalid input
-        if (Validations.isEmpty(edt_usr_name) || Validations.isEmpty(edt_usr_email) || Validations.isEmpty(edt_usr_phone)) {
+        if (Validations.isEmpty(edt_usr_name) || Validations.isEmpty(edt_usr_email) || Validations.isEmpty(edt_usr_phone))
+        {
             if (Validations.isEmpty(edt_usr_name))
             {
                 inputToastDisplay = "Please enter user name";
@@ -538,11 +562,6 @@ public class RegistrationActivity extends Activity
         }
         else
         {
-            progressDialog = new ProgressDialog(cont);
-            progressDialog.setCancelable(false);
-            progressDialog.setMessage("Verifying Input Data");
-          //  progressDialog.show();
-
             //Check for valid email pattern
             if (Validations.isValidEmailId(edt_usr_email.getText().toString().trim()))
             {
@@ -559,31 +578,22 @@ public class RegistrationActivity extends Activity
                         editor.putString(m_config.Entered_Contact_No, edt_usr_phone.getText().toString().trim());
                         editor.apply();
 
-
-
-                           processLogin();
-
-                         //EmailVerification(sharedpreferences.getString(m_config.Entered_Email,"Email"));
+                        processLogin();
+                        //EmailVerification(sharedpreferences.getString(m_config.Entered_Email,"Email"));
                     }
                     else
                     {
-                        progressDialog.dismiss();
-                        progressDialog.cancel();
                         GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
                     }
                 }
                 else
                 {
-                    progressDialog.dismiss();
-                    progressDialog.cancel();
                     GenerikFunctions.showToast(cont, "Enter Valid Contact No");
                     edt_usr_phone.setText("");
                 }
             }
             else
             {
-                progressDialog.dismiss();
-                progressDialog.cancel();
                 GenerikFunctions.showToast(cont, "EnterValid Mail");
                 edt_usr_email.setText("");
             }
@@ -601,7 +611,7 @@ public class RegistrationActivity extends Activity
 //            publish_perm.add("publish_actions");//
 //           loginManager.logInWithPublishPermissions(RegistrationActivity.this,publish_perm);
 
-            Log.e("Inside start login", "yes");
+        //    Log.e("Inside start login", "yes");
             FacebookDataRetieval();
         }
         catch (Exception e)
@@ -646,8 +656,6 @@ public class RegistrationActivity extends Activity
                 public void onSuccess(LoginResult loginResult)
                 {
 
-//                    Intent intent = new Intent(cont,Success.class);
-//                    cont.startActivity(intent);
                  //   https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
 
 //                    // App code
@@ -767,12 +775,15 @@ public class RegistrationActivity extends Activity
                     @Override
                     public void onCompleted(JSONObject object, GraphResponse response)
                     {
-                        GenerikFunctions.showDialog(m_config.pDialog, "Loading...");
+
+                        Log.e("Inside requestMeFbData","Yes");
+                        reg_pd.setMessage("Loading data...");
+                        reg_pd.show();
 
                         String emptyFields="";
 
                         // Application code
-                        Log.i("Me Request", object.toString());
+                       // Log.i("Me Request", object.toString());
 
 //                        AddFriends addFriends = new AddFriends();
 //                        addFriends.requestInvitableFriends(cont,token);
@@ -791,7 +802,7 @@ public class RegistrationActivity extends Activity
                             fbUserInformation.setBirthday("N/A");
                         }
 
-                        Log.e("getBirthday : " , fbUserInformation.getBirthday());
+                       // Log.e("getBirthday : " , fbUserInformation.getBirthday());
 
                         if(fbUserInformation.getEmail().equals(null))
                         {
@@ -799,14 +810,14 @@ public class RegistrationActivity extends Activity
                         }
                         else
                         {
-                            Log.e("getEmail: " ,fbUserInformation.getEmail());
+                          //  Log.e("getEmail: " ,fbUserInformation.getEmail());
                         }
                         if(fbUserInformation.getFBLocationInformation()!= null)
                         {
                             fBCurrentLocationInformation = new FBCurrentLocationInformation();
                             if(fBCurrentLocationInformation.equals(fbUserInformation.getFBLocationInformation()))
                             {
-                                Log.e("Both current Location ","Is Empty");
+                               // Log.e("Both current Location ","Is Empty");
                             }
                             else
                             {
@@ -825,7 +836,7 @@ public class RegistrationActivity extends Activity
                             fbHomelocationInformation = new FbHomelocationInformation();
                             if(fbHomelocationInformation.equals(fbUserInformation.getFbHomelocationInformation()))
                             {
-                                Log.e("Both Home Location ","Is Empty");
+                              //  Log.e("Both Home Location ","Is Empty");
                             }
                             else
                             {
@@ -851,7 +862,7 @@ public class RegistrationActivity extends Activity
                             fbProfilePictureData=fbUserInformation.getFbProfilePictureData();
                         }
 //
-//                        Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
+                       Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
 //
 //                        Log.e("Empty Fields","Yes   " + emptyFields +"    aa");
 
@@ -870,7 +881,6 @@ public class RegistrationActivity extends Activity
                             else
                             {
                               //Update User Entry
-
                                 String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
                                         LoginTableColumns.FB_USER_NAME + " = '" + fbUserInformation.getFbUserName().trim() + "', " +
                                         LoginTableColumns.FB_USER_GENDER + " = '" + fbUserInformation.getGender().trim() + "', " +
@@ -885,8 +895,6 @@ public class RegistrationActivity extends Activity
                                 Log.i("update User  "+ LoginTableColumns.FB_USER_ID , updateUser);
                                 sqldb.execSQL(updateUser);
 
-
-
                                 loggedInUserInfo = new LoggedInUserInformation();
 
                                 loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
@@ -900,15 +908,14 @@ public class RegistrationActivity extends Activity
                                 loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
                                 loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
 
-
                                 getFbFriendsCount();
-
                             }
+
+
                             cursor.close();
                         }
                         else
                         {
-                            GenerikFunctions.hideDialog(m_config.pDialog);
 
 //                            Log.e("emptyFields " ,emptyFields);
                             GenerikFunctions.showToast(cont,"Please specify your "+ emptyFields + " in Facebook");
@@ -957,7 +964,6 @@ public class RegistrationActivity extends Activity
 
         /******/
         getFbFriendsCount();
-
     }
 
     private void getFbFriendsCount()
@@ -978,7 +984,7 @@ public class RegistrationActivity extends Activity
 
                             JSONObject summary = graphObject.getJSONObject("summary");
                             String totCount = summary.getString("total_count");
-                           // Log.e("Summary  totCount ", summary + "      " + totCount);
+                            Log.e("Friend  totCount ", summary + "      " + totCount);
 
                             total_friends_count = (Integer.parseInt(totCount.trim()));
 
@@ -1005,23 +1011,24 @@ public class RegistrationActivity extends Activity
                                 Log.e("Before FB AWS Storage","Yes");
                                 LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
                                 Log.e("FB Info in storage",loggedInUserInformation.getFB_USER_BIRTHDATE() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
-                                new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Registration",sqldb).execute();
+
+                                SharedPreferences.Editor editor = sharedpreferences.edit();
+                                editor.putString(m_config.LoggedInFBUserID, loggedInUserInformation.getFB_USER_ID().trim());
+                                editor.apply();
+
+
+                                Log.e("Inside requestMeFbData","Yes");
+                                new  checkFBUserInfo(loggedInUserInformation).execute();
+
+                            //    new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Registration",sqldb).execute();
 
                             }
 
-                            // Check for DB Updation
-//                             Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
-//                                    FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
-//                            Log.i("User Query for Friends retrieve : ", Query);
-//                            cursor = sqldb.rawQuery(Query, null);
-//                            cursor.moveToFirst();
-//                            Log.e("Cursor  ",cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_NAME)) +"   "
-//                                    + cursor.getString(cursor.getColumnIndex(LoginTableColumns.FB_USER_FRIENDS)));
 
                         }
                         catch (Exception e)
                         {
-                            GenerikFunctions.hideDialog(m_config.pDialog);
+
                             System.out.println("Exception=" + e);
                             e.printStackTrace();
                         }
@@ -1030,6 +1037,92 @@ public class RegistrationActivity extends Activity
         ).executeAsync();
     }
 
+    public void updateUserTableAndPrefs(UserTable user)
+    {
+        String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
+                LoginTableColumns.FB_USER_NAME + " = '" + user.getFBUserName() + "', " +
+                LoginTableColumns.FB_USER_GENDER + " = '" + user.getGender().trim() + "', " +
+                LoginTableColumns.FB_USER_BIRTHDATE + " = '" + user.getBirthDate().trim() + "', " +
+                LoginTableColumns.FB_USER_EMAIL + " = '" + user.getSocialEmail().trim() + "', " +
+                LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + user.getFBHomeLocation().trim() + "', " +
+                LoginTableColumns.FB_USER_PROFILE_PIC + " = '" + user.getProfilePicUrl().get(0) + "', " +
+                LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + user.getFBCurrentLocation().trim() + "'  where "
+                + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
+
+        Log.i("update User "+fbUserInformation.getFbId().trim(), updateUser);
+        sqldb.execSQL(updateUser);
+
+        String Update = "Update " + LoginTableColumns.USERTABLE + " set "
+                + LoginTableColumns.LI_USER_ID  + " = '" + user.getLinkedInID() + "', "
+                + LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + user.getLKProfilePicUrl().toString() + "', "
+                + LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + user.getLKConnectionsCount() + "', "
+                + LoginTableColumns.LI_USER_HEADLINE + " = '" + user.getLKHeadLine() + "' "
+                + " where " + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
+
+        Log.i("update User "+fbUserInformation.getFbId().trim(), Update);
+        sqldb.execSQL(Update);
+
+        LoginValidations.QBStartSession(cont);
+
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString(m_config.Entered_User_Name,user.getName());
+        editor.putString(m_config.Entered_Email,user.getEmail());
+        editor.putString(m_config.Entered_Contact_No,user.getPhoneNumber());
+        editor.putString(m_config.LoggedInFBUserID, user.getFacebookID().trim());
+        editor.putString(m_config.FBLoginDone,"Yes");
+        editor.putString(m_config.LILoginDone,"Yes");
+        editor.putString(m_config.EmailValidationDone,"Yes");
+        editor.putString(m_config.BasicFBLIValidationsDone,"Yes");
+        editor.putString(m_config.OTPValidationDone,"Yes");
+        editor.putString(m_config.FaceDetectDone,"Yes");
+        editor.putString(m_config.FinalStepDone,"Yes");
+        editor.apply();
+        //Start QB Session Here
+    }
+
+//Check whether user exists at AWS or not
+    public class checkFBUserInfo extends AsyncTask<Void, Void, Void>
+    {
+        UserTable selUserData = null;
+        LoggedInUserInformation loggedInUserInformation;
+        public checkFBUserInfo(LoggedInUserInformation loggedInUserInformation)
+        {
+            this.loggedInUserInformation = loggedInUserInformation;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            selUserData = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
+            Log.e("selUserClass from Async", " " + selUserData);
+
+
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void v)
+        {
+            if(selUserData != null)
+            {
+                //Check login done flag
+                if(selUserData.getRegistrationStatus().equals("Yes"))
+                {
+                    //Registration is already done
+                    updateUserTableAndPrefs(selUserData);
+                }
+                else
+                {
+                    new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Registration",sqldb).execute();
+                }
+            }
+            else
+            {
+                //If not exists then call  normal registration flow
+                new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Registration",sqldb).execute();
+
+            }
+        }
+    }
     private static Scope buildScope()
     {
         return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
@@ -1037,6 +1130,8 @@ public class RegistrationActivity extends Activity
 
     public static void startLinkedInProcess()
     {
+        RegistrationActivity.reg_pd.show();
+
         linkedinStart="Yes";
         Log.e("In startLinkedInProcess","Yes");
         LISessionManager.getInstance(cont).init((Activity)cont, buildScope(), new AuthListener()
@@ -1053,56 +1148,31 @@ public class RegistrationActivity extends Activity
             public void onAuthError(LIAuthError error)
             {
                 Log.e("LI Login Error",error.toString()+"");
-                GenerikFunctions.showToast(cont, "failed  linked in " + error.toString());
+                GenerikFunctions.showToast(cont, "Linked In Login failed.");
                 if(error.toString().trim().contains("USER_CANCELLED"))
                 {
+                    if(RegistrationActivity.reg_pd.isShowing())
+                    {
+                        RegistrationActivity.reg_pd.dismiss();
+                    }
                     GenerikFunctions.showToast(cont, "Please accept permissions " );
                     linkedinStart="Yes";
                     startLinkedInProcess();
                 }
                 else //if(error.toString().trim().contains("UNKNOWN_ERROR"))
                 {
+                    if(RegistrationActivity.reg_pd.isShowing())
+                    {
+                        RegistrationActivity.reg_pd.dismiss();
+                    }
                     Log.e("Inside Else","Yes");
                     //GenerikFunctions.showToast(cont, "failed  linked in login " + error.toString());
                 }
             }
-        }, true)
-        ;
+        }, true);
     }
 
-    /*public void startLinkedInProcess()
-    {
-        linkedinStart="Yes";
-        Log.e("In startLinkedInProcess","Yes");
-        LISessionManager.getInstance(cont).init(this, buildScope(), new AuthListener()
-        {
-            @Override
-            public void onAuthSuccess()
-            {
-                Token = LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().getValue().toString();
-                Log.e("LI Token",Token+"");
-              //  GenerikFunctions.showToast(cont,"success   Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
-            }
 
-            @Override
-            public void onAuthError(LIAuthError error)
-            {
-                Log.e("LI Login Error",error.toString()+"");
-                GenerikFunctions.showToast(cont, "failed  linked in " + error.toString());
-                if(error.toString().trim().contains("USER_CANCELLED"))
-                {
-                    GenerikFunctions.showToast(cont, "Please accept permissions " );
-                    linkedinStart="Yes";
-                    startLinkedInProcess();
-                }
-                else if(error.toString().trim().contains("UNKNOWN_ERROR"))
-                {
-                    Log.e("Inside Else","Yes");
-                    GenerikFunctions.showToast(cont, "failed  linked in login " + error.toString());
-                }
-            }
-        }, true);
-    }*/
 
     //function for enabling TelephonyManager for fetching deviceId
     public void getDeviceIdAndroid(String regId, Activity context)
@@ -1129,6 +1199,7 @@ public class RegistrationActivity extends Activity
 
                 Log.e("If permission is not granted",", request for permission");
 
+                Toast.makeText(cont, "Without this permission the app will be unable to receive Push Notifications.",Toast.LENGTH_LONG).show();
 
             }
             else
@@ -1215,7 +1286,7 @@ public class RegistrationActivity extends Activity
         // Instantiate the RequestQueue.
         Log.e("Email Id","Yes  " + EmailId);
         RequestQueue queue = Volley.newRequestQueue((Activity)cont);
-        String url ="http://api.verify-email.org/api.php?usr=harshadaasai&pwd=harshada26&check="+EmailId;
+        String url ="http://api.verify-email.org/api.php?usr=aperotechnologies&pwd=apero@357&check="+EmailId;
        // String url = "http://www.google.com";
         // prepare the Request
         JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -1230,12 +1301,10 @@ public class RegistrationActivity extends Activity
                         {
                             JSONObject json = response;
                             verifyStatus = json.getString("verify_status");
-                            Log.i("verifyStatus 11",verifyStatus + "   11");
-                            Log.i("verifyStatus 44",verifyStatus + "   44");
+                            Log.e("verifyStatus 11",verifyStatus + "   11");
                             if(verifyStatus.equals("1"))
                             {
-                                progressDialog.dismiss();
-                                progressDialog.cancel();
+
 
                                 SharedPreferences.Editor editor = sharedpreferences.edit();
                                 editor.putString(m_config.EmailValidationDone,"Yes");
@@ -1245,18 +1314,22 @@ public class RegistrationActivity extends Activity
                             }
                             else
                             {
-                                progressDialog.dismiss();
-                                progressDialog.cancel();
-                                GenerikFunctions.showToast(cont,"Email Verification Failed");
+                                if(RegistrationActivity.reg_pd.isShowing())
+                                {
+                                    RegistrationActivity.reg_pd.dismiss();
+                                }
+                                GenerikFunctions.showToast(cont,"Email Verification Failed, Please Check your EmailId...");
                             }
                         }
                         catch(Exception e)
                         {
-                            progressDialog.dismiss();
-                            progressDialog.cancel();
+                            if(RegistrationActivity.reg_pd.isShowing())
+                            {
+                                RegistrationActivity.reg_pd.dismiss();
+                            }
                             verifyStatus = "0";
                             Log.i("verifyStatus 22",verifyStatus + "   22");
-                            GenerikFunctions.showToast(cont,"Email Verification Failed");
+                            GenerikFunctions.showToast(cont,"Email Verification Failed, Please Check your EmailId...");
                         }
                     }
                 },
@@ -1265,16 +1338,18 @@ public class RegistrationActivity extends Activity
                     @Override
                     public void onErrorResponse(VolleyError error)
                     {
-                        progressDialog.dismiss();
-                        progressDialog.cancel();
+                        if(RegistrationActivity.reg_pd.isShowing())
+                        {
+                            RegistrationActivity.reg_pd.dismiss();
+                        }
                         Log.d("Error.Response", error.toString());
                         verifyStatus = "0";
                         Log.i("verifyStatus 33",verifyStatus + "   33");
-                        GenerikFunctions.showToast(cont,"Email Verification Failed");
+                        GenerikFunctions.showToast(cont,"Email Verification Failed, Please Check your EmailId...");
                     }
                 });
 
-        RetryPolicy policy = new DefaultRetryPolicy(10000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        RetryPolicy policy = new DefaultRetryPolicy(70000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         getRequest.setRetryPolicy(policy);
         // add it to the RequestQueue
         queue.add(getRequest);

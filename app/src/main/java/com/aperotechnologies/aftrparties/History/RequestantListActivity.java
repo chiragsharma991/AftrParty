@@ -49,7 +49,8 @@ public class RequestantListActivity extends Activity
     private int iterations;
 
 
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_requestant);
 
@@ -71,7 +72,8 @@ public class RequestantListActivity extends Activity
         listRequestant.addFooterView(footerView);
 
 
-        try {
+        try
+        {
 
             partyy = (PartyParceableData)getIntent().getSerializableExtra(ConstsCore.SER_KEY);
             String PartyID = partyy.getPartyId();
@@ -128,8 +130,6 @@ public class RequestantListActivity extends Activity
             setGCListAdapter();
 
             listRequestant.setOnScrollListener(onScrollListener());
-
-
 
         }
         catch (Exception ex)

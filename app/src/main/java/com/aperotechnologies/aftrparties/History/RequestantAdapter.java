@@ -130,9 +130,11 @@ public class RequestantAdapter extends BaseAdapter {
 
         final String GateCrasherID = GateCrashers.getGatecrasherid();
 
-        holder.txtGCRequestStatus.setOnClickListener(new View.OnClickListener() {
+        holder.txtGCRequestStatus.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
 
                 TextView t = (TextView) v;
 
@@ -141,42 +143,45 @@ public class RequestantAdapter extends BaseAdapter {
                     Long currentApprovalTime = System.currentTimeMillis();
                     Boolean allowStatus  = getActivePartyStatus(GateCrasherID, currentApprovalTime);
                     Log.e("allowStatus"," "+allowStatus);
-
                     //check for Active Party of GC
-                    if(allowStatus.booleanValue() == true){
+                    if(allowStatus.booleanValue() == true)
+                    {
                         Boolean paidStatus = getPaidUser(GateCrasherID, currentApprovalTime);
                         Log.e("paidStatus"," "+paidStatus);
                         //check for Paid Status of GC
-                        if(paidStatus.booleanValue() == true){
+                        if(paidStatus.booleanValue() == true)
+                        {
                             //paid user
                             setPaidUserApproval(currentApprovalTime, GateCrasherID, partyy, "Approved", cont, t);
-                        }else{
+                        }
+                        else
+                        {
                             //unpaid user
                             setUnPaidUserApproval(currentApprovalTime, GateCrasherID, partyy, "Approved", cont, t);
                         }
-                    }else{
+                    }
+                    else
+                    {
                         Boolean paidStatus = getPaidUser(GateCrasherID, currentApprovalTime);
                         Log.e("paidStatus"," "+paidStatus);
                         //check for Paid Status of GC
-                        if(paidStatus.booleanValue() == true){
+                        if(paidStatus.booleanValue() == true)
+                        {
                             //paid user
                             GenerikFunctions.showToast(cont, "You cannot approved the request as " +message);
-                        }else{
+                        }
+                        else
+                        {
                             //unpaid user
-                            GenerikFunctions.showToast(cont, "You cannot approved the request as " +message);                        }
-
-
-
+                            GenerikFunctions.showToast(cont, "You cannot approved the request as " +message);
+                        }
                     }
-
-
-
                 }
-
             }
         });
 
-        holder.btnfbProfile.setOnClickListener(new View.OnClickListener() {
+        holder.btnfbProfile.setOnClickListener(new View.OnClickListener()
+        {
             @Override
             public void onClick(View v) {
                 UserTable user = getUser(GateCrasherID);
@@ -223,18 +228,17 @@ public class RequestantAdapter extends BaseAdapter {
 
         holder.btnliProfile.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 Log.e("finalGateCrashers.getGateCrasherID()"," "+GateCrasherID);
-
-
-
 
                 UserTable user = getUser(GateCrasherID);
 
                 String LIID = user.getLinkedInID();//"gWXSo4n1ei";//
                 Log.e("targetID"," "+LIID);
 
-                if(LIID.equals(null) || LIID.equals("") || LIID.equals("N/A")){
+                if(LIID.equals(null) || LIID.equals("") || LIID.equals("N/A"))
+                {
                     return;
                 }
 
@@ -264,7 +268,8 @@ public class RequestantAdapter extends BaseAdapter {
 
         holder.btn1to1Chat.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
                 UserTable user = getUser(GateCrasherID);
                 String QBID = user.getQuickBloxID();
 

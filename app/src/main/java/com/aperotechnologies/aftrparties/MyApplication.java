@@ -14,14 +14,11 @@ import com.quickblox.core.QBSettings;
  */
 public class MyApplication  extends Application {
 
-
     static final String APP_ID = "40454";//"34621";
     static final String AUTH_KEY = "GXzMGfcx-pAQOBP";//"sYpuKrOrGT4pG6d";//"q6aK9sm6GCSmtru";
     static final String AUTH_SECRET = "TZC8fTnAUDXSuYs";//"hVx9RNMT4emBK5K";//"uTOm5-R4zYyR-DV";
     static final String ACCOUNT_KEY = "VLBr2asUuw9uHDFC7qgb";//"VLBr2asUuw9uHDFC7qgb";//"bzbtQDLez742xU468TXt";
     Configuration_Parameter m_config;
-
-    ///
 
 
     @Override
@@ -30,7 +27,7 @@ public class MyApplication  extends Application {
         // to every activity. Everything is contained in MyLifecycleHandler
         // with just a few lines of code. Now *that's* nice.
         registerActivityLifecycleCallbacks(new MyLifecycleHandler());
-        m_config= Configuration_Parameter.getInstance();
+        m_config = Configuration_Parameter.getInstance();
 
         // Initialize the Amazon Cognito credentials provider
         final CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(

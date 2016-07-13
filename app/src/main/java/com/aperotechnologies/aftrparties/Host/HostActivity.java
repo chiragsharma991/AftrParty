@@ -8,6 +8,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,6 +18,10 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,6 +30,7 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -49,6 +55,8 @@ import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
+import com.aperotechnologies.aftrparties.GateCrasher.GCParceableData;
+import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
@@ -59,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
@@ -74,10 +83,13 @@ import static com.aperotechnologies.aftrparties.Reusables.Validations.getOutputM
 public class HostActivity extends Activity//implements AdapterView.OnItemSelectedListener,TimePicker.OnTimeChangedListener {
 {
 
-    LinearLayout lLyoutHost;
+    LinearLayout lLyoutHost, llayoutenterAddress;
     CircularImageView imgParty;
     TextView uploadPartyImage, txtStartDate, txtEndDate;
-    EditText edt_PartyName, edt_Description, edt_Address;
+    TextView edtEndDate;
+    EditText edt_PartyName, edt_Description;
+    CheckBox cb_byobYes, cb_byobNo;
+    CheckBox cb_getLocation, cb_EnterAddress;
     EditText edt_address, edt_street,edt_city,edt_state, edt_pincode;
     Button btn_createParty;
     String timeSelection;
@@ -85,27 +97,21 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     //final variables for StartTime and EndTime in milliseconds
     long selected_startTimeVal;
     long selected_endTimeVal;
-
     String selected_byob;
-    CheckBox cb_byobYes, cb_byobNo;
-
-
-
     //variables for date, mon, year, hour and min
     private int startDate, startMon, startYear, startHour, startMin;
     private int endDate, endMon, endYear, endHour, endMin;
-
     //temp variables for storing StartTime and EndTime in milliseconds
     final long[] tempstartTimeVal = new long[1];
     final long[] tempendTimeVal = new long[1];
-
     Configuration_Parameter m_config;
     SharedPreferences sharedPreferences;
     Context cont;
-
-
     Uri fileUri;
     String picturePath = "";
+    LocationManager locationManager;
+    private static final int MY_PERMISSIONS_ACCESS_CF_LOCATION = 3;
+    Location currentlocation = null;
 
 
     @Override
@@ -128,7 +134,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
         imgParty = (CircularImageView) findViewById(R.id.partyImage);
         uploadPartyImage = (TextView) findViewById(R.id.uploadPartyImage);
-
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 //        // Spinner for Start Now/Later
 //        Spinner spn_startTime = (Spinner) findViewById(R.id.spn_startTime);
@@ -155,19 +161,42 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
         lLyoutHost = (LinearLayout) findViewById(R.id.lLyoutHost);
         txtStartDate = (TextView) findViewById(R.id.txtStartDate);
-        txtEndDate = (TextView) findViewById(R.id.txtEndDate);
+        edtEndDate = (TextView) findViewById(R.id.edtEndDate);
+        //txtEndDate = (TextView) findViewById(R.id.txtEndDate);
         edt_PartyName = (EditText) findViewById(R.id.edt_PartyName);
         edt_Description = (EditText) findViewById(R.id.edt_Description);
+
+        // for BYOB
+        cb_byobYes = (CheckBox) findViewById(R.id.byobyes);
+        cb_byobNo = (CheckBox) findViewById(R.id.byobno);
+
         //For Location
-        edt_address = (EditText) findViewById(R.id.edt_Partyaddress);
+        cb_getLocation = (CheckBox) findViewById(R.id.cbgetLocation);
+        cb_EnterAddress = (CheckBox) findViewById(R.id.cbEnterAddress);
+
+        // UI for Entering Address
+        llayoutenterAddress = (LinearLayout) findViewById(R.id.llayoutenterAddress);
         edt_street =  (EditText) findViewById(R.id.edt_street);
         edt_city =  (EditText) findViewById(R.id.edt_city);
         edt_state =  (EditText) findViewById(R.id.edt_state);
         edt_pincode =  (EditText) findViewById(R.id.edt_pincode);
-        edt_Address = (EditText) findViewById(R.id.edt_Partyaddress);
-        cb_byobYes = (CheckBox) findViewById(R.id.byobyes);
-        cb_byobNo = (CheckBox) findViewById(R.id.byobno);
+        edt_address = (EditText) findViewById(R.id.edt_Partyaddress);
+
+
         btn_createParty = (Button) findViewById(R.id.btn_CreateParty);
+
+
+        lLyoutHost.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(inputManager != null){
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+
+
+            }
+        });
 
         //Code to clear Focus from editText
         edt_PartyName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -176,7 +205,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
                 if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
                     edt_PartyName.clearFocus();
-                    edt_Description.performClick();
+                    edt_Description.requestFocus();
 
                 }
                 return false;
@@ -184,44 +213,148 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         });
 
 
+        //Code to clear Focus from editText
+        edt_address.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
+                    edt_address.clearFocus();
+                    edt_street.requestFocus();
+
+                    handled = true;
+
+                }
+                return handled;
+            }
+        });
 
 
-//        //Code to clear Focus from editText
-//        edt_Description.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//
-//                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
-//                    edt_Description.clearFocus();
-//                    edt_Address.performClick();
-//
-//                }
-//                return false;
-//            }
-//        });
-//
-//
-//        //Code to clear Focus from editText
-//        edt_Address.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//
-//                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
-//                    edt_Address.clearFocus();
-//                    InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-//                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-//
-//
-//                }
-//                return false;
-//            }
-//        });
+
+        edt_street.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
+                    edt_street.clearFocus();
+                    edt_city.requestFocus();
+                    handled = true;
+                }
+                return handled;
+            }
+        });
+
+        edt_city.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
+                    edt_city.clearFocus();
+                    edt_state.requestFocus();
+                    handled = true;
+                }
+                return handled;
+            }
+        });
+
+        edt_state.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
+                    edt_state.clearFocus();
+                    edt_pincode.requestFocus();
+                    handled = true;
+                }
+                return handled;
+            }
+        });
+
+        edt_pincode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
+                    edt_pincode.clearFocus();
+                    InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                    handled = true;
+                }
+                return handled;
+            }
+        });
+
+
+        //Code to show Focus on first letter
+        edt_PartyName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                edt_PartyName.setText(edt_PartyName.getText().toString().replaceAll("\\s+", " ").trim());
+            }
+        });
+
+
+        //Code to show Focus on first letter
+        edt_Description.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                edt_Description.setText(edt_Description.getText().toString().replaceAll("\\s+", " ").trim());
+            }
+        });
+
+
+
+        //Code to show Focus on first letter
+        edt_address.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                edt_address.setText(edt_address.getText().toString().replaceAll("\\s+", " ").trim());
+            }
+        });
+
+        //Code to show Focus on first letter
+        edt_street.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                edt_street.setText(edt_street.getText().toString().replaceAll("\\s+", " ").trim());
+            }
+        });
+
+        //Code to show Focus on first letter
+        edt_city.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                edt_city.setText(edt_city.getText().toString().replaceAll("\\s+", " ").trim());
+            }
+        });
+
+        //Code to show Focus on first letter
+        edt_state.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                edt_state.setText(edt_state.getText().toString().replaceAll("\\s+", " ").trim());
+            }
+        });
+
+        //Code to show Focus on first letter
+        edt_pincode.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                edt_pincode.setText(edt_pincode.getText().toString().replaceAll("\\s+", " ").trim());
+            }
+        });
+
 
         cb_byobYes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 cb_byobYes.setChecked(true);
                 cb_byobNo.setChecked(false);
+                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(inputManager != null){
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
 
             }
         });
@@ -233,7 +366,348 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
             public void onClick(View v) {
                 cb_byobNo.setChecked(true);
                 cb_byobYes.setChecked(false);
+                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(inputManager != null){
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
             }
+        });
+
+
+        cb_getLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cb_getLocation.setChecked(true);
+                cb_EnterAddress.setChecked(false);
+                llayoutenterAddress.setVisibility(View.GONE);
+                edt_address.setText("");
+                edt_street.setText("");
+                edt_city.setText("");
+                edt_state.setText("");
+                edt_pincode.setText("");
+                edt_address.setError(null);
+                edt_street.setError(null);
+                edt_city.setError(null);
+                edt_state.setError(null);
+                edt_pincode.setError(null);
+                
+                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(inputManager != null){
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+
+                if ((int) Build.VERSION.SDK_INT < 23)
+                {
+                    getSelfLocation();
+
+                }
+                else {
+                    if (ActivityCompat.checkSelfPermission(HostActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                            &&
+                            ActivityCompat.checkSelfPermission(HostActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                        ActivityCompat.requestPermissions((Activity) cont,
+                                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                                MY_PERMISSIONS_ACCESS_CF_LOCATION);
+                    } else {
+                        getSelfLocation();
+
+                    }
+                }
+
+            }
+        });
+
+
+        cb_EnterAddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cb_EnterAddress.setChecked(true);
+                cb_getLocation.setChecked(false);
+                edt_address.requestFocus();
+                llayoutenterAddress.setVisibility(View.VISIBLE);
+                edt_address.setText("");
+                edt_street.setText("");
+                edt_city.setText("");
+                edt_state.setText("");
+                edt_pincode.setText("");
+                edt_address.setError(null);
+                edt_street.setError(null);
+                edt_city.setError(null);
+                edt_state.setError(null);
+                edt_pincode.setError(null);
+
+
+            }
+        });
+
+        //Calendar date,time value for StartDateTime
+        final Calendar calendar = Validations.getCalendar();
+        startDate = calendar.get(Calendar.DAY_OF_MONTH);
+        startMon = calendar.get(Calendar.MONTH);
+        startYear = calendar.get(Calendar.YEAR);
+        startHour = calendar.get(Calendar.HOUR_OF_DAY);
+        startMin = calendar.get(Calendar.MINUTE);
+
+        txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
+        //current date time in milliseconds
+        selected_startTimeVal = getTimeinMs(startDate, startMon, startYear, startHour, startMin);
+
+        //date,time value for EndDateTime
+        endDate = calendar.get(Calendar.DAY_OF_MONTH);
+        endMon = calendar.get(Calendar.MONTH);
+        endYear = calendar.get(Calendar.YEAR);
+        endHour = calendar.get(Calendar.HOUR_OF_DAY);
+        endMin = calendar.get(Calendar.MINUTE);
+
+        //txtEndDate.setText(getDateNo(endDate) + "-" + getMonthNo(endMon) + "-" + endYear + ", " + Validations.showTime(endHour, endMin));
+        //current date time in milliseconds
+        //selected_endTimeVal = getTimeinMs(endDate, endMon, endYear, endHour, endMin);
+
+        //set startdateTime and endDateTime to temporary variables
+        tempstartTimeVal[0] = selected_startTimeVal;
+        tempendTimeVal[0] = selected_endTimeVal;
+
+        txtStartDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startDateDialog("show");
+            }
+        });
+
+
+        // selection of Spinner Now/Later and start DatePicker
+//        spn_startTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                timeSelection = parent.getSelectedItem().toString().trim();
+//                if (timeSelection.equals("Later")) {
+//                    startDateDialog("show");
+//
+//                } else {
+//                    //spinner click for Now Selection
+//                    //current date time
+//                    Calendar calendar = Calendar.getInstance();
+//                    int mYear = calendar.get(Calendar.YEAR);
+//                    int mMonth = calendar.get(Calendar.MONTH);
+//                    int mDay = calendar.get(Calendar.DAY_OF_MONTH);
+//                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+//                    int min = calendar.get(Calendar.MINUTE);
+//                    startDate = mDay;
+//                    startMon = mMonth;
+//                    startYear = mYear;
+//                    startHour = hour;
+//                    startMin = min;
+//                    txtStartDate.setText(getDateNo(mDay) + "-" + getMonthNo(mMonth) + "-" + mYear + ", " + Validations.showTime(hour, min));
+//                    selected_startTimeVal = getTimeinMs(mDay, mMonth, mYear, hour, min);
+//
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
+
+        // selection of end date edittext
+        edtEndDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                endDateDialog("show");
+            }
+        });
+
+        // selection of end date textfield
+//        txtEndDate.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                endDateDialog("show");
+//            }
+//        });
+
+
+        // create party button click
+        btn_createParty.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                edt_PartyName.clearFocus();
+                edt_Description.clearFocus();
+                edt_address.clearFocus();
+                edt_street.clearFocus();
+                edt_city.clearFocus();
+                edt_state.clearFocus();
+                edt_pincode.clearFocus();
+                //edt_address.clearFocus();
+                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(inputManager != null){
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+
+                GenerikFunctions.sDialog(cont,"Creating party...");
+
+
+                if(cb_byobYes.isChecked()){
+                    selected_byob = "Yes";
+                }else{
+                    selected_byob = "No";
+                }
+
+
+                String val = Validations.checkWordsCount(edt_Description.getText().toString());
+                String msg = "";
+                int msglength = 0;
+
+//                if(picturePath.equals(""))
+//                {
+//                    msg += "Please upload Image." + "\n";
+//                    msglength++;
+//                }
+
+                if(edtEndDate.getText().toString().equals("Select End Time")){
+                    msg += "Please select PartyEndTime." + "\n";
+                    msglength++;
+
+                }
+                else if (selected_endTimeVal - selected_startTimeVal == 0 || selected_endTimeVal - selected_startTimeVal < ConstsCore.hourVal)
+                {
+                    msg += "PartyEndTime should be greater than one hour." + "\n";
+                    msglength++;
+
+                }
+//
+                else if (selected_endTimeVal - selected_startTimeVal > ConstsCore.TwelveHrVal)
+                {
+                    msg += "PartyEndTime cannot be greater than 12 hours." + "\n";
+                    msglength++;
+                }
+
+                if(edt_PartyName.getText().toString().replaceAll("\\s+", " ").trim().equals("") || edt_PartyName.getText().toString().replaceAll("\\s+", " ").trim().equals(" "))
+                {
+                    //msg += "Please fill Party Name."+ "\n";
+                    edt_PartyName.setError("Please fill Party Name");
+                    msglength++;
+                }
+                else
+                {
+                    edt_PartyName.setError(null);
+                }
+
+                if(!val.equals("true")) {
+                    edt_Description.setError(val);
+                    //msg += val + "\n";
+                    msglength++;
+                }else{
+                    edt_Description.setError(null);
+                }
+
+
+                if(!cb_getLocation.isChecked() && (!cb_EnterAddress.isChecked())){
+                    msg += "Please Select Address";
+                    msglength++;
+                }
+
+
+//                if(cb_getLocation.isChecked())
+//                {
+//                    Log.e("edt_locationAddress.getText().toString().length()"," "+edt_locationAddress.getText().toString().length());
+//                    if(edt_locationAddress.getText().toString().length() == 0)
+//                    {
+//                        msg += "Unable to get current location.";
+//                        msglength++;
+//                        edt_locationAddress.setError("Unable to get current location.");
+//                    }else{
+//                        edt_locationAddress.setError(null);
+//                    }
+//                }
+
+                if(cb_EnterAddress.isChecked() || cb_getLocation.isChecked()) {
+                    if (edt_address.getText().toString().length() == 0) {
+                        //msg += "Please fill the Address."+ "\n";
+                        msglength++;
+                        edt_address.setError("Please Enter Building No./Name");
+                    }else{
+                        edt_address.setError(null);
+                    }
+                    if (edt_street.getText().toString().length() == 0) {
+                        //msg += "Please fill the Address"+ "\n";
+                        msglength++;
+                        edt_street.setError("Please Enter Street Name.");
+                    }else{
+                        edt_street.setError(null);
+                    }
+                    if (edt_city.getText().toString().length() == 0) {
+                        //msg += "Please fill the Address"+ "\n";
+                        msglength++;
+                        edt_city.setError("Please Enter City Name");
+                    }else{
+                        edt_city.setError(null);
+                    }
+                    if (edt_state.getText().toString().length() == 0) {
+                        //msg += "Please fill the Address"+ "\n";
+                        msglength++;
+                        edt_state.setError("Please Enter State Name");
+                    }else{
+                        edt_state.setError(null);
+                    }
+                    if (edt_pincode.getText().toString().length() == 0) {
+                        //msg += "Please fill the Address"+ "\n";
+                        msglength++;
+                        edt_pincode.setError("Please Enter PIN code");
+                    }else{
+                        edt_pincode.setError(null);
+                    }
+                }
+                Log.e("msglength"," "+msglength);
+
+                if(msglength == 0)
+                {
+
+                    String Address = edt_address.getText().toString().trim();
+                    Log.e("address",Address);
+                    String street = edt_street.getText().toString().trim();
+                    String city  = edt_city.getText().toString().trim();
+                    String state = edt_state.getText().toString().trim();
+                    String pin = edt_pincode.getText().toString().trim();
+                    String newAddress = Address +", " + street +", " + city+ ", " + state + ", " + pin;
+                    Log.i("Entered Address ", newAddress);
+
+                    if(cb_EnterAddress.isChecked())
+                    {
+                        getLatLong(newAddress,0);
+                    }
+                    else if(cb_getLocation.isChecked()) {
+
+                        String latitude = String.valueOf(currentlocation.getLatitude());
+                        String longitude = String.valueOf(currentlocation.getLongitude());
+                        new AWSPartyOperations.createParty(cont, initialiseParty(cont, latitude, longitude, newAddress)).execute();
+
+                    }
+
+                }
+                else
+                {
+                    Log.e("msg"," "+msg.equals(""));
+
+                    if(msg.equals(""))
+                    {
+                        GenerikFunctions.hDialog();
+                    }
+                    else
+                    {
+                        Toast.makeText(getApplicationContext(), " " + msg, Toast.LENGTH_LONG).show();
+                        GenerikFunctions.hDialog();
+                    }
+
+
+                }
+
+
+            }
+
+
         });
 
         uploadPartyImage.setOnClickListener(new View.OnClickListener() {
@@ -364,228 +838,9 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
             }
         });
 
-
-        //Calendar date,time value for StartDateTime
-        final Calendar calendar = Validations.getCalendar();
-        startDate = calendar.get(Calendar.DAY_OF_MONTH);
-        startMon = calendar.get(Calendar.MONTH);
-        startYear = calendar.get(Calendar.YEAR);
-        startHour = calendar.get(Calendar.HOUR_OF_DAY);
-        startMin = calendar.get(Calendar.MINUTE);
-
-        txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
-        //current date time in milliseconds
-        selected_startTimeVal = getTimeinMs(startDate, startMon, startYear, startHour, startMin);
-
-        //date,time value for EndDateTime
-        endDate = calendar.get(Calendar.DAY_OF_MONTH);
-        endMon = calendar.get(Calendar.MONTH);
-        endYear = calendar.get(Calendar.YEAR);
-        endHour = calendar.get(Calendar.HOUR_OF_DAY);
-        endMin = calendar.get(Calendar.MINUTE);
-
-        txtEndDate.setText(getDateNo(endDate) + "-" + getMonthNo(endMon) + "-" + endYear + ", " + Validations.showTime(endHour, endMin));
-        //current date time in milliseconds
-        selected_endTimeVal = getTimeinMs(endDate, endMon, endYear, endHour, endMin);
-
-        //set startdateTime and endDateTime to temporary variables
-        tempstartTimeVal[0] = selected_startTimeVal;
-        tempendTimeVal[0] = selected_endTimeVal;
-
-        txtStartDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startDateDialog("show");
-            }
-        });
-
-
-        // selection of Spinner Now/Later and start DatePicker
-//        spn_startTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                timeSelection = parent.getSelectedItem().toString().trim();
-//                if (timeSelection.equals("Later")) {
-//                    startDateDialog("show");
-//
-//                } else {
-//                    //spinner click for Now Selection
-//                    //current date time
-//                    Calendar calendar = Calendar.getInstance();
-//                    int mYear = calendar.get(Calendar.YEAR);
-//                    int mMonth = calendar.get(Calendar.MONTH);
-//                    int mDay = calendar.get(Calendar.DAY_OF_MONTH);
-//                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
-//                    int min = calendar.get(Calendar.MINUTE);
-//                    startDate = mDay;
-//                    startMon = mMonth;
-//                    startYear = mYear;
-//                    startHour = hour;
-//                    startMin = min;
-//                    txtStartDate.setText(getDateNo(mDay) + "-" + getMonthNo(mMonth) + "-" + mYear + ", " + Validations.showTime(hour, min));
-//                    selected_startTimeVal = getTimeinMs(mDay, mMonth, mYear, hour, min);
-//
-//                }
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//            }
-//        });
-
-        // selection of end date textfield
-        txtEndDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                endDateDialog("show");
-            }
-        });
-
-        // spinner selection for BYOB
-//        spn_byob.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                selected_byob = parent.getSelectedItem().toString().trim();
-//                //Log.e("selected_byob "," ---- "+selected_byob);
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//            }
-//        });
-
-        // create party button click
-        btn_createParty.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if(cb_byobYes.isChecked()){
-                    selected_byob = "Yes";
-                }else{
-                    selected_byob = "No";
-                }
-
-                Log.e("selected_byob"," "+selected_byob);
-
-                edt_PartyName.clearFocus();
-                edt_Description.clearFocus();
-                //edt_Address.clearFocus();
-                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-
-                GenerikFunctions.showDialog(m_config.pDialog,"Creating Party...");
-
-                String val = Validations.checkWordsCount(edt_Description.getText().toString());
-                String msg = "";
-                int msglength = 0;
-
-//                if(picturePath.equals(""))
-//                {
-//                    msg += "Please upload Image." + "\n";
-//                    msglength++;
-//                }
-
-                if (selected_endTimeVal - selected_startTimeVal == 0)
-                {
-                    msg += "PartyStartTime & PartyEndTime cannot be same. It should be greater than one hour." + "\n";
-                    msglength++;
-                    
-                }
-                else if (selected_endTimeVal < selected_startTimeVal)
-                {
-                    msg += "PartyEndTime should be greater than StartTime." + "\n";
-                    msglength++;
-                   
-                }
-                else if (selected_endTimeVal - selected_startTimeVal < ConstsCore.hourVal)
-                {
-                    msg += "PartyEndTime should be greater than 1 hour." + "\n";
-                    msglength++;
-                    
-                }
-                else if (selected_endTimeVal - selected_startTimeVal > ConstsCore.TwelveHrVal)
-                {
-                    msg += "PartyEndTime cannot be greater than 12 hours." + "\n";
-                    msglength++;
-                }
-
-                if(edt_PartyName.getText().toString().replaceAll("\\s+", " ").trim().equals("") || edt_PartyName.getText().toString().replaceAll("\\s+", " ").trim().equals(" "))
-                {
-                    //msg += "Please fill Party Name."+ "\n";
-                    edt_PartyName.setError("Please fill Party Name");
-                    msglength++;
-                }
-
-                if(!val.equals("true")) {
-                    edt_Description.setError(val);
-                    //msg += val + "\n";
-                    msglength++;
-                }
-                
-                if(edt_address.getText().toString().length()==0)
-                {
-                    //msg += "Please fill the Address."+ "\n";
-                    msglength++;
-                    edt_address.setError("Please Enter Address");
-                }
-                if(edt_street.getText().toString().length()==0)
-                {
-                    //msg += "Please fill the Address"+ "\n";
-                    msglength++;
-                    edt_street.setError("Please Enter Street Name.");
-                }
-                if(edt_city.getText().toString().length()==0)
-                {
-                    //msg += "Please fill the Address"+ "\n";
-                    msglength++;
-                    edt_city.setError("Please Enter City Name");
-                }
-                if(edt_state.getText().toString().length()==0)
-                {
-                    //msg += "Please fill the Address"+ "\n";
-                    msglength++;
-                    edt_state.setError("Please Enter State Name");
-                }
-                if(edt_pincode.getText().toString().length()==0)
-                {
-                    //msg += "Please fill the Address"+ "\n";
-                    msglength++;
-                    edt_pincode.setError("Please Enter PIN code");
-                }
-
-                if(msglength == 0)
-                {
-                    String Address = edt_address.getText().toString().trim();
-                    Log.e("address",Address);
-                    String street = edt_street.getText().toString().trim();
-                    String city  = edt_city.getText().toString().trim();
-                    String state = edt_state.getText().toString().trim();
-                    String pin = edt_pincode.getText().toString().trim();
-
-                    String newAddress = Address +", " + street +", " + city+ ", " + state + ", " + pin;
-                    Log.i("Entered Address ", newAddress);
-                    newAddress = newAddress.replace(" ", "+");
-                    Log.i("Processed Address ", newAddress);
-
-                    getLatLong(newAddress,0);
-                }
-                else
-                {
-
-                    Toast.makeText(getApplicationContext(), " " + msg, Toast.LENGTH_LONG).show();
-                    GenerikFunctions.hideDialog(m_config.pDialog);
-                }
-
-
-            }
-
-
-        });
-
     }
+
+
 
 
 
@@ -694,16 +949,30 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                         startHour = timePicker.getCurrentHour();
                         startMin = timePicker.getCurrentMinute();
                         tempstartTimeVal[0] = getTimeinMs(startDate, startMon, startYear, startHour,startMin);
-                        Log.e("diff ", "  " + (tempstartTimeVal[0] - selected_startTimeVal));
+                        Log.e("diff ", "  " + tempstartTimeVal[0]+"----"+selected_endTimeVal);
 
-                        if (tempstartTimeVal[0] - selected_startTimeVal < 0) {
-                            Toast.makeText(getApplication(), "StartTime Should be greater than or equal to currentTime", Toast.LENGTH_SHORT).show();
-                        } else {
+                       if(selected_endTimeVal != 0) {
+                            if (selected_endTimeVal - tempstartTimeVal[0] == 0 || selected_endTimeVal - tempstartTimeVal[0] < 0 || selected_endTimeVal - tempstartTimeVal[0] < ConstsCore.hourVal) {
+                                Toast.makeText(getApplicationContext(), " EndTime should be greater than 1 hour ", Toast.LENGTH_SHORT).show();
+                            } else if (selected_endTimeVal - tempstartTimeVal[0] > ConstsCore.TwelveHrVal) {
+                                Toast.makeText(getApplicationContext(), " EndTime cannot be greater than 12 hours ", Toast.LENGTH_SHORT).show();
+                            }else{
+                                txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
+                                selected_startTimeVal = tempstartTimeVal[0];
+                                Log.e("selected_startTimeVal", " " + selected_startTimeVal+" "+new Date(selected_startTimeVal));
+
+                            }
+                        }else {
+
                             txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
                             selected_startTimeVal = tempstartTimeVal[0];
                             Log.e("selected_startTimeVal", " " + selected_startTimeVal+" "+new Date(selected_startTimeVal));
 
                         }
+
+
+
+
                     }
                 })
                 .setNegativeButton(android.R.string.cancel,
@@ -804,18 +1073,14 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
                         Log.e("diff by date", "    " + (finalEndTimeVal - finalStartTimeVal));
 
-                        if (tempendTimeVal[0] - selected_startTimeVal == 0) {
-                            Toast.makeText(getApplicationContext(), "StartTime & EndTime cannot be same", Toast.LENGTH_SHORT).show();
-                        } else if (tempendTimeVal[0] < selected_startTimeVal) {
-                            Toast.makeText(getApplicationContext(), " EndTime should be greater than StartTime", Toast.LENGTH_SHORT).show();
-                        } else if (tempendTimeVal[0] - selected_startTimeVal < ConstsCore.hourVal) {
+                        if (tempendTimeVal[0] - selected_startTimeVal == 0 || tempendTimeVal[0] < selected_startTimeVal || tempendTimeVal[0] - selected_startTimeVal < ConstsCore.hourVal) {
                             Toast.makeText(getApplicationContext(), " EndTime should be greater than 1 hour ", Toast.LENGTH_SHORT).show();
                         } else if (tempendTimeVal[0] - selected_startTimeVal > ConstsCore.TwelveHrVal) {
                             Toast.makeText(getApplicationContext(), " EndTime cannot be greater than 12 hours ", Toast.LENGTH_SHORT).show();
                         } else {
 
                             selected_endTimeVal = tempendTimeVal[0];
-                            txtEndDate.setText(getDateNo(endDate) + "-" + getMonthNo(endMon) + "-" + endYear + ", " + Validations.showTime(endHour, endMin));
+                            edtEndDate.setText(getDateNo(endDate) + "-" + getMonthNo(endMon) + "-" + endYear + ", " + Validations.showTime(endHour, endMin));
 
                         }
                     }
@@ -840,6 +1105,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
 
 
+    //***// function providing latitude longitude from address
     public void getLatLong(String newAddress,int iteration)
     {
         try
@@ -913,26 +1179,31 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
                     case 2 : {
                         Toast.makeText(getApplicationContext(), "Unable to get Latitude and Longitude for this address location.",Toast.LENGTH_SHORT).show();
-                        GenerikFunctions.hideDialog(m_config.pDialog);
                     }
                     break;
 
                 }
-                //edt_Address.setError("Unable to get Latitude and Longitude for this address location.");
+                //edt_address.setError("Unable to get Latitude and Longitude for this address location.");
             }
             else
             {
+
+                String Address = edt_address.getText().toString().trim();
+                String street = edt_street.getText().toString().trim();
+                String city  = edt_city.getText().toString().trim();
+                String state = edt_state.getText().toString().trim();
+                String pin = edt_pincode.getText().toString().trim();
+                String fullAddress = Address +", " + street +", " + city+ ", " + state + ", " + pin;
+
                 Log.e("Store Party to AWS","Yes");
                 Toast.makeText(HostActivity.this,"Store Party to AWS",Toast.LENGTH_LONG);
-                new AWSPartyOperations.createParty(cont, initialiseParty(cont, locationAddress)).execute();
+                new AWSPartyOperations.createParty(cont, initialiseParty(cont, locationAddress.split(" ")[0],locationAddress.split(" ")[1], fullAddress)).execute();
             }
-
-            //lblLatLang.setText("GeoLocation  " + locationAddress);
 
         }
     }
 
-
+//***//
 
 
 
@@ -997,6 +1268,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
             }
         }
     }
+
     public String getpath(Uri imageUri)
     {
         String[] projection = { MediaStore.Images.Media.DATA };
@@ -1173,16 +1445,64 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                     break;
                 }
             }
+            case MY_PERMISSIONS_ACCESS_CF_LOCATION:
+            {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+                    getSelfLocation();
+
+                }
+                else
+                {
+                    // permission was not granted
+                    if (cont == null)
+                    {
+                        return;
+                    }
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(HostActivity.this, Manifest.permission.ACCESS_FINE_LOCATION))
+                    {
+                        //showStoragePermissionRationale();
+
+                        new AlertDialog.Builder(HostActivity.this)
+                                .setTitle("Permission Denied")
+                                .setMessage(getResources().getString(R.string.message_cf_location_permission))
+                                .setPositiveButton("Retry", new DialogInterface.OnClickListener()
+                                {
+                                    public void onClick(DialogInterface dialog, int which)
+                                    {
+                                        // continue with delete
+                                        ActivityCompat.requestPermissions(HostActivity.this,
+                                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                                                ConstsCore.MY_PERMISSIONS_REQUEST_RWFRMCAM);
+                                    }
+                                })
+                                .setNegativeButton("I'm Sure", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // do nothing
+                                    }
+                                })
+                                .show();
+                        break;
+
+                    }
+                    else
+                    {
+
+                    }
+                    break;
+
+                }
+            }
         }
     }
 
-    public PartyTable initialiseParty(Context cont, String locationAddress)
+    public PartyTable initialiseParty(Context cont, String latitude, String longitude, String fullAddress)
     {
 
         String HostFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
         List latlong = new ArrayList();
-        latlong.add(locationAddress.split(" ")[0]);
-        latlong.add(locationAddress.split(" ")[1]);
+        latlong.add(latitude);
+        latlong.add(longitude);
 
         PartyTable party = new PartyTable();
         party.setPartyID(Validations.getUniqueId(cont));
@@ -1201,7 +1521,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
             party.setBYOB("No");
         }
 
-        party.setPartyAddress(edt_Address.getText().toString().trim());
+        party.setPartyAddress(fullAddress);
         party.setPartylatlong(latlong);
         party.setPartyImage(picturePath);
         //party.setPartyImage("");
@@ -1212,11 +1532,166 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
     }
 
+    public void getSelfLocation() {
+
+        
+
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Toast.makeText(HostActivity.this, "GPS not Available", Toast.LENGTH_LONG).show();
+            Log.e("GPS Disabled", "Disabled---");
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+            builder.setTitle("Location Services Not Active");
+            builder.setMessage("Please enable Location Services and GPS");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    // Show location settings when the user acknowledges the alert dialog
+                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(intent);
+
+                    if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                        Log.e("GPS Disabled ", "Disabled");
+                        
+                    } else {
+                        currentlocation = getLastBestLocation();
+                        //Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
+                        if (currentlocation != null) {
+                            double latitude = currentlocation.getLatitude();
+                            double longitude = currentlocation.getLongitude();
+                            Geocoder geocoder = new Geocoder(HostActivity.this, Locale.getDefault());
+                            try {
+
+
+                                List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                                Log.e("here", " " + addresses);
+
+                                String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                                String city = addresses.get(0).getLocality();
+                                String state = addresses.get(0).getAdminArea();
+                                String country = addresses.get(0).getCountryName();
+                                String postalCode = addresses.get(0).getPostalCode();
+                                String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
+
+
+                                //edt_locationAddress.setText(address + " ,  " + city + "  ,  " + state + "  ,  " + country + "  ,  " + postalCode);
+                                //llayoutGetLocation.setVisibility(View.VISIBLE);
+                                edt_street.setText(address);
+                                edt_city.setText(city);
+                                edt_state.setText(state);
+                                edt_pincode.setText(postalCode);
+                                edt_address.requestFocus();
+                                llayoutenterAddress.setVisibility(View.VISIBLE);
+
+
+                            }
+                            catch (Exception e)
+                            {
+
+                                e.printStackTrace();
+                                Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        else
+                        {
+
+                            Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
+            Dialog alertDialog = builder.create();
+            alertDialog.setCanceledOnTouchOutside(false);
+            alertDialog.show();
+        } else {
+
+            currentlocation = getLastBestLocation();
+            //Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
+            if (currentlocation != null) {
+
+                double latitude = currentlocation.getLatitude();
+                double longitude = currentlocation.getLongitude();
+                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                try
+                {
+                    List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                    Log.e("here", " " + addresses);
+
+                    String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                    String city = addresses.get(0).getLocality();
+                    String state = addresses.get(0).getAdminArea();
+             //       String country = addresses.get(0).getCountryName();
+                    String postalCode = addresses.get(0).getPostalCode();
+                    String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
+
+//                    edt_locationAddress.setText(address + " ,  " + city + "  ,  " + state + "  ,  " /*+ country + "  ,  "*/ + postalCode);
+//                    llayoutGetLocation.setVisibility(View.VISIBLE);
+                    edt_street.setText(address);
+                    edt_city.setText(city);
+                    edt_state.setText(state);
+                    edt_pincode.setText(postalCode);
+                    edt_address.requestFocus();
+                    llayoutenterAddress.setVisibility(View.VISIBLE);
+
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
+
+                }
+            }
+            else
+            {
+                Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
+            }
+
+
+
+
+        }
+
+    }
+
+    private Location getLastBestLocation()
+    {
+        Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            //  return TODO;
+        }
+        Location locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+        long GPSLocationTime = 0;
+        if (null != locationGPS) { GPSLocationTime = locationGPS.getTime(); }
+
+        long NetLocationTime = 0;
+
+        if (null != locationNet) {
+            NetLocationTime = locationNet.getTime();
+        }
+
+        if ( 0 < GPSLocationTime - NetLocationTime ) {
+            return locationGPS;
+        }
+        else {
+            return locationNet;
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
+        if(cb_getLocation.isChecked()){
+            getSelfLocation();
+        }
+
     }
 
     @Override

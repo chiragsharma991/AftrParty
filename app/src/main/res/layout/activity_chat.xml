@@ -96,6 +96,8 @@
                 android:hint="Type a message"/>
 
             <Button
+                android:background="@color/colorPrimaryDark"
+                android:textColor="@color/white"
                 android:id="@+id/chatSendButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

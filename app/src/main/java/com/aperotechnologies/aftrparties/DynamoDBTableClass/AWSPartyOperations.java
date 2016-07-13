@@ -304,17 +304,16 @@ public class AWSPartyOperations {
 
                 //new getPrevPartyStatus(cont, partyTable, user).execute();
                 String url = getUrlfromCloudinary(cont, partyTable.getPartyImage());
-                Log.e("url", " " + url);
+                //Log.e("url", " " + url);
                 partyTable.setPartyImage(url);
 
                 m_config.mapper.save(partyTable);
                 Log.e("MainActivity---", "Party inserted");
-
                 new addPartiestoUserTable(user, partyTable, cont, "Created", "CreateParty", null, null).execute();
 
             }else{
                 Log.e("", "Error retrieving data");
-                GenerikFunctions.hideDialog(m_config.pDialog);
+                GenerikFunctions.hDialog();
                 GenerikFunctions.showToast(cont, "Party creation failed, Please try again after some time");
             }
 
@@ -424,25 +423,34 @@ public class AWSPartyOperations {
         {
             Log.e("--onPostEx- addPartiestoUserTable"," "+v);
 
-            if(v == true) {
+            if(v == true)
+            {
 
-                if(fromWhere == "CreateParty"){
-                    GenerikFunctions.hideDialog(m_config.pDialog);
-                    GenerikFunctions.showToast(cont,"Party Created");
+                if(fromWhere == "CreateParty")
+                {
+                    GenerikFunctions.hDialog();
+                    GenerikFunctions.showToast(cont,"Party created successfully");
                     cont.startActivity(new Intent(cont, HistoryActivity.class));
                     ((Activity) cont).finish();
 
-                }else{
+                }
+                else
+                {
                     new addGCtoPartyTable(cont, partytable, "Pending", pc, b).execute();
                 }
 
 
-            }else{
-                if(fromWhere == "CreateParty"){
-                    GenerikFunctions.hideDialog(m_config.pDialog);
+            }
+            else
+            {
+                if(fromWhere == "CreateParty")
+                {
+                    GenerikFunctions.hDialog();
                     GenerikFunctions.showToast(cont,"Party creation failed, Please try again after some time.");
-                }else{
-                    GenerikFunctions.hideDialog(m_config.pDialog);
+                }
+                else
+                {
+                    GenerikFunctions.hDialog();
                     GenerikFunctions.showToast(cont,"Party Request Failed, Please try again after some time.");
                 }
             }
@@ -479,12 +487,21 @@ public class AWSPartyOperations {
 
             try {
                 PartyTable selPartyTable = m_config.mapper.load(PartyTable.class, partytable.getPartyID());
-                String GCFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+                LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
+                String GCFBID = loggedInUserInformation.getFB_USER_ID();
+
+                String GCFBProfilePic = loggedInUserInformation.getFB_USER_PROFILE_PIC();
+                String GCLKID = loggedInUserInformation.getLI_USER_ID();
 
                 if (selPartyTable.getGatecrashers() == null) {
                     GateCrashersClass GateCrashers = new GateCrashersClass();
                     GateCrashers.setGatecrasherid(GCFBID);
                     GateCrashers.setGcrequeststatus(Status);
+                    //
+                    GateCrashers.setgcfbprofilepic(GCFBProfilePic);
+                    GateCrashers.setgclkid(GCLKID);
+                    GateCrashers.setgcqbid(sharedPreferences.getString(m_config.QuickBloxID,""));
+                    //
                     GateCrashers.setGcattendancestatus("No");
 
                     List GateCrasherList = new ArrayList();
@@ -498,6 +515,11 @@ public class AWSPartyOperations {
                     GateCrashersClass GateCrashers = new GateCrashersClass();
                     GateCrashers.setGatecrasherid(GCFBID);
                     GateCrashers.setGcrequeststatus(Status);
+                    //
+                    GateCrashers.setgcfbprofilepic(GCFBProfilePic);
+                    GateCrashers.setgclkid(GCLKID);
+                    GateCrashers.setgcqbid(sharedPreferences.getString(m_config.QuickBloxID,""));
+                    //
                     GateCrashers.setGcattendancestatus("No");
 
                     List GateCrasherList = new ArrayList();
@@ -538,7 +560,7 @@ public class AWSPartyOperations {
 
             if(v == true) {
 
-                GenerikFunctions.showToast(cont,"Request send");
+
                 b.setText(Status);
                 PartyConversion pconv = new PartyConversion();
                 pconv.setPartyid(partytable.getPartyID());
@@ -548,11 +570,13 @@ public class AWSPartyOperations {
                 pconv.setEndtime(partytable.getEndTime());
                 pc.add(pconv);
                 Log.e("pc"," "+pc.size()+" ");
+                GenerikFunctions.hDialog();
+                GenerikFunctions.showToast(cont,"Request has been send to Party");
                 QBPushNotifications.sendRequestPN(partytable.getHostQBID(), partytable.getHostFBID(), partytable.getPartyName(), partytable.getPartyID(), cont);
 
 
             }else{
-                GenerikFunctions.hideDialog(m_config.pDialog);
+                GenerikFunctions.hDialog();
                 GenerikFunctions.showToast(cont,"Party Request Failed, Please try after some time.");
                 //addGCtoPartyTable(cont, partytable, "Pending", pc);
             }
@@ -648,7 +672,7 @@ public class AWSPartyOperations {
                 }else{
 
                     ActivePartyClass ActiveParty = ActivePartyList.get(0);
-                    ActivePartyList.remove(0);
+                    //ActivePartyList.remove(0);
                     ActiveParty.setPartyid(party.getPartyId());
                     ActiveParty.setPartyname(party.getPartyName());
                     ActiveParty.setStarttime(party.getStartTime());
@@ -656,7 +680,7 @@ public class AWSPartyOperations {
                     ActiveParty.setPartystatus(status);
                     ActiveParty.setStartblocktime(startBlocktime);
                     ActiveParty.setEndblocktime(endBlockTime);
-                    ActivePartyList.add(0, ActiveParty);
+                    ActivePartyList.set(0, ActiveParty);
                     user.setActiveparty(ActivePartyList);
                     m_config.mapper.save(user);
                     new AWSPartyOperations.updateGCinPartyTable(gateCrasherID, party.getPartyId(),  status, cont, t).execute();
@@ -667,7 +691,8 @@ public class AWSPartyOperations {
 
 
             }else{
-
+                GenerikFunctions.hDialog();
+                GenerikFunctions.showToast(cont, "Approval failed, Please try again after some time");
             }
 
         }
@@ -686,6 +711,8 @@ public class AWSPartyOperations {
         String DialogID;
         String PartyImage;
         boolean value = false;
+        PartyTable party;
+        List<GateCrashersClass> GCList;
 
 
         public updateGCinPartyTable(String gateCrasherID, String partyID, String Status, Context cont, TextView t)
@@ -704,9 +731,10 @@ public class AWSPartyOperations {
         {
 
             try{
-                PartyTable party = m_config.mapper.load(PartyTable.class, partyID);
-                List<GateCrashersClass> GCList = party.getGatecrashers();
+                party = m_config.mapper.load(PartyTable.class, partyID);
+                GCList = party.getGatecrashers();
                 Log.e("PartyImage "," "+PartyImage);
+                Log.e("GCLIST", "---- "+GCList+" "+gateCrasherID);
 
                 DialogID = party.getDialogID();
                 PartyImage = party.getPartyImage();
@@ -715,24 +743,7 @@ public class AWSPartyOperations {
 
                     //Update Item at particular Position
                     Log.e("GCList size", " " + GCList.size());
-
-                    for (int i = GCList.size() - 1; i >= 0; i--) {
-
-                        if (GCList.get(i).getGatecrasherid().equals(gateCrasherID)) {
-                            GateCrashersClass GateCrashers = GCList.get(i);
-                            GateCrashers.setGatecrasherid(GCList.get(i).getGatecrasherid());
-                            GCList.remove(i);
-                            GateCrashers.setGcrequeststatus(Status);
-                            GateCrashers.setGcattendancestatus("No");
-                            GCList.add(i, GateCrashers);
-                            party.setGatecrashers(GCList);
-                            m_config.mapper.save(party);
-                            value = true;
-                            break;
-                        }
-
-                    }
-
+                    value = true;
                 }
 
             }
@@ -763,9 +774,32 @@ public class AWSPartyOperations {
 
             if(v == true) {
 
+
+                for (int i = GCList.size() - 1; i >= 0; i--) {
+
+                    if (GCList.get(i).getGatecrasherid().equals(gateCrasherID)) {
+
+                        Log.e("-----","came here");
+                        GateCrashersClass GateCrashers = GCList.get(i);
+                        GateCrashers.setGatecrasherid(GCList.get(i).getGatecrasherid());
+                        GateCrashers.setGcrequeststatus(Status);
+                        GateCrashers.setgcfbprofilepic(GCList.get(i).getgcfbprofilepic());
+                        GateCrashers.setgclkid(GCList.get(i).getgclkid());
+                        GateCrashers.setgcqbid(GCList.get(i).getgcqbid());
+                        GateCrashers.setGcattendancestatus("No");
+                        GCList.set(i, GateCrashers);
+                        party.setGatecrashers(GCList);
+                        m_config.mapper.save(party);
+                        break;
+                    }
+
+                }
+
                 new updatePartiesinUserTable(gateCrasherID, partyID, Status, DialogID, PartyImage, cont, t).execute();
 
             }else{
+
+                GenerikFunctions.hDialog();
 
             }
 
@@ -789,9 +823,9 @@ public class AWSPartyOperations {
         String PartyName;
         String PartyEndTime;
         String gateCrasherQBID;
-
-
         boolean value = false;
+        List<PartiesClass> PartiesList;
+        UserTable user;
 
 
         public updatePartiesinUserTable(String gateCrasherFBID, String partyID, String Status, String DialogID, String PartyImage, Context cont, TextView t)
@@ -812,8 +846,8 @@ public class AWSPartyOperations {
         {
 
             try {
-                UserTable user = m_config.mapper.load(UserTable.class, gateCrasherFBID);
-                List<PartiesClass> PartiesList = user.getParties();
+                user = m_config.mapper.load(UserTable.class, gateCrasherFBID);
+                PartiesList = user.getParties();
 
 
                 gateCrasherQBID = user.getQuickBloxID();
@@ -822,26 +856,9 @@ public class AWSPartyOperations {
 
                     //Update Item at particular Position
                     Log.e("PartiesList size", " " + PartiesList.size());
+                    value = true;
 
-                    for (int i = PartiesList.size() - 1; i >= 0; i--) {
-                        if (PartiesList.get(i).getPartyid().equals(partyID)) {
-                            PartiesClass Parties = PartiesList.get(i);
-                            Parties.setPartyid(PartiesList.get(i).getPartyid());
-                            Parties.setStarttime(PartiesList.get(i).getStarttime());
-                            Parties.setEndtime(PartiesList.get(i).getEndtime());
-                            Parties.setPartyname(PartiesList.get(i).getPartyname());
-                            PartiesList.remove(i);
-                            Parties.setPartystatus(Status);
-                            PartiesList.add(i, Parties);
-                            user.setParties(PartiesList);
-                            PartyName = PartiesList.get(i).getPartyname();
-                            PartyEndTime = PartiesList.get(i).getEndtime();
-                            m_config.mapper.save(user);
 
-                            value = true;
-                            break;
-                        }
-                    }
 
 
                 }
@@ -872,27 +889,97 @@ public class AWSPartyOperations {
 
             if(v == true) {
 
-                if (cont instanceof PartyDetails)
-                {//when GC Cancel Party Request after Approval
+                for (int i = PartiesList.size() - 1; i >= 0; i--) {
+                    if (PartiesList.get(i).getPartyid().equals(partyID)) {
+                        PartiesClass Parties = PartiesList.get(i);
+                        Parties.setPartyid(PartiesList.get(i).getPartyid());
+                        Parties.setStarttime(PartiesList.get(i).getStarttime());
+                        Parties.setEndtime(PartiesList.get(i).getEndtime());
+                        Parties.setPartyname(PartiesList.get(i).getPartyname());
+                        //PartiesList.remove(i);
+                        Parties.setPartystatus(Status);
+                        PartiesList.set(i, Parties);
+                        user.setParties(PartiesList);
+                        PartyName = PartiesList.get(i).getPartyname();
+                        PartyEndTime = PartiesList.get(i).getEndtime();
+                        m_config.mapper.save(user);
 
-                    t.setVisibility(View.GONE);
-                    Toast.makeText(cont,"Party request has been cancelled",Toast.LENGTH_SHORT).show();
-
-
-                }else {
-
-                    t.setText(Status);
-
-                    if (DialogID == null || DialogID.equals(null) || DialogID.equals("") || DialogID.equals("N/A")) {
-                        QBChatDialogCreation.createGroupChat(PartyName, PartyImage, gateCrasherQBID, gateCrasherFBID, partyID, cont, PartyEndTime);
-                    } else {
-                        QBChatDialogCreation.updateGroupChat(PartyName, DialogID, gateCrasherQBID, gateCrasherFBID, partyID, cont);
+                        value = true;
+                        break;
                     }
                 }
 
 
-            }else{
+                if (Status.equals("Cancelled"))
+                {  //when GC Cancel Party Request after Approval
 
+                    if(t.getText().toString().equals("Cancel Request"))
+                    {
+
+                        try
+                        {
+                            List<ActivePartyClass> ActivePartyList = user.getActiveparty();
+                            List<PaidGCClass> PaidGC = user.getPaidgc();
+
+                            if (PaidGC == null)
+                            {
+                                //Unpaid user
+                                t.setVisibility(View.GONE);
+                                Toast.makeText(cont,"Party request has been cancelled",Toast.LENGTH_SHORT).show();
+
+                            }
+                            else
+                            {
+                                //Paid User
+                                // remove party from ActiveParty list
+                                if (ActivePartyList != null) {
+                                    ActivePartyClass ActiveParty = ActivePartyList.get(0);
+                                    ActivePartyList.remove(ActiveParty);
+                                    //ActivePartyList.remove(0);
+                                    user.setActiveparty(ActivePartyList);
+                                    m_config.mapper.save(user);
+                                }
+                                t.setVisibility(View.GONE);
+                                Toast.makeText(cont,"Party request has been cancelled",Toast.LENGTH_SHORT).show();
+
+
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                            GenerikFunctions.showToast(cont, "Unable to Cancel Request, Please try again after some time");
+                        }
+                    }
+
+                }
+                else if(Status.equals("Approved"))
+                {
+                    //Chat Dialog Creation after Party Approval
+
+                    t.setText(Status);
+                    Toast.makeText(cont, "Request has been approved",Toast.LENGTH_SHORT).show();
+                    GenerikFunctions.hDialog();
+
+                    if (DialogID == null || DialogID.equals(null) || DialogID.equals("") || DialogID.equals("N/A"))
+                    {
+                        QBChatDialogCreation.createGroupChat(PartyName, PartyImage, gateCrasherQBID, gateCrasherFBID, partyID, cont, PartyEndTime);
+                    }
+                    else
+                    {
+                        QBChatDialogCreation.updateGroupChat(PartyName, DialogID, gateCrasherQBID, gateCrasherFBID, partyID, cont);
+                    }
+                }
+                else if(Status.equals("Declined"))
+                {
+                    t.setText(Status);
+                    Toast.makeText(cont, "Request has been declined",Toast.LENGTH_SHORT).show();
+                    GenerikFunctions.hDialog();
+                }
+
+
+            }else{
+                GenerikFunctions.hDialog();
             }
 
         }

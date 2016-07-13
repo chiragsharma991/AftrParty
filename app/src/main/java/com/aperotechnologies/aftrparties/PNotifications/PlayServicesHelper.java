@@ -104,7 +104,30 @@ public class PlayServicesHelper {
         }
         else
         {
-            Log.i(TAG, "No valid Google Play Services APK found.");
+            Handler h = new Handler(cont.getMainLooper());
+            h.post(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    if(RegistrationActivity.reg_pd!=null)
+                    {
+                        if(RegistrationActivity.reg_pd.isShowing())
+                        {
+                            RegistrationActivity.reg_pd.dismiss();
+                        }
+                    }
+                    if(Welcome.wl_pd!=null)
+                    {
+                        if(Welcome.wl_pd.isShowing())
+                        {
+                            Welcome.wl_pd.dismiss();
+                        }
+                    }
+                    GenerikFunctions.showToast(cont, "No valid Google Play Services APK found.");
+                }
+            });
+
         }
     }
 
@@ -156,12 +179,16 @@ public class PlayServicesHelper {
      * Stores the registration ID and app versionCode in the application's
      * shared preferences.
      */
-    private void registerInBackground() {
-        new AsyncTask<Void, Void, String>() {
+    private void registerInBackground()
+    {
+        new AsyncTask<Void, Void, String>()
+        {
             @Override
-            protected String doInBackground(Void... params) {
+            protected String doInBackground(Void... params)
+            {
                 String msg = "";
-                try {
+                try
+                {
                     if (googleCloudMessaging == null)
                     {
                         googleCloudMessaging = GoogleCloudMessaging.getInstance(cont);
@@ -196,7 +223,33 @@ public class PlayServicesHelper {
                     });
 
 
-                } catch (IOException ex) {
+                } catch (IOException ex)
+                {
+
+                    Handler h = new Handler(cont.getMainLooper());
+                    h.post(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            if(RegistrationActivity.reg_pd!=null)
+                            {
+                                if(RegistrationActivity.reg_pd.isShowing())
+                                {
+                                    RegistrationActivity.reg_pd.dismiss();
+                                }
+                            }
+                            if(Welcome.wl_pd!=null)
+                            {
+                                if(Welcome.wl_pd.isShowing())
+                                {
+                                    Welcome.wl_pd.dismiss();
+                                }
+                            }
+                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                        }
+                    });
+
                     msg = "Error :" + ex.getMessage();
 
                 }
