@@ -22,6 +22,8 @@ import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
+import com.aperotechnologies.aftrparties.Login.OTPActivity;
+import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
@@ -54,6 +56,7 @@ public class SplashActivity extends Activity {
     Configuration_Parameter m_config;
     Context cont = this;
     String LIToken;
+    public static  ProgressDialog pd = null;
 
 //    static final String APP_ID = "40454";//"34621";
 //    static final String AUTH_KEY = "GXzMGfcx-pAQOBP";//"sYpuKrOrGT4pG6d";//"q6aK9sm6GCSmtru";
@@ -71,7 +74,11 @@ public class SplashActivity extends Activity {
         m_config = Configuration_Parameter.getInstance();
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
-        m_config.pDialog = new ProgressDialog(cont);
+        pd = new ProgressDialog(cont);
+        pd.setMessage("Loading");
+        pd.setCancelable(false);
+        RegistrationActivity.reg_pd = null;
+        Welcome.wl_pd = null;
 
 
 //        // Initialize the Amazon Cognito credentials provider
@@ -82,14 +89,10 @@ public class SplashActivity extends Activity {
 //        );
 //
 //        m_config.ddbClient = new AmazonDynamoDBClient(credentialsProvider);
-//        m_config.mapper = new DynamoDBMapper(m_config.ddbClient);
-//
+//        m_config.mapper = new DynamoDBMapper(m_config.ddbClient);//
 //
 //        QBSettings.getInstance().init(getApplicationContext(), APP_ID, AUTH_KEY, AUTH_SECRET);
 //        QBSettings.getInstance().setAccountKey(ACCOUNT_KEY);
-
-
-
 
         Thread timer = new Thread()
         {
@@ -105,6 +108,8 @@ public class SplashActivity extends Activity {
                 }
                 finally
                 {
+//                    Intent intent = new Intent(cont,OTPActivity.class);
+//                    cont.startActivity(intent);
 
                     Log.e("All Flags ","FB : " + sharedpreferences.getString(m_config.FBLoginDone,"No")
                     + "    LI : " + sharedpreferences.getString(m_config.LILoginDone,"No")
@@ -123,14 +128,18 @@ public class SplashActivity extends Activity {
                             @Override
                             public void run()
                             {
-                                m_config.pDialog.setMessage("Loading...");
-                                m_config.pDialog.setCancelable(false);
-                                if (!m_config.pDialog.isShowing())
-                                {
-                                    m_config.pDialog.show();
-                                }
+                               if(pd!=null)
+                               {
+                                   pd.show();
+                               }
                             }
                         });
+
+                        if(LISessionManager.getInstance(cont).getSession() == null)
+                        {
+                            startLinkedInProcess();
+                        }
+
 
                         LoginValidations.QBStartSession(cont);
                     }
@@ -140,13 +149,10 @@ public class SplashActivity extends Activity {
                         Intent intent = new Intent(cont,Welcome.class);
                         cont.startActivity(intent);
                     }
-
                 }
             }
         };
         timer.start();
-
-
     }
 
     @Override

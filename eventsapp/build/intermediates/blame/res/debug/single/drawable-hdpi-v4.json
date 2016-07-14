@@ -152,12 +152,12 @@
         "source": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable-hdpi/abc_menu_hardkey_panel_holo_light.9.png"
     },
     {
-        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/res/merged/debug/drawable-hdpi-v4/abc_textfield_search_right_default_holo_light.9.png",
-        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable-hdpi/abc_textfield_search_right_default_holo_light.9.png"
-    },
-    {
         "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/res/merged/debug/drawable-hdpi-v4/ic_launcher.png",
         "source": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/exploded-aar/AftrParties from Git/linkedin-sdk/unspecified/res/drawable-hdpi-v4/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/res/merged/debug/drawable-hdpi-v4/abc_textfield_search_right_default_holo_light.9.png",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable-hdpi/abc_textfield_search_right_default_holo_light.9.png"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/res/merged/debug/drawable-hdpi-v4/abc_tab_selected_focused_holo.9.png",

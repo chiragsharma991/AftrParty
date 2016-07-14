@@ -68,12 +68,12 @@
         "source": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable-xhdpi/abc_ic_search_api_holo_light.png"
     },
     {
-        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/res/merged/debug/drawable-xhdpi-v4/abc_textfield_search_default_holo_dark.9.png",
-        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable-xhdpi/abc_textfield_search_default_holo_dark.9.png"
-    },
-    {
         "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/res/merged/debug/drawable-xhdpi-v4/abc_textfield_search_right_selected_holo_light.9.png",
         "source": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable-xhdpi/abc_textfield_search_right_selected_holo_light.9.png"
+    },
+    {
+        "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/res/merged/debug/drawable-xhdpi-v4/abc_textfield_search_default_holo_dark.9.png",
+        "source": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/drawable-xhdpi/abc_textfield_search_default_holo_dark.9.png"
     },
     {
         "merged": "/Users/hasai/Documents/repositories/AftrParties from Git/eventsapp/build/intermediates/res/merged/debug/drawable-xhdpi-v4/abc_ic_cab_done_holo_dark.png",

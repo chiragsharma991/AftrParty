@@ -40,6 +40,7 @@ import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -47,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
@@ -98,7 +100,6 @@ public class GateCrasherSearchActivity extends Activity {
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-        m_config.pDialog = new ProgressDialog(cont);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 
@@ -278,29 +279,32 @@ public class GateCrasherSearchActivity extends Activity {
                     selected_byob = "No";
                 }
 
-
-                m_config.pDialog.setMessage("Searching Parties");
-                m_config.pDialog.setCancelable(false);
-                m_config.pDialog.show();
-
-                if ((int) Build.VERSION.SDK_INT < 23)
+                if (compareWithCurrentTime(startHour, startMin) == false)
                 {
-                    getSelfLocation();
+                    GenerikFunctions.showToast(cont,"PartyStartTime should be greater than current time.");
+
                 }
-                else {
-                    if (ActivityCompat.checkSelfPermission(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                            &&
-                            ActivityCompat.checkSelfPermission(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        //Permission model implementation
+                else
+                {
+
+
+                    if ((int) Build.VERSION.SDK_INT < 23) {
+                        getSelfLocation();
+                    } else {
+                        if (ActivityCompat.checkSelfPermission(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                                &&
+                                ActivityCompat.checkSelfPermission(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            //Permission model implementation
 
 //                Location locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 //                return locationNet;
 
-                        ActivityCompat.requestPermissions((Activity) cont,
-                                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
-                                MY_PERMISSIONS_ACCESS_CF_LOCATION);
-                    } else {
-                        getSelfLocation();
+                            ActivityCompat.requestPermissions((Activity) cont,
+                                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                                    MY_PERMISSIONS_ACCESS_CF_LOCATION);
+                        } else {
+                            getSelfLocation();
+                        }
                     }
                 }
 
@@ -309,8 +313,7 @@ public class GateCrasherSearchActivity extends Activity {
 
 //                if(location == null){
 //                    Toast.makeText(cont,"Current Location not available",Toast.LENGTH_SHORT).show();
-//                    m_config.pDialog.dismiss();
-//                    m_config.pDialog.cancel();
+//
 //                }else{
 //                    Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
 //                    GCParceableData data = new GCParceableData();
@@ -325,8 +328,7 @@ public class GateCrasherSearchActivity extends Activity {
 //                    i.putExtras(mBundles);
 //                    cont.startActivity(i);
 //
-//                    m_config.pDialog.dismiss();
-//                    m_config.pDialog.cancel();
+//
 //                }
 
 
@@ -368,8 +370,7 @@ public class GateCrasherSearchActivity extends Activity {
 
             if(location == null){
                     Toast.makeText(cont,"Current Location not available",Toast.LENGTH_SHORT).show();
-                    m_config.pDialog.dismiss();
-                    m_config.pDialog.cancel();
+
                 }else{
                     Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
                     GCParceableData data = new GCParceableData();
@@ -384,8 +385,7 @@ public class GateCrasherSearchActivity extends Activity {
                     i.putExtras(mBundles);
                     cont.startActivity(i);
 
-                    m_config.pDialog.dismiss();
-                    m_config.pDialog.cancel();
+
                 }
 
 
@@ -534,15 +534,30 @@ public class GateCrasherSearchActivity extends Activity {
 
         //Log.e("hour "," "+hour+" minute "+minute);
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(mYear, mMonth, mDay,
-                hour, minute, 0);
-        long TimeinMs = calendar.getTimeInMillis();
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.set(mYear, mMonth, mDay,
+//                hour, minute, 0);
+//        long TimeinMs = calendar.getTimeInMillis();
+//
+//        //Log.e("--- ",""+calendar.getTime()+" "+calendar.getTimeInMillis());
+//        //Log.e("DateTime in milliseconds : ","" + TimeinMs.getTime());
+//        //return TimeinMs.getTime();
+//        return TimeinMs;
 
-        //Log.e("--- ",""+calendar.getTime()+" "+calendar.getTimeInMillis());
-        //Log.e("DateTime in milliseconds : ","" + TimeinMs.getTime());
-        //return TimeinMs.getTime();
-        return TimeinMs;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String inputString = hour +":"+minute+":00";
+        String date = mYear+"-"+mMonth+"-"+mDay;
+        Log.e("date "," "+date +" --- "+inputString);
+        Date d = null;
+        try {
+            d = sdf.parse(date+" " + inputString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return d.getTime();
     }
 
 
@@ -620,10 +635,15 @@ public class GateCrasherSearchActivity extends Activity {
     // function for StartTime TimePicker
     private void startTimeDialog(String check) {
 
+        final int tempstarthour;
+        final int tempstartmin;
         final TimePicker timePicker = new TimePicker(this);
         timePicker.setIs24HourView(true);
         timePicker.setCurrentHour(startHour);
         timePicker.setCurrentMinute(startMin);
+
+        tempstarthour = startHour;
+        tempstartmin = startMin;
 
         new AlertDialog.Builder(this)
                 .setTitle("Set Time")
@@ -636,9 +656,14 @@ public class GateCrasherSearchActivity extends Activity {
                         tempstartTimeVal[0] = getTimeinMs(startDate, startMon, startYear, startHour,startMin);
                         Log.e("diff ", "  " + (tempstartTimeVal[0] - selected_startTimeVal));
 
-                        if (tempstartTimeVal[0] - selected_startTimeVal < 0) {
+                        if (compareWithCurrentTime(startHour, startMin) == false)
+                        {
+                            startHour = tempstarthour;
+                            startMin = tempstartmin;
                             Toast.makeText(getApplication(), "StartTime Should be greater than or equal to currentTime", Toast.LENGTH_SHORT).show();
-                        } else {
+                        }
+                        else
+                        {
                             txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + showTime(startHour, startMin));
                             selected_startTimeVal = tempstartTimeVal[0];
                             Log.e("selected_startTimeVal", " " + selected_startTimeVal+" "+new Date(selected_startTimeVal));
@@ -655,6 +680,33 @@ public class GateCrasherSearchActivity extends Activity {
                                 Log.d("Picker", "Cancelled!");
                             }
                         }).setView(timePicker).show();
+
+    }
+
+    //compare starttime with currenttime
+    private boolean compareWithCurrentTime(int startHour, int startMin) {
+        Boolean value = false;
+        Log.e("startHour"+startHour+"     "+startMin,"");
+
+
+        Calendar calendar = Validations.getCalendar();
+        int currHour, currMin;
+        currHour = calendar.get(Calendar.HOUR_OF_DAY);
+        currMin = calendar.get(Calendar.MINUTE);        Log.e("currHour"+currHour+"     "+currMin,"");
+        if(startHour < currHour){
+            value = false;
+        }
+        else if(startHour == currHour){
+            if(startMin < currMin) {
+                value = false;
+            }
+            else{
+                value = true;
+            }
+        }else{
+            value = true;
+        }
+        return value;
 
     }
 

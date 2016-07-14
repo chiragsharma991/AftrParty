@@ -25,12 +25,15 @@ import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -49,12 +52,13 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSLoginOperations;
 
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
-import com.aperotechnologies.aftrparties.MyLifecycleHandler;
+//import com.aperotechnologies.aftrparties.MyLifecycleHandler;
 import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.model.FBCurrentLocationInformation;
 import com.aperotechnologies.aftrparties.model.FbHomelocationInformation;
 
@@ -177,6 +181,7 @@ public class RegistrationActivity extends Activity
         Welcome.wl_pd = null;
         reg_pd = new ProgressDialog(this);
         reg_pd.setCancelable(false);
+        SplashActivity.pd = null;
 
         //Meghana
         //UI Components
@@ -220,6 +225,7 @@ public class RegistrationActivity extends Activity
             public void onClick(View v)
             {
                 Log.e("Login Clicked", "yes");
+                dismissCursor();
                 validateUserInput();
             }
         });
@@ -257,6 +263,19 @@ public class RegistrationActivity extends Activity
                     String enteredmail = edt_usr_email.getText().toString().trim()+"";
                     edt_usr_email.setText(enteredmail);
                 }
+            }
+        });
+
+        edt_usr_phone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            Boolean handled = false;
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
+                    edt_usr_phone.clearFocus();
+                    btn_login.performClick();
+                    handled = true;
+                }
+                return handled;
             }
         });
 
@@ -458,38 +477,48 @@ public class RegistrationActivity extends Activity
     {
         //Meghana
         //Clear Focus from all edit texts
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(edt_usr_name.getWindowToken(), 0);
-        imm.hideSoftInputFromWindow(edt_usr_email.getWindowToken(), 0);
-        imm.hideSoftInputFromWindow(edt_usr_phone.getWindowToken(), 0);
+//        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//        imm.hideSoftInputFromWindow(edt_usr_name.getWindowToken(), 0);
+//        imm.hideSoftInputFromWindow(edt_usr_email.getWindowToken(), 0);
+//        imm.hideSoftInputFromWindow(edt_usr_phone.getWindowToken(), 0);
+//        edt_usr_name.clearFocus();
+//        edt_usr_email.clearFocus();
+//        edt_usr_phone.clearFocus();
+//        edt_usr_name.setCursorVisible(false);
+//        edt_usr_email.setCursorVisible(false);
+//        edt_usr_phone.setCursorVisible(false);
+
         edt_usr_name.clearFocus();
         edt_usr_email.clearFocus();
         edt_usr_phone.clearFocus();
-        edt_usr_name.setCursorVisible(false);
-        edt_usr_email.setCursorVisible(false);
-        edt_usr_phone.setCursorVisible(false);
+        InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if(inputManager != null){
+            inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+        finish();
 
-        //Harshada
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(RegistrationActivity.this);
-        alertDialogBuilder
-                .setTitle("Exit")
-                .setMessage("Are you sure you want to exit?")
-                .setCancelable(false)
-                .setNegativeButton("No", null)
-                .setPositiveButton("Yes",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id)
-                            {
-                                finish();
-//                                Intent intent = new Intent(Intent.ACTION_MAIN);
-//                                intent.addCategory(Intent.CATEGORY_HOME);
-//                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        //Harshada
+//        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(RegistrationActivity.this);
+//        alertDialogBuilder
+//                .setTitle("Exit")
+//                .setMessage("Are you sure you want to exit?")
+//                .setCancelable(false)
+//                .setNegativeButton("No", null)
+//                .setPositiveButton("Yes",
+//                        new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int id)
+//                            {
+//                                finish();
+////                                Intent intent = new Intent(Intent.ACTION_MAIN);
+////                                intent.addCategory(Intent.CATEGORY_HOME);
+////                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+////                                startActivity(intent);
+//                                Intent intent = new Intent(RegistrationActivity.this,Welcome.class);
 //                                startActivity(intent);
-                                Intent intent = new Intent(RegistrationActivity.this,Welcome.class);
-                                startActivity(intent);
-                            }
-                        });
-        alertDialogBuilder.show();
+//                            }
+//                        });
+//        alertDialogBuilder.show();
+        super.onBackPressed();
     }
 
     //Meghana
@@ -589,13 +618,13 @@ public class RegistrationActivity extends Activity
                 else
                 {
                     GenerikFunctions.showToast(cont, "Enter Valid Contact No");
-                    edt_usr_phone.setText("");
+                    //edt_usr_phone.setText("");
                 }
             }
             else
             {
                 GenerikFunctions.showToast(cont, "EnterValid Mail");
-                edt_usr_email.setText("");
+                //edt_usr_email.setText("");
             }
         }
     }
@@ -1108,7 +1137,15 @@ public class RegistrationActivity extends Activity
                 if(selUserData.getRegistrationStatus().equals("Yes"))
                 {
                     //Registration is already done
-                    updateUserTableAndPrefs(selUserData);
+                    GenerikFunctions.showToast(cont," You are an existing user. Please Login...");
+                    Intent i = new Intent(RegistrationActivity.this, Welcome.class);
+                    startActivity(i);
+
+                    if(reg_pd.isShowing()){
+                        reg_pd.dismiss();
+                    }
+
+                    //updateUserTableAndPrefs(selUserData);
                 }
                 else
                 {
@@ -1286,7 +1323,7 @@ public class RegistrationActivity extends Activity
         // Instantiate the RequestQueue.
         Log.e("Email Id","Yes  " + EmailId);
         RequestQueue queue = Volley.newRequestQueue((Activity)cont);
-        String url ="http://api.verify-email.org/api.php?usr=aperotechnologies&pwd=apero@357&check="+EmailId;
+        String url ="http://api.verify-email.org/api.php?usr=harshadaasai&pwd=harshada26&check="+EmailId;
        // String url = "http://www.google.com";
         // prepare the Request
         JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,

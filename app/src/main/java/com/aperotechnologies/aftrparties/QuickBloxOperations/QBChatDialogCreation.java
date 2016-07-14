@@ -73,11 +73,16 @@ public class QBChatDialogCreation {
                         i.putExtras(bundle);
                         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         cont.startActivity(i);
+                        GenerikFunctions.hDialog();
+                        GenerikFunctions.showToast(cont, "1-1 Chat Created Successfully.");
 
                     }
 
                     @Override
                     public void onError(QBResponseException e) {
+
+                        GenerikFunctions.hDialog();
+                        GenerikFunctions.showToast(cont, "1-1 Chat Created Successfully.");
                         e.printStackTrace();
                     }
 
@@ -89,7 +94,8 @@ public class QBChatDialogCreation {
             @Override
             public void onError(QBResponseException e) {
                 Log.e("onError", " " + privateChatManager);
-                GenerikFunctions.showToast(cont, "Unable to create private chat, Please try again after some time");
+                GenerikFunctions.hDialog();
+                GenerikFunctions.showToast(cont, "Unable to create 1-1 chat, Please try again after some time");
             }
 
 

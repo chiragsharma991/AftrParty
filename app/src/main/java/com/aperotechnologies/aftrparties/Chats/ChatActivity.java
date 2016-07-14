@@ -80,14 +80,10 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
         index = 0;
         totalMessagesCount = 0;
 
-
-
         m_config = Configuration_Parameter.getInstance();
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-
-
         // Setup opponents info
         Intent intent = getIntent();
         dialog = (QBDialog) intent.getSerializableExtra(ConstsCore.EXTRA_DIALOG);

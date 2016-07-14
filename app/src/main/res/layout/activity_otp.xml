@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
- <GridLayout
+ <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
         android:columnCount="1"
         android:rowCount="2"
-        android:layout_gravity="center_horizontal"    >
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical"
+        android:id="@+id/grid_otp">
 
    <LinearLayout
        android:layout_width="match_parent"
@@ -42,20 +44,40 @@
         android:layout_width="wrap_content"
         android:orientation="vertical">
 
+        <!--<com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:singleLine="true"-->
+            <!--android:layout_margin="10dp"-->
+            <!--android:hint="Enter OTP"-->
+            <!--android:id="@+id/edi_otp"-->
+            <!--android:textSize="22sp"-->
+            <!--android:inputType="number"-->
+            <!--android:background="@color/white"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:drawablePadding="10dp"-->
+            <!--android:paddingLeft="5dp"-->
+            <!--android:textCursorDrawable="@null"-->
+            <!--android:focusable="true"-->
+            <!--android:maxLength="4"/>-->
+
         <EditText
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:id="@+id/edi_otp"
-            android:hint="Enter OTP"
+            android:singleLine="true"
             android:layout_margin="10dp"
+            android:hint="Enter OTP"
+            android:id="@+id/edi_otp"
+            android:textSize="22sp"
             android:inputType="number"
-            android:maxLength="4"/>
+            android:layout_gravity="center_horizontal"
+            android:maxLength="4"            />
 
-        <TextView
+          <TextView
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:id="@+id/txt_timer"
-            android:text="Timer"
+            android:text=""
             android:textSize="20dp"
             android:layout_margin="10dp" />
 
@@ -75,16 +97,25 @@
         android:layout_gravity="center_horizontal"
         android:layout_margin="10dp" />
 
-    <EditText
-        android:gravity="center_horizontal"
+
+    <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:id="@+id/edi_verify_mobileno"
-        android:hint="Enter correct mobile no"
+        android:singleLine="true"
         android:layout_margin="10dp"
-        android:inputType="number"
+        android:hint="Enter OTP"
+        android:id="@+id/edi_verify_mobileno"
+        android:textSize="22sp"
+android:inputType="number"
+        android:background="@color/white"
+        android:layout_gravity="center_horizontal"
+        android:drawablePadding="10dp"
+        android:paddingLeft="5dp"
+        android:textCursorDrawable="@null"
+        android:focusable="true"
         android:maxLength="10"
         android:visibility="gone"/>
+
 
     <Button
         android:gravity="center_horizontal"
@@ -93,8 +124,9 @@
         android:id="@+id/btn_submit"
         android:text="Submit"
         android:layout_margin="10dp"
+        android:layout_gravity="center_horizontal"
         android:visibility="gone"/>
 
-    </GridLayout>
+    </LinearLayout>
 
 

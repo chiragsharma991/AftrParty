@@ -184,6 +184,7 @@ public class CustomisedAdapterCards extends CardStackAdapter
             @Override
             public void onClick(View v)
             {
+                GenerikFunctions.sDialog(context, "Creating 1-1 Chat...");
                 QBChatDialogCreation.createPrivateChat(Integer.valueOf(qbid), context);
             }
         });

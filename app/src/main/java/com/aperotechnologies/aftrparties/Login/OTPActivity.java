@@ -20,10 +20,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,6 +75,7 @@ public class OTPActivity extends Activity
     Context cont = this;
     String verfication_Id, mobileNumber;
     TextView txt_timer;
+    LinearLayout grid_otp;
     // ShredPreferences
 
     //For OTP
@@ -79,9 +83,9 @@ public class OTPActivity extends Activity
     //String appkey = "b22ab60eda70072cd34c507c4870ab3c";
     //String appid = "c31396423a00078697c490cb13a6d99b";
 
-    String customerId = "cn9m6qq3";
-    String appkey = "1f075fb4f3c91d022b9e6adddac31e20";
-    String appid = "eb108c70c5251235251ab2c015045206";
+    String customerId = "r3r31h14";
+    String appkey = "a8244ed6ddf7ce236fd9a09581877435";
+    String appid = "dc53aa537b3eb74694ca3601dd6daea5";
 
     RequestInterceptor requestInterceptor;
     Gson gson;
@@ -125,7 +129,7 @@ public class OTPActivity extends Activity
         txt_timer = (TextView) findViewById(R.id.txt_timer);
         edt_mob_no = (EditText) findViewById(R.id.edi_verify_mobileno);
         btn_submit = (Button) findViewById(R.id.btn_submit);
-
+        grid_otp = (LinearLayout) findViewById(R.id.grid_otp);
         //queue = Volley.newRequestQueue(cont);
         lhm = new HashSet<Contact>();
         countDownTimer=null;
@@ -161,6 +165,16 @@ public class OTPActivity extends Activity
             }
         };
 
+        grid_otp.setOnTouchListener(new View.OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                dismissCursor();
+                return true;
+            }
+        });
+
         Log.e("Shrd Pref in OTP Activity",sharedpreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                 sharedpreferences.getString(m_config.Entered_Email,"N/A") + "   "
                 + sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
@@ -178,6 +192,27 @@ public class OTPActivity extends Activity
 //                // requestOTP();
 //            }
 //        });
+
+
+        edt_otp.setOnTouchListener(new View.OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                edt_otp.setCursorVisible(true);
+                return false;
+            }
+        });
+
+        edt_mob_no.setOnTouchListener(new View.OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                edt_mob_no.setCursorVisible(true);
+                return false;
+            }
+        });
 
 
         btn_submit.setOnClickListener(new View.OnClickListener()
@@ -264,6 +299,19 @@ public class OTPActivity extends Activity
 
     // - See more at: http://www.theappguruz.com/blog/android-count-timer#sthash.PfD5YcqI.dpuf
 
+    public void dismissCursor()
+    {
+        //Meghana
+        //Clear Focus from all edit texts
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(edt_otp.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(edt_mob_no.getWindowToken(), 0);
+        edt_otp.clearFocus();
+        edt_mob_no.clearFocus();
+        edt_otp.setCursorVisible(false);
+        edt_mob_no.setCursorVisible(false);
+    }
+
     @Override
     protected void onResume()
     {
@@ -326,6 +374,16 @@ public class OTPActivity extends Activity
     @Override
     public void onBackPressed()
     {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(edt_otp.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(edt_mob_no.getWindowToken(), 0);
+        edt_otp.clearFocus();
+        edt_mob_no.clearFocus();
+        edt_otp.setCursorVisible(false);
+        edt_mob_no.setCursorVisible(false);
+//        edt_otp.setCursorVisible(false);
+//        edt_mob_no.setCursorVisible(false);
+
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(OTPActivity.this);
         alertDialogBuilder
                 .setTitle("Exit")

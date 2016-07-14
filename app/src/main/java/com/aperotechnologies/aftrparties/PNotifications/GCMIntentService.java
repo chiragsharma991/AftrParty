@@ -13,12 +13,13 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 
+import com.aperotechnologies.aftrparties.BaseLifeCycleCallbacks;
 import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
-import com.aperotechnologies.aftrparties.MyLifecycleHandler;
+//import com.aperotechnologies.aftrparties.MyLifecycleHandler;
 import com.aperotechnologies.aftrparties.R;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.quickblox.chat.QBChatService;
@@ -84,11 +85,11 @@ public class GCMIntentService extends IntentService {
         String dialog_id = extras.getString(ConstsCore.DIALOG_ID);
         String messagetype = extras.getString("type");
 
-        Boolean isApplicationForeGround = MyLifecycleHandler.isApplicationInForeground();
+        Boolean isApplicationForeGround = BaseLifeCycleCallbacks.applicationStatus();//MyLifecycleHandler.isApplicationInForeground();
         Intent intent = null;
         Log.e("here", " "+message+" "+messagetype);
 
-        Log.e("isApplicationForeground ","---- "+ MyLifecycleHandler.isApplicationInForeground());
+        Log.e("isApplicationForeground ","---- "+ BaseLifeCycleCallbacks.applicationStatus());//MyLifecycleHandler.isApplicationInForeground());
 
 
 
@@ -113,7 +114,7 @@ public class GCMIntentService extends IntentService {
                     Log.e("activity"," "+m_config.foregroundCont+"----"+message);
 
                     Style style = new Style.Builder()
-                            .setBackgroundColor(R.color.black)
+                            .setBackgroundColor(R.color.colorAccent)
                             .setPaddingInPixels(5)
                             .setGravity(Gravity.CENTER)
                             .setTextColor(android.R.color.white)

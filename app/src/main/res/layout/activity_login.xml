@@ -90,7 +90,7 @@
                android:id="@+id/edt_usr_name"
                android:drawableLeft="@drawable/ic_launcher"
                android:textSize="22sp"
-               android:inputType="textNoSuggestions"
+               android:inputType="textCapWords"
                android:nextFocusDown="@+id/user_password"
                android:background="@color/white"
                android:layout_gravity="center_horizontal"

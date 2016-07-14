@@ -32,6 +32,7 @@ import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.facebook.AccessToken;
 import com.quickblox.auth.QBAuth;
@@ -412,6 +413,13 @@ public  class LoginValidations
                                 {
                                     Welcome.wl_pd.dismiss();
                                 }
+                                if(SplashActivity.pd!=null)
+                                {
+                                    if(SplashActivity.pd.isShowing())
+                                    {
+                                        SplashActivity.pd.dismiss();
+                                    }
+                                }
                                 GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                             }
                         });
@@ -442,6 +450,13 @@ public  class LoginValidations
                             if(Welcome.wl_pd.isShowing())
                             {
                                 Welcome.wl_pd.dismiss();
+                            }
+                            if(SplashActivity.pd!=null)
+                            {
+                                if(SplashActivity.pd.isShowing())
+                                {
+                                    SplashActivity.pd.dismiss();
+                                }
                             }
                             GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                         }
@@ -519,6 +534,13 @@ public  class LoginValidations
                                             Log.e("PD is showing from ","loginWithFbQuickBloxLooper");
                                         }
                                     }
+                                    if(SplashActivity.pd!=null)
+                                    {
+                                        if(SplashActivity.pd.isShowing())
+                                        {
+                                            SplashActivity.pd.dismiss();
+                                        }
+                                    }
                                 }
                             });
                         }
@@ -546,6 +568,13 @@ public  class LoginValidations
                                         if(Welcome.wl_pd.isShowing())
                                         {
                                             Welcome.wl_pd.dismiss();
+                                        }
+                                    }
+                                    if(SplashActivity.pd!=null)
+                                    {
+                                        if(SplashActivity.pd.isShowing())
+                                        {
+                                            SplashActivity.pd.dismiss();
                                         }
                                     }
 
@@ -646,6 +675,13 @@ public  class LoginValidations
                                         if(Welcome.wl_pd.isShowing())
                                         {
                                             Welcome.wl_pd.dismiss();
+                                        }
+                                    }
+                                    if(SplashActivity.pd!=null)
+                                    {
+                                        if(SplashActivity.pd.isShowing())
+                                        {
+                                            SplashActivity.pd.dismiss();
                                         }
                                     }
                                     GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
@@ -756,6 +792,13 @@ public  class LoginValidations
                                     Welcome.wl_pd.dismiss();
                                 }
                             }
+                            if(SplashActivity.pd!=null)
+                            {
+                                if(SplashActivity.pd.isShowing())
+                                {
+                                    SplashActivity.pd.dismiss();
+                                }
+                            }
                             GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                         }
                     });
@@ -856,6 +899,13 @@ public  class LoginValidations
                                 if(Welcome.wl_pd.isShowing())
                                 {
                                     Welcome.wl_pd.dismiss();
+                                }
+                            }
+                            if(SplashActivity.pd!=null)
+                            {
+                                if(SplashActivity.pd.isShowing())
+                                {
+                                    SplashActivity.pd.dismiss();
                                 }
                             }
                             GenerikFunctions.showToast(cont,"Login Failed, Please try again after some time");
@@ -1013,6 +1063,14 @@ public  class LoginValidations
                                             Welcome.wl_pd.dismiss();
                                         }
                                     }
+                                    if(SplashActivity.pd!=null)
+                                    {
+                                        if(SplashActivity.pd.isShowing())
+                                        {
+                                            SplashActivity.pd.dismiss();
+                                        }
+                                    }
+
                                 }
                             });
 //                            if(RegistrationActivity.reg_pd.isShowing())
@@ -1093,6 +1151,13 @@ public  class LoginValidations
                         if(Welcome.wl_pd.isShowing())
                         {
                             Welcome.wl_pd.dismiss();
+                        }
+                    }
+                    if(SplashActivity.pd!=null)
+                    {
+                        if(SplashActivity.pd.isShowing())
+                        {
+                            SplashActivity.pd.dismiss();
                         }
                     }
                     Log.e("Here at OTP Activity","Yes");

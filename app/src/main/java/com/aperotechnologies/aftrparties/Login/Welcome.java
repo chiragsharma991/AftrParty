@@ -38,6 +38,7 @@ import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.model.*;
 import com.aperotechnologies.aftrparties.model.LIPictureData;
 import com.facebook.AccessToken;
@@ -83,7 +84,6 @@ public class Welcome extends Activity
     Configuration_Parameter m_config;
     static Context cont;
     CallbackManager callbackManager;
-    LoginManager loginManager;
     ArrayList<String> permissions;
     public static String linkedinStart="";
     public static String Token;
@@ -109,6 +109,8 @@ public class Welcome extends Activity
     DBHelper helper;
     TelephonyManager mTelephony;
 
+    LoginManager loginManager;
+
 
     public static  ProgressDialog wl_pd = null;
 
@@ -125,6 +127,7 @@ public class Welcome extends Activity
         gson=new Gson();
         helper= DBHelper.getInstance(cont);
         sqldb=helper.getWritableDatabase();
+        loginManager = LoginManager.getInstance();
 
         // Initialize the Amazon Cognito credentials provider
         final CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
@@ -141,6 +144,7 @@ public class Welcome extends Activity
         faceOverlayView = (FaceOverlayView) ((Activity)cont).findViewById(R.id.face_overlay);
         wl_pd = new ProgressDialog(this);
         RegistrationActivity.reg_pd = null;
+        SplashActivity.pd = null;
         //FB Variables
         callbackManager = CallbackManager.Factory.create();
         loginManager = LoginManager.getInstance();
@@ -197,10 +201,10 @@ public class Welcome extends Activity
                 }
                 else
                 {
-                    LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
-                    Log.e("Info in storage",loggedInUserInformation.getFB_USER_ID() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
-
-                    new checkFBUserInfo(loggedInUserInformation).execute();
+                    linkedinStart="";
+                    Log.e("Inside the Login of FB","Yes");
+                    loginManager.logInWithReadPermissions(Welcome.this,permissions);
+                    FacebookDataRetievalNew();
                 }
 
 
@@ -231,6 +235,50 @@ public class Welcome extends Activity
         });
     }
 
+
+    public void FacebookDataRetievalNew()
+    {
+        Log.e("Inside FB data retreive new","Yes");
+        linkedinStart="";
+        try
+        {
+            loginManager.registerCallback(callbackManager,
+                    new FacebookCallback<LoginResult>()
+                    {
+                        @Override
+                        public void onSuccess(LoginResult loginResult)
+                        {
+                            Log.e("FB Login Success FacebookDataRetievalNew", "Yes");
+                            token = loginResult.getAccessToken();
+                            Log.e("AccessToken from Welcome FacebookDataRetievalNew", token.toString() + "    " +token);
+                            wl_pd.setMessage("Loading Data...");
+                            wl_pd.setCancelable(false);
+                            wl_pd.show();
+                            LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
+                            Log.e("Info in storage",loggedInUserInformation.getFB_USER_ID() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
+
+                            new checkFBUserInfo(loggedInUserInformation).execute();
+                        }
+
+                        @Override
+                        public void onCancel()
+                        {
+                            Log.e("Login onCancel FacebookDataRetievalNew", "Yes");
+                        }
+
+                        @Override
+                        public void onError(FacebookException error)
+                        {
+                            Log.e("Inside FacebookDataRetievalNew error",error.toString());
+                            error.printStackTrace();
+                        }
+                    });
+        }
+        catch(Exception e)
+        {
+
+        }
+    }
     //Meghana
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -356,21 +404,21 @@ public class Welcome extends Activity
                 liPictureData = new LIPictureData();
                 if (liPictureData.equals(liUserInformation.getLIPictureData()))
                 {
-                    Log.e("Empty Pictures", "Equal both lipicdata local and received  " + "  both empty");
+                   // Log.e("Empty Pictures", "Equal both lipicdata local and received  " + "  both empty");
                 }
                 else
                 {
-                    Log.e("Not equal ", "Has LI Puicture data");
+                    //Log.e("Not equal ", "Has LI Puicture data");
                     liPictureData = liUserInformation.getLIPictureData();
                 }
-                Log.e("LI Pic Info ", liPictureData.get_total() + "     " + liPictureData.getvalues().size() +  "    " + liPictureData.getvalues().get(0));
+               // Log.e("LI Pic Info ", liPictureData.get_total() + "     " + liPictureData.getvalues().size() +  "    " + liPictureData.getvalues().get(0));
             }
 
             String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
                     FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
             Log.i("User Query  : ", Query);
             Cursor cursor = sqldb.rawQuery(Query, null);
-            Log.e("Cursor count",cursor.getCount()+"");
+           // Log.e("Cursor count",cursor.getCount()+"");
             if(cursor.getCount() == 0)
             {
                 Log.e("Onside update if","Yes");
@@ -383,8 +431,8 @@ public class Welcome extends Activity
                 //  Log.e("LI Id", liUserInformation.getId());
 
                 // Log.e("LI headline", liUserInformation.getHeadline());
-                Log.e("LI firstName", liUserInformation.getFirstName());
-                Log.e("LI lastName", liUserInformation.getLastName());
+               // Log.e("LI firstName", liUserInformation.getFirstName());
+               // Log.e("LI lastName", liUserInformation.getLastName());
 
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                         + LoginTableColumns.LI_USER_ID  + " = '" + liUserInformation.getId() + "', "
@@ -454,10 +502,10 @@ public class Welcome extends Activity
 
     public void askForDeclinedFBPermissions(ArrayList<String> declined_perm)
     {
-        for (int i = 0; i < declined_perm.size(); i++)
-        {
-            Log.e("From dec perm func", declined_perm.get(i));
-        }
+//        for (int i = 0; i < declined_perm.size(); i++)
+//        {
+//            Log.e("From dec perm func", declined_perm.get(i));
+//        }
 
         loginManager.logInWithReadPermissions(Welcome.this, declined_perm);
         FacebookDataRetieval();
@@ -469,7 +517,6 @@ public class Welcome extends Activity
         linkedinStart="";
 
         //Log.e("Inside FB data retreive","Yes   " +linkedinStart +"   aa  " +loginManager.getLoginBehavior().toString());
-
 
         try
         {
@@ -620,28 +667,25 @@ public class Welcome extends Activity
                         wl_pd.setCancelable(false);
                         wl_pd.show();
                         String emptyFields="";
-
                         // Application code
                         Log.i("Me Request", object.toString());
-
-//                        AddFriends addFriends = new AddFriends();
-//                        addFriends.requestInvitableFriends(cont,token);
-
+//                      AddFriends addFriends = new AddFriends();
+//                      addFriends.requestInvitableFriends(cont,token);
                         fbUserInformation = gson.fromJson(object.toString(), FbUserInformation.class);
                         Log.e("User Information --->","Information");
                         Log.e("getFbId Id: " , fbUserInformation.getFbId());
 
-//                        Log.e("getGender: " , fbUserInformation.getGender());
-//                        Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
-//                        Log.e("getEmail: " ,fbUserInformation.getEmail());
-//                        Log.e("getBirthday: " ,fbUserInformation.getBirthday());
+//                      Log.e("getGender: " , fbUserInformation.getGender());
+//                      Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
+//                      Log.e("getEmail: " ,fbUserInformation.getEmail());
+//                      Log.e("getBirthday: " ,fbUserInformation.getBirthday());
 
                         if(fbUserInformation.getBirthday().equals(null))
                         {
                             fbUserInformation.setBirthday("N/A");
                         }
 
-                      //  Log.e("getBirthday : " , fbUserInformation.getBirthday());
+ //                      Log.e("getBirthday : " , fbUserInformation.getBirthday());
 
                         if(fbUserInformation.getEmail().equals(null))
                         {
@@ -1041,72 +1085,72 @@ public class Welcome extends Activity
 //        ;
 //    }
 
-//    //Callback function for Android M Permission
-//    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
-//    {
-//        Log.e("grantResults.length"," "+grantResults.length+" "+grantResults[0]);
-//
-//        switch (requestCode)
-//        {
-//            case MY_PERMISSIONS_REQUEST_READ_PHONE_STATE:
-//            {
-//                // If request is cancelled, the result arrays are empty.
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-//                {
-//                    Log.e("Permission request is accepted","");
-//                    mTelephony = (TelephonyManager) cont.getSystemService(
-//                            Context.TELEPHONY_SERVICE);
-//                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(cont);
-//                    String regId = pref.getString(m_config.temp_regId,"");
-//                    new LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont).execute();
-//                }
-//                else
-//                {
-//                    // permission denied
-//                    Log.e("Permission request is denied","");
-//                    final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-//
-//                    boolean should = ActivityCompat.shouldShowRequestPermissionRationale((Activity) cont, Manifest.permission.READ_PHONE_STATE);
-//                    if(should)
-//                    {
-//                        //user denied without Never ask again, just show rationale explanation
-//                        new android.app.AlertDialog.Builder(Welcome.this)
-//                                .setTitle("Permission Denied")
-//                                .setMessage("Without this permission the app will be unable to receive Push Notifications.Are you sure you want to deny this permission?")
-//                                .setPositiveButton("RE-TRY", new DialogInterface.OnClickListener()
-//                                {
-//                                    public void onClick(DialogInterface dialog, int which)
-//                                    {
-//                                        // continue with delete
-//                                        Log.e("Click of Retry, If permission request is denied",",ask request for permission again");
-//                                        ActivityCompat.requestPermissions((Activity) cont,
-//                                                new String[]{Manifest.permission.READ_PHONE_STATE},
-//                                                MY_PERMISSIONS_REQUEST_READ_PHONE_STATE);
-//
-//                                    }
-//                                })
-//                                .setNegativeButton("I'M SURE", new DialogInterface.OnClickListener()
-//                                {
-//                                    public void onClick(DialogInterface dialog, int which)
-//                                    {
-//                                        // do nothing
-//                                        Log.e("Click of I m sure",", permission request is denied");
-//                                        LoginValidations.checkPendingLoginFlags(cont);
-//                                    }
-//                                })
-//                                .show();
-//                    }
-//                    else
-//                    {
-//                        //user has denied with `Never Ask Again`
-//                        Log.e("Click of Never ask again",", permission request is denied");
-//                        LoginValidations.checkPendingLoginFlags(cont);
-//                    }
-//                }
-//                break;
-//            }
-//        }
-//    }
+    //Callback function for Android M Permission
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
+    {
+        Log.e("grantResults.length"," "+grantResults.length+" "+grantResults[0]);
+
+        switch (requestCode)
+        {
+            case MY_PERMISSIONS_REQUEST_READ_PHONE_STATE:
+            {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+                    Log.e("Permission request is accepted","");
+                    mTelephony = (TelephonyManager) cont.getSystemService(
+                            Context.TELEPHONY_SERVICE);
+                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(cont);
+                    String regId = pref.getString(m_config.temp_regId,"");
+                    new LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont).execute();
+                }
+                else
+                {
+                    // permission denied
+                    Log.e("Permission request is denied","");
+                    final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+
+                    boolean should = ActivityCompat.shouldShowRequestPermissionRationale((Activity) cont, Manifest.permission.READ_PHONE_STATE);
+                    if(should)
+                    {
+                        //user denied without Never ask again, just show rationale explanation
+                        new android.app.AlertDialog.Builder(Welcome.this)
+                                .setTitle("Permission Denied")
+                                .setMessage("Without this permission the app will be unable to receive Push Notifications.Are you sure you want to deny this permission?")
+                                .setPositiveButton("RE-TRY", new DialogInterface.OnClickListener()
+                                {
+                                    public void onClick(DialogInterface dialog, int which)
+                                    {
+                                        // continue with delete
+                                        Log.e("Click of Retry, If permission request is denied",",ask request for permission again");
+                                        ActivityCompat.requestPermissions((Activity) cont,
+                                                new String[]{Manifest.permission.READ_PHONE_STATE},
+                                                MY_PERMISSIONS_REQUEST_READ_PHONE_STATE);
+
+                                    }
+                                })
+                                .setNegativeButton("I'M SURE", new DialogInterface.OnClickListener()
+                                {
+                                    public void onClick(DialogInterface dialog, int which)
+                                    {
+                                        // do nothing
+                                        Log.e("Click of I m sure",", permission request is denied");
+                                        LoginValidations.checkPendingLoginFlags(cont);
+                                    }
+                                })
+                                .show();
+                    }
+                    else
+                    {
+                        //user has denied with `Never Ask Again`
+                        Log.e("Click of Never ask again",", permission request is denied");
+                        LoginValidations.checkPendingLoginFlags(cont);
+                    }
+                }
+                break;
+            }
+        }
+    }
 
     //function for enabling TelephonyManager for fetching deviceId
     public void getDeviceIdAndroid(String regId, Activity context)
@@ -1133,6 +1177,7 @@ public class Welcome extends Activity
 
                 Log.e("If permission is not granted",", request for permission");
 
+                Toast.makeText(cont, "Without this permission the app will be unable to receive Push Notifications.",Toast.LENGTH_LONG).show();
 
             }
             else

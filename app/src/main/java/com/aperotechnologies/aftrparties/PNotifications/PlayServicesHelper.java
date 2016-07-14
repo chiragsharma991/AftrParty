@@ -23,6 +23,7 @@ import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -122,6 +123,13 @@ public class PlayServicesHelper {
                         if(Welcome.wl_pd.isShowing())
                         {
                             Welcome.wl_pd.dismiss();
+                        }
+                    }
+                    if(SplashActivity.pd!=null)
+                    {
+                        if(SplashActivity.pd.isShowing())
+                        {
+                            SplashActivity.pd.dismiss();
                         }
                     }
                     GenerikFunctions.showToast(cont, "No valid Google Play Services APK found.");
@@ -244,6 +252,13 @@ public class PlayServicesHelper {
                                 if(Welcome.wl_pd.isShowing())
                                 {
                                     Welcome.wl_pd.dismiss();
+                                }
+                            }
+                            if(SplashActivity.pd!=null)
+                            {
+                                if(SplashActivity.pd.isShowing())
+                                {
+                                    SplashActivity.pd.dismiss();
                                 }
                             }
                             GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");

@@ -63,11 +63,14 @@ import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.github.siyamed.shapeimageview.CircularImageView;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
@@ -189,6 +192,13 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         lLyoutHost.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                edt_PartyName.clearFocus();
+                edt_Description.clearFocus();
+                edt_address.clearFocus();
+                edt_street.clearFocus();
+                edt_city.clearFocus();
+                edt_state.clearFocus();
+                edt_pincode.clearFocus();
                 InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if(inputManager != null){
                     inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
@@ -202,13 +212,14 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         edt_PartyName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-
+                boolean handled = false;
                 if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
                     edt_PartyName.clearFocus();
                     edt_Description.requestFocus();
+                    handled = true;
 
                 }
-                return false;
+                return handled;
             }
         });
 
@@ -449,6 +460,8 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         startHour = calendar.get(Calendar.HOUR_OF_DAY);
         startMin = calendar.get(Calendar.MINUTE);
 
+
+
         txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
         //current date time in milliseconds
         selected_startTimeVal = getTimeinMs(startDate, startMon, startYear, startHour, startMin);
@@ -466,11 +479,16 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
         //set startdateTime and endDateTime to temporary variables
         tempstartTimeVal[0] = selected_startTimeVal;
-        tempendTimeVal[0] = selected_endTimeVal;
+        //tempendTimeVal[0] = selected_endTimeVal;
 
         txtStartDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(inputManager != null){
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
                 startDateDialog("show");
             }
         });
@@ -515,6 +533,10 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         edtEndDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(inputManager != null){
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
                 endDateDialog("show");
             }
         });
@@ -566,7 +588,13 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 //                    msglength++;
 //                }
 
-                if(edtEndDate.getText().toString().equals("Select End Time")){
+                if (compareWithCurrentTime(startHour, startMin) == false) {
+                    msg += "PartyStartTime should be greater than current time." + "\n";
+                    msglength++;
+
+                }
+
+                else if(edtEndDate.getText().toString().equals("Select End Time")){
                     msg += "Please select PartyEndTime." + "\n";
                     msglength++;
 
@@ -847,20 +875,61 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     //function for converting values in milliseconds
     public long getTimeinMs(int mDay, int mMonth, int mYear, int hour, int minute){
 
-        //Log.e("hour "," "+hour+" minute "+minute);
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(mYear, mMonth, mDay,
-                hour, minute, 0);
-        long TimeinMs = calendar.getTimeInMillis();
 
-        //Log.e("--- ",""+calendar.getTime()+" "+calendar.getTimeInMillis());
-        //Log.e("DateTime in milliseconds : ","" + TimeinMs.getTime());
-        //return TimeinMs.getTime();
-        return TimeinMs;
+        Log.e("----"," "+mDay+"--- "+mMonth+"--"+mYear+"---"+hour+"----"+minute);
+
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.set(mYear, mMonth, mDay,
+//                hour, minute, 00);
+//
+//        Log.e("getTime "+calendar.getTime(),"");
+//        long TimeinMs = calendar.getTimeInMillis();
+//        return TimeinMs;
+
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String inputString = hour +":"+minute+":00";
+        String date = mYear+"-"+mMonth+"-"+mDay;
+        Log.e("date "," "+date +" --- "+inputString);
+        Date d = null;
+        try {
+             d = sdf.parse(date+" " + inputString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return d.getTime();
+
     }
 
+    //compare starttime with currenttime
+    private boolean compareWithCurrentTime(int startHour, int startMin) {
+        Boolean value = false;
+        Log.e("startHour"+startHour+"     "+startMin,"");
 
+
+        int currHour, currMin;
+        Calendar calendar = Validations.getCalendar();
+        currHour = calendar.get(Calendar.HOUR_OF_DAY);
+        currMin = calendar.get(Calendar.MINUTE);        Log.e("currHour"+currHour+"     "+currMin,"");
+        if(startHour < currHour){
+            value = false;
+        }
+        else if(startHour == currHour){
+            if(startMin < currMin) {
+                value = false;
+            }
+            else{
+                value = true;
+            }
+        }else{
+            value = true;
+        }
+        return value;
+
+    }
 
     // function for StartTime DatePicker
     private DatePicker startDateDialog(String check) {
@@ -886,7 +955,6 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                 //DatePicker change listener
 
                 Log.e("-------","change "+startDate);
-
 
                 startDate = dayOfMonth;
                 startMon = month;
@@ -931,14 +999,18 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
     }
 
-
     // function for StartTime TimePicker
     private void startTimeDialog(String check) {
+
+        final int tempstartHour;
+        final int tempstartMin;
 
         final TimePicker timePicker = new TimePicker(this);
         timePicker.setIs24HourView(true);
         timePicker.setCurrentHour(startHour);
         timePicker.setCurrentMinute(startMin);
+        tempstartHour = startHour;
+        tempstartMin = startMin;
 
         new AlertDialog.Builder(this)
                 .setTitle("Set Time")
@@ -949,24 +1021,57 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                         startHour = timePicker.getCurrentHour();
                         startMin = timePicker.getCurrentMinute();
                         tempstartTimeVal[0] = getTimeinMs(startDate, startMon, startYear, startHour,startMin);
-                        Log.e("diff ", "  " + tempstartTimeVal[0]+"----"+selected_endTimeVal);
+                        Log.e("values... ", "  " + tempstartTimeVal[0]+"----"+selected_endTimeVal+" "+(selected_endTimeVal == 0)+" --- "+compareWithCurrentTime(startHour, startMin));
 
-                       if(selected_endTimeVal != 0) {
-                            if (selected_endTimeVal - tempstartTimeVal[0] == 0 || selected_endTimeVal - tempstartTimeVal[0] < 0 || selected_endTimeVal - tempstartTimeVal[0] < ConstsCore.hourVal) {
-                                Toast.makeText(getApplicationContext(), " EndTime should be greater than 1 hour ", Toast.LENGTH_SHORT).show();
-                            } else if (selected_endTimeVal - tempstartTimeVal[0] > ConstsCore.TwelveHrVal) {
-                                Toast.makeText(getApplicationContext(), " EndTime cannot be greater than 12 hours ", Toast.LENGTH_SHORT).show();
-                            }else{
-                                txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
-                                selected_startTimeVal = tempstartTimeVal[0];
-                                Log.e("selected_startTimeVal", " " + selected_startTimeVal+" "+new Date(selected_startTimeVal));
+                       if(selected_endTimeVal == 0)
+                       {
 
-                            }
-                        }else {
+                           Boolean val = compareWithCurrentTime(startHour, startMin);
+                           Log.e("val"," "+val);
+                           if(val == false)
+                           {
+                               startHour = tempstartHour;
+                               startMin = tempstartMin;
+                               Toast.makeText(getApplicationContext(), "StartTime should be greater than current time. ", Toast.LENGTH_SHORT).show();
+                           }
+                           else
+                           {
+                               txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
+                               selected_startTimeVal = tempstartTimeVal[0];
+                               Log.e("selected_startTimeVal", " " + selected_startTimeVal + " " + new Date(selected_startTimeVal));
+                           }
 
-                            txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
-                            selected_startTimeVal = tempstartTimeVal[0];
-                            Log.e("selected_startTimeVal", " " + selected_startTimeVal+" "+new Date(selected_startTimeVal));
+
+                        }
+                       else
+                       {
+                           Boolean val = compareWithCurrentTime(startHour, startMin);
+                           if(val == false)
+                           {
+                               startHour = tempstartHour;
+                               startMin = tempstartMin;
+                               Toast.makeText(getApplicationContext(), "StartTime should be greater than current time.", Toast.LENGTH_SHORT).show();
+                           }
+                           else if (selected_endTimeVal - tempstartTimeVal[0] == 0 || selected_endTimeVal - tempstartTimeVal[0] < 0 || selected_endTimeVal - tempstartTimeVal[0] < ConstsCore.hourVal)
+                           {
+                               startHour = tempstartHour;
+                               startMin = tempstartMin;
+                               Toast.makeText(getApplicationContext(), "Party minimum duraton is of 1 hour.", Toast.LENGTH_SHORT).show();
+                           }
+                           else if (selected_endTimeVal - tempstartTimeVal[0] > ConstsCore.TwelveHrVal)
+                           {
+                               startHour = tempstartHour;
+                               startMin = tempstartMin;
+                               Toast.makeText(getApplicationContext(), "Party maximum duration is of 12 hours.", Toast.LENGTH_SHORT).show();
+
+                           }
+                           else
+                           {
+                               txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + Validations.showTime(startHour, startMin));
+                               selected_startTimeVal = tempstartTimeVal[0];
+                               Log.e("selected_startTimeVal", " " + selected_startTimeVal+" "+new Date(selected_startTimeVal));
+
+                           }
 
                         }
 
@@ -986,7 +1091,6 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                         }).setView(timePicker).show();
 
     }
-
 
     // function for EndTime DatePicker
     private DatePicker endDateDialog(String check) {
@@ -1022,6 +1126,14 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
         dp.setButton(DatePickerDialog.BUTTON_POSITIVE, "Set", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        //date,time value for EndDateTime
+                        if(selected_endTimeVal == 0) {
+                            endDate = calendar.get(Calendar.DAY_OF_MONTH);
+                            endMon = calendar.get(Calendar.MONTH);
+                            endYear = calendar.get(Calendar.YEAR);
+                            endHour = calendar.get(Calendar.HOUR_OF_DAY);
+                            endMin = calendar.get(Calendar.MINUTE);
+                        }
                         endTimeDialog("show");
                     }
                 }
@@ -1046,14 +1158,18 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
     }
 
-
     // function for EndTime TimePicker
     private void endTimeDialog(String check) {
+
+        final int tempendHour;
+        final int tempendMin;
 
         final TimePicker timePicker = new TimePicker(this);
         timePicker.setIs24HourView(true);
         timePicker.setCurrentHour(endHour);
         timePicker.setCurrentMinute(endMin);
+        tempendHour = endHour;
+        tempendMin = endMin;
 
         new AlertDialog.Builder(this)
                 .setTitle("Set Time")
@@ -1065,20 +1181,30 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                         endMin = timePicker.getCurrentMinute();
                         tempendTimeVal[0] = getTimeinMs(endDate, endMon, endYear, endHour, endMin);
 
-                        Log.e("selected_startTimeVal", "   " + selected_startTimeVal+" "+new Date(selected_startTimeVal));
-                        Log.e("tempendTimeVal", "   " + tempendTimeVal[0]+" "+new Date(tempendTimeVal[0]));
-                        Log.e("difference", "   " + (tempendTimeVal[0] - selected_startTimeVal));
+
                         long finalEndTimeVal = new Date(tempendTimeVal[0]).getTime();
                         long finalStartTimeVal = new Date(selected_startTimeVal).getTime();
+                        long diff = finalEndTimeVal - finalStartTimeVal - 1000;
+//                        long diffHours = diff / (60 * 60 * 1000);
+                        Log.e("tempendTimeVal format----", "    " + tempendTimeVal[0]+"---"+selected_startTimeVal+ " ---"+( tempendTimeVal[0] - selected_startTimeVal));
+                        Log.e("date format----", "    " + finalEndTimeVal+"---"+finalStartTimeVal+ " ---"+diff);
+//                        Log.e("diffHours "," "+diffHours);
 
-                        Log.e("diff by date", "    " + (finalEndTimeVal - finalStartTimeVal));
 
-                        if (tempendTimeVal[0] - selected_startTimeVal == 0 || tempendTimeVal[0] < selected_startTimeVal || tempendTimeVal[0] - selected_startTimeVal < ConstsCore.hourVal) {
+
+                        if (tempendTimeVal[0] - selected_startTimeVal == 0 || tempendTimeVal[0] < selected_startTimeVal || tempendTimeVal[0] - selected_startTimeVal < ConstsCore.hourVal)
+                        {
+                            endHour = tempendHour;
+                            endMin = tempendMin;
                             Toast.makeText(getApplicationContext(), " EndTime should be greater than 1 hour ", Toast.LENGTH_SHORT).show();
-                        } else if (tempendTimeVal[0] - selected_startTimeVal > ConstsCore.TwelveHrVal) {
+                        }
+                        else if (tempendTimeVal[0] - selected_startTimeVal > ConstsCore.TwelveHrVal)
+                        {   endHour = tempendHour;
+                            endMin = tempendMin;
                             Toast.makeText(getApplicationContext(), " EndTime cannot be greater than 12 hours ", Toast.LENGTH_SHORT).show();
-                        } else {
-
+                        }
+                        else
+                        {
                             selected_endTimeVal = tempendTimeVal[0];
                             edtEndDate.setText(getDateNo(endDate) + "-" + getMonthNo(endMon) + "-" + endYear + ", " + Validations.showTime(endHour, endMin));
 
@@ -1087,11 +1213,11 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
                 })
                 .setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-
+                        new DialogInterface.OnClickListener()
+                        {
                             @Override
-                            public void onClick(DialogInterface dialog,
-                                                int which) {
+                            public void onClick(DialogInterface dialog, int which)
+                            {
                                 Log.d("Picker", "Cancelled!");
                             }
                         }).setView(timePicker).show();
@@ -1103,9 +1229,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     }
 
 
-
-
-    //***// function providing latitude longitude from address
+    //*// function providing latitude longitude from address
     public void getLatLong(String newAddress,int iteration)
     {
         try
@@ -1203,7 +1327,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         }
     }
 
-//***//
+   //*//
 
 
 
@@ -1496,6 +1620,8 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         }
     }
 
+
+    //**//Function for storing data of Party while creating party
     public PartyTable initialiseParty(Context cont, String latitude, String longitude, String fullAddress)
     {
 
@@ -1531,10 +1657,10 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         return party;
 
     }
+    //**//
 
+    //***// Function for getting Current Location
     public void getSelfLocation() {
-
-        
 
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Toast.makeText(HostActivity.this, "GPS not Available", Toast.LENGTH_LONG).show();
@@ -1650,6 +1776,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         }
 
     }
+    //***//
 
     private Location getLastBestLocation()
     {
@@ -1696,6 +1823,18 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
     @Override
     public void onBackPressed() {
+
+        edt_PartyName.clearFocus();
+        edt_Description.clearFocus();
+        edt_address.clearFocus();
+        edt_street.clearFocus();
+        edt_city.clearFocus();
+        edt_state.clearFocus();
+        edt_pincode.clearFocus();
+        InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if(inputManager != null){
+            inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
         finish();
     }
 

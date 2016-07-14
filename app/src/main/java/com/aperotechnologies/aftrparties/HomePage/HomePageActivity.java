@@ -148,24 +148,22 @@ public class HomePageActivity extends Activity
 //        }
 
 
-
-
         btn_logout.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
                 LISessionManager.getInstance(getApplicationContext()).clearSession();
-                AccessToken.setCurrentAccessToken(null);
-                LoginManager.getInstance().logOut();
+                //LoginManager.getInstance().logOut();
 
+                Log.e("----"," "+LoginValidations.getFBAccessToken());
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString(m_config.FinalStepDone,"No");
                 editor.apply();
 
                 if(LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken() == null)
                 {
-                    Log.e("Logge out from " ,"Linked In");
+                    Log.e("Logged out from " ,"Linked In");
                 }
 
                 Log.e("Logged Out","Yes    "  + "  aa");//.getAccessToken().toString());

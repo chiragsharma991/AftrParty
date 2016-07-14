@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
@@ -100,15 +101,21 @@ public class PartyDetails extends Activity
             txtpartyDesc.setText(party.getPartyDescription());
             txtpartyAddress.setText(party.getPartyAddress());
 
+
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm");
+
+            //Log.e(" party starttime"," "+party.getStartTime()+" "+party.getEndTime());
             String StartTime = party.getStartTime();
-            Calendar calendar = Calendar.getInstance();
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             calendar.setTimeInMillis(Long.parseLong(StartTime));
             String partystrDate = Validations.getMonthNo(calendar.get(Calendar.MONTH)) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR) + " " + Validations.showTime(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
+            //Log.e(" partystrDate"," "+partystrDate);
 
             String EndDate = party.getEndTime();
-            Calendar calendar1 = Calendar.getInstance();
+            Calendar calendar1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             calendar1.setTimeInMillis(Long.parseLong(EndDate));
             String partyendDate = Validations.getMonthNo(calendar1.get(Calendar.MONTH)) + "/" + calendar1.get(Calendar.DAY_OF_MONTH) + "/" + calendar1.get(Calendar.YEAR) + " " + Validations.showTime(calendar1.get(Calendar.HOUR_OF_DAY), calendar1.get(Calendar.MINUTE));
+            //Log.e(" partyendDate"," "+partyendDate);
 
             txtpartyStartTime.setText(partystrDate);
             txtpartyEndTime.setText(partyendDate);
@@ -150,14 +157,6 @@ public class PartyDetails extends Activity
 
         Long currentTime = System.currentTimeMillis();
 
-        if(party.getGatecrashers() == null)
-        {
-            btnRequestant.setVisibility(View.GONE);
-        }
-        else
-        {
-            btnRequestant.setVisibility(View.VISIBLE);
-        }
 
 
         if(PartyStatus.equals("Created"))
@@ -190,19 +189,27 @@ public class PartyDetails extends Activity
 
                 if(btnRequestant.getText().toString().equals("Requestant"))
                 {
-                    //open details of requestant
-                    Log.e("----- "," "+PartyID);
-                    Intent i = new Intent(cont,RequestantCardsActivity.class);
-                    PartyParceableData party1 = new PartyParceableData();
-                    party1.setPartyId(PartyID);
-                    party1.setPartyName(PartyName);
-                    party1.setStartTime(PartyStartTime);
-                    party1.setEndTime(PartyEndTime);
-                    party1.setPartyStatus(PartyStatus);
-                    Bundle mBundles = new Bundle();
-                    mBundles.putSerializable(ConstsCore.SER_KEY, party1);
-                    i.putExtras(mBundles);
-                    cont.startActivity(i);
+                    if(party.getGatecrashers() == null)
+                    {
+                        GenerikFunctions.showToast(cont, "There are no requestants for this party");
+                    }
+                    else
+                    {
+
+                        //open details of requestant
+                        Log.e("----- ", " " + PartyID);
+                        Intent i = new Intent(cont, RequestantCardsActivity.class);
+                        PartyParceableData party1 = new PartyParceableData();
+                        party1.setPartyId(PartyID);
+                        party1.setPartyName(PartyName);
+                        party1.setStartTime(PartyStartTime);
+                        party1.setEndTime(PartyEndTime);
+                        party1.setPartyStatus(PartyStatus);
+                        Bundle mBundles = new Bundle();
+                        mBundles.putSerializable(ConstsCore.SER_KEY, party1);
+                        i.putExtras(mBundles);
+                        cont.startActivity(i);
+                    }
                 }
                 else if (btnRequestant.getText().toString().equals("Host"))
                 {
