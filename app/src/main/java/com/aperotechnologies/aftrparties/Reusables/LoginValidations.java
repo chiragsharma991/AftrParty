@@ -384,6 +384,7 @@ public  class LoginValidations
                     }
                     catch (Exception e)
                     {
+                        callToHomePageActivity(cont);
 
                     }
 
@@ -399,30 +400,7 @@ public  class LoginValidations
                     {
                         e.printStackTrace();
 
-                        Handler h = new Handler(cont.getMainLooper());
-                        h.post(new Runnable()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                if(RegistrationActivity.reg_pd.isShowing())
-                                {
-                                    RegistrationActivity.reg_pd.dismiss();
-                                }
-                                if(Welcome.wl_pd.isShowing())
-                                {
-                                    Welcome.wl_pd.dismiss();
-                                }
-                                if(SplashActivity.pd!=null)
-                                {
-                                    if(SplashActivity.pd.isShowing())
-                                    {
-                                        SplashActivity.pd.dismiss();
-                                    }
-                                }
-                                GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
-                            }
-                        });
+                        callToHomePageActivity(cont);
                     }
 
                     editor.apply();
@@ -436,33 +414,8 @@ public  class LoginValidations
                 {
                     Log.e("createSession", "onerror");
                     e.printStackTrace();
+                    callToHomePageActivity(cont);
 
-                    Handler h = new Handler(cont.getMainLooper());
-                    h.post(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            if(RegistrationActivity.reg_pd.isShowing())
-                            {
-                                RegistrationActivity.reg_pd.dismiss();
-                            }
-                            if(Welcome.wl_pd.isShowing())
-                            {
-                                Welcome.wl_pd.dismiss();
-                            }
-                            if(SplashActivity.pd!=null)
-                            {
-                                if(SplashActivity.pd.isShowing())
-                                {
-                                    SplashActivity.pd.dismiss();
-                                }
-                            }
-                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
-                        }
-                    });
-
-                   // GenerikFunctions.hideDialog(m_config.pDialog);
                 }
             });
 
@@ -470,6 +423,8 @@ public  class LoginValidations
             Looper.loop();
             myLooper.quit();
         }
+
+
     };
 
 
@@ -503,7 +458,7 @@ public  class LoginValidations
                     null, new QBEntityCallback<QBUser>()
                     {
                         @Override
-                        public void onSuccess(QBUser user, Bundle args)
+                        public void onSuccess(final QBUser user, Bundle args)
                         {
 
                             Log.e("Facebook login","Success"+" ");
@@ -512,37 +467,20 @@ public  class LoginValidations
                             SharedPreferences.Editor editor= sharedPreferences.edit();
                             editor.putString(m_config.QuickBloxID, String.valueOf(user.getId()));
                             editor.apply();
-                            new AWSLoginOperations.addUserQuickBloxId(cont, user, avatarUrl).execute();
 
-                            Handler h = new Handler(cont.getMainLooper());
-                            h.post(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    if(RegistrationActivity.reg_pd!=null)
-                                    {
-                                        if(RegistrationActivity.reg_pd.isShowing())
-                                        {
-                                            Log.e("PD is showing from ","loginWithFbQuickBloxLooper");
-                                        }
-                                    }
-                                    if(Welcome.wl_pd!=null)
-                                    {
-                                        if(Welcome.wl_pd.isShowing())
-                                        {
-                                            Log.e("PD is showing from ","loginWithFbQuickBloxLooper");
-                                        }
-                                    }
-                                    if(SplashActivity.pd!=null)
-                                    {
-                                        if(SplashActivity.pd.isShowing())
-                                        {
-                                            SplashActivity.pd.dismiss();
-                                        }
-                                    }
-                                }
-                            });
+                            if(cont instanceof RegistrationActivity){
+                                new AWSLoginOperations.addUserQuickBloxId(cont, user, avatarUrl).execute();
+                            }
+
+                            if(cont instanceof Welcome){
+                                checkChatLoginExist(cont, user);
+                            }
+
+                            if(cont instanceof SplashActivity){
+                                checkChatLoginExist(cont, user);
+                            }
+
+
                         }
 
                         @Override
@@ -550,39 +488,7 @@ public  class LoginValidations
                         {
                             Log.e("Facebook login","OnError");
                             e.printStackTrace();
-                            Handler h = new Handler(cont.getMainLooper());
-                            h.post(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    if(RegistrationActivity.reg_pd!=null)
-                                    {
-                                        if(RegistrationActivity.reg_pd.isShowing())
-                                        {
-                                            RegistrationActivity.reg_pd.dismiss();
-                                        }
-                                    }
-                                    if(Welcome.wl_pd!=null)
-                                    {
-                                        if(Welcome.wl_pd.isShowing())
-                                        {
-                                            Welcome.wl_pd.dismiss();
-                                        }
-                                    }
-                                    if(SplashActivity.pd!=null)
-                                    {
-                                        if(SplashActivity.pd.isShowing())
-                                        {
-                                            SplashActivity.pd.dismiss();
-                                        }
-                                    }
-
-                                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
-                                }
-                            });
-
-                          //  GenerikFunctions.hideDialog(m_config.pDialog);
+                            callToHomePageActivity(cont);
                         }
                     });
 
@@ -636,89 +542,15 @@ public  class LoginValidations
                     else
                     {
                         // Initialise ChatService
-                        try
-                        {
-                            user.setPassword(BaseService.getBaseService().getToken());
-                            boolean isLoggedIn = QBChatService.getInstance().isLoggedIn();
-                            Log.e("isLoggedIn "," "+isLoggedIn);
-                            if(isLoggedIn)
-                            {
-                                //if chat is LoggedIn give a call to PlayServiceHelper
-                                new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
-                            }
-                            else
-                            {
-                                //call to chatLogin
-                                //chatLogin(user, cont);
-                                new chatLogin(user, cont).execute();
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            e.printStackTrace();
+                        checkChatLoginExist(cont, user);
 
-                            Handler h = new Handler(cont.getMainLooper());
-                            h.post(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    if(RegistrationActivity.reg_pd!=null)
-                                    {
-                                        if(RegistrationActivity.reg_pd.isShowing())
-                                        {
-                                            RegistrationActivity.reg_pd.dismiss();
-                                        }
-                                    }
-                                    if(Welcome.wl_pd!=null)
-                                    {
-                                        if(Welcome.wl_pd.isShowing())
-                                        {
-                                            Welcome.wl_pd.dismiss();
-                                        }
-                                    }
-                                    if(SplashActivity.pd!=null)
-                                    {
-                                        if(SplashActivity.pd.isShowing())
-                                        {
-                                            SplashActivity.pd.dismiss();
-                                        }
-                                    }
-                                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
-                                }
-                            });
-
-                           // GenerikFunctions.hideDialog(m_config.pDialog);
-                        }
                     }
                 }
 
                 @Override
                 public void onError(QBResponseException errors)
                 {
-                    Handler h = new Handler(cont.getMainLooper());
-                    h.post(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            if(RegistrationActivity.reg_pd!=null)
-                            {
-                                if(RegistrationActivity.reg_pd.isShowing())
-                                {
-                                    RegistrationActivity.reg_pd.dismiss();
-                                }
-                            }
-                            if(Welcome.wl_pd!=null)
-                            {
-                                if(Welcome.wl_pd.isShowing())
-                                {
-                                    Welcome.wl_pd.dismiss();
-                                }
-                            }
-                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
-                        }
-                    });
+                    callToHomePageActivity(cont);
                 }
             });
 
@@ -768,40 +600,7 @@ public  class LoginValidations
                     // errror
                     Log.e("ChatServicelogin","OnError "+e.toString());
                     e.printStackTrace();
-
-
-
-
-                    Handler h = new Handler(cont.getMainLooper());
-                    h.post(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            if(RegistrationActivity.reg_pd!=null)
-                            {
-                                if(RegistrationActivity.reg_pd.isShowing())
-                                {
-                                    RegistrationActivity.reg_pd.dismiss();
-                                }
-                            }
-                            if(Welcome.wl_pd!=null)
-                            {
-                                if(Welcome.wl_pd.isShowing())
-                                {
-                                    Welcome.wl_pd.dismiss();
-                                }
-                            }
-                            if(SplashActivity.pd!=null)
-                            {
-                                if(SplashActivity.pd.isShowing())
-                                {
-                                    SplashActivity.pd.dismiss();
-                                }
-                            }
-                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
-                        }
-                    });
+                    callToHomePageActivity(cont);
 
 
 
@@ -880,39 +679,7 @@ public  class LoginValidations
                 {
                     Log.e("subscription","onError");
                     e.printStackTrace();
-
-                    Handler h = new Handler(cont.getMainLooper());
-                    h.post(new Runnable()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            if(RegistrationActivity.reg_pd!=null)
-                            {
-                                if(RegistrationActivity.reg_pd.isShowing())
-                                {
-                                    RegistrationActivity.reg_pd.dismiss();
-                                }
-                            }
-                            if(Welcome.wl_pd!=null)
-                            {
-                                if(Welcome.wl_pd.isShowing())
-                                {
-                                    Welcome.wl_pd.dismiss();
-                                }
-                            }
-                            if(SplashActivity.pd!=null)
-                            {
-                                if(SplashActivity.pd.isShowing())
-                                {
-                                    SplashActivity.pd.dismiss();
-                                }
-                            }
-                            GenerikFunctions.showToast(cont,"Login Failed, Please try again after some time");
-                        }
-                    });
-
-                    //GenerikFunctions.hideDialog(m_config.pDialog);
+                    callToHomePageActivity(cont);
 
                 }
             });
@@ -967,31 +734,6 @@ public  class LoginValidations
             }
         });
     }
-
-   /* public static void updateQBProfileImage(String FBID, final String FBProfilePicUrl){
-
-        try {
-            String qbtoken = QBAuth.getBaseService().getToken();
-            Log.e("qbtoken ", qbtoken);
-        } catch (Exception e) {
-
-        }
-
-        QBUsers.getUserByFacebookId(FBID, new QBEntityCallback<QBUser>() {
-            @Override
-            public void onSuccess(QBUser user, Bundle args) {
-                user.setCustomData(FBProfilePicUrl);
-                Log.e("onSuccess"," "+user);
-            }
-
-            @Override
-            public void onError(QBResponseException errors) {
-                errors.printStackTrace();
-                Log.e("onError"," updating user");
-            }
-        });
-
-    }*/
 
     public static void FaceDetect(final Context cont)
     {
@@ -1177,4 +919,118 @@ public  class LoginValidations
             new AsyncAgeCalculation(cont).execute();
         }
     }
+
+    public static void callToHomePageActivity(final Context cont){
+        Handler h = new Handler(cont.getMainLooper());
+        h.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+
+                if(RegistrationActivity.reg_pd != null)
+                {
+                    if (RegistrationActivity.reg_pd.isShowing())
+                    {
+                        RegistrationActivity.reg_pd.dismiss();
+
+                    }
+                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                }
+                else
+                {
+                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                }
+
+                if(Welcome.wl_pd != null) {
+                    if (Welcome.wl_pd.isShowing())
+                    {
+                        Welcome.wl_pd.dismiss();
+                    }
+                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                }
+                else
+                {
+                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                }
+
+                if(SplashActivity.pd != null)
+                {
+                    if(SplashActivity.pd.isShowing())
+                    {
+                        SplashActivity.pd.dismiss();
+                    }
+                    Intent i = new Intent(cont, HomePageActivity.class);
+                    cont.startActivity(i);
+                }else{
+                    Intent i = new Intent(cont, HomePageActivity.class);
+                    cont.startActivity(i);
+                }
+
+            }
+        });
+    }
+
+    public static void checkChatLoginExist(final Context cont, final QBUser user){
+        boolean isLoggedIn = QBChatService.getInstance().isLoggedIn();
+        Log.e("isLoggedIn "," "+isLoggedIn);
+        if(isLoggedIn)
+        {
+            //if chat is LoggedIn give a call to PlayServiceHelper
+            new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+        }
+        else
+        {
+            try
+            {
+                user.setPassword(BaseService.getBaseService().getToken());
+                new chatLogin(user, cont).execute();
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                Handler h = new Handler(cont.getMainLooper());
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run() {
+                        if (RegistrationActivity.reg_pd != null) {
+                            if (RegistrationActivity.reg_pd.isShowing()) {
+                                RegistrationActivity.reg_pd.dismiss();
+                            }
+                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                        } else {
+                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                        }
+
+                        if (Welcome.wl_pd != null) {
+                            if (Welcome.wl_pd.isShowing()) {
+                                Welcome.wl_pd.dismiss();
+                            }
+                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+
+                        } else {
+                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                        }
+
+                        if (SplashActivity.pd != null) {
+                            if (SplashActivity.pd.isShowing()) {
+                                SplashActivity.pd.dismiss();
+                                Intent i = new Intent(cont, HomePageActivity.class);
+                                cont.startActivity(i);
+                            } else {
+                                Intent i = new Intent(cont, HomePageActivity.class);
+                                cont.startActivity(i);
+                            }
+                        }
+                    }
+                });
+
+            }
+            //call to chatLogin
+
+        }
+    }
+
+
 }

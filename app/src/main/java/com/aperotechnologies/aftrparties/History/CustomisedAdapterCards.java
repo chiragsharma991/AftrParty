@@ -43,7 +43,6 @@ public class CustomisedAdapterCards extends CardStackAdapter
 {
     Context context;
     Button accept,decline;
-    String fbid ,liid,qbid;
     Configuration_Parameter m_config;
     String message = " ";
     String requestStatus;
@@ -76,6 +75,7 @@ public class CustomisedAdapterCards extends CardStackAdapter
         String ids = model.getTitle();
         Log.e("IDs",ids);
         String[] id = ids.split("\\*");
+        final String fbid ,liid,qbid;
         fbid = id[0];
         liid = id[1];
         qbid = id[2];

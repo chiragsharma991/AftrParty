@@ -5,6 +5,10 @@ import android.app.Application;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.aperotechnologies.aftrparties.Chats.ChatService;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+
 import java.util.HashMap;
 
 /**
@@ -83,6 +87,8 @@ public class BaseLifeCycleCallbacks implements Application.ActivityLifecycleCall
 
     @Override
     public void onActivityResumed(Activity activity) {
+
+
     }
 
     @Override

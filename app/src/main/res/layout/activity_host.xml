@@ -551,7 +551,7 @@
                         android:layout_weight="0.45"/>
 
 
-                    <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
+                    <!--<com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
                         android:singleLine="true"
                         android:textCursorDrawable="@null"
                         android:padding="10dp"
@@ -564,7 +564,23 @@
                         android:layout_width="0dp"
                         android:textSize="@dimen/text_size"
                         android:id="@+id/edt_state"
-                        android:layout_weight="0.55"/>
+                        android:layout_weight="0.55"/>-->
+
+                    <AutoCompleteTextView
+                        android:singleLine="true"
+                        android:textCursorDrawable="@null"
+                        android:padding="10dp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginRight="5dp"
+                        android:hint="State"
+                        android:inputType="textCapSentences|textAutoComplete"
+                        android:nextFocusDown="@+id/edt_pincode"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:textSize="@dimen/text_size"
+                        android:id="@+id/edt_state"
+                        android:layout_weight="0.55" />
+
                 </LinearLayout>
 
                 <View

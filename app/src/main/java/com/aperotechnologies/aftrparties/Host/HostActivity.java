@@ -40,6 +40,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
@@ -93,7 +94,13 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     EditText edt_PartyName, edt_Description;
     CheckBox cb_byobYes, cb_byobNo;
     CheckBox cb_getLocation, cb_EnterAddress;
-    EditText edt_address, edt_street,edt_city,edt_state, edt_pincode;
+    EditText edt_address, edt_street,edt_city, edt_pincode;
+    public String[] states = new String[]{"Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh",
+            "Jammu & Kashmir","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland",
+            "Odisha (Orissa)","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal"};
+
+
+    AutoCompleteTextView edt_state;
     Button btn_createParty;
     String timeSelection;
 
@@ -181,13 +188,13 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         llayoutenterAddress = (LinearLayout) findViewById(R.id.llayoutenterAddress);
         edt_street =  (EditText) findViewById(R.id.edt_street);
         edt_city =  (EditText) findViewById(R.id.edt_city);
-        edt_state =  (EditText) findViewById(R.id.edt_state);
+        edt_state =  (AutoCompleteTextView) findViewById(R.id.edt_state);
         edt_pincode =  (EditText) findViewById(R.id.edt_pincode);
         edt_address = (EditText) findViewById(R.id.edt_Partyaddress);
-
-
         btn_createParty = (Button) findViewById(R.id.btn_CreateParty);
 
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,states);
+        edt_state.setAdapter(adapter);
 
         lLyoutHost.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -879,28 +886,28 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
         Log.e("----"," "+mDay+"--- "+mMonth+"--"+mYear+"---"+hour+"----"+minute);
 
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.set(mYear, mMonth, mDay,
-//                hour, minute, 00);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(mYear, mMonth, mDay,
+                hour, minute, 00);
+
+        Log.e("getTime "+calendar.getTime(),"");
+        long TimeinMs = calendar.getTimeInMillis();
+        return TimeinMs;
+
+
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        //sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 //
-//        Log.e("getTime "+calendar.getTime(),"");
-//        long TimeinMs = calendar.getTimeInMillis();
-//        return TimeinMs;
-
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        String inputString = hour +":"+minute+":00";
-        String date = mYear+"-"+mMonth+"-"+mDay;
-        Log.e("date "," "+date +" --- "+inputString);
-        Date d = null;
-        try {
-             d = sdf.parse(date+" " + inputString);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return d.getTime();
+//        String inputString = hour +":"+minute+":00";
+//        String date = mYear+"-"+mMonth+"-"+mDay;
+//        Log.e("date "," "+date +" --- "+inputString);
+//        Date d = null;
+//        try {
+//             d = sdf.parse(date+" " + inputString);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//        return d.getTime();
 
     }
 
@@ -1127,13 +1134,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         dp.setButton(DatePickerDialog.BUTTON_POSITIVE, "Set", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         //date,time value for EndDateTime
-                        if(selected_endTimeVal == 0) {
-                            endDate = calendar.get(Calendar.DAY_OF_MONTH);
-                            endMon = calendar.get(Calendar.MONTH);
-                            endYear = calendar.get(Calendar.YEAR);
-                            endHour = calendar.get(Calendar.HOUR_OF_DAY);
-                            endMin = calendar.get(Calendar.MINUTE);
-                        }
+
                         endTimeDialog("show");
                     }
                 }
@@ -1185,10 +1186,13 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                         long finalEndTimeVal = new Date(tempendTimeVal[0]).getTime();
                         long finalStartTimeVal = new Date(selected_startTimeVal).getTime();
                         long diff = finalEndTimeVal - finalStartTimeVal - 1000;
-//                        long diffHours = diff / (60 * 60 * 1000);
+//                      long diffHours = diff / (60 * 60 * 1000);
                         Log.e("tempendTimeVal format----", "    " + tempendTimeVal[0]+"---"+selected_startTimeVal+ " ---"+( tempendTimeVal[0] - selected_startTimeVal));
                         Log.e("date format----", "    " + finalEndTimeVal+"---"+finalStartTimeVal+ " ---"+diff);
 //                        Log.e("diffHours "," "+diffHours);
+//                        Log.e("compare "," "+(tempendTimeVal[0] - selected_startTimeVal));
+//                        Log.e("compare111--- "," "+(tempendTimeVal[0] < selected_startTimeVal));
+//                        Log.e("compare2222==== "," "+(tempendTimeVal[0] - selected_startTimeVal < ConstsCore.hourVal));
 
 
 
@@ -1653,7 +1657,6 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         //party.setPartyImage("");
         //party.setMaskStatus("");
         party.setDialogID("N/A");
-
         return party;
 
     }

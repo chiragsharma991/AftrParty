@@ -1,36 +1,31 @@
-package com.aperotechnologies.aftrparties.LocalNotifications;
+package com.aperotechnologies.aftrparties;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSLoginOperations;
-import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
+import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
+import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity;
+import com.aperotechnologies.aftrparties.History.HistoryActivity;
+import com.aperotechnologies.aftrparties.Host.HostActivity;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.quickblox.auth.QBAuth;
 import com.quickblox.auth.model.QBProvider;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.core.QBEntityCallback;
-import com.quickblox.core.exception.BaseServiceException;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.server.BaseService;
 import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 
 /**
- * Created by hasai on 04/07/16.
+ * Created by hasai on 15/07/16.
  */
-public class LoginforNotifications {
+public class NewClass {
 
-
-
-
-    public void QBSessionforNotification(final Context cont, final String from, final String accessToken, String checkfromWhere)
+    public static void QBSession(final String accessToken, final String checkfromWhere)
     {
 
         QBAuth.createSession(new QBEntityCallback() {
@@ -45,17 +40,19 @@ public class LoginforNotifications {
                 }
                 catch (Exception e)
                 {
-                    Toast.makeText(cont, "Login Failed, Please try again after some time",Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                    GenerikFunctions.hDialog();
                 }
 
-                QBLoginforNotification(cont, from, accessToken);
+                QBLoginforNotification(accessToken, checkfromWhere);
 
             }
 
             @Override
             public void onError(QBResponseException e)
             {
-                Toast.makeText(cont, "Login Failed, Please try again after some time",Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+                GenerikFunctions.hDialog();
 
             }
         });
@@ -64,9 +61,7 @@ public class LoginforNotifications {
 
 
 
-
-
-    public void QBLoginforNotification(final Context cont, final String from, String accessToken)
+    public static void QBLoginforNotification(String accessToken, final String checkfromWhere)
     {
         QBUsers.signInUsingSocialProvider(QBProvider.FACEBOOK, String.valueOf(accessToken),
                 null, new QBEntityCallback<QBUser>()
@@ -75,22 +70,31 @@ public class LoginforNotifications {
                     public void onSuccess(QBUser user, Bundle args)
                     {
                         Log.e("Facebook login","Success"+" ");
-                        QBChatLoginforNotification(cont, from, user);
+                        try {
+                            user.setPassword(BaseService.getBaseService().getToken());
+
+                            QBChatLogin(user, checkfromWhere);
+
+                        }catch (Exception e){
+                            e.printStackTrace();
+                            GenerikFunctions.hDialog();
+                        }
 
                     }
 
                     @Override
                     public void onError(QBResponseException e)
                     {
-                        Toast.makeText(cont, "Login Failed, Please try again after some time",Toast.LENGTH_SHORT).show();
+                        e.printStackTrace();
+                        GenerikFunctions.hDialog();
                     }
                 });
 
     }
 
 
-    public Boolean QBChatLoginforNotification(final Context cont, final String from, final QBUser user){
-        final Boolean[] value = {false};
+    public static void QBChatLogin(final QBUser user, final String checkfromWhere){
+
 
         QBChatService.getInstance().login(user, new QBEntityCallback()
         {
@@ -99,20 +103,23 @@ public class LoginforNotifications {
             {
                 Log.e("ChatServicelogin","Success ");
 
-                value[0] = true;
+
 
             }
 
             @Override
             public void onError(QBResponseException e)
             {
+                e.printStackTrace();
+                GenerikFunctions.hDialog();
 
-                Toast.makeText(cont, "Login Failed, Please try again after some time",Toast.LENGTH_SHORT).show();
-                value[0] = false;
             }
         });
 
-        return value[0];
+
     }
 
+
+
 }
+

@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
@@ -26,10 +27,14 @@ import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
 import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
+import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
+import com.aperotechnologies.aftrparties.QBSessionRestart;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Settings.SettingsActivity;
+import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.TipsActivity;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.aperotechnologies.aftrparties.utils.ResizableButton;
@@ -40,6 +45,10 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.linkedin.platform.LISessionManager;
+import com.quickblox.auth.QBAuth;
+import com.quickblox.chat.QBChatService;
+import com.quickblox.core.exception.QBResponseException;
+import com.quickblox.core.server.BaseService;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -92,6 +101,33 @@ public class HomePageActivity extends Activity
         txt_Header = (TextView) findViewById(R.id.activity_title);
 
         hp_pd= new ProgressDialog(this);
+        if (SplashActivity.pd != null)
+        {
+            if(SplashActivity.pd.isShowing())
+            {
+                SplashActivity.pd.dismiss();
+            }
+        }
+        SplashActivity.pd = null;
+
+        if (RegistrationActivity.reg_pd != null)
+        {
+            if(RegistrationActivity.reg_pd.isShowing())
+            {
+                RegistrationActivity.reg_pd.dismiss();
+            }
+        }
+        RegistrationActivity.reg_pd = null;
+
+        if (Welcome.wl_pd != null)
+        {
+            if(Welcome.wl_pd.isShowing())
+            {
+                Welcome.wl_pd.dismiss();
+            }
+        }
+        Welcome.wl_pd = null;
+
 
 
 //        imguser = (CircularImageView) findViewById(R.id.userimage);
@@ -153,25 +189,38 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v)
             {
-                LISessionManager.getInstance(getApplicationContext()).clearSession();
-                //LoginManager.getInstance().logOut();
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(HomePageActivity.this);
+                alertDialogBuilder
+                        .setTitle("Exit")
+                        .setMessage("Are you sure you want to exit?")
+                        .setCancelable(false)
+                        .setNegativeButton("No", null)
+                        .setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener()
+                                {
+                                    public void onClick(DialogInterface dialog, int id)
+                                    {
+                                        LISessionManager.getInstance(getApplicationContext()).clearSession();
+                                        LoginManager.getInstance().logOut();
 
-                Log.e("----"," "+LoginValidations.getFBAccessToken());
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(m_config.FinalStepDone,"No");
-                editor.apply();
+                                        Log.e("----"," "+LoginValidations.getFBAccessToken());
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        editor.putString(m_config.FinalStepDone,"No");
+                                        editor.apply();
 
-                if(LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken() == null)
-                {
-                    Log.e("Logged out from " ,"Linked In");
-                }
+                                        if(LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken() == null)
+                                        {
+                                            Log.e("Logged out from " ,"Linked In");
+                                        }
 
-                Log.e("Logged Out","Yes    "  + "  aa");//.getAccessToken().toString());
-                Intent intent = new Intent(cont, Welcome.class);
-                startActivity(intent);
+                                        Log.e("Logged Out","Yes    "  + "  aa");//.getAccessToken().toString());
+                                        finish();
+                                        Intent intent = new Intent(cont, Welcome.class);
+                                        startActivity(intent);
 
-//                LoginValidations.QBSessionLogOut();
-//                LoginValidations.chatLogout();
+                                    }
+                                });
+                alertDialogBuilder.show();
             }
         });
 
@@ -190,7 +239,17 @@ public class HomePageActivity extends Activity
             public void onClick(View v)
             {
                 Log.e("----"," came here");
-                new AsyncFBFaces().execute();
+
+                if(ChatService.getInstance().getCurrentUser() == null)
+                {
+                    GenerikFunctions.sDialog(cont, "Loading...");
+                    String accessToken = LoginValidations.getFBAccessToken().getToken();
+                    QBSessionRestart.QBSession(cont, accessToken, "SettingsActivity");
+
+                }
+                else {
+                    new AsyncFBFaces().execute();
+                }
 
 
             }
@@ -200,8 +259,21 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                Intent i = new Intent(HomePageActivity.this, DialogsActivity.class);
-                startActivity(i);
+
+                Log.e("--current user -- "," "+ChatService.getInstance().getCurrentUser());
+
+                if(ChatService.getInstance().getCurrentUser() == null)
+                {
+                    GenerikFunctions.sDialog(cont, "Loading...");
+                    String accessToken = LoginValidations.getFBAccessToken().getToken();
+                    QBSessionRestart.QBSession(cont, accessToken, "ChatActivity");
+                }
+                else
+                {
+                    Intent i = new Intent(HomePageActivity.this, DialogsActivity.class);
+                    startActivity(i);
+                }
+
 
             }
         });
@@ -210,8 +282,18 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                Intent i = new Intent(HomePageActivity.this, HistoryActivity.class);
-                startActivity(i);
+                if(ChatService.getInstance().getCurrentUser() == null)
+                {
+                    GenerikFunctions.sDialog(cont, "Loading...");
+                    String accessToken = LoginValidations.getFBAccessToken().getToken();
+                    QBSessionRestart.QBSession(cont, accessToken, "HistoryActivity");
+                }
+                else
+                {
+                    Intent i = new Intent(HomePageActivity.this, HistoryActivity.class);
+                    startActivity(i);
+                }
+
 
             }
         });
@@ -220,8 +302,17 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                Intent i = new Intent(HomePageActivity.this, HostActivity.class);
-                startActivity(i);
+                if(ChatService.getInstance().getCurrentUser() == null)
+                {
+                    GenerikFunctions.sDialog(cont, "Loading...");
+                    String accessToken = LoginValidations.getFBAccessToken().getToken();
+                    QBSessionRestart.QBSession(cont, accessToken, "HostActivity");
+                }
+                else
+                {
+                    Intent i = new Intent(HomePageActivity.this, HostActivity.class);
+                    startActivity(i);
+                }
 
             }
         });
@@ -230,8 +321,16 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                Intent i = new Intent(HomePageActivity.this, GateCrasherSearchActivity.class);
-                startActivity(i);
+                if(ChatService.getInstance().getCurrentUser() == null)
+                {
+                    GenerikFunctions.sDialog(cont, "Loading...");
+                    String accessToken = LoginValidations.getFBAccessToken().getToken();
+                    QBSessionRestart.QBSession(cont, accessToken, "GCActivity");
+                }
+                else {
+                    Intent i = new Intent(HomePageActivity.this, GateCrasherSearchActivity.class);
+                    startActivity(i);
+                }
 
             }
         });

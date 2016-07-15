@@ -43,7 +43,6 @@ public class HostCardAdapter extends CardStackAdapter
 {
 
     Context context;
-    String fbid ,liid,qbid;
     Configuration_Parameter m_config;
 
     public HostCardAdapter(Context mContext)
@@ -73,6 +72,7 @@ public class HostCardAdapter extends CardStackAdapter
         String ids = model.getTitle();
         Log.e("IDs",ids);
         String[] id = ids.split("\\*");
+        final String fbid ,liid,qbid;
         fbid = id[0];
         liid = id[1];
         qbid = id[2];

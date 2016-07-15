@@ -23,7 +23,7 @@ public class SetLocalNotifications {
 
         AlarmManager alarmManager = (AlarmManager) cont.getSystemService(Context.ALARM_SERVICE);
 
-//        Intent notificationIntent = new Intent("android.media.action.DISPLAY_NOTIFICATION");
+//      Intent notificationIntent = new Intent("android.media.action.DISPLAY_NOTIFICATION");
         Intent notificationIntent = new Intent(cont, RatingsAlarmReceiver.class);
         notificationIntent.putExtra("PartyName",PartyName);
         notificationIntent.putExtra("PartyId",PartyId);

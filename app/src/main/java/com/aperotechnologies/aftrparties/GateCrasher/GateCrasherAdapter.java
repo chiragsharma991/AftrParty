@@ -184,32 +184,32 @@ public class GateCrasherAdapter extends BaseAdapter
                     pconv.setStarttime(p.get(i).getStarttime());
                     pconv.setEndtime(p.get(i).getEndtime());
 
-                    Calendar cal1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                    Calendar currentDay = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    Calendar cal1 = Calendar.getInstance();
+                    Calendar currentDay = Calendar.getInstance();
                     cal1.setTime(pconv.getConvertedstarttime());
                     currentDay.setTime(new Date());
 
 
                     /***/
-                    int hour = currentDay.get(Calendar.HOUR_OF_DAY);
-                    int min = currentDay.get(Calendar.MINUTE);
-                    int day = currentDay.get(Calendar.DAY_OF_MONTH);
-                    int mon = currentDay.get(Calendar.MONTH);
-                    int year = currentDay.get(Calendar.YEAR);
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-                    String inputString = hour +":"+min+":00";
-                    String date = year+"-"+mon+"-"+day;
-                    Log.e("date "," "+date +" --- "+inputString);
-                    Date d = null;
-                    try {
-                        d = sdf.parse(date+" " + inputString);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    Long currentDayTime = d.getTime();
-                    Log.e("currentDate "," "+currentDayTime +"--- "+(currentDayTime <= Long.parseLong(pconv.getEndtime())));
+//                    int hour = currentDay.get(Calendar.HOUR_OF_DAY);
+//                    int min = currentDay.get(Calendar.MINUTE);
+//                    int day = currentDay.get(Calendar.DAY_OF_MONTH);
+//                    int mon = currentDay.get(Calendar.MONTH);
+//                    int year = currentDay.get(Calendar.YEAR);
+//                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                    sdf.setTimeZone();
+//
+//                    String inputString = hour +":"+min+":00";
+//                    String date = year+"-"+mon+"-"+day;
+//                    Log.e("date "," "+date +" --- "+inputString);
+//                    Date d = null;
+//                    try {
+//                        d = sdf.parse(date+" " + inputString);
+//                    } catch (ParseException e) {
+//                        e.printStackTrace();
+//                    }
+//                    Long currentDayTime = d.getTime();
+//                    Log.e("currentDate "," "+currentDayTime +"--- "+(currentDayTime <= Long.parseLong(pconv.getEndtime())));
                    /***/
 
 
@@ -220,8 +220,7 @@ public class GateCrasherAdapter extends BaseAdapter
                     //stores parties data of user in PartyConversion array for current date
                     //if (sameDay == true)
 
-                    //if(currentDay.getTimeInMillis() <= Long.parseLong(pconv.getEndtime())){
-                    if(currentDayTime <= Long.parseLong(pconv.getEndtime())){
+                    if(currentDay.getTimeInMillis() <= Long.parseLong(pconv.getEndtime())){
                         pc.add(pconv);
                         Log.e("pc---- " + " " + pconv.getPartyname() + " " + pconv.getPartystatus(), "aa");
                     }
@@ -234,12 +233,12 @@ public class GateCrasherAdapter extends BaseAdapter
         }
 
         String StartTime = party.getStartTime();
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(Long.parseLong(StartTime));
         String partystrDate = Validations.getMonthNo(calendar.get(Calendar.MONTH)) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR) + " " + Validations.showTime(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
 
         String EndDate = party.getEndTime();
-        Calendar calendar1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        Calendar calendar1 = Calendar.getInstance();
         calendar1.setTimeInMillis(Long.parseLong(EndDate));
         String partyendDate = Validations.getMonthNo(calendar1.get(Calendar.MONTH)) + "/" + calendar1.get(Calendar.DAY_OF_MONTH) + "/" + calendar1.get(Calendar.YEAR) + " " + Validations.showTime(calendar1.get(Calendar.HOUR_OF_DAY), calendar1.get(Calendar.MINUTE));
 
@@ -445,7 +444,7 @@ public class GateCrasherAdapter extends BaseAdapter
         {
             /**/
             String Endblocktime = user.getActiveparty().get(0).getEndblocktime();
-            Calendar calendar1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            Calendar calendar1 = Calendar.getInstance();
             calendar1.setTimeInMillis(Long.parseLong(Endblocktime));
             String PartyEndBlockTime = Validations.getMonthNo(calendar1.get(Calendar.MONTH)) + "/" + calendar1.get(Calendar.DAY_OF_MONTH) + "/" + calendar1.get(Calendar.YEAR) + " " + Validations.showTime(calendar1.get(Calendar.HOUR_OF_DAY), calendar1.get(Calendar.MINUTE));
 /**/

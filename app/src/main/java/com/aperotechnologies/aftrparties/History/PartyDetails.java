@@ -3,8 +3,10 @@ package com.aperotechnologies.aftrparties.History;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +28,7 @@ import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.squareup.picasso.Picasso;
 
@@ -53,6 +56,7 @@ public class PartyDetails extends Activity
     TextView btnReqCancel;
     PartyTable party;
     RadioButton rdbtnByobyes, rdbtnByobNo;
+    SharedPreferences sharedPreferences;
 
 
     @Override
@@ -70,6 +74,7 @@ public class PartyDetails extends Activity
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
         cont = this;
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
 
         imgParty = (CircularImageView)findViewById(R.id.partyimage);
         imgParty.setVisibility(View.GONE);
@@ -106,13 +111,13 @@ public class PartyDetails extends Activity
 
             //Log.e(" party starttime"," "+party.getStartTime()+" "+party.getEndTime());
             String StartTime = party.getStartTime();
-            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(Long.parseLong(StartTime));
             String partystrDate = Validations.getMonthNo(calendar.get(Calendar.MONTH)) + "/" + calendar.get(Calendar.DAY_OF_MONTH) + "/" + calendar.get(Calendar.YEAR) + " " + Validations.showTime(calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE));
             //Log.e(" partystrDate"," "+partystrDate);
 
             String EndDate = party.getEndTime();
-            Calendar calendar1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            Calendar calendar1 = Calendar.getInstance();
             calendar1.setTimeInMillis(Long.parseLong(EndDate));
             String partyendDate = Validations.getMonthNo(calendar1.get(Calendar.MONTH)) + "/" + calendar1.get(Calendar.DAY_OF_MONTH) + "/" + calendar1.get(Calendar.YEAR) + " " + Validations.showTime(calendar1.get(Calendar.HOUR_OF_DAY), calendar1.get(Calendar.MINUTE));
             //Log.e(" partyendDate"," "+partyendDate);
@@ -164,17 +169,30 @@ public class PartyDetails extends Activity
             //Logged user is Host
             btnRequestant.setText("Requestant");
             btnReqCancel.setText("Cancel Party");//Host cancel
-
-
+            //btnReqCancel.setVisibility(View.VISIBLE);
         }
-        else if(PartyStatus.equals("Approved"))
+        if(PartyStatus.equals("Approved"))
         {
             //Logged user is GateCrasher
             btnRequestant.setText("Host");
             btnReqCancel.setText("Cancel Request");// GC Cancel
             //btnReqCancel.setVisibility(View.VISIBLE);
         }
-        else
+        if(PartyStatus.equals("Cancelled")) {
+            //Logged user is GC but status is Cancelled
+            LoggedInUserInformation loggedInUserInformation = new LoggedInUserInformation();
+            String Username = sharedPreferences.getString(m_config.Entered_User_Name, "");
+            if (party.getHostName().equals(Username))
+            {
+                btnRequestant.setText("Requestant");
+            }
+            else
+            {
+                btnRequestant.setText("Host");
+            }
+        }
+
+        if(PartyStatus.equals("Pending") || PartyStatus.equals("Declined"))
         {
             //Logged user is GC but status is Cancelled, Pending, Declined
             btnRequestant.setText("Host");
@@ -189,7 +207,7 @@ public class PartyDetails extends Activity
 
                 if(btnRequestant.getText().toString().equals("Requestant"))
                 {
-                    if(party.getGatecrashers() == null)
+                    if(party.getGatecrashers() == null || party.getGatecrashers().size() == 0)
                     {
                         GenerikFunctions.showToast(cont, "There are no requestants for this party");
                     }

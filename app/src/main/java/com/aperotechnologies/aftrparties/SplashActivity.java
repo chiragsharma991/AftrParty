@@ -21,6 +21,7 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
 import com.aperotechnologies.aftrparties.Login.OTPActivity;
 import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
@@ -135,13 +136,15 @@ public class SplashActivity extends Activity {
                             }
                         });
 
-                        if(LISessionManager.getInstance(cont).getSession() == null)
+                        if(LISessionManager.getInstance(cont).getSession().getAccessToken() == null)
                         {
                             startLinkedInProcess();
                         }
 
 
                         LoginValidations.QBStartSession(cont);
+
+
                     }
                     else
                     {

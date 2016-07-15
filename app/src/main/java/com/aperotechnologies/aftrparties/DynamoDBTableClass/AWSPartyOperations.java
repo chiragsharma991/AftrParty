@@ -365,7 +365,7 @@ public class AWSPartyOperations {
 
             try {
 
-                if (user.getParties() == null) {
+                if (user.getParties() == null || user.getParties().size() == 0) {
                     PartiesClass Parties = new PartiesClass();
                     Parties.setPartyid(partytable.getPartyID());
                     Parties.setPartyname(partytable.getPartyName());
@@ -493,7 +493,7 @@ public class AWSPartyOperations {
                 String GCFBProfilePic = loggedInUserInformation.getFB_USER_PROFILE_PIC();
                 String GCLKID = loggedInUserInformation.getLI_USER_ID();
 
-                if (selPartyTable.getGatecrashers() == null) {
+                if (selPartyTable.getGatecrashers() == null || selPartyTable.getGatecrashers().size() == 0) {
                     GateCrashersClass GateCrashers = new GateCrashersClass();
                     GateCrashers.setGatecrasherid(GCFBID);
                     GateCrashers.setGcrequeststatus(Status);

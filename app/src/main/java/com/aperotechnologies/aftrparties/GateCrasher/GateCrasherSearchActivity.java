@@ -534,30 +534,30 @@ public class GateCrasherSearchActivity extends Activity {
 
         //Log.e("hour "," "+hour+" minute "+minute);
 
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.set(mYear, mMonth, mDay,
-//                hour, minute, 0);
-//        long TimeinMs = calendar.getTimeInMillis();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(mYear, mMonth, mDay,
+                hour, minute, 0);
+        long TimeinMs = calendar.getTimeInMillis();
+
+        //Log.e("--- ",""+calendar.getTime()+" "+calendar.getTimeInMillis());
+        //Log.e("DateTime in milliseconds : ","" + TimeinMs.getTime());
+        //return TimeinMs.getTime();
+        return TimeinMs;
+
+
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        //sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 //
-//        //Log.e("--- ",""+calendar.getTime()+" "+calendar.getTimeInMillis());
-//        //Log.e("DateTime in milliseconds : ","" + TimeinMs.getTime());
-//        //return TimeinMs.getTime();
-//        return TimeinMs;
-
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        String inputString = hour +":"+minute+":00";
-        String date = mYear+"-"+mMonth+"-"+mDay;
-        Log.e("date "," "+date +" --- "+inputString);
-        Date d = null;
-        try {
-            d = sdf.parse(date+" " + inputString);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return d.getTime();
+//        String inputString = hour +":"+minute+":00";
+//        String date = mYear+"-"+mMonth+"-"+mDay;
+//        Log.e("date "," "+date +" --- "+inputString);
+//        Date d = null;
+//        try {
+//            d = sdf.parse(date+" " + inputString);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//        return d.getTime();
     }
 
 

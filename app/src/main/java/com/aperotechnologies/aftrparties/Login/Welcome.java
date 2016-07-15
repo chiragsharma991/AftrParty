@@ -251,6 +251,12 @@ public class Welcome extends Activity
                             Log.e("FB Login Success FacebookDataRetievalNew", "Yes");
                             token = loginResult.getAccessToken();
                             Log.e("AccessToken from Welcome FacebookDataRetievalNew", token.toString() + "    " +token);
+                            if(wl_pd==null)
+                            {
+                                wl_pd = new ProgressDialog(Welcome.this);
+                            }
+                            RegistrationActivity.reg_pd = null;
+                            SplashActivity.pd = null;
                             wl_pd.setMessage("Loading Data...");
                             wl_pd.setCancelable(false);
                             wl_pd.show();
@@ -464,7 +470,6 @@ public class Welcome extends Activity
                         sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "
                         + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
             }
-
         }
         catch (Exception e)
         {
@@ -765,7 +770,6 @@ public class Welcome extends Activity
                             {
                                 //Clear and insert Here
                                 //Update User Entry
-
                                 String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
                                         LoginTableColumns.FB_USER_NAME + " = '" + fbUserInformation.getFbUserName().trim() + "', " +
                                         LoginTableColumns.FB_USER_GENDER + " = '" + fbUserInformation.getGender().trim() + "', " +
@@ -792,8 +796,6 @@ public class Welcome extends Activity
                                 loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
                                 loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
                                 loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
-
-
                                 getFbFriendsCount();
                             }
                             cursor.close();
@@ -903,7 +905,6 @@ public class Welcome extends Activity
                                 new checkFBUserInfo(loggedInUserInformation).execute();
                                // new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Welcome",sqldb).execute();
 
-
                             }
 
                             // Check for DB Updation
@@ -930,49 +931,131 @@ public class Welcome extends Activity
         ).executeAsync();
     }
 
+    private static Scope buildScope()
+    {
+        return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
+    }
+
+    public  void startLinkedInProcess(final UserTable user)
+    {
+        Log.e("In startLinkedInProcess","Yes");
+        LISessionManager.getInstance(cont).init((Activity)cont, buildScope(), new AuthListener()
+        {
+            @Override
+            public void onAuthSuccess()
+            {
+                Token = LISessionManager.getInstance(cont).getSession().getAccessToken().getValue().toString();
+                Log.e("LI Token",Token+"");
+
+                String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
+                        LoginTableColumns.FB_USER_NAME + " = '" + user.getFBUserName() + "', " +
+                        LoginTableColumns.FB_USER_GENDER + " = '" + user.getGender().trim() + "', " +
+                        LoginTableColumns.FB_USER_BIRTHDATE + " = '" + user.getBirthDate().trim() + "', " +
+                        LoginTableColumns.FB_USER_EMAIL + " = '" + user.getSocialEmail().trim() + "', " +
+                        LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + user.getFBHomeLocation().trim() + "', " +
+                        LoginTableColumns.FB_USER_PROFILE_PIC + " = '" + user.getProfilePicUrl().get(0) + "', " +
+                        LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + user.getFBCurrentLocation().trim() + "'  where "
+                        + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
+
+                Log.i("update User "+user.getFacebookID().trim(), updateUser);
+                sqldb.execSQL(updateUser);
+
+                String Update = "Update " + LoginTableColumns.USERTABLE + " set "
+                        + LoginTableColumns.LI_USER_ID  + " = '" + user.getLinkedInID() + "', "
+                        + LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + user.getLKProfilePicUrl().toString() + "', "
+                        + LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + user.getLKConnectionsCount() + "', "
+                        + LoginTableColumns.LI_USER_HEADLINE + " = '" + user.getLKHeadLine() + "' "
+                        + " where " + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
+
+                Log.i("update User "+ user.getFacebookID().trim() , Update);
+                sqldb.execSQL(Update);
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(m_config.Entered_User_Name,user.getName());
+                editor.putString(m_config.Entered_Email,user.getEmail());
+                editor.putString(m_config.Entered_Contact_No,user.getPhoneNumber());
+                editor.putString(m_config.LoggedInFBUserID, user.getFacebookID().trim());
+                editor.putString(m_config.FBLoginDone,"Yes");
+                editor.putString(m_config.LILoginDone,"Yes");
+                editor.putString(m_config.EmailValidationDone,"Yes");
+                editor.putString(m_config.BasicFBLIValidationsDone,"Yes");
+                editor.putString(m_config.OTPValidationDone,"Yes");
+                editor.putString(m_config.FaceDetectDone,"Yes");
+                editor.putString(m_config.FinalStepDone,"Yes");
+                editor.apply();
+
+                Log.e("Updated all flags","yes");
+                LoginValidations.QBStartSession(cont);
+            }
+
+            @Override
+            public void onAuthError(LIAuthError error)
+            {
+                Log.e("LI Login Error",error.toString()+"");
+                if(error.toString().trim().contains("USER_CANCELLED"))
+                {
+                    startLinkedInProcess(user);
+                }
+                else //if(error.toString().trim().contains("UNKNOWN_ERROR"))
+                {
+                    Log.e("Inside Else","Yes");
+                    //GenerikFunctions.showToast(cont, "failed  linked in login " + error.toString());
+                }
+            }
+        }, true);
+    }
 
     public void updateUserTableAndPrefs(UserTable user)
     {
-        String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
-                LoginTableColumns.FB_USER_NAME + " = '" + user.getFBUserName() + "', " +
-                LoginTableColumns.FB_USER_GENDER + " = '" + user.getGender().trim() + "', " +
-                LoginTableColumns.FB_USER_BIRTHDATE + " = '" + user.getBirthDate().trim() + "', " +
-                LoginTableColumns.FB_USER_EMAIL + " = '" + user.getSocialEmail().trim() + "', " +
-                LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + user.getFBHomeLocation().trim() + "', " +
-                LoginTableColumns.FB_USER_PROFILE_PIC + " = '" + user.getProfilePicUrl().get(0) + "', " +
-                LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + user.getFBCurrentLocation().trim() + "'  where "
-                + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
+        if(LISessionManager.getInstance(cont).getSession().getAccessToken() == null)
+        {
+            linkedinStart="Yes";
+            startLinkedInProcess(user);
+        }
+        else
+        {
+            String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
+                    LoginTableColumns.FB_USER_NAME + " = '" + user.getFBUserName() + "', " +
+                    LoginTableColumns.FB_USER_GENDER + " = '" + user.getGender().trim() + "', " +
+                    LoginTableColumns.FB_USER_BIRTHDATE + " = '" + user.getBirthDate().trim() + "', " +
+                    LoginTableColumns.FB_USER_EMAIL + " = '" + user.getSocialEmail().trim() + "', " +
+                    LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + user.getFBHomeLocation().trim() + "', " +
+                    LoginTableColumns.FB_USER_PROFILE_PIC + " = '" + user.getProfilePicUrl().get(0) + "', " +
+                    LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + user.getFBCurrentLocation().trim() + "'  where "
+                    + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
 
-        Log.i("update User "+user.getFacebookID().trim(), updateUser);
-        sqldb.execSQL(updateUser);
+            Log.i("update User "+user.getFacebookID().trim(), updateUser);
+            sqldb.execSQL(updateUser);
 
-        String Update = "Update " + LoginTableColumns.USERTABLE + " set "
-                + LoginTableColumns.LI_USER_ID  + " = '" + user.getLinkedInID() + "', "
-                + LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + user.getLKProfilePicUrl().toString() + "', "
-                + LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + user.getLKConnectionsCount() + "', "
-                + LoginTableColumns.LI_USER_HEADLINE + " = '" + user.getLKHeadLine() + "' "
-                + " where " + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
+            String Update = "Update " + LoginTableColumns.USERTABLE + " set "
+                    + LoginTableColumns.LI_USER_ID  + " = '" + user.getLinkedInID() + "', "
+                    + LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + user.getLKProfilePicUrl().toString() + "', "
+                    + LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + user.getLKConnectionsCount() + "', "
+                    + LoginTableColumns.LI_USER_HEADLINE + " = '" + user.getLKHeadLine() + "' "
+                    + " where " + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
 
-        Log.i("update User "+ user.getFacebookID().trim() , Update);
-        sqldb.execSQL(Update);
+            Log.i("update User "+ user.getFacebookID().trim() , Update);
+            sqldb.execSQL(Update);
 
 
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(m_config.Entered_User_Name,user.getName());
-        editor.putString(m_config.Entered_Email,user.getEmail());
-        editor.putString(m_config.Entered_Contact_No,user.getPhoneNumber());
-        editor.putString(m_config.LoggedInFBUserID, user.getFacebookID().trim());
-        editor.putString(m_config.FBLoginDone,"Yes");
-        editor.putString(m_config.LILoginDone,"Yes");
-        editor.putString(m_config.EmailValidationDone,"Yes");
-        editor.putString(m_config.BasicFBLIValidationsDone,"Yes");
-        editor.putString(m_config.OTPValidationDone,"Yes");
-        editor.putString(m_config.FaceDetectDone,"Yes");
-        editor.putString(m_config.FinalStepDone,"Yes");
-        editor.apply();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(m_config.Entered_User_Name,user.getName());
+            editor.putString(m_config.Entered_Email,user.getEmail());
+            editor.putString(m_config.Entered_Contact_No,user.getPhoneNumber());
+            editor.putString(m_config.LoggedInFBUserID, user.getFacebookID().trim());
+            editor.putString(m_config.FBLoginDone,"Yes");
+            editor.putString(m_config.LILoginDone,"Yes");
+            editor.putString(m_config.EmailValidationDone,"Yes");
+            editor.putString(m_config.BasicFBLIValidationsDone,"Yes");
+            editor.putString(m_config.OTPValidationDone,"Yes");
+            editor.putString(m_config.FaceDetectDone,"Yes");
+            editor.putString(m_config.FinalStepDone,"Yes");
+            editor.apply();
 
-        Log.e("Updated all flags","yes");
-        LoginValidations.QBStartSession(cont);
+            Log.e("Updated all flags","yes");
+            LoginValidations.QBStartSession(cont);
+        }
+
 
         //Start QB Session Here
 //
