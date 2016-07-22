@@ -469,14 +469,17 @@ public  class LoginValidations
                             editor.apply();
 
                             if(cont instanceof RegistrationActivity){
+                                Log.e("camee ","here");
                                 new AWSLoginOperations.addUserQuickBloxId(cont, user, avatarUrl).execute();
                             }
 
                             if(cont instanceof Welcome){
+                                Log.e("camee11111 ","here");
                                 checkChatLoginExist(cont, user);
                             }
 
                             if(cont instanceof SplashActivity){
+                                Log.e("camee2222 ","here");
                                 checkChatLoginExist(cont, user);
                             }
 
@@ -541,6 +544,8 @@ public  class LoginValidations
                     }
                     else
                     {
+
+                        Log.e("upload ","tettrtwetyr");
                         // Initialise ChatService
                         checkChatLoginExist(cont, user);
 
@@ -697,13 +702,13 @@ public  class LoginValidations
     public static void chatLogout(){
 
         final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-        boolean isLoggedIn = m_config.chatService.isLoggedIn();
+        boolean isLoggedIn = QBChatService.getInstance().isLoggedIn();
         if(isLoggedIn) {
-            m_config.chatService.logout(new QBEntityCallback() {
+            QBChatService.getInstance().logout(new QBEntityCallback() {
                 @Override
                 public void onSuccess(Object o, Bundle bundle)
                 {
-                    m_config.chatService.destroy();
+                    QBChatService.getInstance().destroy();
                 }
 
                 @Override

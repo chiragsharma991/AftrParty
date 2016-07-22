@@ -3,6 +3,7 @@ package com.aperotechnologies.aftrparties.model;
 /**
  * Created by mpatil on 26/05/16.
  */
+//Class to parse received OTP response code
 public class ValidOTPResponse
 {
     String verificationId = "N/A";

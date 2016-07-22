@@ -16,9 +16,7 @@ import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 import com.google.android.gms.vision.face.Landmark;
 
-/**
- * Created by Paul on 11/4/15.
- */
+//Customised view for Face Detection
 public class FaceOverlayView extends View
 {
     private Bitmap mBitmap;
@@ -60,7 +58,7 @@ public class FaceOverlayView extends View
             detector.release();
         }
 
-Log.e("Before log face data","Yes");
+        //Log.e("Before log face data","Yes");
       int facesCount =   logFaceData();
         invalidate();
 
@@ -150,7 +148,7 @@ Log.e("Before log face data","Yes");
             return 0;
         }
 
-        Log.e("No of Faces from face overlay",mFaces.size()+"");
+      //  Log.e("No of Faces from face overlay",mFaces.size()+"");
         float smilingProbability;
         float leftEyeOpenProbability;
         float rightEyeOpenProbability;

@@ -119,8 +119,6 @@ public class RegistrationActivity extends Activity
     //Harshada
     private static final String TAG = "LoginActivity";
 
-    PlayServicesHelper playServicesHelper;
-
     //Meghana
     Button btn_login;
     CallbackManager callbackManager;
@@ -132,11 +130,12 @@ public class RegistrationActivity extends Activity
     FbHomelocationInformation fbHomelocationInformation;
     FbProfilePictureData fbProfilePictureData;
     LoggedInUserInformation loggedInUserInfo;
-   // LIPictureInformation liPictureInformation;
-    //picture-urls::(original)
-//    String AdvancedConnectionsLinkedIn="https://api.linkedin.com/v1/people/~:(id,first-name,email-address,last-name,num-connections,picture-url,positions:(id,title,summary,start-date,end-date,is-current,company:(id,name,type,size,industry,ticker)),educations:(id,field-of-study,start-date,end-date,notes),publications:(id,title,publisher:(name),authors:(id,name),date,url,summary),patents:(id,title,summary,number,status:(id,name),office:(name),inventors:(id,name),date,url),languages:(id,language:(name),proficiency:(level,name)),skills:(id,skill:(name)),certifications:(id,name,authority:(name),number,start-date,end-date),courses:(id,name,number),recommendations-received:(id,recommendation-type,recommendation-text,recommender),honors-awards,three-current-positions,three-past-positions,volunteer)?format=json";
+
+    //String AdvancedConnectionsLinkedIn="https://api.linkedin.com/v1/people/~:(id,first-name,api-standard-profile-request,email-address,last-name,public-profile-url,num-connections,picture-urls::(original)?format=json";
 
     String AdvancedConnectionsLinkedIn="https://api.linkedin.com/v1/people/~:(id,first-name,api-standard-profile-request,email-address,last-name,public-profile-url,num-connections,picture-urls::(original),positions:(id,title,summary,start-date,end-date,is-current,company:(id,name,type,size,industry,ticker)),educations:(id,field-of-study,start-date,end-date,notes),publications:(id,title,publisher:(name),authors:(id,name),date,url,summary),patents:(id,title,summary,number,status:(id,name),office:(name),inventors:(id,name),date,url),languages:(id,language:(name),proficiency:(level,name)),skills:(id,skill:(name)),certifications:(id,name,authority:(name),number,start-date,end-date),courses:(id,name,number),recommendations-received:(id,recommendation-type,recommendation-text,recommender),honors-awards,three-current-positions,three-past-positions,volunteer)?format=json";
+
+
     LIUserInformation liUserInformation;
     LIPictureData liPictureData;
     Gson gson;
@@ -158,8 +157,7 @@ public class RegistrationActivity extends Activity
     DBHelper helper;
     TelephonyManager mTelephony;
     private static final  int MY_PERMISSIONS_REQUEST_READ_PHONE_STATE = 1;
-    String regId;
-    String verifyStatus = "0";
+
     public static ProgressDialog reg_pd = null;
 
     public void onCreate(Bundle savedInstanceState)
@@ -190,9 +188,6 @@ public class RegistrationActivity extends Activity
         edt_usr_phone = (EditText) findViewById(R.id.edt_usr_phone);
         btn_login = (Button) findViewById(R.id.btn_login);
         layout_parent_login = (RelativeLayout) findViewById(R.id.layout_parent_login);
-      //  m_config.faceOverlayView = new FaceOverlayView(LoginActivity.this);
-        //m_config.faceOverlayView.setTag(1);
-        //Log.i("Face Tag",m_config.faceOverlayView.getTag()+"");
 
         //FB Variables
         callbackManager = CallbackManager.Factory.create();
@@ -207,6 +202,7 @@ public class RegistrationActivity extends Activity
         permissions.add("user_hometown");
         permissions.add("user_photos");
 
+        //Function to generate Debug hash key
          getDebugHashKey();
 
         layout_parent_login.setOnTouchListener(new View.OnTouchListener()
@@ -241,6 +237,7 @@ public class RegistrationActivity extends Activity
             Log.e("Preferences cleared","yes");
         }
 
+        //If local storage of entered values exists then set to UI
         if (sharedpreferences.getString(m_config.Entered_User_Name, "").length() > 0)
         {
             edt_usr_name.setText(sharedpreferences.getString(m_config.Entered_User_Name, "UserName"));
@@ -248,6 +245,7 @@ public class RegistrationActivity extends Activity
             edt_usr_phone.setText(sharedpreferences.getString(m_config.Entered_Contact_No, "Contact No"));
         }
 
+        //Focus Listener of Email edit text
         edt_usr_email.setOnFocusChangeListener(new View.OnFocusChangeListener()
         {
             @Override
@@ -266,6 +264,7 @@ public class RegistrationActivity extends Activity
             }
         });
 
+        //Focus Listener of Mobile no. edit text
         edt_usr_phone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             Boolean handled = false;
             @Override
@@ -279,17 +278,10 @@ public class RegistrationActivity extends Activity
             }
         });
 
-//        if(sharedpreferences.getString(m_config.FBLoginDone,"").equals("") || sharedpreferences.getString(m_config.FBLoginDone,"").equals("No"))
-//        {
-//            linkedinStart="";
-//        }
-//        else
-//        {
-//            linkedinStart="Yes";
-//        }
     }
 
     //Meghana
+    //Call back for FB and LI Login
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -309,7 +301,7 @@ public class RegistrationActivity extends Activity
             {
                 try
                 {
-                   // setLIUserProfile("");
+
                 }
                 catch (Exception e)
                 {
@@ -324,6 +316,7 @@ public class RegistrationActivity extends Activity
                     @Override
                     public void onApiSuccess(ApiResponse result)
                     {
+
                         try
                         {
                             JSONObject jsonObject = result.getResponseDataAsJson();
@@ -333,40 +326,54 @@ public class RegistrationActivity extends Activity
                         catch (Exception e)
                         {
                             e.printStackTrace();
-                            //GenerikFunctions.showToast(cont,"Li Error catch   "+ e.toString());
-
-                            try
+                            if(reg_pd.isShowing())
                             {
-                                setLIUserProfile("");
+                                reg_pd.dismiss();
+                            }
+                            Toast.makeText(cont,"Linked In Login Failed",Toast.LENGTH_LONG).show();
 
-                            }
-                            catch (Exception ex)
-                            {
-                                ex.printStackTrace();
-                            }
+
+                            //Harshada 22 Jul
+//                        try
+//                        {
+//                            setLIUserProfile("");
+//                            liUserInformation= new LIUserInformation();
+//                        }
+//                        catch (Exception ex)
+//                        {
+//                            ex.printStackTrace();
+//                        }//Harshada
                         }
                     }
                     @Override
                     public void onApiError(LIApiError error)
                     {
                         Log.e("Linked In Error", error.toString());
-                        //GenerikFunctions.showToast(cont,"Li Error  onApiError  "+ error.toString());
-                        try
+                        if(reg_pd.isShowing())
                         {
-                            setLIUserProfile("");
-                            liUserInformation= new LIUserInformation();
+                            reg_pd.dismiss();
                         }
-                        catch (Exception ex)
-                        {
-                            ex.printStackTrace();
-                        }
-//                        //Harshada
+                        Toast.makeText(cont,"Linked In Login Failed",Toast.LENGTH_LONG).show();
+
+
+                        //Harshada 22 Jul
+//                        try
+//                        {
+//                            setLIUserProfile("");
+//                            liUserInformation= new LIUserInformation();
+//                        }
+//                        catch (Exception ex)
+//                        {
+//                            ex.printStackTrace();
+//                        }
+                        //Harshada
                     }
                 });
             }
         }
     }
 
+    //Function to Parse and Store LI data to SQLIte
     public  void  setLIUserProfile(String response)
     {
         try
@@ -451,8 +458,9 @@ public class RegistrationActivity extends Activity
                 //AWS Storage of LI data
                 Log.e("Before LI AWS Storage","Yes");
                 LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
-                //AWSLoginOperations.addLIUserInfo(cont,loggedInUserInformation);
-                new AWSLoginOperations.addLIUserInfo(cont,loggedInUserInformation).execute();
+
+                //Store LI date to AWS
+               new AWSLoginOperations.addLIUserInfo(cont,loggedInUserInformation).execute();
 
                 Log.e("Shrd Pref aftr LILginDne",sharedpreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                         sharedpreferences.getString(m_config.Entered_Email,"N/A") + "   "
@@ -467,7 +475,6 @@ public class RegistrationActivity extends Activity
             }
             Toast.makeText(cont,"Linked In Login Failed",Toast.LENGTH_LONG).show();
             e.printStackTrace();
-
         }
     }
 
@@ -522,6 +529,7 @@ public class RegistrationActivity extends Activity
     }
 
     //Meghana
+    //Generate Debug Hash Key
     public void getDebugHashKey()
     {
         try
@@ -568,6 +576,7 @@ public class RegistrationActivity extends Activity
     }
 
     //Meghana
+    //Function to check for entered values in Name, email and contact no edittext fromats
     public void validateUserInput()
     {
         //CHeck for empty or invalid input
@@ -608,7 +617,6 @@ public class RegistrationActivity extends Activity
                         editor.apply();
 
                         processLogin();
-                        //EmailVerification(sharedpreferences.getString(m_config.Entered_Email,"Email"));
                     }
                     else
                     {
@@ -629,7 +637,7 @@ public class RegistrationActivity extends Activity
         }
     }
 
-    //Meghana
+    //Login with FB
     public void processLogin()
     {
         try
@@ -650,29 +658,15 @@ public class RegistrationActivity extends Activity
         }
     }
 
-    //Meghana
     //Ask for declined FB permissions
     public void askForDeclinedFBPermissions(ArrayList<String> declined_perm)
     {
-//        for (int i = 0; i < declined_perm.size(); i++)
-//        {
-//            Log.e("From dec perm func", declined_perm.get(i));
-//        }
 
         loginManager.logInWithReadPermissions(RegistrationActivity.this, declined_perm);
         FacebookDataRetieval();
     }
 
-    //Meghana
-    //Check if user logged in FB app or not
-    public boolean isFBLoggedIn()
-    {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        Log.e("Current AccessToken","Yes");
-        return accessToken != null;
 
-    }
-    //Meghana 13-5-16
     //After all permissions get FB Data
     public void FacebookDataRetieval()
     {
@@ -687,7 +681,6 @@ public class RegistrationActivity extends Activity
 
                  //   https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
 
-//                    // App code
                     Log.e("FB Login Success", "Yes");
                     token = loginResult.getAccessToken();
                     Log.e("AccessToken", token.toString() + "    " +token);
@@ -745,7 +738,7 @@ public class RegistrationActivity extends Activity
                             editor.putString(m_config.Entered_Email, "");
                             editor.putString(m_config.Entered_Contact_No, "");
                             editor.commit();
-                            startFBLoginScenario();
+                         //   startFBLoginScenario();
                         }
                     }
                 }
@@ -755,7 +748,7 @@ public class RegistrationActivity extends Activity
     //If already logged in FB
     public void startFBLoginScenario()
     {
-        if (isFBLoggedIn())
+        if (LoginValidations.isFBLoggedIn())
         {
             token = AccessToken.getCurrentAccessToken();
             Log.e("Token of current user","yes");
@@ -795,7 +788,7 @@ public class RegistrationActivity extends Activity
     }
 
     //Meghana
-    //Get user data
+    //Get user data from FB and Parse and store it to SQLIte
     public void retrieveFBMeData()
     {
         GraphRequest request1 = GraphRequest.newMeRequest(token,
@@ -812,10 +805,6 @@ public class RegistrationActivity extends Activity
                         String emptyFields="";
 
                         // Application code
-                       // Log.i("Me Request", object.toString());
-
-//                        AddFriends addFriends = new AddFriends();
-//                        addFriends.requestInvitableFriends(cont,token);
 
                         fbUserInformation = gson.fromJson(object.toString(), FbUserInformation.class);
                         Log.e("User FB Information --->","Information");
@@ -958,8 +947,7 @@ public class RegistrationActivity extends Activity
         request1.executeAsync();
     }
 
-    //Meghana
-    //Store User Information In database
+    //Store User FB Information In database
     public void storeUserInDb()
     {
         ContentValues values = new ContentValues();
@@ -995,6 +983,8 @@ public class RegistrationActivity extends Activity
         getFbFriendsCount();
     }
 
+
+    //Retrieve Users FB friends count
     private void getFbFriendsCount()
     {
         //Total No of friends
@@ -1035,7 +1025,6 @@ public class RegistrationActivity extends Activity
                                 //Log.i("update User  "+ LoginTableColumns.FB_USER_ID , Update);
                                 sqldb.execSQL(Update);
 
-
                                 //AWS Storage of FB Data
                                 Log.e("Before FB AWS Storage","Yes");
                                 LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
@@ -1049,10 +1038,7 @@ public class RegistrationActivity extends Activity
                                 Log.e("Inside requestMeFbData","Yes");
                                 new  checkFBUserInfo(loggedInUserInformation).execute();
 
-                            //    new AWSLoginOperations.addFBUserInfo(cont,loggedInUserInformation,"Registration",sqldb).execute();
-
                             }
-
 
                         }
                         catch (Exception e)
@@ -1066,48 +1052,6 @@ public class RegistrationActivity extends Activity
         ).executeAsync();
     }
 
-    public void updateUserTableAndPrefs(UserTable user)
-    {
-        String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
-                LoginTableColumns.FB_USER_NAME + " = '" + user.getFBUserName() + "', " +
-                LoginTableColumns.FB_USER_GENDER + " = '" + user.getGender().trim() + "', " +
-                LoginTableColumns.FB_USER_BIRTHDATE + " = '" + user.getBirthDate().trim() + "', " +
-                LoginTableColumns.FB_USER_EMAIL + " = '" + user.getSocialEmail().trim() + "', " +
-                LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + user.getFBHomeLocation().trim() + "', " +
-                LoginTableColumns.FB_USER_PROFILE_PIC + " = '" + user.getProfilePicUrl().get(0) + "', " +
-                LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + user.getFBCurrentLocation().trim() + "'  where "
-                + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
-
-        Log.i("update User "+fbUserInformation.getFbId().trim(), updateUser);
-        sqldb.execSQL(updateUser);
-
-        String Update = "Update " + LoginTableColumns.USERTABLE + " set "
-                + LoginTableColumns.LI_USER_ID  + " = '" + user.getLinkedInID() + "', "
-                + LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + user.getLKProfilePicUrl().toString() + "', "
-                + LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + user.getLKConnectionsCount() + "', "
-                + LoginTableColumns.LI_USER_HEADLINE + " = '" + user.getLKHeadLine() + "' "
-                + " where " + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
-
-        Log.i("update User "+fbUserInformation.getFbId().trim(), Update);
-        sqldb.execSQL(Update);
-
-        LoginValidations.QBStartSession(cont);
-
-        SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putString(m_config.Entered_User_Name,user.getName());
-        editor.putString(m_config.Entered_Email,user.getEmail());
-        editor.putString(m_config.Entered_Contact_No,user.getPhoneNumber());
-        editor.putString(m_config.LoggedInFBUserID, user.getFacebookID().trim());
-        editor.putString(m_config.FBLoginDone,"Yes");
-        editor.putString(m_config.LILoginDone,"Yes");
-        editor.putString(m_config.EmailValidationDone,"Yes");
-        editor.putString(m_config.BasicFBLIValidationsDone,"Yes");
-        editor.putString(m_config.OTPValidationDone,"Yes");
-        editor.putString(m_config.FaceDetectDone,"Yes");
-        editor.putString(m_config.FinalStepDone,"Yes");
-        editor.apply();
-        //Start QB Session Here
-    }
 
 //Check whether user exists at AWS or not
     public class checkFBUserInfo extends AsyncTask<Void, Void, Void>
@@ -1139,13 +1083,12 @@ public class RegistrationActivity extends Activity
                     //Registration is already done
                     GenerikFunctions.showToast(cont," You are an existing user. Please Login...");
                     Intent i = new Intent(RegistrationActivity.this, Welcome.class);
+                    i.putExtra("from","registration");
                     startActivity(i);
 
                     if(reg_pd.isShowing()){
                         reg_pd.dismiss();
                     }
-
-                    //updateUserTableAndPrefs(selUserData);
                 }
                 else
                 {
@@ -1160,11 +1103,13 @@ public class RegistrationActivity extends Activity
             }
         }
     }
+    //LI permission module
     private static Scope buildScope()
     {
         return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
     }
 
+    //Start forLI login session
     public static void startLinkedInProcess()
     {
         RegistrationActivity.reg_pd.show();
@@ -1210,12 +1155,9 @@ public class RegistrationActivity extends Activity
     }
 
 
-
     //function for enabling TelephonyManager for fetching deviceId
     public void getDeviceIdAndroid(String regId, Activity context)
     {
-
-
         if ((int) Build.VERSION.SDK_INT < 23)
         {
             //this is a check for build version below 23
@@ -1318,80 +1260,7 @@ public class RegistrationActivity extends Activity
         }
     }
 
-    public void EmailVerification(String EmailId)
-    {
-        // Instantiate the RequestQueue.
-        Log.e("Email Id","Yes  " + EmailId);
-        RequestQueue queue = Volley.newRequestQueue((Activity)cont);
-        String url ="http://api.verify-email.org/api.php?usr=harshadaasai&pwd=harshada26&check="+EmailId;
-       // String url = "http://www.google.com";
-        // prepare the Request
-        JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>()
-                {
-                    @Override
-                    public void onResponse(JSONObject response)
-                    {
-                        // display response
-                        Log.d("Response", response.toString());
-                        try
-                        {
-                            JSONObject json = response;
-                            verifyStatus = json.getString("verify_status");
-                            Log.e("verifyStatus 11",verifyStatus + "   11");
-                            if(verifyStatus.equals("1"))
-                            {
 
-
-                                SharedPreferences.Editor editor = sharedpreferences.edit();
-                                editor.putString(m_config.EmailValidationDone,"Yes");
-                                editor.apply();
-
-                                processLogin();
-                            }
-                            else
-                            {
-                                if(RegistrationActivity.reg_pd.isShowing())
-                                {
-                                    RegistrationActivity.reg_pd.dismiss();
-                                }
-                                GenerikFunctions.showToast(cont,"Email Verification Failed, Please Check your EmailId...");
-                            }
-                        }
-                        catch(Exception e)
-                        {
-                            if(RegistrationActivity.reg_pd.isShowing())
-                            {
-                                RegistrationActivity.reg_pd.dismiss();
-                            }
-                            verifyStatus = "0";
-                            Log.i("verifyStatus 22",verifyStatus + "   22");
-                            GenerikFunctions.showToast(cont,"Email Verification Failed, Please Check your EmailId...");
-                        }
-                    }
-                },
-                new Response.ErrorListener()
-                {
-                    @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
-                        if(RegistrationActivity.reg_pd.isShowing())
-                        {
-                            RegistrationActivity.reg_pd.dismiss();
-                        }
-                        Log.d("Error.Response", error.toString());
-                        verifyStatus = "0";
-                        Log.i("verifyStatus 33",verifyStatus + "   33");
-                        GenerikFunctions.showToast(cont,"Email Verification Failed, Please Check your EmailId...");
-                    }
-                });
-
-        RetryPolicy policy = new DefaultRetryPolicy(70000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        getRequest.setRetryPolicy(policy);
-        // add it to the RequestQueue
-        queue.add(getRequest);
-
-    }
 
     @Override
     protected void onResume() {
@@ -1402,65 +1271,3 @@ public class RegistrationActivity extends Activity
 
 
 }
-/*
-*
-
-//
-//new GraphRequest(
-//        AccessToken.getCurrentAccessToken(),
-//        "/" + fbUserInformation.getFbId().trim() + "/
-ble_friends",
-//        null,
-//        HttpMethod.GET,
-//        new GraphRequest.Callback()
-//        {
-//public void onCompleted(GraphResponse response)
-//        {
-//        JSONObject res = response.getJSONObject();
-//        Log.e("Taggable user friends list", response + "");
-//        try
-//        {
-//        JSONObject graphObject = response.getJSONObject();
-//        JSONArray dataArray = graphObject.getJSONArray("data");
-//        Log.e("Taggable Array length", dataArray.length() + "");
-//        JSONObject paging = graphObject.getJSONObject("paging");
-//        Log.e("Taggable Paging", paging + "");
-//        String next = paging.getString("next");
-//        Log.e("Taggable next", next + "");
-//        for (int i = 0; i < dataArray.length(); i++)
-//        {
-//        try
-//        {
-//        // here all that you want
-//        JSONObject object = dataArray.getJSONObject(i);
-//
-//        // get facebook user id,name and picture
-//        String str_id = object.getString("id");
-//
-//        String str_name = object.getString("name");
-//
-//
-//        JSONObject picture_obj = object.getJSONObject("picture");
-//
-//        JSONObject data_obj = picture_obj.getJSONObject("data");
-//
-//        String str_url = data_obj.getString("url");
-//        Log.e(i + "Taggable Info", str_id + "    " + str_name + "     " + "       " + str_url + "     " + picture_obj + "    " + data_obj);
-//
-//        }
-//        catch (Exception e)
-//        {
-//        e.printStackTrace();
-//        }
-//        }
-//        }
-//        catch (Exception e)
-//        {
-//        System.out.println("Exception=" + e);
-//        e.printStackTrace();
-//        }
-//        }
-//        }
-//        ).executeAsync();
-//
-//        */

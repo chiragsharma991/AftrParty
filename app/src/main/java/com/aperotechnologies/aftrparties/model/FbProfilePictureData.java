@@ -5,6 +5,7 @@ import java.util.Random;
 /**
  * Created by mpatil on 12/05/16.
  */
+//Class to parse FB profilepic data
 public class FbProfilePictureData
 {
 

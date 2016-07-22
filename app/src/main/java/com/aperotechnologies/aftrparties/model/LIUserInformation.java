@@ -3,6 +3,7 @@ package com.aperotechnologies.aftrparties.model;
 /**
  * Created by mpatil on 13/05/16.
  */
+//Class toparseLI user information
 public class LIUserInformation
 {
     String id= "N/A";

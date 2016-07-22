@@ -144,7 +144,7 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                     @Override
                     public void run()
                     {
-                        GenerikFunctions.showToast(cont, "DOnt have profile picture");
+                        GenerikFunctions.showToast(cont, "Don't have profile picture");
                     }
                 });
             }
@@ -202,7 +202,7 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                                     {
                                         RegistrationActivity.reg_pd.dismiss();
                                     }
-                                    GenerikFunctions.showToast(cont, "LI conn count is less than " + ConstsCore.LI_CONNECTIONS);
+                                    GenerikFunctions.showToast(cont, "Linked In connection count is less than " + ConstsCore.LI_CONNECTIONS);
                                 }
                             });
                         }
@@ -287,11 +287,14 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                                     RegistrationActivity.reg_pd.dismiss();
                                 }
                                 faces = 0;
-                                Intent intent = new Intent(cont,OTPActivity.class);
-                                cont.startActivity(intent);
 
-//                                Intent intent = new Intent(cont,HomePageActivity.class);
+                                //Harshada 22 jul//
+//                                Intent intent = new Intent(cont,OTPActivity.class);
 //                                cont.startActivity(intent);
+                                //
+
+                                Intent intent = new Intent(cont, HomePageActivity.class);
+                                cont.startActivity(intent);
                             }
                             else
                             {

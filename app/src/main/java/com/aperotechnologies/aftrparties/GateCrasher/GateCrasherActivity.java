@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.View;
@@ -23,12 +24,18 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
+import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.exception.QBResponseException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,9 +61,7 @@ public class GateCrasherActivity extends Activity
     RequestQueue queue;
 
 
-
-        public void onCreate(Bundle savedInstanceState)
-        {
+        public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_gatecrasher);
 
@@ -71,10 +76,42 @@ public class GateCrasherActivity extends Activity
             pBar = (ProgressBar) findViewById(R.id.progressBar);
             pBar.setVisibility(View.VISIBLE);
             txtNoParties = (TextView) findViewById(R.id.noParties);
-            new GetData().execute();
 
 
+            Log.e("ChatService.getInstance().getCurrentUser()", " " + ChatService.getInstance().getCurrentUser());
+            if (ChatService.getInstance().getCurrentUser() == null) {
+                String accessToken = LoginValidations.getFBAccessToken().getToken();
 
+                QBSessionClass.getInstance().getQBSession(new QBEntityCallback() {
+
+                    @Override
+                    public void onSuccess(Object o, Bundle bundle) {
+                        Handler h = new Handler(cont.getMainLooper());
+                        h.post(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                new GetData().execute();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(QBResponseException e) {
+
+                        pBar.setVisibility(View.GONE);
+                        GenerikFunctions.showToast(cont, "There was an error connecting to network, Please try after some time.");
+
+                    }
+
+                }, accessToken, pBar, cont);
+
+
+            }
+            else
+            {
+                new GetData().execute();
+            }
         }
 
 

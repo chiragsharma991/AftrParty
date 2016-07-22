@@ -4,7 +4,7 @@ package com.aperotechnologies.aftrparties.model;
  * Created by mpatil on 12/05/16.
  */
 //Meghana
-    //Class to get JSON object
+    //Class to get JSON object from FB response
 public class FbUserInformation
 {
     String id = "N/A";

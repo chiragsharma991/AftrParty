@@ -221,44 +221,63 @@
                 android:layout_height="5dp"
                 android:layout_width="3dp"     />
 
-            <!--<LinearLayout android:id="@+id/seekbar_placeholder"
+           <LinearLayout android:id="@+id/seekbar_placeholder"
                 android:layout_margin="20dp"
                 android:orientation="vertical"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>-->
+                android:layout_height="wrap_content"/>
 
 
             <!--<TextView android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:id="@+id/txtrangeseekbarval"
-                android:layout_gravity="center_horizontal" />-->
+                android:layout_gravity="center_horizontal" />
 
-            <!--<com.yahoo.mobile.client.android.util.rangeseekbar.RangeSeekBar
+            <com.yahoo.mobile.client.android.util.rangeseekbar.RangeSeekBar
                 android:id="@+id/rangeseekbar"
                 android:layout_margin="20dp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 app:absoluteMinValue="0"
-                app:absoluteMaxValue="5"
+                app:absoluteMaxValue="50"
                 app:singleThumb="true" />-->
+
 
 
             <TextView
                 android:textSize="@dimen/text_size"
                 android:layout_centerInParent="true"
-                android:text="Distance(Km)"
+                android:text="Distance(Km) :"
                 android:padding="3dp"
                 android:layout_margin="5dp"
                 android:textColor="@android:color/black"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"   />
 
+
             <TextView android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:id="@+id/txtseekbarval1"
+                android:text="3"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@android:color/black"/>
+
+
+            <SeekBar
+                android:id="@+id/seekbar1"
+                android:layout_margin="20dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:progress="0"
+                android:max="50" />
+
+            <!--<TextView android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:id="@+id/txtseekbarval"
                 android:text="10"
                 android:layout_gravity="center_horizontal"
                 android:textColor="@android:color/black"/>
+
 
             <SeekBar
                 android:id="@+id/seekbar"
@@ -266,7 +285,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:progress="10"
-                android:max="50" />
+                android:max="50" />-->
 
             <View
                 android:layout_height="5dp"

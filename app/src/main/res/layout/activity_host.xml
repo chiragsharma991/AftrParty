@@ -363,6 +363,61 @@
                     android:layout_width="3dp"  />
 
 
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:weightSum="1">
+
+                    <TextView
+                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:textColor="@android:color/black"
+                        android:padding="10dp"
+                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:text="Mask/UnMask :"
+                        android:textSize="@dimen/text_size"
+                        android:layout_weight="0.455"/>
+
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="0.55"
+                        android:orientation="horizontal"
+                        android:weightSum="1">
+
+                        <CheckBox
+                            android:enabled="true"
+                            android:id="@+id/mask"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Mask"
+                            android:checked="true" />
+
+
+                        <CheckBox
+                            android:enabled="true"
+                            android:layout_marginLeft="10dp"
+                            android:id="@+id/unmask"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="UnMask"
+                            android:checked="false" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+                <View
+                    android:layout_height="5dp"
+                    android:layout_width="3dp"  />
+
+
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -49,6 +49,7 @@ import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
+import com.aperotechnologies.aftrparties.model.OtpRequestApi;
 import com.aperotechnologies.aftrparties.model.OtpVerifiedResponse;
 import com.aperotechnologies.aftrparties.model.ValidOTPResponse;
 
@@ -79,10 +80,7 @@ public class OTPActivity extends Activity
     // ShredPreferences
 
     //For OTP
-    //String customerId = "kr0lv39n";
-    //String appkey = "b22ab60eda70072cd34c507c4870ab3c";
-    //String appid = "c31396423a00078697c490cb13a6d99b";
-
+   //Get these from FOneVerify  dashboard
     String customerId = "r3r31h14";
     String appkey = "a8244ed6ddf7ce236fd9a09581877435";
     String appid = "dc53aa537b3eb74694ca3601dd6daea5";
@@ -180,18 +178,8 @@ public class OTPActivity extends Activity
                 + sharedpreferences.getString(m_config.Entered_Contact_No,"N/A"));
 
 
+        //Function to generate OTP
         GenerateOTP();
-
-//        btn_generate.setOnClickListener(new View.OnClickListener()
-//        {
-//            @Override
-//            public void onClick(View v)
-//            {
-//
-//
-//                // requestOTP();
-//            }
-//        });
 
 
         edt_otp.setOnTouchListener(new View.OnTouchListener()
@@ -232,7 +220,7 @@ public class OTPActivity extends Activity
                     String otp = "";
                     newPrimaryUrl = primaryUrl + "/update?appKey=" + appkey + "&customerId=" + customerId + "&verificationId=" + verfication_Id + "&code=" + otp;
                     Log.e("New fallback URL", newPrimaryUrl);
-                    requestOTPStrp2(newPrimaryUrl);
+                    verifyEnteredOTP(newPrimaryUrl);
                 }
                 else
                 {
@@ -292,7 +280,7 @@ public class OTPActivity extends Activity
                 String otp = edt_otp.getText().toString().trim();
                 newPrimaryUrl = primaryUrl + "/update?appKey=" + appkey + "&customerId=" + customerId + "&verificationId=" + verfication_Id + "&code=" + otp;
                 Log.e("New URL", newPrimaryUrl);
-                requestOTPStrp2(newPrimaryUrl);
+                verifyEnteredOTP(newPrimaryUrl);
             }
         });
     }
@@ -320,11 +308,12 @@ public class OTPActivity extends Activity
         m_config.foregroundCont = this;
     }
 
+    //Generate OTP with simple retrofit callback request to registered mobile no
     public void GenerateOTP()
     {
-        Log.e("Btn send clicked", "Yes");
         //Defining the method
-        otpRequestApi.getOTP(appkey, customerId, "IN", mobileNumber, "application/x-www-form-urlencoded", new Callback<ValidOTPResponse>() {
+        otpRequestApi.getOTP(appkey, customerId, "IN", mobileNumber, "application/x-www-form-urlencoded", new Callback<ValidOTPResponse>()
+        {
             @Override
             public void success(ValidOTPResponse validOTPResponse, retrofit.client.Response response)
             {
@@ -362,7 +351,7 @@ public class OTPActivity extends Activity
             @Override
             public void failure(RetrofitError error)
             {
-                countDownTimer.onFinish();
+
                 countDownTimer.cancel();
                 countDownTimer=null;
                 Log.e("Retrofit error", error.toString());
@@ -371,6 +360,8 @@ public class OTPActivity extends Activity
         });
     }
 
+    
+    //Navigate to registration activity
     @Override
     public void onBackPressed()
     {
@@ -381,8 +372,6 @@ public class OTPActivity extends Activity
         edt_mob_no.clearFocus();
         edt_otp.setCursorVisible(false);
         edt_mob_no.setCursorVisible(false);
-//        edt_otp.setCursorVisible(false);
-//        edt_mob_no.setCursorVisible(false);
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(OTPActivity.this);
         alertDialogBuilder
@@ -396,19 +385,17 @@ public class OTPActivity extends Activity
                             public void onClick(DialogInterface dialog, int id)
                             {
                                 finish();
-//                                Intent intent = new Intent(Intent.ACTION_MAIN);
-//                                intent.addCategory(Intent.CATEGORY_HOME);
-//                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                startActivity(intent);
+
                                 Intent intent = new Intent(OTPActivity.this,RegistrationActivity.class);
                                 startActivity(intent);
                             }
                         });
         alertDialogBuilder.show();
     }
-    public void requestOTPStrp2(final String url)
+    
+    //Verify entered OTP
+    public void verifyEnteredOTP(final String url)
     {
-        // String url="http://apifv.foneverify.com/U2opia_Verify/v1.0/trial/update?appKey=" + appkey + "&customerId=" +  customerId +   "&verificationId="+verfication_Id+"&code="+otpText;
         final StringRequest postRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>()
                 {
@@ -423,11 +410,13 @@ public class OTPActivity extends Activity
                             Log.e("", otpVerifiedResponse.getVerificationId() + "");
                             Log.e("", otpVerifiedResponse.getVerificationStatus() + "");
                             Log.e("", otpVerifiedResponse.getResponseCode() + "");
+                            //For wrong OTP
                             if (otpVerifiedResponse.getVerificationStatus().equals("WRONG_OTP_PROVIDED"))
                             {
                                 GenerikFunctions.showToast(cont, "Enter Correct OTP");
                                 edt_otp.setText("");
                             }
+                            //Upon completion of OTP verification cycle
                             else if (otpVerifiedResponse.getVerificationStatus().equals("VERIFICATION_COMPLETED"))
                             {
                                 countDownTimer.cancel();
@@ -436,10 +425,10 @@ public class OTPActivity extends Activity
                                 txt_timer.setText("");
 
                                 //Fetch Contacts Here
-                                //Go for HomePage
                                 getDeviceContatcs();
 
                             }
+                            //Fallbak mode of OTP
                             else if(otpVerifiedResponse.getVerificationStatus().equals("TRYING_FALLBACK_SMS_NOT_DELIVERED"))
                             {
                                 Log.e("Restart timer","Yes");
@@ -462,6 +451,7 @@ public class OTPActivity extends Activity
                                     }
                                 }.start();
                             }
+                            //Upon failure of cycle
                             else if(otpVerifiedResponse.getVerificationStatus().equals("VERIFICATION_FAILED"))
                             {
                                 Toast.makeText(OTPActivity.this,"Verification failed. Please check your mobile no",Toast.LENGTH_LONG).show();
@@ -500,13 +490,13 @@ public class OTPActivity extends Activity
         queue.add(postRequest);
     }
 
+    //Function to retrieve Contacts in Contacts Arraylist
     private void displayContacts()
     {
         ContentResolver cr = getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, ContactsContract.Contacts.SORT_KEY_PRIMARY
                 + " ASC");
         int index = 0;
-        //Toast.makeText(OTPActivity.this, "Cursor Count " + cur.getCount(), Toast.LENGTH_SHORT).show();
         ArrayList<String> names = new ArrayList<String>();
         ArrayList<String> contatcs = new ArrayList<String>();
 
@@ -630,28 +620,19 @@ public class OTPActivity extends Activity
                 //    System.out.println(pr);
             }
 
-            for(int i=0;i<NP.size();i++)
-            {
-                Log.e("Contatct  " + i,NP.get(i));
-            }
+//            for(int i=0;i<NP.size();i++)
+//            {
+//                Log.e("Contatct  " + i,NP.get(i));
+//            }
 
-            //Toast.makeText(OTPActivity.this, "Conacts Count " + NP.size(), Toast.LENGTH_SHORT).show();
+            new SaveContactsAsync().execute();
 
-            saveContatcs();
-
-//            listAdapter = new ArrayAdapter<String>(this, R.layout.contatcs_list_layout, NP);
-//            mainListView.setAdapter(listAdapter);
-
-            //    Toast.makeText(MainActivity.this, "Name Count " + names.size() +"   Number Count  " +contatcs.size(), Toast.LENGTH_SHORT).show();
-            //   Toast.makeText(MainActivity.this, "Conacts Count " + index, Toast.LENGTH_SHORT).show();
         }
     }
 
-    public void saveContatcs()
-    {
-        Log.e("Inside saveUserData","Yess");
-          new SaveContactsAsync().execute();
-    }
+
+    //Save Contatcs to AWS
+
     class SaveContactsAsync extends AsyncTask<Void, Void, Void>
     {
         protected void onPostExecute(Void abc)
@@ -664,8 +645,6 @@ public class OTPActivity extends Activity
             Log.e("--- "," loggedInUserInformation    "+loggedInUserInformation.getFB_USER_ID());
             new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
 
-//            Intent intent = new Intent(cont, HomePageActivity.class);
-//            startActivity(intent);
 
         }
 
@@ -700,7 +679,7 @@ public class OTPActivity extends Activity
         }
     }
 
-    //function for enabling TelephonyManager for fetching deviceId
+  //function for enabling TelephonyManager for fetching device contatcs
     public void getDeviceContatcs()
     {
         if ((int) Build.VERSION.SDK_INT < 23)
@@ -717,13 +696,10 @@ public class OTPActivity extends Activity
                         new String[]{Manifest.permission.READ_CONTACTS},
                         MY_PERMISSIONS_REQUEST_READ_CONTATCS);
 
-                Log.e("If permission is not granted",", request for permission");
             }
             else
             {
-
                 displayContacts();
-                Log.e("If Permission is granted","");
             }
         }
     }
@@ -778,8 +754,7 @@ public class OTPActivity extends Activity
                                         editor.apply();
                                         Log.e("--- "," loggedInUserInformation    "+loggedInUserInformation.getFB_USER_ID());
                                         new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
-//                                        Intent intent = new Intent(cont, HomePageActivity.class);
-//                                        startActivity(intent);
+//
                                     }
                                 }).show();
                     }
@@ -793,8 +768,6 @@ public class OTPActivity extends Activity
                         editor.apply();
                         Log.e("--- "," loggedInUserInformation    "+loggedInUserInformation.getFB_USER_ID());
                         new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
-//                        Intent intent = new Intent(cont, HomePageActivity.class);
-//                        startActivity(intent);
                     }
                 }
                 break;

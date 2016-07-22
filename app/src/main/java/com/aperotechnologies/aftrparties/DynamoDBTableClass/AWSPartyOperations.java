@@ -1,44 +1,38 @@
 package com.aperotechnologies.aftrparties.DynamoDBTableClass;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.GateCrasher.PartyConversion;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
-import com.aperotechnologies.aftrparties.History.PartyDetails;
 import com.aperotechnologies.aftrparties.History.PartyParceableData;
-import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
-import com.aperotechnologies.aftrparties.Login.AsyncAgeCalculation;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
-import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
-import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
-import com.quickblox.core.QBEntityCallback;
-import com.quickblox.core.exception.QBResponseException;
-import com.quickblox.core.helper.StringifyArrayList;
 
-import com.quickblox.messages.model.QBEnvironment;
-import com.quickblox.messages.model.QBEvent;
-import com.quickblox.messages.model.QBNotificationType;
-
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -302,14 +296,14 @@ public class AWSPartyOperations {
 
             if(v == true) {
 
-                //new getPrevPartyStatus(cont, partyTable, user).execute();
-                String url = getUrlfromCloudinary(cont, partyTable.getPartyImage());
-                //Log.e("url", " " + url);
-                partyTable.setPartyImage(url);
-
-                m_config.mapper.save(partyTable);
-                Log.e("MainActivity---", "Party inserted");
-                new addPartiestoUserTable(user, partyTable, cont, "Created", "CreateParty", null, null).execute();
+                  new getPrevPartyStatus(cont, partyTable, user).execute();
+//                String url = getUrlfromCloudinary(cont, partyTable.getPartyImage());
+//                //Log.e("url", " " + url);
+//                partyTable.setPartyImage(url);
+//
+//                m_config.mapper.save(partyTable);
+//                Log.e("MainActivity---", "Party inserted");
+//                new addPartiestoUserTable(user, partyTable, cont, "Created", "CreateParty", null, null).execute();
 
             }else{
                 Log.e("", "Error retrieving data");
@@ -320,6 +314,7 @@ public class AWSPartyOperations {
         }
     }
 
+    //Function for adding DialogId in partyTable
     public static void updateDialogId(Context cont, String DialogID, String GCFBID, String GCQBID, String PartyID, String PartyName){
         Configuration_Parameter m_config = Configuration_Parameter.getInstance();
         try {
@@ -572,9 +567,24 @@ public class AWSPartyOperations {
                 Log.e("pc"," "+pc.size()+" ");
                 GenerikFunctions.hDialog();
                 GenerikFunctions.showToast(cont,"Request has been send to Party");
-                QBPushNotifications.sendRequestPN(partytable.getHostQBID(), partytable.getHostFBID(), partytable.getPartyName(), partytable.getPartyID(), cont);
 
+                JSONObject jsonObj = new JSONObject();
+                try {
+                    jsonObj.put("HostQBID",partytable.getHostQBID());
+                    jsonObj.put("HostFBID",partytable.getHostFBID());
+                    jsonObj.put("PartyName",partytable.getPartyName());
+                    jsonObj.put("PartyID",partytable.getPartyID());
+                    jsonObj.put("PartyStartTime",partytable.getStartTime());
+                    jsonObj.put("PartyEndTime",partytable.getEndTime());
 
+                    Log.e("save jsonObj "," "+jsonObj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                //QBPushNotifications.sendRequestPN(partytable.getHostQBID(), partytable.getHostFBID(), partytable.getPartyName(), partytable.getPartyID(), cont);
+
+                QBPushNotifications.sendRequestPN(jsonObj, cont);
             }else{
                 GenerikFunctions.hDialog();
                 GenerikFunctions.showToast(cont,"Party Request Failed, Please try after some time.");
@@ -651,7 +661,7 @@ public class AWSPartyOperations {
             if(v == true) {
 
 
-                if (ActivePartyList == null) {
+                if (ActivePartyList == null || ActivePartyList.size() == 0) {
 
                     List<ActivePartyClass> ActivityPartylist = new ArrayList<>();
                     ActivePartyClass ActiveParty = new ActivePartyClass();
@@ -809,7 +819,6 @@ public class AWSPartyOperations {
 
     /** Updating UserTable at time of Status Updation**/
 
-
     public static class updatePartiesinUserTable extends AsyncTask<String, Void, Boolean>
     {
         Context cont;
@@ -885,7 +894,7 @@ public class AWSPartyOperations {
         @Override
         protected void onPostExecute(Boolean v)
         {
-            Log.e("--onPostEx- updatePartiesinUserTable"," "+v);
+            Log.e("--onPostEx- updatePartiesinUserTable"," "+v+" "+Status);
 
             if(v == true) {
 
@@ -913,34 +922,53 @@ public class AWSPartyOperations {
                 if (Status.equals("Cancelled"))
                 {  //when GC Cancel Party Request after Approval
 
-                    if(t.getText().toString().equals("Cancel Request"))
-                    {
-
                         try
                         {
                             List<ActivePartyClass> ActivePartyList = user.getActiveparty();
                             List<PaidGCClass> PaidGC = user.getPaidgc();
+                            Long currentCancelTime = System.currentTimeMillis();
 
                             if (PaidGC == null)
                             {
                                 //Unpaid user
-                                t.setVisibility(View.GONE);
-                                Toast.makeText(cont,"Party request has been cancelled",Toast.LENGTH_SHORT).show();
+                                //t.setVisibility(View.GONE);
 
+                                GenerikFunctions.showToast(cont, "Party request has been cancelled");
+                                GenerikFunctions.hDialog();
+                                Intent i = new Intent(cont, HistoryActivity.class);
+                                cont.startActivity(i);
                             }
                             else
                             {
                                 //Paid User
-                                // remove party from ActiveParty list
-                                if (ActivePartyList != null) {
-                                    ActivePartyClass ActiveParty = ActivePartyList.get(0);
-                                    ActivePartyList.remove(ActiveParty);
-                                    //ActivePartyList.remove(0);
-                                    user.setActiveparty(ActivePartyList);
-                                    m_config.mapper.save(user);
+                                String SubscriptionTime = PaidGC.get(0).getSubscriptiondate();
+                                if (currentCancelTime > Long.parseLong(SubscriptionTime))
+                                {
+                                    //t.setVisibility(View.GONE);
+                                    GenerikFunctions.showToast(cont, "Party request has been cancelled");
+                                    GenerikFunctions.hDialog();
+                                    Intent i = new Intent(cont, HistoryActivity.class);
+                                    cont.startActivity(i);
+
                                 }
-                                t.setVisibility(View.GONE);
-                                Toast.makeText(cont,"Party request has been cancelled",Toast.LENGTH_SHORT).show();
+                                else
+                                {
+                                    Log.e("here"," in cancellation");
+
+                                    // remove party from ActiveParty list
+                                    if (ActivePartyList != null || ActivePartyList.size() != 0)
+                                    {
+                                        ActivePartyList.remove(0);
+                                        user.setActiveparty(ActivePartyList);
+                                        m_config.mapper.save(user);
+                                    }
+
+                                    //t.setVisibility(View.GONE);
+                                    GenerikFunctions.showToast(cont, "Party request has been cancelled");
+                                    GenerikFunctions.hDialog();
+                                    Intent i = new Intent(cont, HistoryActivity.class);
+                                    cont.startActivity(i);
+                                }
 
 
                             }
@@ -948,18 +976,25 @@ public class AWSPartyOperations {
                         catch (Exception e)
                         {
                             e.printStackTrace();
-                            GenerikFunctions.showToast(cont, "Unable to Cancel Request, Please try again after some time");
+                            Log.e("Unable to update ActiveParty","");
+                            GenerikFunctions.showToast(cont, "Party request has been cancelled");
+                            GenerikFunctions.hDialog();
+                            Intent i = new Intent(cont, HistoryActivity.class);
+                            cont.startActivity(i);
                         }
-                    }
+
 
                 }
                 else if(Status.equals("Approved"))
                 {
                     //Chat Dialog Creation after Party Approval
 
+                    Log.e(" gateCrasherFBID "," "+gateCrasherFBID);
+
                     t.setText(Status);
                     Toast.makeText(cont, "Request has been approved",Toast.LENGTH_SHORT).show();
                     GenerikFunctions.hDialog();
+                    new RemovePendingPartiesAPI(cont, partyID, gateCrasherFBID).execute();
 
                     if (DialogID == null || DialogID.equals(null) || DialogID.equals("") || DialogID.equals("N/A"))
                     {
@@ -973,6 +1008,7 @@ public class AWSPartyOperations {
                 else if(Status.equals("Declined"))
                 {
                     t.setText(Status);
+                    QBPushNotifications.sendDeclinedPN(gateCrasherFBID, gateCrasherQBID, partyID, PartyName, cont);
                     Toast.makeText(cont, "Request has been declined",Toast.LENGTH_SHORT).show();
                     GenerikFunctions.hDialog();
                 }
@@ -1060,7 +1096,8 @@ public class AWSPartyOperations {
                             allowStatus = "Yes";
                         } else {
                             //Check status
-                            if (pc.get(j).getPartystatus().equals("Approved") || pc.get(j).getPartystatus().equals("Created") || pc.get(j).getPartystatus().equals("Pending")) {
+                            //if (pc.get(j).getPartystatus().equals("Approved") || pc.get(j).getPartystatus().equals("Created") || pc.get(j).getPartystatus().equals("Pending")) {
+                            if (pc.get(j).getPartystatus().equals("Created")) {
                                 //dont allow request
                                 allowStatus = "No";
                                 break;
@@ -1106,8 +1143,8 @@ public class AWSPartyOperations {
                 } else {
                     //Dont Allow for party request
 
-                    GenerikFunctions.showToast(cont,"Party creation failed, already created a party or exist in a party");
-                    GenerikFunctions.hideDialog(m_config.pDialog);
+                    GenerikFunctions.showToast(cont,"Party creation failed, already created a party or exist in a party.");
+                    GenerikFunctions.hDialog();
                 }
 
 
@@ -1115,10 +1152,81 @@ public class AWSPartyOperations {
     }
 
 
+    public static class RemovePendingPartiesAPI extends AsyncTask<String, Void, Boolean> {
+
+        Configuration_Parameter m_config;
+        Context cont;
+        String partyid;
+        String facebookid;
+
+        public RemovePendingPartiesAPI(final Context cont,
+                                       String partyid, String facebookid)
+        {
+            Log.e("----", " "+facebookid+" "+partyid);
+
+            this.cont = cont;
+            this.partyid = partyid;
+            this.facebookid = facebookid;
+            m_config = Configuration_Parameter.getInstance();
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            // Instantiate the RequestQueue.
+            RequestQueue queue = Volley.newRequestQueue((Activity) cont);
+            String url = "https://j4zoihu1pl.execute-api.us-east-1.amazonaws.com/Development/RemovePendingParties";
 
 
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("facebookid", facebookid);
+                obj.put("partyid", partyid);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            Log.e("object "," "+obj.toString());
+
+            // prepare the Request
+            JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.DELETE, url, obj,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            // display response
+                            Log.d("Response", response.toString());
 
 
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+
+                            error.printStackTrace();
+                        }
+                    }
+            );
+
+            // add it to the RequestQueue
+            int socketTimeout = 10000;//60 seconds
+            RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+            getRequest.setRetryPolicy(policy);
+            queue.add(getRequest);
+
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+        }
+    }
 
 }
 

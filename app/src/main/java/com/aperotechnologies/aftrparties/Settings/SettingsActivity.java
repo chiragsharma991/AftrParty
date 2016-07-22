@@ -74,6 +74,7 @@ import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+import com.yahoo.mobile.client.android.util.rangeseekbar.RangeSeekBar;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -103,9 +104,10 @@ public class SettingsActivity extends Activity
     SharedPreferences sharedPreferences;
     CircularImageView imguser;
     EditTextPopUpFixed edt_usermsgStatus, edt_Age, edt_userName;
-    TextView txtrangeseekbarval, txtseekbarval;
-    //    RangeSeekBar rangeSeekBar;
-    SeekBar SeekBar;
+    //TextView txtrangeseekbarval, txtseekbarval, txtseekbarval1;
+    TextView txtseekbarval1;
+    //RangeSeekBar rangeSeekBar;
+    SeekBar seekBar1;
     SeekbarWithIntervals seekbarWithIntervals = null;
     String seekbarVal = "";
     Spinner spn_Gender, spn_mask;
@@ -120,6 +122,7 @@ public class SettingsActivity extends Activity
     FaceOverlayView faceOverlayView;
     List<String> valid;
     public static ArrayList<String> validPics;
+    public static ArrayList<String> cameraGalaryImageList;
    // GridView images;
     LinearLayout lineimg;
     String user_name,user_gender,user_status,user_mask_unmask,user_profilepic,user_age;
@@ -162,13 +165,17 @@ public class SettingsActivity extends Activity
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(SettingsActivity.this, LinearLayoutManager.HORIZONTAL, false));
 
-
-        txtseekbarval = (TextView) findViewById(R.id.txtseekbarval);
-
-        SeekBar = (SeekBar) findViewById(R.id.seekbar);
+//        txtrangeseekbarval = (TextView) findViewById(R.id.txtrangeseekbarval);
+//        txtseekbarval = (TextView) findViewById(R.id.txtseekbarval);
+        txtseekbarval1 = (TextView) findViewById(R.id.txtseekbarval1);
+//        rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeseekbar);
+//        seekBar = (SeekBar) findViewById(R.id.seekbar);
+        seekBar1 = (SeekBar) findViewById(R.id.seekbar1);
 
         img_editSettings = (Button) findViewById(R.id.img_editSettings);
         faceOverlayView =(FaceOverlayView) findViewById(R.id.face_overlay);
+        cameraGalaryImageList=new ArrayList<>();
+
 
         sett_pd = new ProgressDialog(this);
 
@@ -219,6 +226,7 @@ public class SettingsActivity extends Activity
             {
                 try
                 {
+                    //Function to set all UI components based on data fetched
                     setUserInfo();
                 }
                 catch (Exception e)
@@ -232,27 +240,60 @@ public class SettingsActivity extends Activity
 
         /*1111*/
 
-    final int stepSize = 10;
-    SeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
-    {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
-        {
-            progress = ((int)Math.round(progress/stepSize))*stepSize;
-            seekBar.setProgress(progress);
-            txtseekbarval.setText(progress + "");
-        }
+//        final int stepSize = 10;
+//        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+//        {
+//            @Override
+//            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+//            {
+//                progress = ((int)Math.round(progress/stepSize))*stepSize;
+//                seekBar.setProgress(progress);
+//                txtseekbarval.setText(progress + "");
+//            }
+//
+//            @Override
+//            public void onStartTrackingTouch(SeekBar seekBar)
+//            {
+//            }
+//
+//            @Override
+//            public void onStopTrackingTouch(SeekBar seekBar)
+//            {
+//            }
+//        });
 
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar)
-        {
-        }
 
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar)
+        seekBar1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
         {
-        }
-    });
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+            {
+                seekBar1.setProgress(progress);
+                txtseekbarval1.setText(progress + "");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar)
+            {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar)
+            {
+            }
+        });
+
+
+//        rangeSeekBar.setOnRangeSeekBarChangeListener(new RangeSeekBar.OnRangeSeekBarChangeListener() {
+//            @Override
+//            public void onRangeSeekBarValuesChanged(RangeSeekBar bar, Object minValue, Object maxValue) {
+//                txtrangeseekbarval.setText(maxValue + "");
+//                bar.setSelectedMaxValue((Number) maxValue);
+//            }
+//        });
+
+
+
 
 
 
@@ -263,13 +304,14 @@ public class SettingsActivity extends Activity
         {
 
             int listCount = recyclerView.getAdapter().getItemCount();
+            //Check for 5 images in recycler view
             if(listCount == 5)
             {
                 Toast.makeText(cont,"Only 5 images are allowed. Please remove atleast one image first to upload new",Toast.LENGTH_LONG).show();
             }
             else
             {
-
+                //Alert Dialog to upload image from camera and gallery
                 AlertDialog.Builder builderSingle = new AlertDialog.Builder(SettingsActivity.this);
 
                 builderSingle.setTitle("Add Photo");
@@ -493,7 +535,7 @@ public class SettingsActivity extends Activity
 //        }
     }
 
-
+    //Retrieve AWS info of USer and update UI component
     public void setUserInfo()
     {
 
@@ -532,7 +574,7 @@ public class SettingsActivity extends Activity
             String DOB = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_BIRTHDATE();
 
             SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
-
+            //Calculate Age from retieved DOB
             try
             {
                 Date date = format.parse(DOB);
@@ -712,12 +754,14 @@ public class SettingsActivity extends Activity
                     public void run()
                     {
                         String maxText = String.valueOf(10);
-                        //txtrangeseekbarval.setText(maxText);
-                        txtseekbarval.setText(maxText);
-                        //rangeSeekBar.setSelectedMaxValue(2);
-                        SeekBar.setProgress(10);
-                        //getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
-                        //selectedDistVal = Integer.parseInt(seekbarVal);
+//                        txtrangeseekbarval.setText("3");
+//                        rangeSeekBar.setSelectedMaxValue(3);
+//                        txtseekbarval.setText(maxText);
+//                        seekBar.setProgress(10);
+
+                        txtseekbarval1.setText("3");
+                        seekBar1.setProgress(3);
+
                     }
                 });
             }
@@ -729,13 +773,16 @@ public class SettingsActivity extends Activity
                     public void run()
                     {
                         Log.e("came here"," ");
-                        //txtrangeseekbarval.setText(seekbarVal);
-                        txtseekbarval.setText(seekbarVal);
                         int value = Integer.parseInt(seekbarVal);
-                        //rangeSeekBar.setSelectedMaxValue(value);
-                        SeekBar.setProgress(value);
-                        //getSeekbarWithIntervals().setProgress(Integer.parseInt(seekbarVal));
-                        //selectedDistVal = Integer.parseInt(seekbarVal);
+//                        txtrangeseekbarval.setText(seekbarVal);
+//                        rangeSeekBar.setSelectedMaxValue(value);
+//
+//                        txtseekbarval.setText(seekbarVal);
+//                        seekBar.setProgress(value);
+
+                        txtseekbarval1.setText(seekbarVal);
+                        seekBar1.setProgress(value);
+
                     }
                 });
             }
@@ -812,6 +859,7 @@ public class SettingsActivity extends Activity
 //        return seekbarWithIntervals;
 //    }
 
+    //before updatimg settings info to AWS, verify all input data
     private void editSettings()
     {
         sett_pd.setMessage("Updating User Information");
@@ -837,7 +885,7 @@ public class SettingsActivity extends Activity
             editor.putString(m_config.GenderPreference, selected_Gender);
         }
 
-        editor.putString(m_config.Distance, txtseekbarval.getText().toString());
+        editor.putString(m_config.Distance, txtseekbarval1.getText().toString());
         // editor.putString("Distance", String.valueOf(selectedDistVal));
         editor.apply();
 
@@ -869,7 +917,7 @@ public class SettingsActivity extends Activity
     }
 
 
-
+    //Update users new primary image to quickblox
     public void updateQBProfilePic(String fbId,final String profileStatus, final String pic)
     {
         QBUsers.getUserByFacebookId(fbId, new QBEntityCallback<QBUser>()
@@ -979,6 +1027,7 @@ public class SettingsActivity extends Activity
         }
     }
 
+    //Call back for camera and gallery selection
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -1015,6 +1064,8 @@ public class SettingsActivity extends Activity
                         getFBProfilePictures();
 
                         picturePath = Validations.getUrlfromCloudinary(cont,picturePath);
+                        //set flag here
+                        cameraGalaryImageList.add(picturePath);
                         m_config.PrimaryUrl = picturePath;
                         Log.e("New URL",picturePath+"");
                         validPics.set((validPics.size()-1),picturePath);
@@ -1045,6 +1096,7 @@ public class SettingsActivity extends Activity
 
                 int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
                 picturePath = cursor.getString(columnIndex);
+
                 BitmapFactory.Options bmOptions = new BitmapFactory.Options();
                 Bitmap bitmap = BitmapFactory.decodeFile(picturePath,bmOptions);
                 int value = 0;
@@ -1066,6 +1118,8 @@ public class SettingsActivity extends Activity
                     validPics.add(picturePath+"");
 
                     picturePath = Validations.getUrlfromCloudinary(cont,picturePath);
+                    //set flag here
+                    cameraGalaryImageList.add(picturePath);
                     validPics.set((validPics.size()-1),picturePath);
                     m_config.PrimaryUrl = picturePath;
 
@@ -1081,6 +1135,7 @@ public class SettingsActivity extends Activity
         }
     }
 
+    //Get actual storage path from the URI
     public String getpath(Uri imageUri)
     {
         String[] projection = { MediaStore.Images.Media.DATA };
@@ -1094,6 +1149,7 @@ public class SettingsActivity extends Activity
         return cursor.getString(column_index);
     }
 
+    //Call back for android M permission retrieval to get Camera and Gallery Permission
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
     {
@@ -1258,8 +1314,25 @@ public class SettingsActivity extends Activity
     public void onBackPressed()
     {
         super.onBackPressed();
-        Intent intent = new Intent(cont, HomePageActivity.class);
-        startActivity(intent);
+        GenerikFunctions.sDialog(cont,"navigating ");
+        //updated by Imran date-21/7/16
+        if (cameraGalaryImageList.size()== 0)
+        {
+            Intent intent = new Intent(cont, HomePageActivity.class);
+            startActivity(intent);
+        }else {
+            for(int i=0;i<cameraGalaryImageList.size();i++){
+                Validations.deleteImagefromCloudinary(cameraGalaryImageList.get(i).substring(cameraGalaryImageList.get(i).lastIndexOf("/") + 1));
+                Log.e("SettingActivity",""+i);
+            }
+            Intent intent = new Intent(cont, HomePageActivity.class);
+            startActivity(intent);
+        }
+        GenerikFunctions.hDialog();
+        Log.e("SettingActivity","on Back press completed");
+
+
+
     }
 
     @Override

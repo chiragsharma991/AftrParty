@@ -9,6 +9,7 @@ import java.util.Random;
 /**
  * Created by mpatil on 24/05/16.
  */
+//Class toparse LI picture information
 public class LIPictureData
 {
     String _total = "0";

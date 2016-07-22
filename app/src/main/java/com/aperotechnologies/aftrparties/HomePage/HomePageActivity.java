@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
@@ -25,11 +27,14 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
+import com.aperotechnologies.aftrparties.InAppPurchase.InAppBillingActivity;
 import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
+import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.QBSessionRestart;
+import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
@@ -37,6 +42,10 @@ import com.aperotechnologies.aftrparties.Settings.SettingsActivity;
 import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.TipsActivity;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
+import com.aperotechnologies.aftrparties.util.IabHelper;
+import com.aperotechnologies.aftrparties.util.IabResult;
+import com.aperotechnologies.aftrparties.util.Inventory;
+import com.aperotechnologies.aftrparties.util.Purchase;
 import com.aperotechnologies.aftrparties.utils.ResizableButton;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -47,6 +56,7 @@ import com.github.siyamed.shapeimageview.CircularImageView;
 import com.linkedin.platform.LISessionManager;
 import com.quickblox.auth.QBAuth;
 import com.quickblox.chat.QBChatService;
+import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.server.BaseService;
 import com.squareup.picasso.Picasso;
@@ -80,6 +90,12 @@ public class HomePageActivity extends Activity
     String url;
     FaceOverlayView faceOverlayView;
     public static ProgressDialog hp_pd = null;
+
+    /****/
+    IabHelper mHelper;
+
+    static final String ITEM_SKU = "ap_unmasking";//android.test.purchased ";
+/*****/
 
     public void onCreate(Bundle savedInstanceState)
     {
@@ -128,6 +144,23 @@ public class HomePageActivity extends Activity
         }
         Welcome.wl_pd = null;
 
+/****/
+        String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqiS7HW5sBPoBBxCNFf1OGtRMPVzuzqhQOq6T1ZBuO6PMHzpAaiVzVZfccoUmc0Lj/Wyu4lpaK9H+aQy3oEKS9EbyQQ6GVKFLFOCFo8w8TP/Z5U14oiTvmpnLDLxhCeKRbMow+Z04hhgbnezHsikIPkULezF6psxrZ6kvzlT23pg91Yn2y/kgiLJMnxpj2G1RUfVaFlVXA/SM23yWYkK1qeTxeoZ5l36TfPjazWN8TXHmQvPX9SVTWg0tnTtxDVNfNvRMUsLd9t75JGhRimqhhgEGleQtiMZYasnmGyvWa3QGSN5CjtzW6aNocC4Cw3DcnIzM/tcriK6M75PpRMXVpwIDAQAB";
+
+
+    mHelper = new IabHelper(HomePageActivity.this, base64EncodedPublicKey);
+
+        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+            public void onIabSetupFinished(IabResult result) {
+                if (!result.isSuccess()) {
+                    Log.e("HomePageActivity", "In-app Billing setup failed: " +
+                            result);
+                } else {
+                    Log.e("HomePageActivity", "In-app Billing is set up OK");
+                }
+            }
+        });
+/****/
 
 
 //        imguser = (CircularImageView) findViewById(R.id.userimage);
@@ -143,7 +176,7 @@ public class HomePageActivity extends Activity
         btnGateCrasher = (ResizableButton) findViewById(R.id.btnGateCrasher);
         faceOverlayView = (FaceOverlayView)findViewById(R.id.face_overlay);
 
-        loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
+        //loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
 
 
 //        txtuserName.setText(sharedPreferences.getString(m_config.Entered_User_Name,""));
@@ -172,12 +205,12 @@ public class HomePageActivity extends Activity
 
 
         //if(sharedPreferences.getString(m_config.Entered_User_Name,"").equals("")){
-        try {
-            UserTable user = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
-            txt_Header.setText("Welcome " + user.getName());
-        }catch (Exception e){
-
-        }
+//        try {
+//            UserTable user = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
+//            txt_Header.setText("Welcome " + user.getName());
+//        }catch (Exception e){
+//
+//        }
 
 //        }else{
 //            txt_Header.setText("Welcome " +sharedPreferences.getString(m_config.Entered_User_Name,""));
@@ -216,6 +249,7 @@ public class HomePageActivity extends Activity
                                         Log.e("Logged Out","Yes    "  + "  aa");//.getAccessToken().toString());
                                         finish();
                                         Intent intent = new Intent(cont, Welcome.class);
+                                        intent.putExtra("from","homepage");
                                         startActivity(intent);
 
                                     }
@@ -228,8 +262,21 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                Intent i = new Intent(HomePageActivity.this, TipsActivity.class);
-                startActivity(i);
+//                Intent i = new Intent(HomePageActivity.this, TipsActivity.class);
+//                startActivity(i);
+
+
+                try {
+
+                    ///10001 - is requestCode
+                    mHelper.launchPurchaseFlow(HomePageActivity.this, ITEM_SKU, 10001,
+                            mPurchaseFinishedListener, "mypurchasetoken");
+
+                } catch (IabHelper.IabAsyncInProgressException e) {
+                    e.printStackTrace();
+                }
+
+
             }
         });
 
@@ -240,16 +287,51 @@ public class HomePageActivity extends Activity
             {
                 Log.e("----"," came here");
 
-                if(ChatService.getInstance().getCurrentUser() == null)
+                hp_pd.setMessage("Loading");
+                hp_pd.setCancelable(false);
+                hp_pd.show();
+
+                Log.e("ChatService.getInstance().getCurrentUser()", " " + ChatService.getInstance().getCurrentUser());
+                if (ChatService.getInstance().getCurrentUser() == null)
                 {
-                    GenerikFunctions.sDialog(cont, "Loading...");
                     String accessToken = LoginValidations.getFBAccessToken().getToken();
-                    QBSessionRestart.QBSession(cont, accessToken, "SettingsActivity");
+
+                    QBSessionClass.getInstance().getQBSession(new QBEntityCallback()
+                    {
+
+                        @Override
+                        public void onSuccess(Object o, Bundle bundle)
+                        {
+                            Handler h = new Handler(cont.getMainLooper());
+                            h.post(new Runnable() {
+                                @Override
+                                public void run() {
+
+
+                                    //new AsyncFBFaces().execute();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(QBResponseException e)
+                        {
+
+                            GenerikFunctions.hDialog();
+                            GenerikFunctions.showToast(cont, "There was an error connecting to network, Please try after some time.");
+
+                        }
+
+                    }, accessToken, null, cont);
+
 
                 }
-                else {
-                    new AsyncFBFaces().execute();
+                else
+                {
+                    //new AsyncFBFaces().execute();
                 }
+
+
 
 
             }
@@ -262,17 +344,17 @@ public class HomePageActivity extends Activity
 
                 Log.e("--current user -- "," "+ChatService.getInstance().getCurrentUser());
 
-                if(ChatService.getInstance().getCurrentUser() == null)
-                {
-                    GenerikFunctions.sDialog(cont, "Loading...");
-                    String accessToken = LoginValidations.getFBAccessToken().getToken();
-                    QBSessionRestart.QBSession(cont, accessToken, "ChatActivity");
-                }
-                else
-                {
+//                if(ChatService.getInstance().getCurrentUser() == null)
+//                {
+//                    GenerikFunctions.sDialog(cont, "Loading...");
+//                    String accessToken = LoginValidations.getFBAccessToken().getToken();
+//                    QBSessionRestart.QBSession(cont, accessToken, "ChatActivity");
+//                }
+//                else
+//                {
                     Intent i = new Intent(HomePageActivity.this, DialogsActivity.class);
                     startActivity(i);
-                }
+                //}
 
 
             }
@@ -282,17 +364,17 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                if(ChatService.getInstance().getCurrentUser() == null)
-                {
-                    GenerikFunctions.sDialog(cont, "Loading...");
-                    String accessToken = LoginValidations.getFBAccessToken().getToken();
-                    QBSessionRestart.QBSession(cont, accessToken, "HistoryActivity");
-                }
-                else
-                {
+//                if(ChatService.getInstance().getCurrentUser() == null)
+//                {
+//                    GenerikFunctions.sDialog(cont, "Loading...");
+//                    String accessToken = LoginValidations.getFBAccessToken().getToken();
+//                    QBSessionRestart.QBSession(cont, accessToken, "HistoryActivity");
+//                }
+//                else
+//                {
                     Intent i = new Intent(HomePageActivity.this, HistoryActivity.class);
                     startActivity(i);
-                }
+//                }
 
 
             }
@@ -302,17 +384,17 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                if(ChatService.getInstance().getCurrentUser() == null)
-                {
-                    GenerikFunctions.sDialog(cont, "Loading...");
-                    String accessToken = LoginValidations.getFBAccessToken().getToken();
-                    QBSessionRestart.QBSession(cont, accessToken, "HostActivity");
-                }
-                else
-                {
+//                if(ChatService.getInstance().getCurrentUser() == null)
+//                {
+//                    GenerikFunctions.sDialog(cont, "Loading...");
+//                    String accessToken = LoginValidations.getFBAccessToken().getToken();
+//                    QBSessionRestart.QBSession(cont, accessToken, "HostActivity");
+//                }
+//                else
+//                {
                     Intent i = new Intent(HomePageActivity.this, HostActivity.class);
                     startActivity(i);
-                }
+//                }
 
             }
         });
@@ -321,16 +403,16 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                if(ChatService.getInstance().getCurrentUser() == null)
-                {
-                    GenerikFunctions.sDialog(cont, "Loading...");
-                    String accessToken = LoginValidations.getFBAccessToken().getToken();
-                    QBSessionRestart.QBSession(cont, accessToken, "GCActivity");
-                }
-                else {
+//                if(ChatService.getInstance().getCurrentUser() == null)
+//                {
+//                    GenerikFunctions.sDialog(cont, "Loading...");
+//                    String accessToken = LoginValidations.getFBAccessToken().getToken();
+//                    QBSessionRestart.QBSession(cont, accessToken, "GCActivity");
+//                }
+//                else {
                     Intent i = new Intent(HomePageActivity.this, GateCrasherSearchActivity.class);
                     startActivity(i);
-                }
+//                }
 
             }
         });
@@ -360,7 +442,16 @@ public class HomePageActivity extends Activity
         alertDialogBuilder.show();
     }
 
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mHelper != null) try {
+            mHelper.dispose();
+        } catch (IabHelper.IabAsyncInProgressException e) {
+            e.printStackTrace();
+        }
+        mHelper = null;
+    }
 
 
 
@@ -380,19 +471,12 @@ public class HomePageActivity extends Activity
         @Override
         protected void onPreExecute()
         {
-//            progressDialog = ProgressDialog.show(HomePageActivity.this,"Loading","Loading User Images");
-//            progressDialog.setCancelable(false);
 
-
-//            m_config.pDialog.setMessage("Loading");
-//            m_config.pDialog.setCancelable(false);
-//            if(!m_config.pDialog.isShowing())
-//            m_config.pDialog.show();
-
-            hp_pd.setMessage("Loading");
-            hp_pd.setCancelable(false);
-            hp_pd.show();
+//            hp_pd.setMessage("Loading");
+//            hp_pd.setCancelable(false);
+//            hp_pd.show();
             super.onPreExecute();
+
         }
 
         @Override
@@ -405,8 +489,10 @@ public class HomePageActivity extends Activity
             }
             catch (Exception e)
             {
-              //  m_config.pDialog.dismiss();
-                hp_pd.dismiss();
+                if(hp_pd != null){
+                    hp_pd.dismiss();
+                }
+
 
             }
 
@@ -420,8 +506,9 @@ public class HomePageActivity extends Activity
             super.onPostExecute(aVoid);
             if(selUserData == null)
             {
-                //m_config.pDialog.dismiss();
-                hp_pd.dismiss();
+                if(hp_pd != null){
+                    hp_pd.dismiss();
+                }
             }
             else
             {
@@ -436,7 +523,6 @@ public class HomePageActivity extends Activity
                         images[q]=image.get(q);
                         Log.e("Images",images[q]);
                     }
-                   // m_config.pDialog.dismiss();
 
                     Intent i = new Intent(cont, SettingsActivity.class);
                     Bundle b=new Bundle();
@@ -494,8 +580,9 @@ public class HomePageActivity extends Activity
                         }
                         catch(Exception e)
                         {
-                          //  m_config.pDialog.dismiss();
-                            hp_pd.dismiss();
+                            if(hp_pd != null){
+                                hp_pd.dismiss();
+                            }
                         }
 
                     }
@@ -621,5 +708,110 @@ public class HomePageActivity extends Activity
 
         }
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent data)
+    {
+
+        Log.e("inside onActivityResult"," "+!mHelper.handleActivityResult(requestCode,
+                resultCode, data));
+
+        if (!mHelper.handleActivityResult(requestCode,
+                resultCode, data)) {
+
+            Log.e("inside mHelper.handleActivityResult"," ");
+
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
+            = new IabHelper.OnIabPurchaseFinishedListener() {
+        public void onIabPurchaseFinished(IabResult result,
+                                          Purchase purchase)
+        {
+//            // if we were disposed of in the meantime, quit.
+//            if (mHelper == null) return;
+//
+//
+            if (result.isFailure()) {
+                // Handle error
+                Log.e("Error purchasing:"," ---- " + result+" ");
+                Toast.makeText(getApplicationContext(),""+result, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            else if (purchase.getSku().equals(ITEM_SKU)) {
+
+
+                Log.e("Purchase Success"," "+purchase.getToken());
+
+                Toast.makeText(getApplicationContext(),"Purchase success", Toast.LENGTH_SHORT).show();
+                consumeItem();
+                //buyButton.setEnabled(false);
+            }
+
+        }
+    };
+
+
+    public void consumeItem() {
+        try {
+            mHelper.queryInventoryAsync(mReceivedInventoryListener);
+            Log.e("consumeItem ","try");
+            Toast.makeText(getApplicationContext(),"consumeitem try", Toast.LENGTH_SHORT).show();
+        } catch (IabHelper.IabAsyncInProgressException e) {
+            Log.e("consumeItem ","catch");
+            Toast.makeText(getApplicationContext(),"consumeitem catch", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
+    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
+            = new IabHelper.QueryInventoryFinishedListener() {
+        @Override
+        public void onQueryInventoryFinished(IabResult result, Inventory inv) {
+            if (result.isFailure()) {
+                // Handle failure
+                Log.e("QueryInventory ","failed");
+                Toast.makeText(getApplicationContext(),"QueryInventory failed", Toast.LENGTH_SHORT).show();
+            } else {
+                try {
+                    Log.e("QueryInventory ","consumeAsync");
+                    mHelper.consumeAsync(inv.getPurchase(ITEM_SKU),
+                            mConsumeFinishedListener);
+
+                    Toast.makeText(getApplicationContext(),"QueryInventory  consumeAsync", Toast.LENGTH_SHORT).show();
+
+                } catch (IabHelper.IabAsyncInProgressException e) {
+                    Log.e("QueryInventory ","catch");
+                    Toast.makeText(getApplicationContext(),"QueryInventory  catch", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+    };
+
+
+    IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
+            new IabHelper.OnConsumeFinishedListener() {
+                public void onConsumeFinished(Purchase purchase,
+                                              IabResult result) {
+                    // if we were disposed of in the meantime, quit.
+                    if (mHelper == null) return;
+
+                    if (result.isSuccess()) {
+                        //clickButton.setEnabled(true);
+                        Log.e("--- "," "+"consume success");
+                        Toast.makeText(getApplicationContext(),"consume success", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // handle error
+                        Log.e("--- "," "+"consume failed");
+                        Toast.makeText(getApplicationContext(),"consume failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            };
 
 }

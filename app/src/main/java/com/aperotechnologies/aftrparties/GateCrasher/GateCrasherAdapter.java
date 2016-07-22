@@ -190,37 +190,16 @@ public class GateCrasherAdapter extends BaseAdapter
                     currentDay.setTime(new Date());
 
 
-                    /***/
-//                    int hour = currentDay.get(Calendar.HOUR_OF_DAY);
-//                    int min = currentDay.get(Calendar.MINUTE);
-//                    int day = currentDay.get(Calendar.DAY_OF_MONTH);
-//                    int mon = currentDay.get(Calendar.MONTH);
-//                    int year = currentDay.get(Calendar.YEAR);
-//                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                    sdf.setTimeZone();
-//
-//                    String inputString = hour +":"+min+":00";
-//                    String date = year+"-"+mon+"-"+day;
-//                    Log.e("date "," "+date +" --- "+inputString);
-//                    Date d = null;
-//                    try {
-//                        d = sdf.parse(date+" " + inputString);
-//                    } catch (ParseException e) {
-//                        e.printStackTrace();
-//                    }
-//                    Long currentDayTime = d.getTime();
-//                    Log.e("currentDate "," "+currentDayTime +"--- "+(currentDayTime <= Long.parseLong(pconv.getEndtime())));
-                   /***/
-
-
                     boolean sameDay = cal1.get(Calendar.YEAR) == currentDay.get(Calendar.YEAR) &&
                             cal1.get(Calendar.DAY_OF_YEAR) == currentDay.get(Calendar.DAY_OF_YEAR) && cal1.get(Calendar.MONTH) == currentDay.get(Calendar.MONTH);
+
                     Log.e("sameDay   " + i, " " + sameDay);
                     Log.e("currrr"," "+currentDay.getTimeInMillis()+" "+pconv.getEndtime() +" "+(currentDay.getTimeInMillis() <= Long.parseLong(pconv.getEndtime()))+" "+currentDay.getTime());
                     //stores parties data of user in PartyConversion array for current date
                     //if (sameDay == true)
 
-                    if(currentDay.getTimeInMillis() <= Long.parseLong(pconv.getEndtime())){
+                    if(currentDay.getTimeInMillis() <= Long.parseLong(pconv.getEndtime()))
+                    {
                         pc.add(pconv);
                         Log.e("pc---- " + " " + pconv.getPartyname() + " " + pconv.getPartystatus(), "aa");
                     }
@@ -300,13 +279,15 @@ public class GateCrasherAdapter extends BaseAdapter
                 {
                     String stateparty = b.getText().toString().trim();
                     if(stateparty.equals("Created")){
-                        GenerikFunctions.showToast(cont, "Your cannot send request to this party.");
+                        GenerikFunctions.showToast(cont, "You cannot send request to this party.");
                     }else  if(stateparty.equals("Pending")){
-                        GenerikFunctions.showToast(cont, "Your have already send request to this party.");
+                        GenerikFunctions.showToast(cont, "You have already send request to this party.");
                     }else  if(stateparty.equals("Declined")){
                         GenerikFunctions.showToast(cont, "Your request for this party have been declined.");
                     }else  if(stateparty.equals("Approved")){
                         GenerikFunctions.showToast(cont, "Your request for this party have been approved.");
+                    }else  if(stateparty.equals("Cancelled")){
+                        GenerikFunctions.showToast(cont, "Your request for this party have been cancelled.");
                     }
 
                     Log.e("Dont Allow request For  " , finalHolder.partyName.getText() + " aa");
@@ -434,7 +415,7 @@ public class GateCrasherAdapter extends BaseAdapter
         //Log.e("user.getActiveParty()", " " + user.getActiveparty()+" "+(user.getActiveparty() == null));
 
         //check whether any party of user have been approved or not for the day
-        if (user.getActiveparty() == null)
+        if (user.getActiveparty() == null || user.getActiveparty().size() == 0)
         {
             // if there is no active party
             Log.e("if there is no active party", "");
@@ -447,15 +428,12 @@ public class GateCrasherAdapter extends BaseAdapter
             Calendar calendar1 = Calendar.getInstance();
             calendar1.setTimeInMillis(Long.parseLong(Endblocktime));
             String PartyEndBlockTime = Validations.getMonthNo(calendar1.get(Calendar.MONTH)) + "/" + calendar1.get(Calendar.DAY_OF_MONTH) + "/" + calendar1.get(Calendar.YEAR) + " " + Validations.showTime(calendar1.get(Calendar.HOUR_OF_DAY), calendar1.get(Calendar.MINUTE));
-/**/
+            /**/
             //if there is an active party
             Log.e("if there is an active party", "");
             //check for Paid status
             if (PaidGC == null)
             {
-
-
-
                 //UnPaidUser
                 Log.e("UnPaid User","");
                 // if there is any active party

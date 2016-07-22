@@ -3,31 +3,25 @@ package com.aperotechnologies.aftrparties.Chats;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.StrictMode;
-import android.preference.PreferenceManager;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.model.QBDialog;
 import com.quickblox.core.QBEntityCallback;
@@ -38,6 +32,7 @@ import com.quickblox.users.QBUsers;
 import com.quickblox.users.model.QBUser;
 import java.util.ArrayList;
 import java.util.List;
+
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
 
@@ -86,8 +81,41 @@ public class DialogsActivity extends Activity implements AbsListView.OnScrollLis
         //add the footer before adding the adapter, else the footer will not load!
         footerView = (ProgressBar) ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.list_footer, null, false);
 
+        if (ChatService.getInstance().getCurrentUser() == null)
+        {
+            String accessToken = LoginValidations.getFBAccessToken().getToken();
 
-        getDialogs(index, count, "loading page");
+            QBSessionClass.getInstance().getQBSession(new QBEntityCallback() {
+
+                @Override
+                public void onSuccess(Object o, Bundle bundle) {
+                    Handler h = new Handler(cont.getMainLooper());
+                    h.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.e("inside handler","---");
+                            getDialogs(index, count, "loading page");
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(QBResponseException e) {
+
+                    pBar.setVisibility(View.GONE);
+                    GenerikFunctions.showToast(cont, "There was an error while loading data, please try again after some time.");
+
+                }
+
+            }, accessToken, pBar, cont);
+
+
+        }
+        else
+        {
+
+            getDialogs(index, count, "loading page");
+        }
 
 
         listDialogs.setOnItemClickListener(new AdapterView.OnItemClickListener()
@@ -155,7 +183,7 @@ public class DialogsActivity extends Activity implements AbsListView.OnScrollLis
     }
 
 
-    private void getDialogs(final int index, final int count, final String check) {
+    public void getDialogs(final int index, final int count, final String check) {
         Log.e("index count ",index+"    "+ count);
 
         QBRequestGetBuilder requestBuilder1 = new QBRequestGetBuilder();
@@ -198,7 +226,7 @@ public class DialogsActivity extends Activity implements AbsListView.OnScrollLis
 
                             // Save users
                             //
-                            Log.e(":dialogusers ", " " + dialogusers.size());
+//                            Log.e(":dialogusers ", " " + dialogusers.size());
                             for(int i = 0; i < users.size(); i++)
                             {
                                 if(!dialogusers.contains(users.get(i))){

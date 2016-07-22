@@ -13,6 +13,14 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.EditText;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
@@ -25,6 +33,8 @@ import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Settings.SettingsActivity;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.quickblox.users.model.QBUser;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -349,21 +359,114 @@ public class AWSLoginOperations {
                 SharedPreferences.Editor editor= sharedPreferences.edit();
                 editor.putString(m_config.LILoginDone,"Yes");
                 editor.apply();
+                //Harshada 22nd Jul
+                //EmailVerification(cont);
+
                 //Harshada
+                editor.putString(m_config.EmailValidationDone,"Yes");
+                editor.apply();
                 LoginValidations.QBStartSession(cont);
+                ///
 
             }
             else
             {
                 Log.e("", "Error retrieving data");
-                if(RegistrationActivity.reg_pd.isShowing())
-                {
-                    RegistrationActivity.reg_pd.dismiss();
+                if(RegistrationActivity.reg_pd != null){
+                    if(RegistrationActivity.reg_pd.isShowing())
+                    {
+                        RegistrationActivity.reg_pd.dismiss();
+                    }
                 }
+
                 GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
             }
         }
     }
+
+
+
+    public static void EmailVerification(final Context cont)
+    {
+        // Instantiate the RequestQueue.
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        String verifyStatus;
+        RequestQueue queue = Volley.newRequestQueue((Activity)cont);
+        String url ="http://api.verify-email.org/api.php?usr=harshadaasai&pwd=harshada26&check="+sharedPreferences.getString(m_config.Entered_Email,"N/A");
+        // prepare the Request
+        JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>()
+                {
+                    @Override
+                    public void onResponse(JSONObject response)
+                    {
+                        // display response
+                        Log.d("Response", response.toString());
+                        try
+                        {
+                            JSONObject json = response;
+                            String verifyStatus = json.getString("verify_status");
+                            Log.e("verifyStatus 11",verifyStatus + "   11");
+                            if(verifyStatus.equals("1"))
+                            {
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString(m_config.EmailValidationDone,"Yes");
+                                editor.apply();
+                                LoginValidations.QBStartSession(cont);
+
+                            }
+                            else
+                            {
+                                if(RegistrationActivity.reg_pd != null){
+                                    if(RegistrationActivity.reg_pd.isShowing())
+                                    {
+                                        RegistrationActivity.reg_pd.dismiss();
+                                    }
+                                }
+                                GenerikFunctions.showToast(cont,"Email Verification Failed, Please Check your EmailId...");
+                            }
+                        }
+                        catch(Exception e)
+                        {
+                            if(RegistrationActivity.reg_pd != null){
+                                if(RegistrationActivity.reg_pd.isShowing())
+                                {
+                                    RegistrationActivity.reg_pd.dismiss();
+                                }
+                            }
+                            String verifyStatus = "0";
+                            Log.i("verifyStatus 22",verifyStatus + "   22");
+                            GenerikFunctions.showToast(cont,"Email Verification Failed, Please Check your EmailId...");
+                        }
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        if(RegistrationActivity.reg_pd != null){
+                            if(RegistrationActivity.reg_pd.isShowing())
+                            {
+                                RegistrationActivity.reg_pd.dismiss();
+                            }
+                        }
+                        Log.d("Error.Response", error.toString());
+                        String verifyStatus = "0";
+                        Log.i("verifyStatus 33",verifyStatus + "   33");
+                        GenerikFunctions.showToast(cont,"Email Verification Failed, Please Check your EmailId...");
+                    }
+                });
+
+        RetryPolicy policy = new DefaultRetryPolicy(70000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        getRequest.setRetryPolicy(policy);
+        // add it to the RequestQueue
+        queue.add(getRequest);
+
+    }
+
+
 
     //function for adding devicetoken while login in UserTable
     public static class addUserDeviceToken extends AsyncTask<String, Void, Boolean>

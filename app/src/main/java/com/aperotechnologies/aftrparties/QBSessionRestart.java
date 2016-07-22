@@ -3,6 +3,7 @@ package com.aperotechnologies.aftrparties;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -107,8 +108,16 @@ public class QBSessionRestart {
             public void onSuccess(Object o, Bundle bundle)
             {
                 Log.e("ChatServicelogin","Success ");
+                Handler h = new Handler(cont.getMainLooper());
+                h.post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
 
-                callforFunctionafterQBSession(cont, checkfromWhere);
+                    }
+                });
+
 
             }
 
@@ -125,39 +134,9 @@ public class QBSessionRestart {
 
     }
 
-    private static void callforFunctionafterQBSession(Context cont, String checkfromWhere)
-    {
-        if(checkfromWhere == "ChatActivity")
-        {
-            Intent i = new Intent(cont, DialogsActivity.class);
-            cont.startActivity(i);
-            GenerikFunctions.hDialog();
-        }
-        else if (checkfromWhere == "SettingsActivity")
-        {
-            GenerikFunctions.hDialog();
 
-        }
-        else if (checkfromWhere == "HistoryActivity")
-        {
-            Intent i = new Intent(cont, HistoryActivity.class);
-            cont.startActivity(i);
-            GenerikFunctions.hDialog();
-        }
-        else if (checkfromWhere == "HostActivity")
-        {
-            Intent i = new Intent(cont, HostActivity.class);
-            cont.startActivity(i);
-            GenerikFunctions.hDialog();
-        }
-        else if (checkfromWhere == "GCActivity")
-        {
-            Intent i = new Intent(cont, GateCrasherSearchActivity.class);
-            cont.startActivity(i);
-            GenerikFunctions.hDialog();
-        }
-
-
-    }
 
 }
+
+
+

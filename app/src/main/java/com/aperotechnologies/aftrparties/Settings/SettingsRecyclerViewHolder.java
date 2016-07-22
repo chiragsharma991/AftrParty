@@ -21,7 +21,6 @@ public class SettingsRecyclerViewHolder extends RecyclerView.ViewHolder
     {
         super(view);
         // Find all views ids
-
         this.imageview = (ImageView) view.findViewById(R.id.image);
     }
 }

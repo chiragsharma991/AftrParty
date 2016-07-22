@@ -535,13 +535,20 @@ public class GateCrasherSearchActivity extends Activity {
         //Log.e("hour "," "+hour+" minute "+minute);
 
         Calendar calendar = Calendar.getInstance();
-        calendar.set(mYear, mMonth, mDay,
-                hour, minute, 0);
+//        calendar.set(mYear, mMonth, mDay,
+//                hour, minute, 0);
+
+        calendar.set(Calendar.DAY_OF_MONTH, mDay);
+        calendar.set(Calendar.MONTH, mMonth);
+        calendar.set(Calendar.YEAR, mYear);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
         long TimeinMs = calendar.getTimeInMillis();
 
-        //Log.e("--- ",""+calendar.getTime()+" "+calendar.getTimeInMillis());
-        //Log.e("DateTime in milliseconds : ","" + TimeinMs.getTime());
-        //return TimeinMs.getTime();
+        Log.e("TimeinMs ",""+TimeinMs);
         return TimeinMs;
 
 
@@ -557,6 +564,7 @@ public class GateCrasherSearchActivity extends Activity {
 //        } catch (ParseException e) {
 //            e.printStackTrace();
 //        }
+//        Log.e("getTime in GC ",""+d.getTime());
 //        return d.getTime();
     }
 

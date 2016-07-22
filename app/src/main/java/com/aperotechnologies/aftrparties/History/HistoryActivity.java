@@ -1,9 +1,9 @@
 package com.aperotechnologies.aftrparties.History;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,13 +13,16 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartiesClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
-import com.aperotechnologies.aftrparties.GateCrasher.PartyConversion;
+import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.exception.QBResponseException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,8 +68,6 @@ public class HistoryActivity extends Activity
         count = 10;
 
 
-
-
         listHistory = (ListView) findViewById(R.id.listhistory);
         txtnoHistory = (TextView) findViewById(R.id.noHistory);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -84,7 +85,6 @@ public class HistoryActivity extends Activity
             UserTable selectedUser = m_config.mapper.load(UserTable.class, FacebookID);// retrieve using particular key/primary key
             PartiesList = selectedUser.getParties();
             Log.e("finalpartyIdstatus ", " " + PartiesList);
-
 
 
             if(PartiesList == null)
@@ -132,9 +132,45 @@ public class HistoryActivity extends Activity
 
             }
 
-            setHistoryListAdapter();
+            Log.e("ChatService.getInstance().getCurrentUser()"," "+ChatService.getInstance().getCurrentUser());
+            if (ChatService.getInstance().getCurrentUser() == null)
+            {
+                String accessToken = LoginValidations.getFBAccessToken().getToken();
 
-            listHistory.setOnScrollListener(onScrollListener());
+                QBSessionClass.getInstance().getQBSession(new QBEntityCallback() {
+
+                    @Override
+                    public void onSuccess(Object o, Bundle bundle) {
+                        Handler h = new Handler(cont.getMainLooper());
+                        h.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.e("inside handler","---");
+                                setHistoryListAdapter();
+                                listHistory.setOnScrollListener(onScrollListener());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(QBResponseException e) {
+
+                        progressBar.setVisibility(View.GONE);
+                        GenerikFunctions.showToast(cont, "There was an error while loading data, please try again after some time.");
+
+                    }
+
+                }, accessToken, progressBar, cont);
+
+
+            }
+            else
+            {
+                setHistoryListAdapter();
+                listHistory.setOnScrollListener(onScrollListener());
+            }
+
+
 
 
 

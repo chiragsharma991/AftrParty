@@ -72,7 +72,11 @@
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name=".History.RequestantListActivity"
+            android:name="com.aperotechnologies.aftrparties.History.HostProfileActivity"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
+            android:name="com.aperotechnologies.aftrparties.History.RequestantActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
@@ -107,14 +111,6 @@
 
         <activity android:name=".GateCrasher.RatePartyActivity"
             android:screenOrientation="portrait"></activity>
-
-        <activity android:name=".History.RequestantCardsActivity"
-            android:screenOrientation="portrait"></activity>
-
-
-        <activity android:name=".History.HostDetailsCardsActivity"
-            android:screenOrientation="portrait"></activity>
-
 
 
         <!-- Local Notification receiver-->

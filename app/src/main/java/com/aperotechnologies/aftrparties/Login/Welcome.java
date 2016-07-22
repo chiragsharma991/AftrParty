@@ -11,8 +11,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,11 +28,15 @@ import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSLoginOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
-import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
+import com.aperotechnologies.aftrparties.History.HistoryActivity;
+import com.aperotechnologies.aftrparties.History.PartyParceableData;
+import com.aperotechnologies.aftrparties.History.RequestantActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
@@ -61,7 +63,6 @@ import com.linkedin.platform.listeners.ApiListener;
 import com.linkedin.platform.listeners.ApiResponse;
 import com.linkedin.platform.listeners.AuthListener;
 import com.linkedin.platform.utils.Scope;
-import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import org.json.JSONObject;
@@ -149,6 +150,7 @@ public class Welcome extends Activity
         callbackManager = CallbackManager.Factory.create();
         loginManager = LoginManager.getInstance();
 
+        //Permissions needed for FB Login
         permissions = new ArrayList<>();
         permissions.add("public_profile");
         permissions.add("email");
@@ -159,10 +161,11 @@ public class Welcome extends Activity
         permissions.add("user_photos");
 
 
-         Log.e("Shrd Pref in Welcome",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
-                    sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "  + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
+//         Log.e("Shrd Pref in Welcome",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
+//                    sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "  + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
 
 
+        //Start Registration activity on Register button click
         btn_register.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -174,6 +177,7 @@ public class Welcome extends Activity
             }
         });
 
+        //Login Button Click
         btn_login.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -184,8 +188,10 @@ public class Welcome extends Activity
                         sharedPreferences.getString(m_config.LoggedInFBUserID,"N/A"));
 
 
+                //Check for local storage of FB ID
                 if(sharedPreferences.getString(m_config.LoggedInFBUserID,"N/A").equals("N/A"))
                 {
+                    //If not stored locally, initialise the FB lofgin
                     linkedinStart = "";
                     try
                     {
@@ -201,41 +207,18 @@ public class Welcome extends Activity
                 }
                 else
                 {
+                    //Iflocally stored then initialise the FB Session
                     linkedinStart="";
                     Log.e("Inside the Login of FB","Yes");
                     loginManager.logInWithReadPermissions(Welcome.this,permissions);
                     FacebookDataRetievalNew();
                 }
 
-
-//                if(sharedPreferences.getString(m_config.Entered_User_Name,"N/A").equals("N/A"))
-//                {
-//                    Log.e("Inside if","Launch registration");
-//                    Intent intent = new Intent(Welcome.this,RegistrationActivity.class);
-//                    startActivity(intent);
-//                }
-//                else
-//                {
-//                    Log.e("11","11");
-//                    //FB Login First
-//                    linkedinStart = "";
-//                    try
-//                    {
-//                        loginManager.logInWithReadPermissions(Welcome.this, permissions);
-//                        Log.e("Inside start login", "yes");
-//                        FacebookDataRetieval();
-//                    }
-//                    catch (Exception e)
-//                    {
-//                        Log.e("External Exception", e.toString());
-//                        e.printStackTrace();
-//                    }
-//                }
             }
         });
     }
 
-
+    //FB Login to retrieve FB ID
     public void FacebookDataRetievalNew()
     {
         Log.e("Inside FB data retreive new","Yes");
@@ -282,10 +265,10 @@ public class Welcome extends Activity
         }
         catch(Exception e)
         {
-
         }
     }
     //Meghana
+    //For FB and LI login call back sessions
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -307,17 +290,6 @@ public class Welcome extends Activity
             if (Token == null)
             {
                 GenerikFunctions.showToast(cont,"LI Login Failed");
-
-                try
-                {
-
-                    //setLIUserProfile("");
-                }
-                catch (Exception e)
-                {
-                    e.printStackTrace();
-                }
-                //   startLinkedInProcess();
             }
             else
             {
@@ -329,7 +301,6 @@ public class Welcome extends Activity
                     {
                         try
                         {
-                            //   liUserInformation = gson.fromJson(result.toString(),LIUserInformation.class);
                             JSONObject jsonObject = result.getResponseDataAsJson();
                             setLIUserProfile(jsonObject.toString());
                             Log.e("jsonresponse", "aa  " + result.toString() + " ");
@@ -337,7 +308,6 @@ public class Welcome extends Activity
                         catch (Exception e)
                         {
                             e.printStackTrace();
-                            //GenerikFunctions.showToast(cont,"Li Error catch   "+ e.toString());
 
                             try
                             {
@@ -348,17 +318,12 @@ public class Welcome extends Activity
                             {
                                 ex.printStackTrace();
                             }
-
-                            //New Harshada Code for QB Session
-
-                           // LoginValidations.QBStartSession(cont);
                         }
                     }
                     @Override
                     public void onApiError(LIApiError error)
                     {
                         Log.e("Linked In Error", error.toString());
-                        //GenerikFunctions.showToast(cont,"Li Error  onApiError  "+ error.toString());
 
                         try
                         {
@@ -369,16 +334,13 @@ public class Welcome extends Activity
                         {
                             ex.printStackTrace();
                         }
-//
-
-                        //New Harshada Code for QB Session
-                      //  LoginValidations.QBStartSession(cont);
                     }
                 });
             }
         }
     }
 
+    //Function to parse update LI data to AWS and SQLite
     public  void  setLIUserProfile(String response)
     {
         try
@@ -386,26 +348,13 @@ public class Welcome extends Activity
             Log.e("setLIUserProfile response", response + "");
             if (response.length() == 0 || response.equals(""))
             {
-                Log.e("In If", "setLIUserProfile");
                 liUserInformation = new LIUserInformation();
                 liPictureData = new LIPictureData();
             }
             else
             {
-                Log.e("In else", "setLIUserProfile");
                 liUserInformation = gson.fromJson(response.toString(), LIUserInformation.class);
 
-//            Log.e("Response In Else ", response.toString() + "");
-//
-//            Log.e("LI Email ", liUserInformation.getEmailAddress());
-//
-//            Log.e("LI Id", liUserInformation.getId());
-//
-//            Log.e("LI emailAddress", liUserInformation.getEmailAddress());
-//            Log.e("LI numConnections", liUserInformation.getNumConnections());
-//            Log.e("LI headline", liUserInformation.getHeadline());
-//            Log.e("LI firstName", liUserInformation.getFirstName());
-//            Log.e("LI lastName", liUserInformation.getLastName());
 
                 liPictureData = new LIPictureData();
                 if (liPictureData.equals(liUserInformation.getLIPictureData()))
@@ -470,6 +419,7 @@ public class Welcome extends Activity
                         sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "
                         + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
             }
+
         }
         catch (Exception e)
         {
@@ -505,23 +455,18 @@ public class Welcome extends Activity
         alertDialogBuilder.show();
     }
 
+    //Ask user again for declined FB permissions
     public void askForDeclinedFBPermissions(ArrayList<String> declined_perm)
     {
-//        for (int i = 0; i < declined_perm.size(); i++)
-//        {
-//            Log.e("From dec perm func", declined_perm.get(i));
-//        }
-
         loginManager.logInWithReadPermissions(Welcome.this, declined_perm);
         FacebookDataRetieval();
     }
 
+    //Check for user permissions acceptance for FB
     public void FacebookDataRetieval()
     {
         Log.e("Inside FB data retreive","Yes");
         linkedinStart="";
-
-        //Log.e("Inside FB data retreive","Yes   " +linkedinStart +"   aa  " +loginManager.getLoginBehavior().toString());
 
         try
         {
@@ -539,12 +484,6 @@ public class Welcome extends Activity
 
                         Set<String> given_perm = token.getPermissions();
                         iterator = given_perm.iterator();
-
-//                        while (iterator.hasNext())
-//                        {
-//                            String perm_name = iterator.next().toString();
-//                            Log.e("Given Permission in: ", perm_name + " ");
-//                        }
 
                         ArrayList<String> declined_permissions = new ArrayList<String>();
                         Set<String> declined_perm = token.getDeclinedPermissions();
@@ -659,7 +598,7 @@ public class Welcome extends Activity
     }
 
     //Meghana
-    //Get user data
+    //Get user data from FB
     public void retrieveFBMeData()
     {
         GraphRequest request1 = GraphRequest.newMeRequest(token,
@@ -689,7 +628,6 @@ public class Welcome extends Activity
                         {
                             fbUserInformation.setBirthday("N/A");
                         }
-
  //                      Log.e("getBirthday : " , fbUserInformation.getBirthday());
 
                         if(fbUserInformation.getEmail().equals(null))
@@ -750,9 +688,8 @@ public class Welcome extends Activity
                             fbProfilePictureData=fbUserInformation.getFbProfilePictureData();
                         }
 
-                        Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
+                      //  Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
 
-                     //   Log.e("Empty Fields","Yes   " + emptyFields +"    aa");
 
                         if(emptyFields.equals(""))
                         {
@@ -763,12 +700,11 @@ public class Welcome extends Activity
 //                            Log.e("Cursir count",cursor.getCount()+"");
                             if(cursor.getCount() == 0)
                             {
-                                //  Store here
+                                //  Store use info in SQLIte
                                 storeUserInDb();
                             }
                             else
                             {
-                                //Clear and insert Here
                                 //Update User Entry
                                 String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
                                         LoginTableColumns.FB_USER_NAME + " = '" + fbUserInformation.getFbUserName().trim() + "', " +
@@ -802,7 +738,6 @@ public class Welcome extends Activity
                         }
                         else
                         {
-//                            Log.e("emptyFields " ,emptyFields);
                             if(wl_pd.isShowing())
                             {
                                 wl_pd.dismiss();
@@ -856,6 +791,8 @@ public class Welcome extends Activity
         //Total No of friends
         getFbFriendsCount();
     }
+
+    //Function to retrieve FB friends count and update in SQLite and update user FB data to AWS
     private void getFbFriendsCount()
     {
         //Total No of friends
@@ -871,8 +808,8 @@ public class Welcome extends Activity
                         {
                             JSONObject graphObject = response.getJSONObject();
                             Log.e("graphObject",graphObject.toString());
-                            //        JSONArray dataArray = graphObject.getJSONArray("data");
-                            //        JSONObject paging = graphObject.getJSONObject("paging");
+                            // JSONArray dataArray = graphObject.getJSONArray("data");
+                            // JSONObject paging = graphObject.getJSONObject("paging");
                             JSONObject summary = graphObject.getJSONObject("summary");
                             String totCount = summary.getString("total_count");
                             Log.e("Summary  totCount ", summary + "      " + totCount);
@@ -930,12 +867,13 @@ public class Welcome extends Activity
                 }
         ).executeAsync();
     }
-
+    //LI permissions
     private static Scope buildScope()
     {
         return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
     }
 
+    //LI session initialition
     public  void startLinkedInProcess(final UserTable user)
     {
         Log.e("In startLinkedInProcess","Yes");
@@ -945,7 +883,7 @@ public class Welcome extends Activity
             public void onAuthSuccess()
             {
                 Token = LISessionManager.getInstance(cont).getSession().getAccessToken().getValue().toString();
-                Log.e("LI Token",Token+"");
+                Log.e("LI Token", Token+"");
 
                 String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
                         LoginTableColumns.FB_USER_NAME + " = '" + user.getFBUserName() + "', " +
@@ -967,7 +905,7 @@ public class Welcome extends Activity
                         + LoginTableColumns.LI_USER_HEADLINE + " = '" + user.getLKHeadLine() + "' "
                         + " where " + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
 
-                Log.i("update User "+ user.getFacebookID().trim() , Update);
+                Log.i("update User "+ user.getFacebookID().trim(), Update);
                 sqldb.execSQL(Update);
 
                 SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -985,7 +923,88 @@ public class Welcome extends Activity
                 editor.apply();
 
                 Log.e("Updated all flags","yes");
-                LoginValidations.QBStartSession(cont);
+                String from = getIntent().getExtras().getString("from");
+                Log.e("from"," "+from);
+
+                if(from.equals("registration") || from.equals("splash") || from.equals("homepage")){
+                    LoginValidations.QBStartSession(cont);
+
+                    if(wl_pd!=null)
+                    {
+                        if(wl_pd.isShowing())
+                        {
+                            wl_pd.dismiss();
+                        }
+                    }
+                }
+                else if(from.equals("requestsend"))
+                {
+                    String PartyId = getIntent().getExtras().getString("PartyId");
+                    String PartyName = getIntent().getExtras().getString("PartyName");
+                    String PartyStartTime = getIntent().getExtras().getString("PartyStartTime");
+                    String PartyEndTime = getIntent().getExtras().getString("PartyEndTime");
+                    String PartyStatus = getIntent().getExtras().getString("PartyStatus");
+                    String GCQBID = getIntent().getExtras().getString("GCQBID");
+                    String GCFBID = getIntent().getExtras().getString("GCFBID");
+                    String message = getIntent().getExtras().getString("message");
+
+                    Intent i = new Intent(Welcome.this, RequestantActivity.class);
+                    PartyParceableData party1 = new PartyParceableData();
+                    party1.setPartyId(PartyId);
+                    party1.setPartyName(PartyName);
+                    party1.setStartTime(PartyStartTime);
+                    party1.setEndTime(PartyEndTime);
+                    party1.setPartyStatus(PartyStatus);
+                    i.putExtra("from", "requestSend");
+                    i.putExtra("GCQBID",GCQBID);
+                    i.putExtra("GCFBID", GCFBID);
+                    i.putExtra("message", message);
+                    Bundle mBundles = new Bundle();
+                    startActivity(i);
+
+                    if(wl_pd!=null)
+                    {
+                        if(wl_pd.isShowing())
+                        {
+                            wl_pd.dismiss();
+                        }
+                    }
+
+                }
+                else if(from.equals("chatoffline"))
+                {
+                    Intent i = new Intent(Welcome.this, DialogsActivity.class);
+                    startActivity(i);
+
+                    if(wl_pd!=null)
+                    {
+                        if(wl_pd.isShowing())
+                        {
+                            wl_pd.dismiss();
+                        }
+                    }
+                }
+                else if(from.equals("requestApproved"))
+                {
+                    String GCFBID = getIntent().getExtras().getString("GCFBID");
+                    String message = getIntent().getExtras().getString("message");
+                    Intent i = new Intent(Welcome.this, HistoryActivity.class);
+                    i.putExtra("GCFBID", GCFBID);
+                    i.putExtra("from", "requestApproved");
+                    i.putExtra("message", message);
+                    startActivity(i);
+
+
+                    if(wl_pd!=null)
+                    {
+                        if(wl_pd.isShowing())
+                        {
+                            wl_pd.dismiss();
+                        }
+                    }
+                }
+
+
             }
 
             @Override
@@ -999,21 +1018,36 @@ public class Welcome extends Activity
                 else //if(error.toString().trim().contains("UNKNOWN_ERROR"))
                 {
                     Log.e("Inside Else","Yes");
+                    if(wl_pd!=null)
+                    {
+                        if(wl_pd.isShowing())
+                        {
+                            wl_pd.dismiss();
+                        }
+                    }
+
                     //GenerikFunctions.showToast(cont, "failed  linked in login " + error.toString());
                 }
             }
         }, true);
     }
 
+    //Update local SQLite storage and shared preferences
     public void updateUserTableAndPrefs(UserTable user)
     {
+        Log.e("Inside Update User flags","Yes");
         if(LISessionManager.getInstance(cont).getSession().getAccessToken() == null)
         {
+            Log.e("LI out","Yes");
             linkedinStart="Yes";
             startLinkedInProcess(user);
         }
         else
         {
+            Log.e("LI out","No");
+            String  litok = LISessionManager.getInstance(cont).getSession().getAccessToken().toString();
+            Log.e("litok","litok");
+
             String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
                     LoginTableColumns.FB_USER_NAME + " = '" + user.getFBUserName() + "', " +
                     LoginTableColumns.FB_USER_GENDER + " = '" + user.getGender().trim() + "', " +
@@ -1037,7 +1071,6 @@ public class Welcome extends Activity
             Log.i("update User "+ user.getFacebookID().trim() , Update);
             sqldb.execSQL(Update);
 
-
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(m_config.Entered_User_Name,user.getName());
             editor.putString(m_config.Entered_Email,user.getEmail());
@@ -1053,7 +1086,20 @@ public class Welcome extends Activity
             editor.apply();
 
             Log.e("Updated all flags","yes");
-            LoginValidations.QBStartSession(cont);
+            //Start LI Session
+
+            if(LISessionManager.getInstance(cont).getSession().getAccessToken().toString() == null)
+            {
+                Log.e("LI out","Yes");
+                linkedinStart="Yes";
+                startLinkedInProcess(user);
+            }
+            else
+            {
+                LoginValidations.QBStartSession(cont);
+            }
+
+
         }
 
 
@@ -1128,45 +1174,6 @@ public class Welcome extends Activity
         }
     }
 
-//    private static Scope buildScope()
-//    {
-//        return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
-//    }
-//
-//    public static void startLinkedInProcess()
-//    {
-//        linkedinStart="Yes";
-//        Log.e("In startLinkedInProcess","Yes");
-//        LISessionManager.getInstance(cont).init((Activity)cont, buildScope(), new AuthListener()
-//        {
-//            @Override
-//            public void onAuthSuccess()
-//            {
-//                Token = LISessionManager.getInstance(cont).getSession().getAccessToken().getValue().toString();
-//                Log.e("LI Token",Token+"");
-//                //  GenerikFunctions.showToast(cont,"success   Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
-//            }
-//
-//            @Override
-//            public void onAuthError(LIAuthError error)
-//            {
-//                Log.e("LI Login Error",error.toString()+"");
-//                GenerikFunctions.showToast(cont, "failed  linked in " + error.toString());
-//                if(error.toString().trim().contains("USER_CANCELLED"))
-//                {
-//                    GenerikFunctions.showToast(cont, "Please accept permissions " );
-//                    linkedinStart="Yes";
-//                    startLinkedInProcess();
-//                }
-//                else //if(error.toString().trim().contains("UNKNOWN_ERROR"))
-//                {
-//                    Log.e("Inside Else","Yes");
-//                    //GenerikFunctions.showToast(cont, "failed  linked in login " + error.toString());
-//                }
-//            }
-//        }, true)
-//        ;
-//    }
 
     //Callback function for Android M Permission
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
@@ -1260,7 +1267,7 @@ public class Welcome extends Activity
 
                 Log.e("If permission is not granted",", request for permission");
 
-                Toast.makeText(cont, "Without this permission the app will be unable to receive Push Notifications.",Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Without this permission the app will be unable to receive Push Notifications.",Toast.LENGTH_LONG).show();
 
             }
             else

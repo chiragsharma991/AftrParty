@@ -15,13 +15,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.DeleteItemRequest;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.ActivePartyClass;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.R;
@@ -30,15 +26,9 @@ import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.github.siyamed.shapeimageview.CircularImageView;
-import com.squareup.picasso.Picasso;
 
-import java.security.Key;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
@@ -160,23 +150,29 @@ public class PartyDetails extends Activity
         }
 
 
-        Long currentTime = System.currentTimeMillis();
-
+        final Long currentTime = System.currentTimeMillis();
+        final String partyStartTime = party.getStartTime();
 
 
         if(PartyStatus.equals("Created"))
         {
             //Logged user is Host
             btnRequestant.setText("Requestant");
-            btnReqCancel.setText("Cancel Party");//Host cancel
-            //btnReqCancel.setVisibility(View.VISIBLE);
+
+            //if(currentTime < Long.parseLong(partyStartTime)){
+                btnReqCancel.setText("Cancel Party");//Host cancel
+                btnReqCancel.setVisibility(View.VISIBLE);
+            //}
+
         }
         if(PartyStatus.equals("Approved"))
         {
             //Logged user is GateCrasher
             btnRequestant.setText("Host");
-            btnReqCancel.setText("Cancel Request");// GC Cancel
-            //btnReqCancel.setVisibility(View.VISIBLE);
+            //if(currentTime < Long.parseLong(partyStartTime)) {
+                btnReqCancel.setText("Cancel Request");// GC Cancel
+                btnReqCancel.setVisibility(View.VISIBLE);
+            //}
         }
         if(PartyStatus.equals("Cancelled")) {
             //Logged user is GC but status is Cancelled
@@ -190,13 +186,14 @@ public class PartyDetails extends Activity
             {
                 btnRequestant.setText("Host");
             }
+            btnReqCancel.setVisibility(View.GONE);
         }
 
         if(PartyStatus.equals("Pending") || PartyStatus.equals("Declined"))
         {
-            //Logged user is GC but status is Cancelled, Pending, Declined
+            //Logged user is GC but status is Pending, Declined
             btnRequestant.setText("Host");
-            //btnReqCancel.setVisibility(View.GONE);
+            btnReqCancel.setVisibility(View.GONE);
         }
 
 
@@ -216,7 +213,7 @@ public class PartyDetails extends Activity
 
                         //open details of requestant
                         Log.e("----- ", " " + PartyID);
-                        Intent i = new Intent(cont, RequestantCardsActivity.class);
+                        Intent i = new Intent(cont, RequestantActivity.class);
                         PartyParceableData party1 = new PartyParceableData();
                         party1.setPartyId(PartyID);
                         party1.setPartyName(PartyName);
@@ -236,7 +233,7 @@ public class PartyDetails extends Activity
                     try
                     {
                         UserTable host = m_config.mapper.load(UserTable.class,party.getHostFBID());
-                        Intent i = new Intent(cont,HostDetailsCardsActivity.class);
+                        Intent i = new Intent(cont,HostProfileActivity.class);
                         i.putExtra("FBID",host.getFacebookID());
                         i.putExtra("LIID",host.getLinkedInID());
                         i.putExtra("QBID",host.getQuickBloxID());
@@ -261,17 +258,33 @@ public class PartyDetails extends Activity
 
                 if (btnReqCancel.getText().toString().equals("Cancel Request"))
                 {
-                    //call for GC Cancel Request
-                    //check for Paid/Unpaid user
-                    String GCID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
-                    new AWSPartyOperations.updateGCinPartyTable(GCID, PartyID, "Cancelled", cont, btnReqCancel).execute();
+                    //GC cancel party request button click
 
+                    if(currentTime < Long.parseLong(partyStartTime)) {
+                        GenerikFunctions.sDialog(cont, "Cancelling Request...");
+                        String GCID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+                        new AWSPartyOperations.updateGCinPartyTable(GCID, PartyID, "Cancelled", cont, btnReqCancel).execute();
+                    }
+                    else
+                    {
+                        GenerikFunctions.showToast(cont, "Cannot cancel party");
+                    }
 
                 }
                 else if (btnReqCancel.getText().toString().equals("Cancel Party"))
                 {
-                    //call for Host cancel Party
-                    new HostCancelParty(cont, PartyID, btnReqCancel);
+                    // Host Cancel Party Button click
+
+                    if(currentTime < Long.parseLong(partyStartTime))
+                    {
+                        //call for Host cancel Party
+                        GenerikFunctions.sDialog(cont, "Cancelling Party...");
+                        new HostCancelPartyAPI(cont, PartyID, btnReqCancel);
+                    }
+                    else
+                    {
+                        GenerikFunctions.showToast(cont, "Cannot cancel party");
+                    }
 
                 }
             }

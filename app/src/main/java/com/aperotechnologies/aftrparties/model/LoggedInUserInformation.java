@@ -3,6 +3,8 @@ package com.aperotechnologies.aftrparties.model;
 /**
  * Created by mpatil on 16/05/16.
  */
+
+//Class to refere locally store user information
 public class LoggedInUserInformation
 {
     String    FB_USER_ID= "N/A";

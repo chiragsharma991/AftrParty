@@ -36,7 +36,7 @@ public class QBChatDialogCreation {
 
 
 
-    public static void createPrivateChat(Integer occupantId, final Context cont){
+    public static void createPrivateChat(final Integer occupantId, final Context cont){
 
         final QBPrivateChatManager privateChatManager = QBChatService.getInstance().getPrivateChatManager();
 
@@ -45,6 +45,7 @@ public class QBChatDialogCreation {
             public void onSuccess(final QBDialog dialogs, Bundle args) {
                 Log.e("onSuccess", " " + "privateChat"+ dialogs.getOccupants());
 
+                QBPushNotifications.sendPeerChatNotification(cont, occupantId);
 
                 List<Integer> usersIDs = new ArrayList<Integer>();
                 for(Integer dialog : dialogs.getOccupants()){
@@ -128,7 +129,6 @@ public class QBChatDialogCreation {
             {
                 Log.e("onSuccess", " ");
 
-                GenerikFunctions.showToast(cont, "Request has been approved");
                 AWSPartyOperations.updateDialogId(cont, dialog.getDialogId(), GCFBID, GCQBID, PartyID, PartyName);
                 //SetLocalNotifications.setLNotificationPartyRetention(cont, PartyName, PartyID , dialog.getDialogId(), PartyEndTime);
 

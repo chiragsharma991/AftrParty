@@ -16,8 +16,6 @@ public class PartiesClass {
     private String endtime;
 
 
-
-
     public String getPartyid() { return partyid; }
     public void setPartyid(String partyid) { this.partyid = partyid; }
 

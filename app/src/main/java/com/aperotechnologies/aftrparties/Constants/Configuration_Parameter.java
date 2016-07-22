@@ -24,8 +24,6 @@ public class Configuration_Parameter
     //Harshada
 
     public QBChatService chatService;
-    public QBGroupChatManager groupChatManager;
-    public QBPrivateChatManager privateChatManager;
     public Collection<Integer> onlineUsers;
     public NotificationManager notificationManager;
 
@@ -53,6 +51,7 @@ public class Configuration_Parameter
     public String Distance = "3";
     public String GenderPreference = "N/A";
     public String PrimaryUrl;
+    public Boolean flag = false;
 
 
     //Harshada

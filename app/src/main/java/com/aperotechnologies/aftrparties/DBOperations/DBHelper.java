@@ -18,7 +18,7 @@ public class DBHelper extends SQLiteOpenHelper
     private static final int DATABASE_VERSION = 1;
 
     // private SQLiteDatabase sqLiteDatabase;
-    private static final String DATABASE_NAME = "LineList.db";
+    private static final String DATABASE_NAME = "Aftrparties.db";
 
     private static DBHelper mInstance = null;
 

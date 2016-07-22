@@ -34,7 +34,6 @@ public class UserTable {
     private String ProfileStatus;
     private String DeviceToken;
     private List<PartiesClass> parties;
-    private List Images;
     private String Registrationstatus;
     private List<PaidGCClass> paidgc;
     private List<ActivePartyClass> activeparty;

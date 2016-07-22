@@ -52,17 +52,24 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 
+import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.GateCrasher.GCParceableData;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherActivity;
+import com.aperotechnologies.aftrparties.Login.Welcome;
+import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.facebook.login.LoginManager;
 import com.github.siyamed.shapeimageview.CircularImageView;
+import com.linkedin.platform.LISessionManager;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.exception.QBResponseException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -93,6 +100,8 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     TextView edtEndDate;
     EditText edt_PartyName, edt_Description;
     CheckBox cb_byobYes, cb_byobNo;
+    CheckBox cb_mask, cb_unmask;
+
     CheckBox cb_getLocation, cb_EnterAddress;
     EditText edt_address, edt_street,edt_city, edt_pincode;
     public String[] states = new String[]{"Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh",
@@ -179,6 +188,10 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         // for BYOB
         cb_byobYes = (CheckBox) findViewById(R.id.byobyes);
         cb_byobNo = (CheckBox) findViewById(R.id.byobno);
+
+        // for mask/unmask
+        cb_mask = (CheckBox) findViewById(R.id.mask);
+        cb_unmask = (CheckBox) findViewById(R.id.unmask);
 
         //For Location
         cb_getLocation = (CheckBox) findViewById(R.id.cbgetLocation);
@@ -384,6 +397,60 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
             public void onClick(View v) {
                 cb_byobNo.setChecked(true);
                 cb_byobYes.setChecked(false);
+                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(inputManager != null){
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+            }
+        });
+
+
+
+        cb_mask.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cb_mask.setChecked(true);
+                cb_unmask.setChecked(false);
+                InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                if(inputManager != null){
+                    inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                }
+
+            }
+        });
+
+
+        cb_unmask.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(HostActivity.this);
+                alertDialogBuilder
+                        .setTitle("Pay for Unmasking Party.")
+                        .setMessage("Are you sure you want to pay for Party?")
+                        .setCancelable(false)
+                        .setNegativeButton("No", new DialogInterface.OnClickListener()
+                        {
+                            public void onClick(DialogInterface dialog, int id)
+                            {
+                                cb_unmask.setChecked(false);
+                                cb_mask.setChecked(true);
+                            }
+                        })
+                        .setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener()
+                                {
+                                    public void onClick(DialogInterface dialog, int id)
+                                    {
+                                        cb_unmask.setChecked(true);
+                                        cb_mask.setChecked(false);
+                                        cb_unmask.setEnabled(false);
+                                        cb_mask.setEnabled(false);
+
+                                    }
+                                });
+                alertDialogBuilder.show();
+
+
                 InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if(inputManager != null){
                     inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
@@ -706,7 +773,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                     String city  = edt_city.getText().toString().trim();
                     String state = edt_state.getText().toString().trim();
                     String pin = edt_pincode.getText().toString().trim();
-                    String newAddress = Address +", " + street +", " + city+ ", " + state + ", " + pin;
+                    final String newAddress = Address +", " + street +", " + city+ ", " + state + ", " + pin;
                     Log.i("Entered Address ", newAddress);
 
                     if(cb_EnterAddress.isChecked())
@@ -715,9 +782,45 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                     }
                     else if(cb_getLocation.isChecked()) {
 
-                        String latitude = String.valueOf(currentlocation.getLatitude());
-                        String longitude = String.valueOf(currentlocation.getLongitude());
-                        new AWSPartyOperations.createParty(cont, initialiseParty(cont, latitude, longitude, newAddress)).execute();
+                        final String latitude = String.valueOf(currentlocation.getLatitude());
+                        final String longitude = String.valueOf(currentlocation.getLongitude());
+
+
+                        Log.e("ChatService.getInstance().getCurrentUser()", " " + ChatService.getInstance().getCurrentUser());
+                        if (ChatService.getInstance().getCurrentUser() == null)
+                        {
+                            String accessToken = LoginValidations.getFBAccessToken().getToken();
+
+                            QBSessionClass.getInstance().getQBSession(new QBEntityCallback()
+                            {
+
+                                @Override
+                                public void onSuccess(Object o, Bundle bundle) {
+                                    Handler h = new Handler(cont.getMainLooper());
+                                    h.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            new AWSPartyOperations.createParty(cont, initialiseParty(cont, latitude, longitude, newAddress)).execute();
+                                        }
+                                    });
+                                }
+
+                                @Override
+                                public void onError(QBResponseException e) {
+
+                                    GenerikFunctions.hDialog();
+                                    GenerikFunctions.showToast(cont, "Party creation failed, Please try again after some time");
+                                }
+
+                            }, accessToken, null, cont);
+
+
+                        }
+                        else
+                        {
+                            new AWSPartyOperations.createParty(cont, initialiseParty(cont, latitude, longitude, newAddress)).execute();
+                        }
 
                     }
 
@@ -883,20 +986,26 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     public long getTimeinMs(int mDay, int mMonth, int mYear, int hour, int minute){
 
 
-
         Log.e("----"," "+mDay+"--- "+mMonth+"--"+mYear+"---"+hour+"----"+minute);
 
         Calendar calendar = Calendar.getInstance();
-        calendar.set(mYear, mMonth, mDay,
-                hour, minute, 00);
+//        calendar.set(mYear, mMonth, mDay,
+//                hour, minute, 00);
 
-        Log.e("getTime "+calendar.getTime(),"");
+        calendar.set(Calendar.DAY_OF_MONTH, mDay);
+        calendar.set(Calendar.MONTH, mMonth);
+        calendar.set(Calendar.YEAR, mYear);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minute);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
         long TimeinMs = calendar.getTimeInMillis();
+        Log.e("getTime "+TimeinMs,"");
         return TimeinMs;
 
 
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        //sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 //
 //        String inputString = hour +":"+minute+":00";
 //        String date = mYear+"-"+mMonth+"-"+mDay;
@@ -907,6 +1016,8 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 //        } catch (ParseException e) {
 //            e.printStackTrace();
 //        }
+//
+//        Log.e("getTime "," "+d.getTime());
 //        return d.getTime();
 
     }
@@ -915,7 +1026,6 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     private boolean compareWithCurrentTime(int startHour, int startMin) {
         Boolean value = false;
         Log.e("startHour"+startHour+"     "+startMin,"");
-
 
         int currHour, currMin;
         Calendar calendar = Validations.getCalendar();
@@ -1259,7 +1369,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         @Override
         public void handleMessage(Message message)
         {
-            String locationAddress;
+            final String locationAddress;
             switch (message.what)
             {
                 case 1:
@@ -1321,11 +1431,46 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                 String city  = edt_city.getText().toString().trim();
                 String state = edt_state.getText().toString().trim();
                 String pin = edt_pincode.getText().toString().trim();
-                String fullAddress = Address +", " + street +", " + city+ ", " + state + ", " + pin;
+                final String fullAddress = Address +", " + street +", " + city+ ", " + state + ", " + pin;
 
                 Log.e("Store Party to AWS","Yes");
                 Toast.makeText(HostActivity.this,"Store Party to AWS",Toast.LENGTH_LONG);
-                new AWSPartyOperations.createParty(cont, initialiseParty(cont, locationAddress.split(" ")[0],locationAddress.split(" ")[1], fullAddress)).execute();
+                Log.e("ChatService.getInstance().getCurrentUser()", " " + ChatService.getInstance().getCurrentUser());
+                if (ChatService.getInstance().getCurrentUser() == null)
+                {
+                    String accessToken = LoginValidations.getFBAccessToken().getToken();
+
+                    QBSessionClass.getInstance().getQBSession(new QBEntityCallback()
+                    {
+
+                        @Override
+                        public void onSuccess(Object o, Bundle bundle) {
+                            Handler h = new Handler(cont.getMainLooper());
+                            h.post(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    new AWSPartyOperations.createParty(cont, initialiseParty(cont, locationAddress.split(" ")[0],locationAddress.split(" ")[1], fullAddress)).execute();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(QBResponseException e) {
+
+                            GenerikFunctions.hDialog();
+                            GenerikFunctions.showToast(cont, "Party creation failed, Please try again after some time");
+                        }
+
+                    }, accessToken, null, cont);
+
+
+                }
+                else
+                {
+                    new AWSPartyOperations.createParty(cont, initialiseParty(cont, locationAddress.split(" ")[0],locationAddress.split(" ")[1], fullAddress)).execute();
+                }
+
             }
 
         }

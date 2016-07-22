@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
@@ -26,6 +27,7 @@ import com.aperotechnologies.aftrparties.Host.HostActivity;
 import com.aperotechnologies.aftrparties.Login.OTPActivity;
 import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.cloudinary.Cloudinary;
@@ -59,10 +61,6 @@ public class SplashActivity extends Activity {
     String LIToken;
     public static  ProgressDialog pd = null;
 
-//    static final String APP_ID = "40454";//"34621";
-//    static final String AUTH_KEY = "GXzMGfcx-pAQOBP";//"sYpuKrOrGT4pG6d";//"q6aK9sm6GCSmtru";
-//    static final String AUTH_SECRET = "TZC8fTnAUDXSuYs";//"hVx9RNMT4emBK5K";//"uTOm5-R4zYyR-DV";
-//    static final String ACCOUNT_KEY = "VLBr2asUuw9uHDFC7qgb";//"VLBr2asUuw9uHDFC7qgb";//"bzbtQDLez742xU468TXt";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,21 +78,6 @@ public class SplashActivity extends Activity {
         pd.setCancelable(false);
         RegistrationActivity.reg_pd = null;
         Welcome.wl_pd = null;
-
-
-//        // Initialize the Amazon Cognito credentials provider
-//        final CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
-//                getApplicationContext(),
-//                "us-east-1:bd2ea8c9-5aa9-4e32-b8e5-20235fc7f4ac", // Identity Pool ID
-//                Regions.US_EAST_1 // Region
-//        );
-//
-//        m_config.ddbClient = new AmazonDynamoDBClient(credentialsProvider);
-//        m_config.mapper = new DynamoDBMapper(m_config.ddbClient);//
-//
-//        QBSettings.getInstance().init(getApplicationContext(), APP_ID, AUTH_KEY, AUTH_SECRET);
-//        QBSettings.getInstance().setAccountKey(ACCOUNT_KEY);
-
         Thread timer = new Thread()
         {
             public void run()
@@ -109,9 +92,7 @@ public class SplashActivity extends Activity {
                 }
                 finally
                 {
-//                    Intent intent = new Intent(cont,OTPActivity.class);
-//                    cont.startActivity(intent);
-
+                    //Print all flags from local storage
                     Log.e("All Flags ","FB : " + sharedpreferences.getString(m_config.FBLoginDone,"No")
                     + "    LI : " + sharedpreferences.getString(m_config.LILoginDone,"No")
                     + "    BasicVal : " + sharedpreferences.getString(m_config.BasicFBLIValidationsDone,"No") +
@@ -119,7 +100,7 @@ public class SplashActivity extends Activity {
                             "    OTP :   " + sharedpreferences.getString(m_config.OTPValidationDone,"No") +
                             "    FinalStepDone :   " + sharedpreferences.getString(m_config.FinalStepDone,"No"));
 
-
+                    //If all validations are donr then start Home Page
                     if(sharedpreferences.getString(m_config.FinalStepDone,"No").equals("Yes"))
                     {
                         Log.e("Inside if","yes");
@@ -136,20 +117,26 @@ public class SplashActivity extends Activity {
                             }
                         });
 
+
+                        //Condition to check LI session existance check
                         if(LISessionManager.getInstance(cont).getSession().getAccessToken() == null)
                         {
                             startLinkedInProcess();
                         }
 
 
-                        LoginValidations.QBStartSession(cont);
-
-
+                        //Start QB Session
+                        Intent i = new Intent(cont, HomePageActivity.class);
+                        cont.startActivity(i);
+                        //LoginValidations.QBStartSession(cont);
+                        //new AWSPartyOperations.RemovePendingPartiesAPI(cont, "155325838204047_1468823718211","137075106698189").execute();
                     }
                     else
                     {
+                        //Else go forLogin Page
                         Log.e("Inside else","yes");
                         Intent intent = new Intent(cont,Welcome.class);
+                        intent.putExtra("from","splash");
                         cont.startActivity(intent);
                     }
                 }
@@ -166,13 +153,13 @@ public class SplashActivity extends Activity {
 
     }
 
-
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         super.onPause();
-
     }
 
+    //Callback for Linked in session initialization
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -185,7 +172,7 @@ public class SplashActivity extends Activity {
             Log.e("LI TOken Null","Yes");
         }
     }
-
+    //Permissions from linked login
     private static Scope buildScope()
     {
         return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
@@ -216,7 +203,7 @@ public class SplashActivity extends Activity {
                 else //if(error.toString().trim().contains("UNKNOWN_ERROR"))
                 {
                     Log.e("Inside Else","Yes");
-                    //GenerikFunctions.showToast(cont, "failed  linked in login " + error.toString());
+                    Toast.makeText(cont,"Linked In Login Failed",Toast.LENGTH_LONG).show();
                 }
             }
         }, true);

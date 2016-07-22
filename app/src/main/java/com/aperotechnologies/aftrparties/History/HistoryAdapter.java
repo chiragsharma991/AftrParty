@@ -119,7 +119,7 @@ public class HistoryAdapter extends BaseAdapter {
 //                Log.e("PartyName"," "+ finalParties.getPartyName());
 //                Log.e("Status"," "+ finalParties.getPartyStatus());
 
-                if(finalParties.getPartystatus().equals("Created")){
+                if(finalParties.getPartystatus().equals("Created") || finalParties.getPartystatus().equals("Approved")){
                     Intent i = new Intent(cont,PartyDetails.class);
                     PartyParceableData party = new PartyParceableData();
                     party.setPartyId(finalParties.getPartyid());
@@ -133,17 +133,7 @@ public class HistoryAdapter extends BaseAdapter {
                     cont.startActivity(i);
 
                 }else{
-                    Intent i = new Intent(cont,PartyDetails.class);
-                    PartyParceableData party = new PartyParceableData();
-                    party.setPartyId(finalParties.getPartyid());
-                    party.setPartyName(finalParties.getPartyname());
-                    party.setStartTime(finalParties.getStarttime());
-                    party.setEndTime(finalParties.getEndtime());
-                    party.setPartyStatus(finalParties.getPartystatus());
-                    Bundle mBundles = new Bundle();
-                    mBundles.putSerializable(ConstsCore.SER_KEY, party);
-                    i.putExtras(mBundles);
-                    cont.startActivity(i);
+
                 }
 
 

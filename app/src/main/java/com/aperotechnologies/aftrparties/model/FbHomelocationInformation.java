@@ -5,6 +5,7 @@ import java.util.Random;
 /**
  * Created by mpatil on 13/05/16.
  */
+//Class to parse FB Home Location information
 public class FbHomelocationInformation
 {
     String id = "N/A";

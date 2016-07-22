@@ -35,7 +35,7 @@ import static com.aperotechnologies.aftrparties.Reusables.Validations.getOutputM
 /**
  * Created by mpatil on 05/07/16.
  */
-
+//
 public class RecyclerViewAdapter extends RecyclerView.Adapter<SettingsRecyclerViewHolder>
 {// Recyclerview will extend to
     // recyclerview adapter
@@ -43,16 +43,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<SettingsRecyclerVi
     private Context context;
     ImageView img;
     Configuration_Parameter m_config;
-ImageView primary;
     public RecyclerViewAdapter(Context context, ArrayList<String> arrayList,ImageView primaryImage)
     {
-        Log.e("Inside recycler adapter","Yes  "+arrayList.size()+"");
+      //  Log.e("Inside recycler adapter","Yes  "+arrayList.size()+"");
         this.context = context;
         this.arrayList = arrayList;
         img = primaryImage;
         m_config = Configuration_Parameter.getInstance();
-        Activity act = (Activity)context;
-        primary = (ImageView)act.findViewById(R.id.userimage);
     }
 
     @Override
@@ -61,31 +58,26 @@ ImageView primary;
         return (null != arrayList ? arrayList.size() : 0);
     }
 
-
-
     @Override
     public void onBindViewHolder(SettingsRecyclerViewHolder holder, final int position)
     {
         final String model = arrayList.get(position);
 
-        SettingsRecyclerViewHolder mainHolder = (SettingsRecyclerViewHolder) holder;// holder
+        SettingsRecyclerViewHolder mainHolder = (SettingsRecyclerViewHolder) holder;
 
-        // setting image
-
+        // settings images in recycler view
         Picasso.with(context).load(model).fit().centerCrop()
                 .placeholder(R.drawable.placeholder_user)
                 .error(R.drawable.placeholder_user)
                 .into(mainHolder.imageview);
-
 
         mainHolder.imageview.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-              //  Toast.makeText(context,"Image at position "+position+" clicked",Toast.LENGTH_LONG).show();
 
-
+            //Users choice to make image preimary or remove it from list
                 AlertDialog.Builder builderSingle = new AlertDialog.Builder(context);
                 final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
                         context, android.R.layout.select_dialog_item);
@@ -110,6 +102,7 @@ ImageView primary;
                             {
                                 if(which==0)
                                 {
+                                    //Make image primary by setting it in the top imageview of settings
                                     m_config.PrimaryUrl = arrayList.get(position);
                                     Picasso.with(context).load(arrayList.get(position)).fit().centerCrop()
                                             .placeholder(R.drawable.placeholder_user)
@@ -122,13 +115,14 @@ ImageView primary;
                                     //Delete Image
                                     Log.e("Initialsizes ","aa   " +SettingsActivity.validPics.size() +"   " +arrayList.size());
 
-
+                                    //if only one image is there in the listview then dont allow deletion
                                     if(arrayList.size()==1)
                                     {
                                         Toast.makeText(context,"Deletion is not allowed on single image",Toast.LENGTH_LONG).show();
                                     }
                                     else
                                     {
+                                        //If image is on the cloudinerty then delete it from there
                                         if(arrayList.get(position).contains("cloudinary"))
                                         {
                                             Log.e("Image Element",arrayList.get(position));
@@ -147,6 +141,7 @@ ImageView primary;
                                         if(img.getTag().equals(position+""))
                                         {
                                             Log.e("Equals both","Yes");
+                                            //Check for the last image in arraylist. Ifso then make 0th image as primary in arraylist
                                             if((position+1) == arrayList.size())
                                             {
                                                 Log.e("Inside if", "yess 11");
@@ -159,6 +154,7 @@ ImageView primary;
                                             }
                                             else
                                             {
+                                                //Not first image, make next image as primary
                                                 Log.e("Inside else", "yess 11");
                                                 Log.e("arrayList.get(position+1) " + (position+1),arrayList.get(position+1)+"");
                                                 Picasso.with(context).load(arrayList.get(position+1)).fit().centerCrop()
@@ -171,10 +167,6 @@ ImageView primary;
                                         }
                                         Log.e("Position to be removed is ","aa   "+position);
                                         arrayList.remove(position);
-
-
-
-
 
                                         Log.e("Validpics.size","aa   " +SettingsActivity.validPics.size() +"   " +arrayList.size());
                                         Log.e("New Arraylist size",arrayList.size()+"");
@@ -200,4 +192,6 @@ ImageView primary;
         return listHolder;
 
     }
+
+
 }

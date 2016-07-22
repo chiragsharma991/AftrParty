@@ -3,6 +3,8 @@ package com.aperotechnologies.aftrparties.Login;
 /**
  * Created by mpatil on 13/05/16.
  */
+
+//SQLIte Tables and DB columns initialization
 public class LoginTableColumns
 {
 
