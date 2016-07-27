@@ -27,14 +27,10 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
-import com.aperotechnologies.aftrparties.InAppPurchase.InAppBillingActivity;
-import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.QBSessionClass;
-import com.aperotechnologies.aftrparties.QBSessionRestart;
-import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
@@ -54,11 +50,8 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.linkedin.platform.LISessionManager;
-import com.quickblox.auth.QBAuth;
-import com.quickblox.chat.QBChatService;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
-import com.quickblox.core.server.BaseService;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -91,11 +84,6 @@ public class HomePageActivity extends Activity
     FaceOverlayView faceOverlayView;
     public static ProgressDialog hp_pd = null;
 
-    /****/
-    IabHelper mHelper;
-
-    static final String ITEM_SKU = "ap_unmasking";//android.test.purchased ";
-/*****/
 
     public void onCreate(Bundle savedInstanceState)
     {
@@ -144,23 +132,7 @@ public class HomePageActivity extends Activity
         }
         Welcome.wl_pd = null;
 
-/****/
-        String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqiS7HW5sBPoBBxCNFf1OGtRMPVzuzqhQOq6T1ZBuO6PMHzpAaiVzVZfccoUmc0Lj/Wyu4lpaK9H+aQy3oEKS9EbyQQ6GVKFLFOCFo8w8TP/Z5U14oiTvmpnLDLxhCeKRbMow+Z04hhgbnezHsikIPkULezF6psxrZ6kvzlT23pg91Yn2y/kgiLJMnxpj2G1RUfVaFlVXA/SM23yWYkK1qeTxeoZ5l36TfPjazWN8TXHmQvPX9SVTWg0tnTtxDVNfNvRMUsLd9t75JGhRimqhhgEGleQtiMZYasnmGyvWa3QGSN5CjtzW6aNocC4Cw3DcnIzM/tcriK6M75PpRMXVpwIDAQAB";
 
-
-    mHelper = new IabHelper(HomePageActivity.this, base64EncodedPublicKey);
-
-        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
-            public void onIabSetupFinished(IabResult result) {
-                if (!result.isSuccess()) {
-                    Log.e("HomePageActivity", "In-app Billing setup failed: " +
-                            result);
-                } else {
-                    Log.e("HomePageActivity", "In-app Billing is set up OK");
-                }
-            }
-        });
-/****/
 
 
 //        imguser = (CircularImageView) findViewById(R.id.userimage);
@@ -262,20 +234,8 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-//                Intent i = new Intent(HomePageActivity.this, TipsActivity.class);
-//                startActivity(i);
-
-
-                try {
-
-                    ///10001 - is requestCode
-                    mHelper.launchPurchaseFlow(HomePageActivity.this, ITEM_SKU, 10001,
-                            mPurchaseFinishedListener, "mypurchasetoken");
-
-                } catch (IabHelper.IabAsyncInProgressException e) {
-                    e.printStackTrace();
-                }
-
+                Intent i = new Intent(HomePageActivity.this, TipsActivity.class);
+                startActivity(i);
 
             }
         });
@@ -425,8 +385,8 @@ public class HomePageActivity extends Activity
         //Harshada
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(HomePageActivity.this);
         alertDialogBuilder
-                .setTitle("Exit")
-                .setMessage("Are you sure you want to exit?")
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
                 .setCancelable(false)
                 .setNegativeButton("No", null)
                 .setPositiveButton("Yes",
@@ -441,18 +401,6 @@ public class HomePageActivity extends Activity
                         });
         alertDialogBuilder.show();
     }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mHelper != null) try {
-            mHelper.dispose();
-        } catch (IabHelper.IabAsyncInProgressException e) {
-            e.printStackTrace();
-        }
-        mHelper = null;
-    }
-
 
 
     @Override
@@ -709,109 +657,7 @@ public class HomePageActivity extends Activity
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode,
-                                    Intent data)
-    {
-
-        Log.e("inside onActivityResult"," "+!mHelper.handleActivityResult(requestCode,
-                resultCode, data));
-
-        if (!mHelper.handleActivityResult(requestCode,
-                resultCode, data)) {
-
-            Log.e("inside mHelper.handleActivityResult"," ");
-
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
-    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
-            = new IabHelper.OnIabPurchaseFinishedListener() {
-        public void onIabPurchaseFinished(IabResult result,
-                                          Purchase purchase)
-        {
-//            // if we were disposed of in the meantime, quit.
-//            if (mHelper == null) return;
-//
-//
-            if (result.isFailure()) {
-                // Handle error
-                Log.e("Error purchasing:"," ---- " + result+" ");
-                Toast.makeText(getApplicationContext(),""+result, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            else if (purchase.getSku().equals(ITEM_SKU)) {
 
 
-                Log.e("Purchase Success"," "+purchase.getToken());
-
-                Toast.makeText(getApplicationContext(),"Purchase success", Toast.LENGTH_SHORT).show();
-                consumeItem();
-                //buyButton.setEnabled(false);
-            }
-
-        }
-    };
-
-
-    public void consumeItem() {
-        try {
-            mHelper.queryInventoryAsync(mReceivedInventoryListener);
-            Log.e("consumeItem ","try");
-            Toast.makeText(getApplicationContext(),"consumeitem try", Toast.LENGTH_SHORT).show();
-        } catch (IabHelper.IabAsyncInProgressException e) {
-            Log.e("consumeItem ","catch");
-            Toast.makeText(getApplicationContext(),"consumeitem catch", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
-            = new IabHelper.QueryInventoryFinishedListener() {
-        @Override
-        public void onQueryInventoryFinished(IabResult result, Inventory inv) {
-            if (result.isFailure()) {
-                // Handle failure
-                Log.e("QueryInventory ","failed");
-                Toast.makeText(getApplicationContext(),"QueryInventory failed", Toast.LENGTH_SHORT).show();
-            } else {
-                try {
-                    Log.e("QueryInventory ","consumeAsync");
-                    mHelper.consumeAsync(inv.getPurchase(ITEM_SKU),
-                            mConsumeFinishedListener);
-
-                    Toast.makeText(getApplicationContext(),"QueryInventory  consumeAsync", Toast.LENGTH_SHORT).show();
-
-                } catch (IabHelper.IabAsyncInProgressException e) {
-                    Log.e("QueryInventory ","catch");
-                    Toast.makeText(getApplicationContext(),"QueryInventory  catch", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                }
-            }
-        }
-
-
-    };
-
-
-    IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
-            new IabHelper.OnConsumeFinishedListener() {
-                public void onConsumeFinished(Purchase purchase,
-                                              IabResult result) {
-                    // if we were disposed of in the meantime, quit.
-                    if (mHelper == null) return;
-
-                    if (result.isSuccess()) {
-                        //clickButton.setEnabled(true);
-                        Log.e("--- "," "+"consume success");
-                        Toast.makeText(getApplicationContext(),"consume success", Toast.LENGTH_SHORT).show();
-                    } else {
-                        // handle error
-                        Log.e("--- "," "+"consume failed");
-                        Toast.makeText(getApplicationContext(),"consume failed", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            };
 
 }

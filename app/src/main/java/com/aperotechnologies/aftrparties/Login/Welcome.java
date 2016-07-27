@@ -154,11 +154,11 @@ public class Welcome extends Activity
         permissions = new ArrayList<>();
         permissions.add("public_profile");
         permissions.add("email");
-        permissions.add("user_location");
-        permissions.add("user_birthday");
+        //permissions.add("user_location");
+        //permissions.add("user_birthday");
         permissions.add("user_friends");
-        permissions.add("user_hometown");
-        permissions.add("user_photos");
+        //permissions.add("user_hometown");
+        //permissions.add("user_photos");
 
 
 //         Log.e("Shrd Pref in Welcome",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
@@ -243,8 +243,15 @@ public class Welcome extends Activity
                             wl_pd.setMessage("Loading Data...");
                             wl_pd.setCancelable(false);
                             wl_pd.show();
+
+
+
                             LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
                             Log.e("Info in storage",loggedInUserInformation.getFB_USER_ID() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
+
+                            fbUserInformation = new FbUserInformation();
+                            fbUserInformation.setFbId(loggedInUserInformation.getFB_USER_ID() );
+                            fbUserInformation.setEmail(loggedInUserInformation.getFB_USER_EMAIL());
 
                             new checkFBUserInfo(loggedInUserInformation).execute();
                         }
@@ -302,8 +309,9 @@ public class Welcome extends Activity
                         try
                         {
                             JSONObject jsonObject = result.getResponseDataAsJson();
+                            Log.e("jsonresponse", "aa=====  " + result.toString() + " ");
                             setLIUserProfile(jsonObject.toString());
-                            Log.e("jsonresponse", "aa  " + result.toString() + " ");
+
                         }
                         catch (Exception e)
                         {
@@ -369,8 +377,10 @@ public class Welcome extends Activity
                // Log.e("LI Pic Info ", liPictureData.get_total() + "     " + liPictureData.getvalues().size() +  "    " + liPictureData.getvalues().get(0));
             }
 
+
+            Log.e("LoginTableColumns.USERTABLE"," "+LoginTableColumns.FB_USER_ID+ "    "+fbUserInformation.getFbId().trim());
             String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
-                    FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
+                    LoginTableColumns.FB_USER_ID +" = '" + fbUserInformation.getFbId() + "'";
             Log.i("User Query  : ", Query);
             Cursor cursor = sqldb.rawQuery(Query, null);
            // Log.e("Cursor count",cursor.getCount()+"");
@@ -380,14 +390,6 @@ public class Welcome extends Activity
             }
             else
             {
-                //Log.e("Onside update else","Yes");
-                // Log.e("LI emailAddress", liUserInformation.getEmailAddress());
-                //  Log.e("LI numConnections", liUserInformation.getNumConnections());
-                //  Log.e("LI Id", liUserInformation.getId());
-
-                // Log.e("LI headline", liUserInformation.getHeadline());
-               // Log.e("LI firstName", liUserInformation.getFirstName());
-               // Log.e("LI lastName", liUserInformation.getLastName());
 
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                         + LoginTableColumns.LI_USER_ID  + " = '" + liUserInformation.getId() + "', "
@@ -402,27 +404,32 @@ public class Welcome extends Activity
                 Log.i("update User "+fbUserInformation.getFbId().trim(), Update);
                 sqldb.execSQL(Update);
 
-                loggedInUserInfo.setLI_USER_ID(liUserInformation.getId());
-                loggedInUserInfo.setLI_USER_FIRST_NAME(liUserInformation.getFirstName());
-                loggedInUserInfo.setLI_USER_LAST_NAME(liUserInformation.getLastName());
-                loggedInUserInfo.setLI_USER_EMAIL(liUserInformation.getEmailAddress());
-                loggedInUserInfo.setLI_USER_PROFILE_PIC(liPictureData.getvalues().get(0).toString());
-                loggedInUserInfo.setLI_USER_CONNECTIONS(liUserInformation.getNumConnections());
-                loggedInUserInfo.setLI_USER_HEADLINE(liUserInformation.getHeadline());
 
                 //AWS Storage of LI data
                 Log.e("Before LI AWS Storage","Yes");
-                LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
-                new AWSLoginOperations.addLIUserInfo(cont,loggedInUserInformation).execute();
+//                LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
+//                new AWSLoginOperations.addLIUserInfo(cont,loggedInUserInformation).execute();
+
+
+                SharedPreferences.Editor editor= sharedPreferences.edit();
+                editor.putString(m_config.LILoginDone,"Yes");
+                editor.apply();
+
+                String from = getIntent().getExtras().getString("from");
+                Log.e("from"," "+from);
+
 
                 Log.e("Shrd Pref aftr LILginDne",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                         sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "
                         + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
+
+                checkfromWhere(from);
             }
 
         }
         catch (Exception e)
         {
+            Log.e("setLIUserProfile catch", "");
             e.printStackTrace();
         }
     }
@@ -694,7 +701,7 @@ public class Welcome extends Activity
                         if(emptyFields.equals(""))
                         {
                             String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
-                                    FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
+                                    LoginTableColumns.FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
 //                            Log.i("User Query  : ", Query);
                             Cursor cursor = sqldb.rawQuery(Query, null);
 //                            Log.e("Cursir count",cursor.getCount()+"");
@@ -720,19 +727,19 @@ public class Welcome extends Activity
                                 Log.i("update User  "+ LoginTableColumns.FB_USER_ID , updateUser);
                                 sqldb.execSQL(updateUser);
 
-                                loggedInUserInfo =new LoggedInUserInformation();
-
-                                loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
-                                loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
-                                loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
-                                loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
-                                loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
-                                //  loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
-                                loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
-                                loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
-                                loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
-                                loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
-                                getFbFriendsCount();
+//                                loggedInUserInfo =new LoggedInUserInformation();
+//
+//                                loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
+//                                loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
+//                                loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
+//                                loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+//                                loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
+//                                //  loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
+//                                loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
+//                                loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
+//                                loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
+//                                loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
+                                  getFbFriendsCount();
                             }
                             cursor.close();
                         }
@@ -773,18 +780,18 @@ public class Welcome extends Activity
         Log.i("Inserted User ", fbUserInformation.getFbId().trim() + "   " +
                 fbHomelocationInformation.getLocationId() +"   aa   " + fbHomelocationInformation.getLocationName());
 
-        loggedInUserInfo =new LoggedInUserInformation();
-
-        loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
-        loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
-        loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
-        loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
-        loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
-        loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
-        loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
-        loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
-        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
-        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
+//        loggedInUserInfo =new LoggedInUserInformation();
+//
+//        loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
+//        loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
+//        loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
+//        loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+//        loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
+//        loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
+//        loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
+//        loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
+//        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
+//        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
 
         /******/
 
@@ -926,84 +933,7 @@ public class Welcome extends Activity
                 String from = getIntent().getExtras().getString("from");
                 Log.e("from"," "+from);
 
-                if(from.equals("registration") || from.equals("splash") || from.equals("homepage")){
-                    LoginValidations.QBStartSession(cont);
-
-                    if(wl_pd!=null)
-                    {
-                        if(wl_pd.isShowing())
-                        {
-                            wl_pd.dismiss();
-                        }
-                    }
-                }
-                else if(from.equals("requestsend"))
-                {
-                    String PartyId = getIntent().getExtras().getString("PartyId");
-                    String PartyName = getIntent().getExtras().getString("PartyName");
-                    String PartyStartTime = getIntent().getExtras().getString("PartyStartTime");
-                    String PartyEndTime = getIntent().getExtras().getString("PartyEndTime");
-                    String PartyStatus = getIntent().getExtras().getString("PartyStatus");
-                    String GCQBID = getIntent().getExtras().getString("GCQBID");
-                    String GCFBID = getIntent().getExtras().getString("GCFBID");
-                    String message = getIntent().getExtras().getString("message");
-
-                    Intent i = new Intent(Welcome.this, RequestantActivity.class);
-                    PartyParceableData party1 = new PartyParceableData();
-                    party1.setPartyId(PartyId);
-                    party1.setPartyName(PartyName);
-                    party1.setStartTime(PartyStartTime);
-                    party1.setEndTime(PartyEndTime);
-                    party1.setPartyStatus(PartyStatus);
-                    i.putExtra("from", "requestSend");
-                    i.putExtra("GCQBID",GCQBID);
-                    i.putExtra("GCFBID", GCFBID);
-                    i.putExtra("message", message);
-                    Bundle mBundles = new Bundle();
-                    startActivity(i);
-
-                    if(wl_pd!=null)
-                    {
-                        if(wl_pd.isShowing())
-                        {
-                            wl_pd.dismiss();
-                        }
-                    }
-
-                }
-                else if(from.equals("chatoffline"))
-                {
-                    Intent i = new Intent(Welcome.this, DialogsActivity.class);
-                    startActivity(i);
-
-                    if(wl_pd!=null)
-                    {
-                        if(wl_pd.isShowing())
-                        {
-                            wl_pd.dismiss();
-                        }
-                    }
-                }
-                else if(from.equals("requestApproved"))
-                {
-                    String GCFBID = getIntent().getExtras().getString("GCFBID");
-                    String message = getIntent().getExtras().getString("message");
-                    Intent i = new Intent(Welcome.this, HistoryActivity.class);
-                    i.putExtra("GCFBID", GCFBID);
-                    i.putExtra("from", "requestApproved");
-                    i.putExtra("message", message);
-                    startActivity(i);
-
-
-                    if(wl_pd!=null)
-                    {
-                        if(wl_pd.isShowing())
-                        {
-                            wl_pd.dismiss();
-                        }
-                    }
-                }
-
+                checkfromWhere(from);
 
             }
 
@@ -1096,7 +1026,12 @@ public class Welcome extends Activity
             }
             else
             {
-                LoginValidations.QBStartSession(cont);
+                //LoginValidations.QBStartSession(cont);
+
+                String from = getIntent().getExtras().getString("from");
+                Log.e("from"," "+from);
+
+                checkfromWhere(from);
             }
 
 
@@ -1298,4 +1233,100 @@ public class Welcome extends Activity
         m_config.mapper = new DynamoDBMapper(m_config.ddbClient);
     }
 
+
+
+    public void checkfromWhere(String from)
+    {
+        if(from.equals("registration") || from.equals("splash") || from.equals("homepage"))
+        {
+            LoginValidations.QBStartSession(cont);
+        }
+        else if(from.equals("requestSend"))
+        {
+            String PartyId = getIntent().getExtras().getString("PartyId");
+            String PartyName = getIntent().getExtras().getString("PartyName");
+            String PartyStartTime = getIntent().getExtras().getString("PartyStartTime");
+            String PartyEndTime = getIntent().getExtras().getString("PartyEndTime");
+            String PartyStatus = getIntent().getExtras().getString("PartyStatus");
+            String GCQBID = getIntent().getExtras().getString("GCQBID");
+            String GCFBID = getIntent().getExtras().getString("GCFBID");
+            String message = getIntent().getExtras().getString("message");
+
+            Intent i = new Intent(Welcome.this, RequestantActivity.class);
+            PartyParceableData party1 = new PartyParceableData();
+            party1.setPartyId(PartyId);
+            party1.setPartyName(PartyName);
+            party1.setStartTime(PartyStartTime);
+            party1.setEndTime(PartyEndTime);
+            party1.setPartyStatus(PartyStatus);
+            i.putExtra("from", "requestSend");
+            i.putExtra("GCQBID",GCQBID);
+            i.putExtra("GCFBID", GCFBID);
+            i.putExtra("message", message);
+            Bundle mBundles = new Bundle();
+            mBundles.putSerializable(ConstsCore.SER_KEY, party1);
+            i.putExtras(mBundles);
+            startActivity(i);
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+
+        }
+        else if(from.equals("chatoffline"))
+        {
+            Intent i = new Intent(Welcome.this, DialogsActivity.class);
+            startActivity(i);
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
+        else if(from.equals("requestApproved"))
+        {
+            String GCFBID = getIntent().getExtras().getString("GCFBID");
+            String message = getIntent().getExtras().getString("message");
+            Intent i = new Intent(Welcome.this, HistoryActivity.class);
+            i.putExtra("GCFBID", GCFBID);
+            i.putExtra("from", "requestApproved");
+            i.putExtra("message", message);
+            startActivity(i);
+
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
+        else if(from.equals("requestDeclined"))
+        {
+            String GCFBID = getIntent().getExtras().getString("GCFBID");
+            String message = getIntent().getExtras().getString("message");
+            Intent i = new Intent(Welcome.this, HistoryActivity.class);
+            i.putExtra("GCFBID", GCFBID);
+            i.putExtra("from", "requestDeclined");
+            i.putExtra("message", message);
+            startActivity(i);
+
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
+    }
 }

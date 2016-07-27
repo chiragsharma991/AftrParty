@@ -259,7 +259,7 @@ public class GateCrasherAdapter extends BaseAdapter
                 {
                     GenerikFunctions.sDialog(cont, "Sending Request for Party");
                     Log.e("PartyName  " , finalHolder.partyName.getText() + " Check Conditions here  aa"+"  "+ finalParty.getPartyName());
-                    Long currentReqTime = System.currentTimeMillis();
+                    Long currentReqTime = Validations.getCurrentTime();//System.currentTimeMillis();
                     String PartyId = finalParty.getPartyID();
 
 
@@ -451,6 +451,7 @@ public class GateCrasherAdapter extends BaseAdapter
 
 
             } else {//Paid User
+
 
                 Log.e("Paid User","");
                 String SubscriptionTime = PaidGC.get(0).getSubscriptiondate();

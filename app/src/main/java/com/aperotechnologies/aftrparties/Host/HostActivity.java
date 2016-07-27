@@ -56,7 +56,9 @@ import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.GateCrasher.GCParceableData;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
@@ -65,6 +67,10 @@ import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.aperotechnologies.aftrparties.util.IabHelper;
+import com.aperotechnologies.aftrparties.util.IabResult;
+import com.aperotechnologies.aftrparties.util.Inventory;
+import com.aperotechnologies.aftrparties.util.Purchase;
 import com.facebook.login.LoginManager;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.linkedin.platform.LISessionManager;
@@ -132,6 +138,11 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     private static final int MY_PERMISSIONS_ACCESS_CF_LOCATION = 3;
     Location currentlocation = null;
 
+    private IabHelper mHelper;
+    String loginUserFBID;
+    UserTable user;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -154,6 +165,22 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         imgParty = (CircularImageView) findViewById(R.id.partyImage);
         uploadPartyImage = (TextView) findViewById(R.id.uploadPartyImage);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+
+        /****/
+        mHelper = new IabHelper(HostActivity.this, ConstsCore.base64EncodedPublicKey);
+
+        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+            public void onIabSetupFinished(IabResult result) {
+                if (!result.isSuccess()) {
+                    Log.e("HomePageActivity", "In-app Billing setup failed: " +
+                            result);
+                } else {
+                    Log.e("HomePageActivity", "In-app Billing is set up OK");
+                }
+            }
+        });
+       /****/
 
 //        // Spinner for Start Now/Later
 //        Spinner spn_startTime = (Spinner) findViewById(R.id.spn_startTime);
@@ -192,6 +219,38 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         // for mask/unmask
         cb_mask = (CheckBox) findViewById(R.id.mask);
         cb_unmask = (CheckBox) findViewById(R.id.unmask);
+
+        loginUserFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+
+        //Check mask Status of user for party creation
+        try
+        {
+
+            user = m_config.mapper.load(UserTable.class,loginUserFBID);
+            Log.e("Here"," "+user.getPartymaskstatus());
+            List<PartyMaskStatusClass> partymaskstatus = user.getPartymaskstatus();
+            if(partymaskstatus != null || partymaskstatus.size() != 0)
+            {
+
+                if(partymaskstatus.get(0).getMaskstatus().equals("Unmask"))
+                {
+                    Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
+                    if(currTime < Long.parseLong(partymaskstatus.get(0).getMasksubscriptiondate()))
+                    {
+                        cb_mask.setEnabled(false);
+                        cb_unmask.setEnabled(false);
+                        cb_unmask.setChecked(true);
+
+                    }
+
+                }
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+        //
 
         //For Location
         cb_getLocation = (CheckBox) findViewById(R.id.cbgetLocation);
@@ -441,10 +500,21 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                                 {
                                     public void onClick(DialogInterface dialog, int id)
                                     {
-                                        cb_unmask.setChecked(true);
-                                        cb_mask.setChecked(false);
-                                        cb_unmask.setEnabled(false);
-                                        cb_mask.setEnabled(false);
+
+                                        cb_unmask.setChecked(false);
+                                        cb_mask.setChecked(true);
+                                        try {
+
+                                            ///10001 - is requestCode
+                                            mHelper.launchPurchaseFlow(HostActivity.this, ConstsCore.ITEM_MASK_SKU, ConstsCore.RequestCode,
+                                                    mPurchaseFinishedListener, "mypurchasetoken");
+
+                                        } catch (IabHelper.IabAsyncInProgressException e) {
+                                            e.printStackTrace();
+                                        }
+
+
+
 
                                     }
                                 });
@@ -1539,6 +1609,19 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                 imgParty.setImageBitmap(finalbitmap);
 
             }
+
+            else if (requestCode == ConstsCore.RequestCode) {
+                Log.e("inside onActivityResult"," "+!mHelper.handleActivityResult(requestCode,
+                        resultCode, data));
+
+                if (!mHelper.handleActivityResult(requestCode,
+                        resultCode, data)) {
+
+                    Log.e("inside mHelper.handleActivityResult"," ");
+
+                    super.onActivityResult(requestCode, resultCode, data);
+                }
+            }
         }
     }
 
@@ -1958,6 +2041,132 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         }
     }
 
+
+    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
+            = new IabHelper.OnIabPurchaseFinishedListener() {
+        public void onIabPurchaseFinished(IabResult result,
+                                          Purchase purchase)
+        {
+//            // if we were disposed of in the meantime, quit.
+//            if (mHelper == null) return;
+//
+//
+            if (result.isFailure())
+            {
+                // Handle error
+                Log.e("Error purchasing:"," ---- " + result+" ");
+                Toast.makeText(getApplicationContext(),""+result, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            else if (purchase.getSku().equals(ConstsCore.ITEM_MASK_SKU))
+            {
+
+
+                Log.e("Purchase Success"," "+purchase.getToken());
+
+                Toast.makeText(getApplicationContext(),"Purchase success", Toast.LENGTH_SHORT).show();
+                consumeItem();
+                //buyButton.setEnabled(false);
+            }
+
+        }
+    };
+
+
+    public void consumeItem() {
+        try {
+            mHelper.queryInventoryAsync(mReceivedInventoryListener);
+            Log.e("consumeItem ","try");
+            Toast.makeText(getApplicationContext(),"consumeitem try", Toast.LENGTH_SHORT).show();
+        } catch (IabHelper.IabAsyncInProgressException e) {
+            Log.e("consumeItem ","catch");
+            Toast.makeText(getApplicationContext(),"consumeitem catch", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
+    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
+            = new IabHelper.QueryInventoryFinishedListener() {
+        @Override
+        public void onQueryInventoryFinished(IabResult result, Inventory inv) {
+            if (result.isFailure()) {
+                // Handle failure
+                Log.e("QueryInventory ","failed");
+                Toast.makeText(getApplicationContext(),"QueryInventory failed", Toast.LENGTH_SHORT).show();
+            } else {
+                try {
+
+                    mHelper.consumeAsync(inv.getPurchase(ConstsCore.ITEM_MASK_SKU),
+                            mConsumeFinishedListener);
+
+                    Toast.makeText(getApplicationContext(),"QueryInventory  consumeAsync", Toast.LENGTH_SHORT).show();
+
+                } catch (IabHelper.IabAsyncInProgressException e) {
+
+                    Toast.makeText(getApplicationContext(),"QueryInventory  catch", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+    };
+
+
+    IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
+            new IabHelper.OnConsumeFinishedListener() {
+                public void onConsumeFinished(Purchase purchase,
+                                              IabResult result) {
+                    // if we were disposed of in the meantime, quit.
+                    if (mHelper == null) return;
+
+                    if (result.isSuccess()) {
+                        //clickButton.setEnabled(true);
+
+                        Toast.makeText(getApplicationContext(),"consume success", Toast.LENGTH_SHORT).show();
+
+                        GenerikFunctions.sDialog(cont, "Purchasing");
+                        setInAppPurchaseinAWSUser();
+
+
+                    } else {
+                        // handle error
+
+                        Toast.makeText(getApplicationContext(),"consume failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            };
+
+    private void setInAppPurchaseinAWSUser()
+    {
+        Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
+        try {
+            if (user.getPartymaskstatus() == null || user.getPartymaskstatus().size() == 0) {
+                PartyMaskStatusClass partymaskstatus = new PartyMaskStatusClass();
+                partymaskstatus.setMaskstatus("Unmask");
+                partymaskstatus.setMasksubscriptiondate(String.valueOf(subVal));
+
+                List<PartyMaskStatusClass> partymaskstatuslist = new ArrayList<>();
+                partymaskstatuslist.add(partymaskstatus);
+                user.setPartymaskstatus(partymaskstatuslist);
+                m_config.mapper.save(user);
+
+                Toast.makeText(getApplicationContext(),"Purchase Successful", Toast.LENGTH_SHORT).show();
+                GenerikFunctions.hDialog();
+                cb_unmask.setChecked(true);
+                cb_mask.setChecked(false);
+                cb_unmask.setEnabled(false);
+                cb_mask.setEnabled(false);
+
+            }
+        }
+        catch(Exception e)
+        {
+            GenerikFunctions.hDialog();
+        }
+
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -1967,6 +2176,17 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
             getSelfLocation();
         }
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mHelper != null) try {
+            mHelper.dispose();
+        } catch (IabHelper.IabAsyncInProgressException e) {
+            e.printStackTrace();
+        }
+        mHelper = null;
     }
 
     @Override
@@ -1987,3 +2207,6 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     }
 
 }
+
+
+///keytool -exportcert -alias aftrparties -keystore /Users/hasai/Documents/Harshada/AftrParties/Docs/AftrPartiesKey/aftrpartieskeystore -storepass apero@123 | openssl sha1 -binary | openssl base64

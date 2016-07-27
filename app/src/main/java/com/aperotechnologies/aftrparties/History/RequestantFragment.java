@@ -1,5 +1,6 @@
 package com.aperotechnologies.aftrparties.History;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreatio
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.facebook.AccessToken;
 import com.linkedin.platform.DeepLinkHelper;
 import com.linkedin.platform.errors.LIDeepLinkError;
@@ -62,6 +64,7 @@ public class RequestantFragment extends Fragment
     {
     }
 
+    @SuppressLint("ValidFragment")
     public RequestantFragment(Context cont, int position, ArrayList<String> status, ArrayList<String> facebookId, ArrayList<String> liId, ArrayList<String> QbId, ArrayList<String> imageArray)
     {
         this.status = status;
@@ -189,7 +192,7 @@ public class RequestantFragment extends Fragment
                 accept.setEnabled(false);
                 deny.setEnabled(false);
 
-                Long currentApprovalTime = System.currentTimeMillis();
+                Long currentApprovalTime = Validations.getCurrentTime();//System.currentTimeMillis();
                 Boolean allowStatus = getActivePartyStatus(facebookId.get(position), currentApprovalTime);
                 Log.e("allowStatus", " " + allowStatus);
 
@@ -400,7 +403,6 @@ public class RequestantFragment extends Fragment
                 }
 
             }, accessToken, null, cont);
-
 
         }
         else

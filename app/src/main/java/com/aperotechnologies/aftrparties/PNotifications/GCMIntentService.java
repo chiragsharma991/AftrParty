@@ -105,7 +105,7 @@ public class GCMIntentService extends IntentService {
                 //chat
                 if (isApplicationForeGround == true) {
                     // application is in foreground
-                    Log.e("activity", " " + m_config.foregroundCont + "----" + message);
+                    Log.e("activity", " " + m_config.foregroundCont + "----" + message +" ");
 
                     Style style = new Style.Builder()
                             .setBackgroundColor(R.color.colorAccent)
@@ -115,17 +115,25 @@ public class GCMIntentService extends IntentService {
                             .setHeight(100)
                             .build();
 
-                    Crouton crouton = Crouton.makeText((Activity) m_config.foregroundCont, message, style);
-                    crouton.show();
-                    crouton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent i = new Intent(m_config.foregroundCont, DialogsActivity.class);
-                            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(i);
-                        }
-                    });
 
+                    Crouton crouton = Crouton.makeText((Activity) m_config.foregroundCont, message, style);
+
+                    if(m_config.foregroundCont instanceof DialogsActivity){
+
+                    }else
+                    {
+                        crouton.show();
+                        crouton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                Log.e("here ","  click of crouton");
+                                Intent i = new Intent(m_config.foregroundCont, DialogsActivity.class);
+                                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
+                            }
+                        });
+                    }
 
                 }
                 else

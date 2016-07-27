@@ -1,5 +1,6 @@
 package com.aperotechnologies.aftrparties.History;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -54,7 +55,8 @@ public class HostFragment extends Fragment {
     {
     }
 
-    public  HostFragment(Context cont,int position,String fbid,String liid,String qbid,String img_url){
+    @SuppressLint("ValidFragment")
+    public HostFragment(Context cont,int position,String fbid,String liid,String qbid,String img_url){
         this.position=position;
         this.cont=cont;
         this.fbid=fbid;

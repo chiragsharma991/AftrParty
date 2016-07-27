@@ -44,12 +44,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import io.fabric.sdk.android.Fabric;
+
+import static com.aperotechnologies.aftrparties.Reusables.Validations.getDateNo;
+import static com.aperotechnologies.aftrparties.Reusables.Validations.getMonthNo;
 
 /**
  * Created by hasai on 06/05/16.
@@ -126,10 +130,9 @@ public class SplashActivity extends Activity {
 
 
                         //Start QB Session
-                        Intent i = new Intent(cont, HomePageActivity.class);
-                        cont.startActivity(i);
-                        //LoginValidations.QBStartSession(cont);
-                        //new AWSPartyOperations.RemovePendingPartiesAPI(cont, "155325838204047_1468823718211","137075106698189").execute();
+//                       Intent i = new Intent(cont, HomePageActivity.class);
+//                       cont.startActivity(i);
+                        LoginValidations.QBStartSession(cont);
                     }
                     else
                     {
@@ -139,11 +142,15 @@ public class SplashActivity extends Activity {
                         intent.putExtra("from","splash");
                         cont.startActivity(intent);
                     }
+
+
                 }
             }
         };
         timer.start();
     }
+
+
 
     @Override
     protected void onResume() {

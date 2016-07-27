@@ -30,6 +30,7 @@ import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreatio
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 
 import org.json.JSONException;
@@ -926,7 +927,7 @@ public class AWSPartyOperations {
                         {
                             List<ActivePartyClass> ActivePartyList = user.getActiveparty();
                             List<PaidGCClass> PaidGC = user.getPaidgc();
-                            Long currentCancelTime = System.currentTimeMillis();
+                            Long currentCancelTime = Validations.getCurrentTime();//System.currentTimeMillis();
 
                             if (PaidGC == null)
                             {
@@ -958,9 +959,14 @@ public class AWSPartyOperations {
                                     // remove party from ActiveParty list
                                     if (ActivePartyList != null || ActivePartyList.size() != 0)
                                     {
-                                        ActivePartyList.remove(0);
-                                        user.setActiveparty(ActivePartyList);
-                                        m_config.mapper.save(user);
+                                        // wheyther partyid to be cancelled and active partyid is same or not
+                                        if(partyID.equals(ActivePartyList.get(0).getPartyid()))
+                                        {
+                                            ActivePartyList.remove(0);
+                                            user.setActiveparty(ActivePartyList);
+                                            m_config.mapper.save(user);
+                                        }
+
                                     }
 
                                     //t.setVisibility(View.GONE);
@@ -988,9 +994,7 @@ public class AWSPartyOperations {
                 else if(Status.equals("Approved"))
                 {
                     //Chat Dialog Creation after Party Approval
-
                     Log.e(" gateCrasherFBID "," "+gateCrasherFBID);
-
                     t.setText(Status);
                     Toast.makeText(cont, "Request has been approved",Toast.LENGTH_SHORT).show();
                     GenerikFunctions.hDialog();
@@ -1196,7 +1200,6 @@ public class AWSPartyOperations {
                             // display response
                             Log.d("Response", response.toString());
 
-
                         }
                     },
                     new Response.ErrorListener() {
@@ -1209,7 +1212,7 @@ public class AWSPartyOperations {
             );
 
             // add it to the RequestQueue
-            int socketTimeout = 10000;//60 seconds
+            int socketTimeout = 5000;//60 seconds
             RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
             getRequest.setRetryPolicy(policy);
             queue.add(getRequest);

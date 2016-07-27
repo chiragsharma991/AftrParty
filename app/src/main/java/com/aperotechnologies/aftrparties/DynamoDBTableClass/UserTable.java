@@ -39,6 +39,7 @@ public class UserTable {
     private List<ActivePartyClass> activeparty;
     private String currentmaskstatus;
     private String Imageflag;
+    private List<PartyMaskStatusClass> PartyMaskStatus;
 
 
     @DynamoDBHashKey(attributeName = "facebookid")
@@ -264,7 +265,7 @@ public class UserTable {
         return paidgc;
     }
 
-    public void setPaidgc(List<PaidGCClass> paidgC) {
+    public void setPaidgc(List<PaidGCClass> paidgc) {
         this.paidgc = paidgc;
     }
 
@@ -293,7 +294,13 @@ public class UserTable {
     }
 
 
+    public List<PartyMaskStatusClass> getPartymaskstatus() {
+        return PartyMaskStatus;
+    }
 
+    public void setPartymaskstatus(List<PartyMaskStatusClass> PartyMaskStatus) {
+        this.PartyMaskStatus = PartyMaskStatus;
+    }
 
 }
 

@@ -150,7 +150,7 @@ public class PartyDetails extends Activity
         }
 
 
-        final Long currentTime = System.currentTimeMillis();
+        final Long currentTime = Validations.getCurrentTime();//System.currentTimeMillis();
         final String partyStartTime = party.getStartTime();
 
 
@@ -159,20 +159,20 @@ public class PartyDetails extends Activity
             //Logged user is Host
             btnRequestant.setText("Requestant");
 
-            //if(currentTime < Long.parseLong(partyStartTime)){
+            if(currentTime < Long.parseLong(partyStartTime)){
                 btnReqCancel.setText("Cancel Party");//Host cancel
                 btnReqCancel.setVisibility(View.VISIBLE);
-            //}
+            }
 
         }
         if(PartyStatus.equals("Approved"))
         {
             //Logged user is GateCrasher
             btnRequestant.setText("Host");
-            //if(currentTime < Long.parseLong(partyStartTime)) {
+            if(currentTime < Long.parseLong(partyStartTime)) {
                 btnReqCancel.setText("Cancel Request");// GC Cancel
                 btnReqCancel.setVisibility(View.VISIBLE);
-            //}
+            }
         }
         if(PartyStatus.equals("Cancelled")) {
             //Logged user is GC but status is Cancelled
@@ -220,6 +220,7 @@ public class PartyDetails extends Activity
                         party1.setStartTime(PartyStartTime);
                         party1.setEndTime(PartyEndTime);
                         party1.setPartyStatus(PartyStatus);
+                        i.putExtra("from","partydetails");
                         Bundle mBundles = new Bundle();
                         mBundles.putSerializable(ConstsCore.SER_KEY, party1);
                         i.putExtras(mBundles);

@@ -154,18 +154,19 @@ public class RequestantActivity extends AppCompatActivity
             viewPager.setOnPageChangeListener(new CircularViewPagerHandler(viewPager));
 
 
-//            for(int i = 0 ; i < facebookId.size(); i++)
-//            {
-//
-//                Log.e("came here","");
-//
-//                String GCFBID = getIntent().getExtras().getString("GCFBID");
-//                if(facebookId.get(i).equals(GCFBID))
-//                {
-//                    viewPager.setCurrentItem(i);
-//                }
-//            }
 
+            if(!getIntent().getExtras().getString("from").equals("partydetails") || getIntent().getExtras().getString("from").equals("requestSend")) {
+                //Harshada
+                for (int i = 0; i < facebookId.size(); i++) {
+
+                    Log.e("came here", "");
+                    String GCFBID = getIntent().getExtras().getString("GCFBID");
+                    if (facebookId.get(i).equals(GCFBID)) {
+                        viewPager.setCurrentItem(i);
+                    }
+                }
+            }
+            //Harshada
 
 
 

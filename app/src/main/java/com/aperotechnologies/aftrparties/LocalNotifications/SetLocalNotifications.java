@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
+import com.aperotechnologies.aftrparties.Reusables.Validations;
+
 
 /**
  * Created by hasai on 04/07/16.
@@ -18,7 +20,7 @@ public class SetLocalNotifications {
     // set Local Notification for party retention
     public static void setLNotificationPartyRetention(Context cont, String PartyName, String PartyId, String DialogId, String PartyEndTime)
     {
-        Long currentTimeMillis = System.currentTimeMillis();
+        Long currentTimeMillis = Validations.getCurrentTime();//System.currentTimeMillis();
         Log.e("Current Time Millis",currentTimeMillis + "");
 
         AlarmManager alarmManager = (AlarmManager) cont.getSystemService(Context.ALARM_SERVICE);

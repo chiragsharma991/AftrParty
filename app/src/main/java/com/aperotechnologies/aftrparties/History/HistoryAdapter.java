@@ -14,7 +14,10 @@ import android.widget.TextView;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartiesClass;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,7 +135,43 @@ public class HistoryAdapter extends BaseAdapter {
                     i.putExtras(mBundles);
                     cont.startActivity(i);
 
-                }else{
+                }
+                else
+                {
+                    try
+                    {
+                        String PartyId = finalParties.getPartyid();
+                        PartyTable partytable = m_config.mapper.load(PartyTable.class, PartyId);
+                        List<PartyMaskStatusClass> partymaskstatus = partytable.getPartymaskstatus();
+                        if(partymaskstatus.get(0).getMaskstatus().equals("Unmask"))
+                        {
+                            Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
+                            if(currTime < Long.parseLong(partymaskstatus.get(0).getMasksubscriptiondate()))
+                            {
+                                // check whether party is Unmasked
+
+                                Intent i = new Intent(cont,PartyDetails.class);
+                                PartyParceableData party = new PartyParceableData();
+                                party.setPartyId(finalParties.getPartyid());
+                                party.setPartyName(finalParties.getPartyname());
+                                party.setStartTime(finalParties.getStarttime());
+                                party.setEndTime(finalParties.getEndtime());
+                                party.setPartyStatus(finalParties.getPartystatus());
+                                Bundle mBundles = new Bundle();
+                                mBundles.putSerializable(ConstsCore.SER_KEY, party);
+                                i.putExtras(mBundles);
+                                cont.startActivity(i);
+
+                            }
+
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+
 
                 }
 

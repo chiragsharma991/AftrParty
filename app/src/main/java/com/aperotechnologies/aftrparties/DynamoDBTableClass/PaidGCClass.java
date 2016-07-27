@@ -18,6 +18,4 @@ public class PaidGCClass {
     public String getSubscriptiondate() { return subscriptiondate; }
     public void setSubscriptiondate(String subscriptiondate) { this.subscriptiondate = subscriptiondate; }
 
-
-
 }
