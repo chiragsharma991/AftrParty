@@ -141,6 +141,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     private IabHelper mHelper;
     String loginUserFBID;
     UserTable user;
+    String masksubscriptionTime;
 
 
 
@@ -237,6 +238,8 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                     Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
                     if(currTime < Long.parseLong(partymaskstatus.get(0).getMasksubscriptiondate()))
                     {
+
+                        masksubscriptionTime = partymaskstatus.get(0).getMasksubscriptiondate();
                         cb_mask.setEnabled(false);
                         cb_unmask.setEnabled(false);
                         cb_unmask.setChecked(true);
@@ -1882,9 +1885,28 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         party.setPartyAddress(fullAddress);
         party.setPartylatlong(latlong);
         party.setPartyImage(picturePath);
+
+        if (user.getPartymaskstatus() == null || user.getPartymaskstatus().size() == 0)
+        {
+
+        }
+        else
+        {
+            PartyMaskStatusClass partymaskstatus = new PartyMaskStatusClass();
+            partymaskstatus.setMaskstatus("Unmask");
+            partymaskstatus.setMasksubscriptiondate(masksubscriptionTime);
+            List<PartyMaskStatusClass> partymaskstatuslist = new ArrayList<>();
+            partymaskstatuslist.add(partymaskstatus);
+            party.setPartymaskstatus(partymaskstatuslist);
+            
+
+        }
+
+
         //party.setPartyImage("");
         //party.setMaskStatus("");
         party.setDialogID("N/A");
+
         return party;
 
     }
@@ -2145,7 +2167,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                 PartyMaskStatusClass partymaskstatus = new PartyMaskStatusClass();
                 partymaskstatus.setMaskstatus("Unmask");
                 partymaskstatus.setMasksubscriptiondate(String.valueOf(subVal));
-
+                masksubscriptionTime = String.valueOf(subVal);
                 List<PartyMaskStatusClass> partymaskstatuslist = new ArrayList<>();
                 partymaskstatuslist.add(partymaskstatus);
                 user.setPartymaskstatus(partymaskstatuslist);
@@ -2158,6 +2180,24 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                 cb_unmask.setEnabled(false);
                 cb_mask.setEnabled(false);
 
+            }
+            else
+            {
+                List<PartyMaskStatusClass> partymaskstatuslist = user.getPartymaskstatus();
+                PartyMaskStatusClass partymaskstatus = partymaskstatuslist.get(0);
+                partymaskstatus.setMaskstatus("Unmask");
+                partymaskstatus.setMasksubscriptiondate(String.valueOf(subVal));
+                masksubscriptionTime = String.valueOf(subVal);
+                partymaskstatuslist.add(0, partymaskstatus);
+                user.setPartymaskstatus(partymaskstatuslist);
+                m_config.mapper.save(user);
+
+                Toast.makeText(getApplicationContext(),"Purchase Successful", Toast.LENGTH_SHORT).show();
+                GenerikFunctions.hDialog();
+                cb_unmask.setChecked(true);
+                cb_mask.setChecked(false);
+                cb_unmask.setEnabled(false);
+                cb_mask.setEnabled(false);
             }
         }
         catch(Exception e)
