@@ -53,6 +53,7 @@ public class ConstsCore {
 
     /****/
     public static final String ITEM_MASK_SKU = "ap_unmasking";//android.test.purchased ";
+    public static final String ITEM_PARTYPURCHASE_SKU = "ap_reqpartypurchase";//android.test.purchased ";
     public static final String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqiS7HW5sBPoBBxCNFf1OGtRMPVzuzqhQOq6T1ZBuO6PMHzpAaiVzVZfccoUmc0Lj/Wyu4lpaK9H+aQy3oEKS9EbyQQ6GVKFLFOCFo8w8TP/Z5U14oiTvmpnLDLxhCeKRbMow+Z04hhgbnezHsikIPkULezF6psxrZ6kvzlT23pg91Yn2y/kgiLJMnxpj2G1RUfVaFlVXA/SM23yWYkK1qeTxeoZ5l36TfPjazWN8TXHmQvPX9SVTWg0tnTtxDVNfNvRMUsLd9t75JGhRimqhhgEGleQtiMZYasnmGyvWa3QGSN5CjtzW6aNocC4Cw3DcnIzM/tcriK6M75PpRMXVpwIDAQAB";
     public static final int RequestCode = 10001;
     /*****/

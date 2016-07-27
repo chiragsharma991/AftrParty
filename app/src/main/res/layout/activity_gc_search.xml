@@ -36,6 +36,7 @@
 
 
                     <TextView
+                        android:layout_marginRight="100dp"
                         android:textSize="@dimen/text_size"
                         android:layout_centerInParent="true"
                         android:text="GATE CRASHER"
@@ -43,6 +44,18 @@
                         android:textColor="#ffffff"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"   />
+
+
+                    <Button
+                        android:layout_marginTop="0dp"
+                        android:layout_marginRight="0dp"
+                        android:layout_alignParentRight="true"
+                        android:id="@+id/inapppurchase"
+                        android:text="In App"
+                        android:layout_width="100dp"
+                        android:layout_height="match_parent" />
+
+
                 </RelativeLayout>
 
 

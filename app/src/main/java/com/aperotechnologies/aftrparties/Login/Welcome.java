@@ -406,7 +406,7 @@ public class Welcome extends Activity
 
 
                 //AWS Storage of LI data
-                Log.e("Before LI AWS Storage","Yes");
+             //   Log.e("Before LI AWS Storage","Yes");
 //                LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
 //                new AWSLoginOperations.addLIUserInfo(cont,loggedInUserInformation).execute();
 
@@ -423,7 +423,7 @@ public class Welcome extends Activity
                         sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "
                         + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
 
-                checkfromWhere(from);
+                //checkfromWhere(from);
             }
 
         }
@@ -1017,7 +1017,6 @@ public class Welcome extends Activity
 
             Log.e("Updated all flags","yes");
             //Start LI Session
-
             if(LISessionManager.getInstance(cont).getSession().getAccessToken().toString() == null)
             {
                 Log.e("LI out","Yes");

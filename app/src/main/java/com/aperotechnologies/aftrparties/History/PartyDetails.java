@@ -169,7 +169,8 @@ public class PartyDetails extends Activity
         {
             //Logged user is GateCrasher
             btnRequestant.setText("Host");
-            if(currentTime < Long.parseLong(partyStartTime)) {
+            if(currentTime < Long.parseLong(partyStartTime))
+            {
                 btnReqCancel.setText("Cancel Request");// GC Cancel
                 btnReqCancel.setVisibility(View.VISIBLE);
             }

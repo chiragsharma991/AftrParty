@@ -37,10 +37,18 @@ import android.widget.Toast;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.aperotechnologies.aftrparties.util.IabHelper;
+import com.aperotechnologies.aftrparties.util.IabResult;
+import com.aperotechnologies.aftrparties.util.Inventory;
+import com.aperotechnologies.aftrparties.util.Purchase;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -86,7 +94,10 @@ public class GateCrasherSearchActivity extends Activity {
     private static final int MY_PERMISSIONS_ACCESS_CF_LOCATION = 3;
     Location location = null;
 
-
+    private IabHelper mHelper;
+    private String loginUserFBID;
+    private UserTable user;
+    private String masksubscriptionTime;
 
 
 
@@ -126,6 +137,7 @@ public class GateCrasherSearchActivity extends Activity {
 //        spn_byob.setAdapter(byob);
 
 
+        Button btninapppurchase = (Button) findViewById(R.id.inapppurchase);
         txtStartDate = (TextView) findViewById(R.id.txtStartDate);
         btn_getCurrentLocation = (Button) findViewById(R.id.btn_getlocation);
         btn_getCurrentLocation.setVisibility(View.GONE);
@@ -134,7 +146,7 @@ public class GateCrasherSearchActivity extends Activity {
 
         btn_SearchGCParty = (Button) findViewById(R.id.btn_SearchGCParty);
 
-
+        loginUserFBID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
 
         //Calendar date,time value for StartDateTime
         final Calendar calendar = getCalendar();
@@ -156,6 +168,73 @@ public class GateCrasherSearchActivity extends Activity {
             @Override
             public void onClick(View v) {
                 startDateDialog("show");
+            }
+        });
+
+        /****/
+        mHelper = new IabHelper(GateCrasherSearchActivity.this, ConstsCore.base64EncodedPublicKey);
+
+        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+            public void onIabSetupFinished(IabResult result) {
+                if (!result.isSuccess()) {
+                    Log.e("HomePageActivity", "In-app Billing setup failed: " +
+                            result);
+                } else {
+                    Log.e("HomePageActivity", "In-app Billing is set up OK");
+                }
+            }
+        });
+        /****/
+
+
+
+
+        btninapppurchase.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //Check mask status of user for party request
+                try
+                {
+
+                    user = m_config.mapper.load(UserTable.class,loginUserFBID);
+                    Log.e("----"," "+user.getPaidgc());
+                    List<PaidGCClass> paidgclist = user.getPaidgc();
+                    if(paidgclist != null || paidgclist.size() != 0)
+                    {
+
+                        if(paidgclist.get(0).getPaidstatus().equals("Yes"))
+                        {
+                            Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
+                            if(currTime < Long.parseLong(paidgclist.get(0).getSubscriptiondate()))
+                            {
+                                GenerikFunctions.showToast(cont, "Your subscription is upto date.");
+
+                            }
+
+                        }
+                        else
+                        {
+                            ///10001 - is requestCode
+                            mHelper.launchPurchaseFlow(GateCrasherSearchActivity.this, ConstsCore.ITEM_PARTYPURCHASE_SKU, ConstsCore.RequestCode,
+                                    mPurchaseFinishedListener, "mypurchasetoken");
+                        }
+                    }
+                    else
+                    {
+                        ///10001 - is requestCode
+                        mHelper.launchPurchaseFlow(GateCrasherSearchActivity.this, ConstsCore.ITEM_PARTYPURCHASE_SKU, ConstsCore.RequestCode,
+                                mPurchaseFinishedListener, "mypurchasetoken");
+                    }
+                }
+                catch (Exception e)
+                {
+
+                }
+
+
+
+
             }
         });
 
@@ -741,6 +820,143 @@ public class GateCrasherSearchActivity extends Activity {
             e.printStackTrace();
         }
         return flag;
+
+    }
+
+
+
+    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
+            = new IabHelper.OnIabPurchaseFinishedListener() {
+        public void onIabPurchaseFinished(IabResult result,
+                                          Purchase purchase)
+        {
+//            // if we were disposed of in the meantime, quit.
+//            if (mHelper == null) return;
+//
+//
+            if (result.isFailure())
+            {
+                // Handle error
+                Log.e("Error purchasing:"," ---- " + result+" ");
+                Toast.makeText(getApplicationContext(),""+result, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            else if (purchase.getSku().equals(ConstsCore.ITEM_PARTYPURCHASE_SKU))
+            {
+
+
+                Log.e("Purchase Success"," "+purchase.getToken());
+
+                Toast.makeText(getApplicationContext(),"Purchase success", Toast.LENGTH_SHORT).show();
+                consumeItem();
+            }
+
+        }
+    };
+
+
+    public void consumeItem() {
+        try {
+            mHelper.queryInventoryAsync(mReceivedInventoryListener);
+            Log.e("consumeItem ","try");
+            Toast.makeText(getApplicationContext(),"consumeitem try", Toast.LENGTH_SHORT).show();
+        } catch (IabHelper.IabAsyncInProgressException e) {
+            Log.e("consumeItem ","catch");
+            Toast.makeText(getApplicationContext(),"consumeitem catch", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
+    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
+            = new IabHelper.QueryInventoryFinishedListener() {
+        @Override
+        public void onQueryInventoryFinished(IabResult result, Inventory inv) {
+            if (result.isFailure()) {
+                // Handle failure
+                Log.e("QueryInventory ","failed");
+                Toast.makeText(getApplicationContext(),"QueryInventory failed", Toast.LENGTH_SHORT).show();
+            } else {
+                try {
+
+                    mHelper.consumeAsync(inv.getPurchase(ConstsCore.ITEM_PARTYPURCHASE_SKU),
+                            mConsumeFinishedListener);
+
+                    Toast.makeText(getApplicationContext(),"QueryInventory  consumeAsync", Toast.LENGTH_SHORT).show();
+
+                } catch (IabHelper.IabAsyncInProgressException e) {
+
+                    Toast.makeText(getApplicationContext(),"QueryInventory  catch", Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+    };
+
+
+    IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
+            new IabHelper.OnConsumeFinishedListener() {
+                public void onConsumeFinished(Purchase purchase,
+                                              IabResult result) {
+                    // if we were disposed of in the meantime, quit.
+                    if (mHelper == null) return;
+
+                    if (result.isSuccess()) {
+
+                        Toast.makeText(getApplicationContext(),"consume success", Toast.LENGTH_SHORT).show();
+                        GenerikFunctions.sDialog(cont, "Purchasing");
+                        setPartyPurcahseinAWS();
+                        //
+
+                    } else {
+                        // handle error
+
+                        Toast.makeText(getApplicationContext(),"consume failed", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            };
+
+
+    private void setPartyPurcahseinAWS()
+    {
+        Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
+
+        try {
+            if (user.getPaidgc() == null || user.getPaidgc().size() == 0) {
+                PaidGCClass paidGCClass = new PaidGCClass();
+                paidGCClass.setPaidstatus("Yes");
+                paidGCClass.setSubscriptiondate(String.valueOf(subVal));
+                List<PaidGCClass> paidgclist = new ArrayList<>();
+                paidgclist.add(paidGCClass);
+                user.setPaidgc(paidgclist);
+                m_config.mapper.save(user);
+
+                Toast.makeText(getApplicationContext(),"Purchase Successful", Toast.LENGTH_SHORT).show();
+                GenerikFunctions.hDialog();
+
+
+            }
+            else
+            {
+                List<PaidGCClass> paidgclist = user.getPaidgc();
+                PaidGCClass paidGCClass = paidgclist.get(0);
+                paidGCClass.setPaidstatus("Yes");
+                paidGCClass.setSubscriptiondate(String.valueOf(subVal));
+                paidgclist.add(0, paidGCClass);
+                user.setPaidgc(paidgclist);
+                m_config.mapper.save(user);
+
+                Toast.makeText(getApplicationContext(),"Purchase Successful", Toast.LENGTH_SHORT).show();
+                GenerikFunctions.hDialog();
+
+            }
+        }
+        catch(Exception e)
+        {
+            Toast.makeText(getApplicationContext(),"Purchase Failed", Toast.LENGTH_SHORT).show();
+            GenerikFunctions.hDialog();
+        }
 
     }
 

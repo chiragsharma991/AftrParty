@@ -148,7 +148,7 @@ public class HomePageActivity extends Activity
         btnGateCrasher = (ResizableButton) findViewById(R.id.btnGateCrasher);
         faceOverlayView = (FaceOverlayView)findViewById(R.id.face_overlay);
 
-        //loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
+        loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
 
 
 //        txtuserName.setText(sharedPreferences.getString(m_config.Entered_User_Name,""));
@@ -176,17 +176,17 @@ public class HomePageActivity extends Activity
 //        }
 
 
-        //if(sharedPreferences.getString(m_config.Entered_User_Name,"").equals("")){
-//        try {
-//            UserTable user = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
-//            txt_Header.setText("Welcome " + user.getName());
-//        }catch (Exception e){
-//
-//        }
+        if(sharedPreferences.getString(m_config.Entered_User_Name,"").equals("")){
+            try {
+                UserTable user = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
+                txt_Header.setText("Welcome " + user.getName());
+            }catch (Exception e){
 
-//        }else{
-//            txt_Header.setText("Welcome " +sharedPreferences.getString(m_config.Entered_User_Name,""));
-//        }
+            }
+
+        }else{
+            txt_Header.setText("Welcome " +sharedPreferences.getString(m_config.Entered_User_Name,""));
+        }
 
 
         btn_logout.setOnClickListener(new View.OnClickListener()
@@ -268,7 +268,7 @@ public class HomePageActivity extends Activity
                                 public void run() {
 
 
-                                    //new AsyncFBFaces().execute();
+                                    new AsyncFBFaces().execute();
                                 }
                             });
                         }
@@ -288,7 +288,8 @@ public class HomePageActivity extends Activity
                 }
                 else
                 {
-                    //new AsyncFBFaces().execute();
+                    Log.e("here ","iiinnn");
+                    new AsyncFBFaces().execute();
                 }
 
 
@@ -419,7 +420,6 @@ public class HomePageActivity extends Activity
         @Override
         protected void onPreExecute()
         {
-
 //            hp_pd.setMessage("Loading");
 //            hp_pd.setCancelable(false);
 //            hp_pd.show();
@@ -430,6 +430,8 @@ public class HomePageActivity extends Activity
         @Override
         protected Void doInBackground(Void... voids)
         {
+
+            Log.e("doInBackground", "");
             try
             {
                 selUserData = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
@@ -437,6 +439,9 @@ public class HomePageActivity extends Activity
             }
             catch (Exception e)
             {
+
+                Log.e("doInBackground", "----e----");
+                e.printStackTrace();
                 if(hp_pd != null){
                     hp_pd.dismiss();
                 }

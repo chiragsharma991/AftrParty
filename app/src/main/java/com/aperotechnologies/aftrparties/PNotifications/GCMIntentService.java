@@ -100,6 +100,20 @@ public class GCMIntentService extends IntentService {
 //                CreateNotification(intent, message);
 
 
+                //for test purpose
+
+
+                messagetype = "requestApproved";
+                if (isApplicationForeGround == true)
+                {
+                    new ForegroundFunctionCall(extras, messagetype, message, this);
+                }
+                else{
+                    new BackgroundFunctionCall(extras, messagetype, message, this);
+                }
+                //
+
+
             } else {
                 m_config.notificationManager = notificationManager;
                 //chat

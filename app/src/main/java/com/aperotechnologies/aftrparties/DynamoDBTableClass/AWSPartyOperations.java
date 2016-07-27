@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
@@ -995,10 +997,8 @@ public class AWSPartyOperations {
                 {
                     //Chat Dialog Creation after Party Approval
                     Log.e(" gateCrasherFBID "," "+gateCrasherFBID);
-                    t.setText(Status);
-                    Toast.makeText(cont, "Request has been approved",Toast.LENGTH_SHORT).show();
-                    GenerikFunctions.hDialog();
-                    new RemovePendingPartiesAPI(cont, partyID, gateCrasherFBID).execute();
+
+                    new RemovePendingPartiesAPI(cont, partyID, gateCrasherFBID, t, Status).execute();
 
                     if (DialogID == null || DialogID.equals(null) || DialogID.equals("") || DialogID.equals("N/A"))
                     {
@@ -1162,26 +1162,32 @@ public class AWSPartyOperations {
         Context cont;
         String partyid;
         String facebookid;
+        TextView t;
+        String Status;
 
         public RemovePendingPartiesAPI(final Context cont,
-                                       String partyid, String facebookid)
+                                       String partyid, String facebookid, TextView t, String Status)
         {
             Log.e("----", " "+facebookid+" "+partyid);
 
             this.cont = cont;
             this.partyid = partyid;
             this.facebookid = facebookid;
+            this.t = t;
+            this.Status = Status;
             m_config = Configuration_Parameter.getInstance();
         }
 
         @Override
         protected Boolean doInBackground(String... params) {
             // Instantiate the RequestQueue.
-            RequestQueue queue = Volley.newRequestQueue((Activity) cont);
+
+            RequestQueue requestQueue = Volley.newRequestQueue((Activity) cont);
+
             String url = "https://j4zoihu1pl.execute-api.us-east-1.amazonaws.com/Development/RemovePendingParties";
 
-
             JSONObject obj = new JSONObject();
+
             try {
                 obj.put("facebookid", facebookid);
                 obj.put("partyid", partyid);
@@ -1191,14 +1197,32 @@ public class AWSPartyOperations {
             }
 
             Log.e("object "," "+obj.toString());
-
             // prepare the Request
-            JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.DELETE, url, obj,
+            JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.POST, url, obj,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             // display response
                             Log.d("Response", response.toString());
+
+                            try {
+                                if(response.getInt("confirm_status") == 1)
+                                {
+                                    t.setText(Status);
+                                    Toast.makeText(cont, "Request has been approved",Toast.LENGTH_SHORT).show();
+                                    GenerikFunctions.hDialog();
+
+                                }
+                                else
+                                {
+                                    Toast.makeText(cont, "Request approval has been failed, Please try again after some time",Toast.LENGTH_SHORT).show();
+                                    GenerikFunctions.hDialog();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                Toast.makeText(cont, "Request approval has been failed, Please try again after some time",Toast.LENGTH_SHORT).show();
+                                GenerikFunctions.hDialog();
+                            }
 
                         }
                     },
@@ -1215,7 +1239,7 @@ public class AWSPartyOperations {
             int socketTimeout = 5000;//60 seconds
             RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
             getRequest.setRetryPolicy(policy);
-            queue.add(getRequest);
+            requestQueue.add(getRequest);
 
             return null;
         }

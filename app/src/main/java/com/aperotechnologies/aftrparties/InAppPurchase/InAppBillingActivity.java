@@ -109,33 +109,11 @@ public class InAppBillingActivity extends Activity
             }
 
 
-//                Log.d(TAG, "Purchase finished: " + result + ", purchase: "
-//                        + purchase);
-//
-//                if (result.isFailure()) {
-//                    Log.e("Error purchasing:"," ---- " + result);
-//
-//                    return;
-//                }
-//
-//                if (purchase.getSku().equals(ITEM_SKU)) {
-//                    // remove query inventory method from here and put consumeAsync() directly
-//
-//                    Log.e("Purchase Success"," "+purchase.getToken());
-//
-//                    try {
-//                        mHelper.consumeAsync(purchase, mConsumeFinishedListener);
-//                    } catch (IabHelper.IabAsyncInProgressException e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                }
-
         }
     };
 
 
-    public void consumeItem() {
+    private void consumeItem() {
         try {
             mHelper.queryInventoryAsync(mReceivedInventoryListener);
             Log.e("consumeItem ","try");
@@ -147,7 +125,7 @@ public class InAppBillingActivity extends Activity
         }
     }
 
-    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
+    private IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
             = new IabHelper.QueryInventoryFinishedListener() {
         @Override
         public void onQueryInventoryFinished(IabResult result, Inventory inv) {
@@ -175,7 +153,7 @@ public class InAppBillingActivity extends Activity
     };
 
 
-    IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
+    private IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
             new IabHelper.OnConsumeFinishedListener() {
                 public void onConsumeFinished(Purchase purchase,
                                               IabResult result) {

@@ -28,8 +28,8 @@ android {
         applicationId "com.aperotechnologies.aftrparties"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 6
-        versionName "1.5"
+        versionCode 8
+        versionName "1.7"
     }
     buildTypes {
         release {
@@ -84,12 +84,12 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.android.support:recyclerview-v7:23.1.1'
-
     compile 'com.github.kikoso:SwipeableCards:1.1-RELEASE@aar'
     //compile 'com.makeramen:roundedimageview:2.2.1'
     compile('de.keyboardsurfer.android.widget:crouton:1.8.5@aar') {
         // exclusion is not necessary, but generally a good idea.
         exclude group: 'com.google.android', module: 'support-v4'
     }
+    compile files('libs/http-core-4.1.jar')
 
 }

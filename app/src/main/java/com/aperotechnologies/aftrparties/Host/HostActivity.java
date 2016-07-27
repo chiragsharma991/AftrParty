@@ -139,9 +139,9 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     Location currentlocation = null;
 
     private IabHelper mHelper;
-    String loginUserFBID;
-    UserTable user;
-    String masksubscriptionTime;
+    private String loginUserFBID;
+    private UserTable user;
+    private String masksubscriptionTime;
 
 
 
@@ -167,7 +167,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         uploadPartyImage = (TextView) findViewById(R.id.uploadPartyImage);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-
+        masksubscriptionTime = String.valueOf(Validations.getCurrentTime());
         /****/
         mHelper = new IabHelper(HostActivity.this, ConstsCore.base64EncodedPublicKey);
 
@@ -242,11 +242,24 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                         masksubscriptionTime = partymaskstatus.get(0).getMasksubscriptiondate();
                         cb_mask.setEnabled(false);
                         cb_unmask.setEnabled(false);
+                        cb_mask.setChecked(false);
                         cb_unmask.setChecked(true);
 
                     }
+                    else {
+                        cb_mask.setEnabled(true);
+                        cb_unmask.setEnabled(true);
+                        cb_mask.setChecked(true);
+                        cb_unmask.setChecked(false);
+                    }
 
                 }
+            }
+            else {
+                cb_mask.setEnabled(true);
+                cb_unmask.setEnabled(true);
+                cb_mask.setChecked(true);
+                cb_unmask.setChecked(false);
             }
         }
         catch (Exception e)
@@ -1886,21 +1899,33 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         party.setPartylatlong(latlong);
         party.setPartyImage(picturePath);
 
-        if (user.getPartymaskstatus() == null || user.getPartymaskstatus().size() == 0)
-        {
+        //adding mask status in Partytable
 
-        }
-        else
+
+
+
+        PartyMaskStatusClass partymaskstatus = new PartyMaskStatusClass();
+        if(cb_mask.isChecked() == true)
         {
-            PartyMaskStatusClass partymaskstatus = new PartyMaskStatusClass();
+            GenerikFunctions.showToast(cont, "Mask");
+
+            partymaskstatus.setMaskstatus("Mask");
+            partymaskstatus.setMasksubscriptiondate(masksubscriptionTime);
+            List<PartyMaskStatusClass> partymaskstatuslist = new ArrayList<>();
+            partymaskstatuslist.add(partymaskstatus);
+            party.setPartymaskstatus(partymaskstatuslist);
+        }
+        else if(cb_unmask.isChecked() == true)
+        {
+            GenerikFunctions.showToast(cont, "Unmask");
+
             partymaskstatus.setMaskstatus("Unmask");
             partymaskstatus.setMasksubscriptiondate(masksubscriptionTime);
             List<PartyMaskStatusClass> partymaskstatuslist = new ArrayList<>();
             partymaskstatuslist.add(partymaskstatus);
             party.setPartymaskstatus(partymaskstatuslist);
-            
-
         }
+
 
 
         //party.setPartyImage("");
@@ -1983,7 +2008,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         } else {
 
             currentlocation = getLastBestLocation();
-            //Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
+            Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
             if (currentlocation != null) {
 
                 double latitude = currentlocation.getLatitude();
@@ -2069,10 +2094,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         public void onIabPurchaseFinished(IabResult result,
                                           Purchase purchase)
         {
-//            // if we were disposed of in the meantime, quit.
-//            if (mHelper == null) return;
-//
-//
+
             if (result.isFailure())
             {
                 // Handle error
@@ -2088,7 +2110,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
                 Toast.makeText(getApplicationContext(),"Purchase success", Toast.LENGTH_SHORT).show();
                 consumeItem();
-                //buyButton.setEnabled(false);
+
             }
 
         }
@@ -2143,7 +2165,6 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                     if (mHelper == null) return;
 
                     if (result.isSuccess()) {
-                        //clickButton.setEnabled(true);
 
                         Toast.makeText(getApplicationContext(),"consume success", Toast.LENGTH_SHORT).show();
 
@@ -2202,6 +2223,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         }
         catch(Exception e)
         {
+            Toast.makeText(getApplicationContext(),"Purchase Failed", Toast.LENGTH_SHORT).show();
             GenerikFunctions.hDialog();
         }
 

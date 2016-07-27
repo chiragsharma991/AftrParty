@@ -294,9 +294,6 @@ public class SettingsActivity extends Activity
 
 
 
-
-
-
     imguser.setOnClickListener(new View.OnClickListener()
     {
         @Override

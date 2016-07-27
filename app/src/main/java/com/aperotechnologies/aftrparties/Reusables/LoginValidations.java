@@ -468,17 +468,20 @@ public  class LoginValidations
                             editor.putString(m_config.QuickBloxID, String.valueOf(user.getId()));
                             editor.apply();
 
-                            if(cont instanceof RegistrationActivity){
+                            if(cont instanceof RegistrationActivity)
+                            {
                                 Log.e("camee ","here");
                                 new AWSLoginOperations.addUserQuickBloxId(cont, user, avatarUrl).execute();
                             }
 
-                            if(cont instanceof Welcome){
+                            if(cont instanceof Welcome)
+                            {
                                 Log.e("camee11111 ","here");
                                 checkChatLoginExist(cont, user);
                             }
 
-                            if(cont instanceof SplashActivity){
+                            if(cont instanceof SplashActivity)
+                            {
                                 Log.e("camee2222 ","here");
                                 checkChatLoginExist(cont, user);
                             }
@@ -942,24 +945,15 @@ public  class LoginValidations
                     }
                     GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                 }
-                else
+                else if (Welcome.wl_pd != null)
                 {
-                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
-                }
-
-                if(Welcome.wl_pd != null) {
                     if (Welcome.wl_pd.isShowing())
                     {
                         Welcome.wl_pd.dismiss();
                     }
                     GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                 }
-                else
-                {
-                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
-                }
-
-                if(SplashActivity.pd != null)
+                else  if(SplashActivity.pd != null)
                 {
                     if(SplashActivity.pd.isShowing())
                     {
@@ -967,10 +961,13 @@ public  class LoginValidations
                     }
                     Intent i = new Intent(cont, HomePageActivity.class);
                     cont.startActivity(i);
-                }else{
-                    Intent i = new Intent(cont, HomePageActivity.class);
-                    cont.startActivity(i);
                 }
+                else{
+                    GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                }
+
+
+
 
             }
         });
@@ -981,11 +978,13 @@ public  class LoginValidations
         Log.e("isLoggedIn "," "+isLoggedIn);
         if(isLoggedIn)
         {
+            Log.e("here" ," inLoggedIn");
             //if chat is LoggedIn give a call to PlayServiceHelper
             new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
         }
         else
         {
+            Log.e("here" ," if not inLoggedIn");
             try
             {
                 user.setPassword(BaseService.getBaseService().getToken());
