@@ -896,9 +896,10 @@ public class GateCrasherSearchActivity extends Activity {
 
 
     IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
-            new IabHelper.OnConsumeFinishedListener() {
-                public void onConsumeFinished(Purchase purchase,
-                                              IabResult result) {
+            new IabHelper.OnConsumeFinishedListener()
+            {
+                public void onConsumeFinished(Purchase purchase, IabResult result)
+                {
                     // if we were disposed of in the meantime, quit.
                     if (mHelper == null) return;
 
@@ -922,8 +923,10 @@ public class GateCrasherSearchActivity extends Activity {
     {
         Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
 
-        try {
-            if (user.getPaidgc() == null || user.getPaidgc().size() == 0) {
+        try
+        {
+            if (user.getPaidgc() == null || user.getPaidgc().size() == 0)
+            {
                 PaidGCClass paidGCClass = new PaidGCClass();
                 paidGCClass.setPaidstatus("Yes");
                 paidGCClass.setSubscriptiondate(String.valueOf(subVal));
@@ -961,7 +964,8 @@ public class GateCrasherSearchActivity extends Activity {
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
@@ -969,7 +973,8 @@ public class GateCrasherSearchActivity extends Activity {
 
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressed()
+    {
         finish();
     }
 
