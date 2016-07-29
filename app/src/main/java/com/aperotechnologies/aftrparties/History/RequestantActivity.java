@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.andtinder.model.CardModel;
+import com.anjlab.android.iab.v3.BillingProcessor;
+import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
@@ -23,6 +25,7 @@ import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.GateCrashersClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.QBSessionClass;
+import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
@@ -51,8 +54,7 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 /**
  * Created by mpatil on 19/07/16.
  */
-public class RequestantActivity extends AppCompatActivity
-{
+public class RequestantActivity extends AppCompatActivity implements BillingProcessor.IBillingHandler {
     private ViewPager viewPager;
     CallbackManager callbackManager;
     LoginManager loginManager;
@@ -75,6 +77,9 @@ public class RequestantActivity extends AppCompatActivity
     public static String Token;
     Iterator iterator;
     int total_friends_count = 0;
+    public static BillingProcessor bpReqChat;
+    public static  boolean readyToPurchaseRChat = false;
+    String fragmentPosition;
 
 
     public void onCreate(Bundle savedInstanceState)
@@ -89,6 +94,15 @@ public class RequestantActivity extends AppCompatActivity
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
         cont  = this;
+
+
+        if(!BillingProcessor.isIabServiceAvailable(cont)) {
+            GenerikFunctions.showToast(cont,"In-app billing service is unavailable, please upgrade Android Market/Play to version >= 3.9.16");
+        }
+
+        bpReqChat = new BillingProcessor(cont, ConstsCore.base64EncodedPublicKey, this);
+
+
         //   pd = (ProgressBar)findViewById(R.id.pd);
         viewPager = (ViewPager)findViewById(R.id.pager);
 
@@ -118,7 +132,8 @@ public class RequestantActivity extends AppCompatActivity
         permissions.add("user_photos");
 
         //created by Imran for notification check
-        checkFBLILoginState();
+        //checkFBLILoginState();
+
 
         try
         {
@@ -152,6 +167,7 @@ public class RequestantActivity extends AppCompatActivity
             RequestantPagerAdapter adapter = new RequestantPagerAdapter(cont,getSupportFragmentManager(),facebookId,liId, QbId,imageArray,status);
             viewPager.setAdapter(adapter);
             viewPager.setOnPageChangeListener(new CircularViewPagerHandler(viewPager));
+
 
 
 
@@ -327,15 +343,78 @@ public class RequestantActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (linkedinStart.equals("")) {
-            //For FB
-            super.onActivityResult(requestCode, resultCode, data);
-            callbackManager.onActivityResult(requestCode, resultCode, data);
+            GenerikFunctions.showToast(cont,m_config.QbIdforInappPChat);
+
+            if (!bpReqChat.handleActivityResult(requestCode, resultCode, data))
+                super.onActivityResult(requestCode, resultCode, data);
+
+
+//        else {
+//            if (linkedinStart.equals(""))
+//            {
+//                //For FB
+//                super.onActivityResult(requestCode, resultCode, data);
+//                callbackManager.onActivityResult(requestCode, resultCode, data);
+//            } else {
+//                //For LI
+//                LISessionManager.getInstance(getApplicationContext()).onActivityResult(this, requestCode, resultCode, data);
+//            }
+//        }
+    }
+
+
+
+
+    @Override
+    public void onDestroy() {
+        if (bpReqChat != null)
+            bpReqChat.release();
+
+        super.onDestroy();
+    }
+
+
+    @Override
+    public void onProductPurchased(String productId, TransactionDetails details) {
+        GenerikFunctions.showToast(cont,"Purchase Successful");
+        Boolean consumed = bpReqChat.consumePurchase(ConstsCore.ITEM_PRIVATECHAT_SKU);
+        GenerikFunctions.sDialog(cont, "Creating 1-1 Chat...");
+
+        if (consumed)
+        {
+            //GenerikFunctions.showToast(cont,"Successfully consumed");
+            QBChatDialogCreation.createPrivateChat(Integer.valueOf(m_config.QbIdforInappPChat), cont);
         }
-        else {
-            //For LI
-            LISessionManager.getInstance(getApplicationContext()).onActivityResult(this, requestCode, resultCode, data);
+        else{
+            GenerikFunctions.hDialog();
         }
+    }
+
+    @Override
+    public void onPurchaseHistoryRestored() {
+        //GenerikFunctions.showToast(cont,"onPurchaseHistoryRestored");
+        for(String sku : bpReqChat.listOwnedProducts())
+            Log.d("", "Owned Managed Product: " + sku);
+        for(String sku : bpReqChat.listOwnedSubscriptions())
+            Log.d("", "Owned Subscription: " + sku);
+    }
+
+    @Override
+    public void onBillingError(int errorCode, Throwable error) {
+        GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
+    }
+
+    @Override
+    public void onBillingInitialized() {
+        //GenerikFunctions.showToast(cont,"onBillingInitialized");
+        readyToPurchaseRChat = true;
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        m_config.QbIdforInappPChat = "";
+        finish();
     }
 
 }

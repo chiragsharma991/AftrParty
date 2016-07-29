@@ -52,6 +52,8 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 
+import com.anjlab.android.iab.v3.BillingProcessor;
+import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
@@ -63,6 +65,7 @@ import com.aperotechnologies.aftrparties.GateCrasher.GCParceableData;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.QBSessionClass;
+import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
@@ -97,7 +100,7 @@ import static com.aperotechnologies.aftrparties.Reusables.Validations.getOutputM
 /**
  * Created by hasai on 02/05/16.
  */
-public class HostActivity extends Activity//implements AdapterView.OnItemSelectedListener,TimePicker.OnTimeChangedListener {
+public class HostActivity extends Activity implements BillingProcessor.IBillingHandler//implements AdapterView.OnItemSelectedListener,TimePicker.OnTimeChangedListener {
 {
 
     LinearLayout lLyoutHost, llayoutenterAddress;
@@ -138,10 +141,11 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     private static final int MY_PERMISSIONS_ACCESS_CF_LOCATION = 3;
     Location currentlocation = null;
 
-    private IabHelper mHelper;
     private String loginUserFBID;
     private UserTable user;
     private String masksubscriptionTime;
+    private BillingProcessor bpMaskUnmask;
+    private boolean readyToPurchaseMaskUnmask = false;
 
 
 
@@ -168,20 +172,15 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         masksubscriptionTime = String.valueOf(Validations.getCurrentTime());
-        /****/
-        mHelper = new IabHelper(HostActivity.this, ConstsCore.base64EncodedPublicKey);
 
-        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
-            public void onIabSetupFinished(IabResult result) {
-                if (!result.isSuccess()) {
-                    Log.e("HomePageActivity", "In-app Billing setup failed: " +
-                            result);
-                } else {
-                    Log.e("HomePageActivity", "In-app Billing is set up OK");
-                }
-            }
-        });
-       /****/
+
+        if(!BillingProcessor.isIabServiceAvailable(cont)) {
+            GenerikFunctions.showToast(cont,"In-app billing service is unavailable, please upgrade Android Market/Play to version >= 3.9.16");
+        }
+
+        bpMaskUnmask = new BillingProcessor(HostActivity.this, ConstsCore.base64EncodedPublicKey, this);
+
+
 
 //        // Spinner for Start Now/Later
 //        Spinner spn_startTime = (Spinner) findViewById(R.id.spn_startTime);
@@ -498,6 +497,9 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         cb_unmask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
+
                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(HostActivity.this);
                 alertDialogBuilder
                         .setTitle("Pay for Unmasking Party.")
@@ -519,14 +521,15 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
                                         cb_unmask.setChecked(false);
                                         cb_mask.setChecked(true);
-                                        try {
+                                        if (!readyToPurchaseMaskUnmask)
+                                        {
+                                            GenerikFunctions.showToast(cont,"Billing not initialized.");
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            bpMaskUnmask.purchase((Activity) cont,ConstsCore.ITEM_MASK_SKU);
 
-                                            ///10001 - is requestCode
-                                            mHelper.launchPurchaseFlow(HostActivity.this, ConstsCore.ITEM_MASK_SKU, ConstsCore.RequestCode,
-                                                    mPurchaseFinishedListener, "mypurchasetoken");
-
-                                        } catch (IabHelper.IabAsyncInProgressException e) {
-                                            e.printStackTrace();
                                         }
 
 
@@ -1445,6 +1448,45 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
         }
     }
 
+    @Override
+    public void onProductPurchased(String productId, TransactionDetails details) {
+        //GenerikFunctions.showToast(cont,"onProductPurchased: " + productId+" ");
+        GenerikFunctions.showToast(cont,"Purchase Successful.");
+        Boolean consumed = bpMaskUnmask.consumePurchase(ConstsCore.ITEM_MASK_SKU);
+        GenerikFunctions.sDialog(cont, "Saving Data");
+
+        if (consumed)
+        {
+           // GenerikFunctions.showToast(cont,"Successfully consumed");
+            setInAppPurchaseinAWSUser();
+        }
+        else
+        {
+            GenerikFunctions.hDialog();
+        }
+    }
+
+    @Override
+    public void onPurchaseHistoryRestored() {
+        //GenerikFunctions.showToast(cont,"onPurchaseHistoryRestored");
+        for(String sku : bpMaskUnmask.listOwnedProducts())
+            Log.d("", "Owned Managed Product: " + sku);
+        for(String sku : bpMaskUnmask.listOwnedSubscriptions())
+            Log.d("", "Owned Subscription: " + sku);
+    }
+
+    @Override
+    public void onBillingError(int errorCode, Throwable error) {
+        //GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
+
+    }
+
+    @Override
+    public void onBillingInitialized() {
+        //GenerikFunctions.showToast(cont,"onBillingInitialized");
+        readyToPurchaseMaskUnmask = true;
+    }
+
     private class GeocoderHandler extends Handler
     {
         int iteration;
@@ -1626,17 +1668,9 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
             }
 
-            else if (requestCode == ConstsCore.RequestCode) {
-                Log.e("inside onActivityResult"," "+!mHelper.handleActivityResult(requestCode,
-                        resultCode, data));
-
-                if (!mHelper.handleActivityResult(requestCode,
-                        resultCode, data)) {
-
-                    Log.e("inside mHelper.handleActivityResult"," ");
-
+            else  {
+                if (!bpMaskUnmask.handleActivityResult(requestCode, resultCode, data))
                     super.onActivityResult(requestCode, resultCode, data);
-                }
             }
         }
     }
@@ -2089,96 +2123,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
     }
 
 
-    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
-            = new IabHelper.OnIabPurchaseFinishedListener() {
-        public void onIabPurchaseFinished(IabResult result,
-                                          Purchase purchase)
-        {
 
-            if (result.isFailure())
-            {
-                // Handle error
-                Log.e("Error purchasing:"," ---- " + result+" ");
-                Toast.makeText(getApplicationContext(),""+result, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            else if (purchase.getSku().equals(ConstsCore.ITEM_MASK_SKU))
-            {
-
-
-                Log.e("Purchase Success"," "+purchase.getToken());
-
-                Toast.makeText(getApplicationContext(),"Purchase success", Toast.LENGTH_SHORT).show();
-                consumeItem();
-
-            }
-
-        }
-    };
-
-
-    public void consumeItem() {
-        try {
-            mHelper.queryInventoryAsync(mReceivedInventoryListener);
-            Log.e("consumeItem ","try");
-            Toast.makeText(getApplicationContext(),"consumeitem try", Toast.LENGTH_SHORT).show();
-        } catch (IabHelper.IabAsyncInProgressException e) {
-            Log.e("consumeItem ","catch");
-            Toast.makeText(getApplicationContext(),"consumeitem catch", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
-            = new IabHelper.QueryInventoryFinishedListener() {
-        @Override
-        public void onQueryInventoryFinished(IabResult result, Inventory inv) {
-            if (result.isFailure()) {
-                // Handle failure
-                Log.e("QueryInventory ","failed");
-                Toast.makeText(getApplicationContext(),"QueryInventory failed", Toast.LENGTH_SHORT).show();
-            } else {
-                try {
-
-                    mHelper.consumeAsync(inv.getPurchase(ConstsCore.ITEM_MASK_SKU),
-                            mConsumeFinishedListener);
-
-                    Toast.makeText(getApplicationContext(),"QueryInventory  consumeAsync", Toast.LENGTH_SHORT).show();
-
-                } catch (IabHelper.IabAsyncInProgressException e) {
-
-                    Toast.makeText(getApplicationContext(),"QueryInventory  catch", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                }
-            }
-        }
-
-
-    };
-
-
-    IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
-            new IabHelper.OnConsumeFinishedListener() {
-                public void onConsumeFinished(Purchase purchase,
-                                              IabResult result) {
-                    // if we were disposed of in the meantime, quit.
-                    if (mHelper == null) return;
-
-                    if (result.isSuccess()) {
-
-                        Toast.makeText(getApplicationContext(),"consume success", Toast.LENGTH_SHORT).show();
-
-                        GenerikFunctions.sDialog(cont, "Purchasing");
-                        setInAppPurchaseinAWSUser();
-
-
-                    } else {
-                        // handle error
-
-                        Toast.makeText(getApplicationContext(),"consume failed", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            };
 
     private void setInAppPurchaseinAWSUser()
     {
@@ -2194,7 +2139,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                 user.setPartymaskstatus(partymaskstatuslist);
                 m_config.mapper.save(user);
 
-                Toast.makeText(getApplicationContext(),"Purchase Successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Data is saved Successfully", Toast.LENGTH_SHORT).show();
                 GenerikFunctions.hDialog();
                 cb_unmask.setChecked(true);
                 cb_mask.setChecked(false);
@@ -2213,7 +2158,7 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
                 user.setPartymaskstatus(partymaskstatuslist);
                 m_config.mapper.save(user);
 
-                Toast.makeText(getApplicationContext(),"Purchase Successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Data is saved Successfully", Toast.LENGTH_SHORT).show();
                 GenerikFunctions.hDialog();
                 cb_unmask.setChecked(true);
                 cb_mask.setChecked(false);
@@ -2240,15 +2185,13 @@ public class HostActivity extends Activity//implements AdapterView.OnItemSelecte
 
     }
 
+
     @Override
     public void onDestroy() {
+        if (bpMaskUnmask != null)
+            bpMaskUnmask.release();
+
         super.onDestroy();
-        if (mHelper != null) try {
-            mHelper.dispose();
-        } catch (IabHelper.IabAsyncInProgressException e) {
-            e.printStackTrace();
-        }
-        mHelper = null;
     }
 
     @Override

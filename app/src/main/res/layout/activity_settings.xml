@@ -183,7 +183,7 @@
                 <!--/>-->
 
 
-            <Spinner
+            <!--<Spinner
                 android:padding="10dp"
                 android:textColor="@android:color/black"
                 android:layout_margin="5dp"
@@ -195,7 +195,7 @@
 
             <View
                 android:layout_height="5dp"
-                android:layout_width="3dp"  />
+                android:layout_width="3dp"  />-->
 
             <TextView
                 android:textSize="@dimen/text_size"

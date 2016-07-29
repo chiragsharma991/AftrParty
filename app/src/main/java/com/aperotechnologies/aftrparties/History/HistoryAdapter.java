@@ -17,6 +17,7 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartiesClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
 
 import java.util.ArrayList;
@@ -122,7 +123,8 @@ public class HistoryAdapter extends BaseAdapter {
 //                Log.e("PartyName"," "+ finalParties.getPartyName());
 //                Log.e("Status"," "+ finalParties.getPartyStatus());
 
-                if(finalParties.getPartystatus().equals("Created") || finalParties.getPartystatus().equals("Approved")){
+                if(finalParties.getPartystatus().equals("Created") || finalParties.getPartystatus().equals("Approved"))
+                {
                     Intent i = new Intent(cont,PartyDetails.class);
                     PartyParceableData party = new PartyParceableData();
                     party.setPartyId(finalParties.getPartyid());
@@ -138,6 +140,8 @@ public class HistoryAdapter extends BaseAdapter {
                 }
                 else
                 {
+
+                    GenerikFunctions.sDialog(cont, "Fetching Party Mask Status");
                     try
                     {
                         String PartyId = finalParties.getPartyid();
@@ -148,8 +152,9 @@ public class HistoryAdapter extends BaseAdapter {
                             Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
                             if(currTime < Long.parseLong(partymaskstatus.get(0).getMasksubscriptiondate()))
                             {
-                                // check whether party is Unmasked
+                                Log.e("Party status is Unmask"," ");
 
+                                // check whether party is Unmasked
                                 Intent i = new Intent(cont,PartyDetails.class);
                                 PartyParceableData party = new PartyParceableData();
                                 party.setPartyId(finalParties.getPartyid());
@@ -161,7 +166,11 @@ public class HistoryAdapter extends BaseAdapter {
                                 mBundles.putSerializable(ConstsCore.SER_KEY, party);
                                 i.putExtras(mBundles);
                                 cont.startActivity(i);
+                                GenerikFunctions.hDialog();
 
+                            }else
+                            {
+                                GenerikFunctions.hDialog();
                             }
 
                         }
@@ -169,6 +178,7 @@ public class HistoryAdapter extends BaseAdapter {
                     }
                     catch (Exception e)
                     {
+                        GenerikFunctions.hDialog();
 
                     }
 

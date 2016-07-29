@@ -79,7 +79,8 @@ public class GateCrasherActivity extends Activity
 
 
             Log.e("ChatService.getInstance().getCurrentUser()", " " + ChatService.getInstance().getCurrentUser());
-            if (ChatService.getInstance().getCurrentUser() == null) {
+            if (ChatService.getInstance().getCurrentUser() == null)
+            {
                 String accessToken = LoginValidations.getFBAccessToken().getToken();
 
                 QBSessionClass.getInstance().getQBSession(new QBEntityCallback() {

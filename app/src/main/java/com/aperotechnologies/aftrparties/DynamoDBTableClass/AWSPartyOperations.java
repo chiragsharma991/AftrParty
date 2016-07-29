@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -20,7 +19,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpStack;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
@@ -607,12 +605,13 @@ public class AWSPartyOperations {
         String endBlockTime;
         String status;
         TextView t;
+        Button accept, deny;
         boolean value = false;
         UserTable user;
         List<ActivePartyClass> ActivePartyList;
 
 
-        public addupdActiveParty(String gateCrasherID, PartyParceableData party, String startBlockTime, String endBlockTime, String status, Context cont, TextView t)
+        public addupdActiveParty(String gateCrasherID, PartyParceableData party, String startBlockTime, String endBlockTime, String status, Context cont, TextView t, Button accept, Button deny)
         {
             this.cont = cont;
             this.gateCrasherID = gateCrasherID;
@@ -621,6 +620,8 @@ public class AWSPartyOperations {
             this.endBlockTime = endBlockTime;
             this.status = status;
             this.t = t;
+            this.accept = accept;
+            this.deny = deny;
             m_config = Configuration_Parameter.getInstance();
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         }
@@ -678,7 +679,7 @@ public class AWSPartyOperations {
                     ActivityPartylist.add(ActiveParty);
                     user.setActiveparty(ActivityPartylist);
                     m_config.mapper.save(user);
-                    new AWSPartyOperations.updateGCinPartyTable(gateCrasherID, party.getPartyId(),  status, cont, t).execute();
+                    new AWSPartyOperations.updateGCinPartyTable(gateCrasherID, party.getPartyId(),  status, cont, t, accept, deny).execute();
 
 
 
@@ -696,7 +697,7 @@ public class AWSPartyOperations {
                     ActivePartyList.set(0, ActiveParty);
                     user.setActiveparty(ActivePartyList);
                     m_config.mapper.save(user);
-                    new AWSPartyOperations.updateGCinPartyTable(gateCrasherID, party.getPartyId(),  status, cont, t).execute();
+                    new AWSPartyOperations.updateGCinPartyTable(gateCrasherID, party.getPartyId(),  status, cont, t, accept, deny).execute();
 
 
                 }
@@ -726,15 +727,18 @@ public class AWSPartyOperations {
         boolean value = false;
         PartyTable party;
         List<GateCrashersClass> GCList;
+        Button accept, deny;
 
 
-        public updateGCinPartyTable(String gateCrasherID, String partyID, String Status, Context cont, TextView t)
+        public updateGCinPartyTable(String gateCrasherID, String partyID, String Status, Context cont, TextView t, Button accept, Button deny)
         {
             this.cont = cont;
             this.gateCrasherID = gateCrasherID;
             this.partyID = partyID;
             this.Status = Status;
             this.t = t;
+            this.accept = accept;
+            this.deny = deny;
             m_config = Configuration_Parameter.getInstance();
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         }
@@ -808,7 +812,7 @@ public class AWSPartyOperations {
 
                 }
 
-                new updatePartiesinUserTable(gateCrasherID, partyID, Status, DialogID, PartyImage, cont, t).execute();
+                new updatePartiesinUserTable(gateCrasherID, partyID, Status, DialogID, PartyImage, cont, t, accept, deny).execute();
 
             }else{
 
@@ -831,6 +835,7 @@ public class AWSPartyOperations {
         String PartyImage;
         String Status;
         TextView t;
+        Button accept, deny;
 
         String PartyName;
         String PartyEndTime;
@@ -840,7 +845,7 @@ public class AWSPartyOperations {
         UserTable user;
 
 
-        public updatePartiesinUserTable(String gateCrasherFBID, String partyID, String Status, String DialogID, String PartyImage, Context cont, TextView t)
+        public updatePartiesinUserTable(String gateCrasherFBID, String partyID, String Status, String DialogID, String PartyImage, Context cont, TextView t, Button accept, Button deny)
         {
             this.cont = cont;
             this.gateCrasherFBID = gateCrasherFBID;
@@ -849,6 +854,8 @@ public class AWSPartyOperations {
             this.PartyImage = PartyImage;
             this.Status = Status;
             this.t = t;
+            this.accept = accept;
+            this.deny = deny;
             m_config = Configuration_Parameter.getInstance();
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         }
@@ -998,7 +1005,7 @@ public class AWSPartyOperations {
                     //Chat Dialog Creation after Party Approval
                     Log.e(" gateCrasherFBID "," "+gateCrasherFBID);
 
-                    new RemovePendingPartiesAPI(cont, partyID, gateCrasherFBID, t, Status).execute();
+                    new RemovePendingPartiesAPI(cont, partyID, gateCrasherFBID, t, Status, accept, deny).execute();
 
                     if (DialogID == null || DialogID.equals(null) || DialogID.equals("") || DialogID.equals("N/A"))
                     {
@@ -1012,6 +1019,8 @@ public class AWSPartyOperations {
                 else if(Status.equals("Declined"))
                 {
                     t.setText(Status);
+                    accept.setVisibility(View.GONE);
+                    deny.setVisibility(View.GONE);
                     QBPushNotifications.sendDeclinedPN(gateCrasherFBID, gateCrasherQBID, partyID, PartyName, cont);
                     Toast.makeText(cont, "Request has been declined",Toast.LENGTH_SHORT).show();
                     GenerikFunctions.hDialog();
@@ -1163,10 +1172,11 @@ public class AWSPartyOperations {
         String partyid;
         String facebookid;
         TextView t;
+        Button accept, deny;
         String Status;
 
         public RemovePendingPartiesAPI(final Context cont,
-                                       String partyid, String facebookid, TextView t, String Status)
+                                       String partyid, String facebookid, TextView t, String Status, Button accept, Button deny)
         {
             Log.e("----", " "+facebookid+" "+partyid);
 
@@ -1174,6 +1184,8 @@ public class AWSPartyOperations {
             this.partyid = partyid;
             this.facebookid = facebookid;
             this.t = t;
+            this.accept = accept;
+            this.deny = deny;
             this.Status = Status;
             m_config = Configuration_Parameter.getInstance();
         }
@@ -1209,6 +1221,8 @@ public class AWSPartyOperations {
                                 if(response.getInt("confirm_status") == 1)
                                 {
                                     t.setText(Status);
+                                    accept.setVisibility(View.GONE);
+                                    deny.setVisibility(View.GONE);
                                     Toast.makeText(cont, "Request has been approved",Toast.LENGTH_SHORT).show();
                                     GenerikFunctions.hDialog();
 

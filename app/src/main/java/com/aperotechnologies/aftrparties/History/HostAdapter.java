@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.util.Log;
 
+import com.anjlab.android.iab.v3.BillingProcessor;
+
 /**
  * Created by ifattehkhan on 20/07/16.
  */
@@ -16,17 +18,17 @@ public class HostAdapter extends FragmentStatePagerAdapter{
     String qbid;
     String img_url;
 
-    public HostAdapter(FragmentManager fm) {
-        super(fm);
-    }
 
-    public HostAdapter(Context cont,FragmentManager fm, String fbid, String liid, String qbid, String img_url) {
+
+
+    public HostAdapter(Context cont, FragmentManager fm, String fbid, String liid, String qbid, String img_url) {
         super(fm);
         this.cont=cont;
         this.fbid=fbid;
         this.liid=liid;
         this.qbid=qbid;
         this.img_url=img_url;
+
         Log.e("in Host Adapter","11");
 
 
@@ -35,6 +37,8 @@ public class HostAdapter extends FragmentStatePagerAdapter{
     @Override
     public Fragment getItem(int position) {
         HostFragment tab1 = new HostFragment(cont,position,fbid,liid,qbid,img_url);
+
+
         Log.e("in Host Adapter","22");
         return tab1;
     }

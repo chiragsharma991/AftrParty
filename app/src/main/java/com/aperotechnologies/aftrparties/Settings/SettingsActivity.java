@@ -111,7 +111,7 @@ public class SettingsActivity extends Activity
     SeekbarWithIntervals seekbarWithIntervals = null;
     String seekbarVal = "";
     Spinner spn_Gender, spn_mask;
-    Button img_editSettings;
+    Button btn_update;
     String selected_Gender, selected_maskStatus = "Mask";
     String FacebookID;
     int selectedDistVal = 1;
@@ -172,7 +172,7 @@ public class SettingsActivity extends Activity
 //        seekBar = (SeekBar) findViewById(R.id.seekbar);
         seekBar1 = (SeekBar) findViewById(R.id.seekbar1);
 
-        img_editSettings = (Button) findViewById(R.id.img_editSettings);
+        btn_update = (Button) findViewById(R.id.img_editSettings);
         faceOverlayView =(FaceOverlayView) findViewById(R.id.face_overlay);
         cameraGalaryImageList=new ArrayList<>();
 
@@ -180,11 +180,11 @@ public class SettingsActivity extends Activity
         sett_pd = new ProgressDialog(this);
 
         // Spinner for Mask/UnMask
-        spn_mask = (Spinner) findViewById(R.id.spn_maskStatus);
-        List<String> maskList = new ArrayList<String>();
-        //maskList.add("Select Mask Status");
-        maskList.add("Mask");
-        maskList.add("Unmask");
+//        spn_mask = (Spinner) findViewById(R.id.spn_maskStatus);
+//        List<String> maskList = new ArrayList<String>();
+//        //maskList.add("Select Mask Status");
+//        maskList.add("Mask");
+//        maskList.add("Unmask");
 
         // Spinner for Gender
         spn_Gender = (Spinner) findViewById(R.id.spn_Gender);
@@ -197,9 +197,9 @@ public class SettingsActivity extends Activity
         genderadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spn_Gender.setAdapter(genderadapter);
 
-        final ArrayAdapter<String> maskStatus = new ArrayAdapter<String>(SettingsActivity.this, R.layout.spinner_item, maskList);
-        maskStatus.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spn_mask.setAdapter(maskStatus);
+//        final ArrayAdapter<String> maskStatus = new ArrayAdapter<String>(SettingsActivity.this, R.layout.spinner_item, maskList);
+//        maskStatus.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spn_mask.setAdapter(maskStatus);
 
         FacebookID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
 
@@ -445,43 +445,17 @@ public class SettingsActivity extends Activity
         }
     });
 
-    img_editSettings.setOnClickListener(new View.OnClickListener()
+    btn_update.setOnClickListener(new View.OnClickListener()
     {
         @Override
         public void onClick(View v)
         {
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(edt_usermsgStatus.getWindowToken(), 0);
-//            m_config.pDialog.setMessage("Updating User");
-//            m_config.pDialog.setCancelable(false);
-//            m_config.pDialog.show();
             editSettings();
         }
     });
 
-    // spinner selection for Mask
-    spn_mask.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-    {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-        {
-            Log.e("selected_maskStatus"," "+selected_maskStatus);
-            if(parent.getSelectedItem().toString().trim().equals("Unmask"))
-            {
-                //ask for in-app purchase
-                Log.e("ask for in-app purchase"," ");
-                selected_maskStatus = "Unmask";
-            }
-            else
-            {
-                selected_maskStatus = "Mask";
-            }
-        }
-        @Override
-        public void onNothingSelected(AdapterView<?> parent)
-        {
-        }
-     });
 
     }
 
@@ -489,13 +463,6 @@ public class SettingsActivity extends Activity
     {
         Log.e("Valid Pics ",validPics.size()+"");
 
-//        for(int i=0;i<validPics.size();i++)
-//        {
-//            Log.e("Valid Pics getFBProfilePictures",validPics.get(i)+"");
-//        }
-     //   lineimg.removeAllViews();
-
-        Log.e("Removed all  objects","Yes");
 
         RecyclerViewAdapter  adapter = new RecyclerViewAdapter(SettingsActivity.this, validPics,imguser);
         recyclerView.setAdapter(adapter);
@@ -627,33 +594,20 @@ public class SettingsActivity extends Activity
                 });
             }
 
-            if(user_mask_unmask.equals("Mask"))
-            {
-                h.post(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        Log.e("Inside setUserInfo","setUserInfo  33");
-                        spn_mask.setSelection(0);
-
-                    }
-                });
-            }
-            else  if(user_mask_unmask.equals("Unmask"))
-            {
-                h.post(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        Log.e("Inside setUserInfo","setUserInfo  44");
-                        spn_mask.setSelection(1);
-                        spn_mask.setEnabled(false);
-                    }
-                });
-            }
-//            else
+//            if(user_mask_unmask.equals("Mask"))
+//            {
+//                h.post(new Runnable()
+//                {
+//                    @Override
+//                    public void run()
+//                    {
+//                        Log.e("Inside setUserInfo","setUserInfo  33");
+//                        spn_mask.setSelection(0);
+//
+//                    }
+//                });
+//            }
+//            else  if(user_mask_unmask.equals("Unmask"))
 //            {
 //                h.post(new Runnable()
 //                {
@@ -661,13 +615,13 @@ public class SettingsActivity extends Activity
 //                    public void run()
 //                    {
 //                        Log.e("Inside setUserInfo","setUserInfo  44");
-//                        spn_mask.setSelection(0);
-//
+//                        spn_mask.setSelection(1);
+//                        spn_mask.setEnabled(false);
 //                    }
 //                });
-//
 //            }
-            Log.e("Inside setUserInfo","setUserInfo  55");
+//
+
 
             if(user_profilepic.equals("N/A"))
             {
@@ -792,11 +746,6 @@ public class SettingsActivity extends Activity
                 }
             });
 
-//            progressDialog.dismiss();
-
-//            progressDialog.cancel();
-//            m_config.pDialog.dismiss();
-//            m_config.pDialog.cancel();
 
             if(HomePageActivity.hp_pd!=null)
             {
@@ -1005,7 +954,7 @@ public class SettingsActivity extends Activity
 
             userTable.setProfileStatus(profileStatus);
             userTable.setProfilePicUrl(validPics);
-            userTable.setcurrentmaskstatus(selected_maskStatus);
+            //userTable.setcurrentmaskstatus(selected_maskStatus);
             userTable.setImageflag("Yes");
             m_config.mapper.save(userTable);
 

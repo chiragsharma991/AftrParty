@@ -19,6 +19,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -35,6 +36,8 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 
+import com.anjlab.android.iab.v3.BillingProcessor;
+import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
@@ -94,10 +97,10 @@ public class GateCrasherSearchActivity extends Activity {
     private static final int MY_PERMISSIONS_ACCESS_CF_LOCATION = 3;
     Location location = null;
 
-    private IabHelper mHelper;
     private String loginUserFBID;
     private UserTable user;
-    private String masksubscriptionTime;
+    private BillingProcessor bp;
+    private boolean readyToPurchase = false;
 
 
 
@@ -105,6 +108,13 @@ public class GateCrasherSearchActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gc_search);
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build();
+        StrictMode.setThreadPolicy(policy);
+
         cont = this;
 
         m_config = Configuration_Parameter.getInstance();
@@ -171,72 +181,194 @@ public class GateCrasherSearchActivity extends Activity {
             }
         });
 
-        /****/
-        mHelper = new IabHelper(GateCrasherSearchActivity.this, ConstsCore.base64EncodedPublicKey);
 
-        mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
-            public void onIabSetupFinished(IabResult result) {
-                if (!result.isSuccess()) {
-                    Log.e("HomePageActivity", "In-app Billing setup failed: " +
-                            result);
-                } else {
-                    Log.e("HomePageActivity", "In-app Billing is set up OK");
+
+        if(!BillingProcessor.isIabServiceAvailable(this)) {
+            GenerikFunctions.showToast(cont,"In-app billing service is unavailable, please upgrade Android Market/Play to version >= 3.9.16");
+        }
+
+        bp = new BillingProcessor(this, ConstsCore.base64EncodedPublicKey, new BillingProcessor.IBillingHandler() {
+            @Override
+            public void onProductPurchased(String productId, TransactionDetails details) {
+                //GenerikFunctions.showToast(cont,"onProductPurchased: " + productId+" ");
+                GenerikFunctions.showToast(cont,"Purchase Successful");
+                Boolean consumed = bp.consumePurchase(ConstsCore.ITEM_PARTYPURCHASE_SKU);
+                GenerikFunctions.sDialog(cont,"Saving Data");
+
+                if (consumed)
+                {
+                    setPartyPurchaseinAWS();
                 }
+                else{
+                    GenerikFunctions.hDialog();
+                }
+
+
+            }
+            @Override
+            public void onBillingError(int errorCode, Throwable error) {
+                //GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
+            }
+
+            @Override
+            public void onBillingInitialized() {
+                //GenerikFunctions.showToast(cont,"onBillingInitialized");
+                readyToPurchase = true;
+
+
+            }
+
+            @Override
+            public void onPurchaseHistoryRestored() {
+                //GenerikFunctions.showToast(cont,"onPurchaseHistoryRestored");
+                for(String sku : bp.listOwnedProducts())
+                    Log.d("", "Owned Managed Product: " + sku);
+                for(String sku : bp.listOwnedSubscriptions())
+                    Log.d("", "Owned Subscription: " + sku);
+
             }
         });
-        /****/
-
 
 
 
         btninapppurchase.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
 
                 //Check mask status of user for party request
                 try
                 {
-
-                    user = m_config.mapper.load(UserTable.class,loginUserFBID);
-                    Log.e("----"," "+user.getPaidgc());
+                    user = m_config.mapper.load(UserTable.class, loginUserFBID);
+                    Log.e("----", " " + user.getPaidgc());
                     List<PaidGCClass> paidgclist = user.getPaidgc();
-                    if(paidgclist != null || paidgclist.size() != 0)
+                    if (paidgclist == null || paidgclist.size() == 0)
                     {
 
-                        if(paidgclist.get(0).getPaidstatus().equals("Yes"))
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(GateCrasherSearchActivity.this);
+                        alertDialogBuilder
+                                .setTitle("Pay for Unmasking Party.")
+                                .setMessage("Are you sure you want to pay for Party?")
+                                .setCancelable(false)
+                                .setNegativeButton("No", new DialogInterface.OnClickListener()
+                                {
+                                    public void onClick(DialogInterface dialog, int id)
+                                    {
+
+                                    }
+                                })
+                                .setPositiveButton("Yes",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id)
+                                            {
+                                                if (!readyToPurchase)
+                                                {
+                                                    GenerikFunctions.showToast(cont,"Billing not initialized.");
+                                                    return;
+                                                }
+                                                else
+                                                {
+                                                    bp.purchase((Activity) cont,ConstsCore.ITEM_PARTYPURCHASE_SKU);
+
+                                                }
+                                            }
+
+                                        });
+                        alertDialogBuilder.show();
+
+                    }
+                    else
+                    {
+
+
+                        if (paidgclist.get(0).getPaidstatus().equals("Yes"))
                         {
+
                             Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
-                            if(currTime < Long.parseLong(paidgclist.get(0).getSubscriptiondate()))
+                            if (currTime < Long.parseLong(paidgclist.get(0).getSubscriptiondate()))
                             {
                                 GenerikFunctions.showToast(cont, "Your subscription is upto date.");
 
                             }
+                            else
+                            {
+                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(GateCrasherSearchActivity.this);
+                                alertDialogBuilder
+                                        .setTitle("Pay for Unmasking Party.")
+                                        .setMessage("Are you sure you want to pay for Party?")
+                                        .setCancelable(false)
+                                        .setNegativeButton("No", new DialogInterface.OnClickListener()
+                                        {
+                                            public void onClick(DialogInterface dialog, int id)
+                                            {
 
-                        }
-                        else
-                        {
+                                            }
+                                        })
+                                        .setPositiveButton("Yes",
+                                                new DialogInterface.OnClickListener()
+                                                {
+                                                    public void onClick(DialogInterface dialog, int id)
+                                                    {
+                                                        if (!readyToPurchase) {
+                                                            GenerikFunctions.showToast(cont,"Billing not initialized.");
+                                                            return;
+                                                        }
+                                                        else
+                                                        {
+                                                            bp.purchase((Activity) cont,ConstsCore.ITEM_PARTYPURCHASE_SKU);
+                                                        }
+                                                    }
+
+                                                });
+                                alertDialogBuilder.show();
+                            }
+
+                        } else {
+
                             ///10001 - is requestCode
-                            mHelper.launchPurchaseFlow(GateCrasherSearchActivity.this, ConstsCore.ITEM_PARTYPURCHASE_SKU, ConstsCore.RequestCode,
-                                    mPurchaseFinishedListener, "mypurchasetoken");
+                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(GateCrasherSearchActivity.this);
+                            alertDialogBuilder
+                                    .setTitle("Pay for Unmasking Party.")
+                                    .setMessage("Are you sure you want to pay for Party?")
+                                    .setCancelable(false)
+                                    .setNegativeButton("No", new DialogInterface.OnClickListener()
+                                    {
+                                        public void onClick(DialogInterface dialog, int id)
+                                        {
+
+                                        }
+                                    })
+                                    .setPositiveButton("Yes",
+                                            new DialogInterface.OnClickListener()
+                                            {
+                                                public void onClick(DialogInterface dialog, int id)
+                                                {
+                                                    if (!readyToPurchase) {
+                                                        GenerikFunctions.showToast(cont,"Billing not initialized.");
+                                                        return;
+                                                    }
+                                                    else
+                                                    {
+                                                        bp.purchase((Activity) cont,ConstsCore.ITEM_PARTYPURCHASE_SKU);
+                                                    }
+                                                }
+
+                                            });
+                            alertDialogBuilder.show();
                         }
+
                     }
-                    else
-                    {
-                        ///10001 - is requestCode
-                        mHelper.launchPurchaseFlow(GateCrasherSearchActivity.this, ConstsCore.ITEM_PARTYPURCHASE_SKU, ConstsCore.RequestCode,
-                                mPurchaseFinishedListener, "mypurchasetoken");
-                    }
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
 
                 }
-
 
 
 
             }
         });
+
+
+
 
         // selection of Spinner Now/Later and start DatePicker
 //        spn_startTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -825,101 +957,9 @@ public class GateCrasherSearchActivity extends Activity {
 
 
 
-    IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener
-            = new IabHelper.OnIabPurchaseFinishedListener() {
-        public void onIabPurchaseFinished(IabResult result,
-                                          Purchase purchase)
-        {
-//            // if we were disposed of in the meantime, quit.
-//            if (mHelper == null) return;
-//
-//
-            if (result.isFailure())
-            {
-                // Handle error
-                Log.e("Error purchasing:"," ---- " + result+" ");
-                Toast.makeText(getApplicationContext(),""+result, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            else if (purchase.getSku().equals(ConstsCore.ITEM_PARTYPURCHASE_SKU))
-            {
 
 
-                Log.e("Purchase Success"," "+purchase.getToken());
-
-                Toast.makeText(getApplicationContext(),"Purchase success", Toast.LENGTH_SHORT).show();
-                consumeItem();
-            }
-
-        }
-    };
-
-
-    public void consumeItem() {
-        try {
-            mHelper.queryInventoryAsync(mReceivedInventoryListener);
-            Log.e("consumeItem ","try");
-            Toast.makeText(getApplicationContext(),"consumeitem try", Toast.LENGTH_SHORT).show();
-        } catch (IabHelper.IabAsyncInProgressException e) {
-            Log.e("consumeItem ","catch");
-            Toast.makeText(getApplicationContext(),"consumeitem catch", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    IabHelper.QueryInventoryFinishedListener mReceivedInventoryListener
-            = new IabHelper.QueryInventoryFinishedListener() {
-        @Override
-        public void onQueryInventoryFinished(IabResult result, Inventory inv) {
-            if (result.isFailure()) {
-                // Handle failure
-                Log.e("QueryInventory ","failed");
-                Toast.makeText(getApplicationContext(),"QueryInventory failed", Toast.LENGTH_SHORT).show();
-            } else {
-                try {
-
-                    mHelper.consumeAsync(inv.getPurchase(ConstsCore.ITEM_PARTYPURCHASE_SKU),
-                            mConsumeFinishedListener);
-
-                    Toast.makeText(getApplicationContext(),"QueryInventory  consumeAsync", Toast.LENGTH_SHORT).show();
-
-                } catch (IabHelper.IabAsyncInProgressException e) {
-
-                    Toast.makeText(getApplicationContext(),"QueryInventory  catch", Toast.LENGTH_SHORT).show();
-                    e.printStackTrace();
-                }
-            }
-        }
-
-
-    };
-
-
-    IabHelper.OnConsumeFinishedListener mConsumeFinishedListener =
-            new IabHelper.OnConsumeFinishedListener()
-            {
-                public void onConsumeFinished(Purchase purchase, IabResult result)
-                {
-                    // if we were disposed of in the meantime, quit.
-                    if (mHelper == null) return;
-
-                    if (result.isSuccess()) {
-
-                        Toast.makeText(getApplicationContext(),"consume success", Toast.LENGTH_SHORT).show();
-                        GenerikFunctions.sDialog(cont, "Purchasing");
-                        setPartyPurcahseinAWS();
-                        //
-
-                    } else {
-                        // handle error
-
-                        Toast.makeText(getApplicationContext(),"consume failed", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            };
-
-
-    private void setPartyPurcahseinAWS()
+    private void setPartyPurchaseinAWS()
     {
         Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
 
@@ -935,7 +975,7 @@ public class GateCrasherSearchActivity extends Activity {
                 user.setPaidgc(paidgclist);
                 m_config.mapper.save(user);
 
-                Toast.makeText(getApplicationContext(),"Purchase Successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Data is saved Successfully", Toast.LENGTH_SHORT).show();
                 GenerikFunctions.hDialog();
 
 
@@ -950,7 +990,7 @@ public class GateCrasherSearchActivity extends Activity {
                 user.setPaidgc(paidgclist);
                 m_config.mapper.save(user);
 
-                Toast.makeText(getApplicationContext(),"Purchase Successful", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Data is saved Successfully", Toast.LENGTH_SHORT).show();
                 GenerikFunctions.hDialog();
 
             }
@@ -961,6 +1001,21 @@ public class GateCrasherSearchActivity extends Activity {
             GenerikFunctions.hDialog();
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (!bp.handleActivityResult(requestCode, resultCode, data))
+            super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    @Override
+    public void onDestroy() {
+        if (bp != null)
+            bp.release();
+
+        super.onDestroy();
     }
 
     @Override

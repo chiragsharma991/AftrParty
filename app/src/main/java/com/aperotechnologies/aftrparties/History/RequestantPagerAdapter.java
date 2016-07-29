@@ -1,9 +1,13 @@
 package com.aperotechnologies.aftrparties.History;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+
+import com.aperotechnologies.aftrparties.Chats.ChatActivity;
 
 import java.util.ArrayList;
 

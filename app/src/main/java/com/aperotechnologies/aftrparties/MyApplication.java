@@ -12,7 +12,8 @@ import com.quickblox.core.QBSettings;
 /**
  * Created by hasai on 28/06/16.
  */
-public class MyApplication  extends Application {
+public class MyApplication  extends Application
+{
 
     static final String APP_ID = "40454";//"34621";
     static final String AUTH_KEY = "GXzMGfcx-pAQOBP";//"sYpuKrOrGT4pG6d";//"q6aK9sm6GCSmtru";

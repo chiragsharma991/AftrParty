@@ -2,7 +2,9 @@ package com.aperotechnologies.aftrparties.History;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -17,7 +19,10 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.anjlab.android.iab.v3.BillingProcessor;
+import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
@@ -31,6 +36,11 @@ import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.aperotechnologies.aftrparties.util.IabException;
+import com.aperotechnologies.aftrparties.util.IabHelper;
+import com.aperotechnologies.aftrparties.util.IabResult;
+import com.aperotechnologies.aftrparties.util.Inventory;
+import com.aperotechnologies.aftrparties.util.Purchase;
 import com.facebook.AccessToken;
 import com.linkedin.platform.DeepLinkHelper;
 import com.linkedin.platform.errors.LIDeepLinkError;
@@ -39,9 +49,13 @@ import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by mpatil on 19/07/16.
@@ -57,8 +71,8 @@ public class RequestantFragment extends Fragment
     ImageView image;
     Context cont;
     String message = " ";
-
     Configuration_Parameter m_config;
+
 
     public RequestantFragment()
     {
@@ -95,9 +109,27 @@ public class RequestantFragment extends Fragment
 
         accept = (Button) layoutView.findViewById(R.id.accept);
         deny = (Button) layoutView.findViewById(R.id.decline);
+        m_config.QbIdforInappPChat = "";
+
+
+
+        System.out.println(status);
+        if(status.get(position).equals("Pending"))
+        {
+            accept.setVisibility(View.VISIBLE);
+            deny.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            accept.setVisibility(View.GONE);
+            deny.setVisibility(View.GONE);
+        }
 
         txt_fbid.setText(facebookId.get(position));
         txt_status.setText(status.get(position));
+
+
+
 
         Picasso.with(cont).load(imageArray.get(position)).fit().centerCrop()
                 .placeholder(R.drawable.placeholder_user)
@@ -177,17 +209,49 @@ public class RequestantFragment extends Fragment
             @Override
             public void onClick(View v)
             {
-                GenerikFunctions.sDialog(cont, "Creating 1-1 Chat...");
-                QBChatDialogCreation.createPrivateChat(Integer.valueOf(QbId.get(position)), cont);
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
+                alertDialogBuilder
+                        .setTitle("Pay for Unmasking Party.")
+                        .setMessage("Are you sure you want to pay for Party?")
+                        .setCancelable(false)
+                        .setNegativeButton("No", new DialogInterface.OnClickListener()
+                        {
+                            public void onClick(DialogInterface dialog, int id)
+                            {
+
+                            }
+                        })
+                        .setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id)
+                                    {
+                                        if (!RequestantActivity.readyToPurchaseRChat)
+                                        {
+                                            GenerikFunctions.showToast(cont,"Billing not initialized.");
+                                            return;
+                                        }
+                                        else
+                                        {
+                                            m_config.QbIdforInappPChat = QbId.get(position);
+                                            RequestantActivity.bpReqChat.purchase((Activity) cont,ConstsCore.ITEM_PRIVATECHAT_SKU);
+
+
+                                        }
+                                    }
+
+                                });
+                alertDialogBuilder.show();
+
             }
         });
+
 
         accept.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v) {
                 GenerikFunctions.sDialog(cont,"Approving Request");
-
 
                 accept.setEnabled(false);
                 deny.setEnabled(false);
@@ -205,11 +269,11 @@ public class RequestantFragment extends Fragment
                     if (paidStatus.booleanValue() == true)
                     {
                         //paid user
-                        setPaidUserApproval(currentApprovalTime, facebookId.get(position), RequestantActivity.partyy, "Approved", cont, txt_status);
+                        setPaidUserApproval(currentApprovalTime, facebookId.get(position), RequestantActivity.partyy, "Approved", cont, txt_status, accept, deny);
                     } else
                     {
                         //unpaid user
-                        setUnPaidUserApproval(currentApprovalTime, facebookId.get(position), RequestantActivity.partyy, "Approved", cont, txt_status);
+                        setUnPaidUserApproval(currentApprovalTime, facebookId.get(position), RequestantActivity.partyy, "Approved", cont, txt_status, accept, deny);
                     }
                 }
                 else
@@ -247,7 +311,7 @@ public class RequestantFragment extends Fragment
 
 
                 new AWSPartyOperations.updateGCinPartyTable(facebookId.get(position), RequestantActivity.partyy.getPartyId(),
-                        "Declined", cont, txt_status).execute();
+                        "Declined", cont, txt_status, accept, deny).execute();
             }
         });
 
@@ -354,7 +418,7 @@ public class RequestantFragment extends Fragment
 
     }
 
-    private void setPaidUserApproval(Long currentApprovalTime, final String gateCrasherID, final PartyParceableData partyy, final String status, final Context cont, final TextView t)
+    private void setPaidUserApproval(Long currentApprovalTime, final String gateCrasherID, final PartyParceableData partyy, final String status, final Context cont, final TextView t, final Button accept, final Button deny)
     {
         final String StartBlockTime = String.valueOf(currentApprovalTime);
         String EndBlockTime = "";
@@ -388,7 +452,7 @@ public class RequestantFragment extends Fragment
                         @Override
                         public void run() {
                             Log.e("inside handler","---");
-                            new AWSPartyOperations.addupdActiveParty(gateCrasherID, partyy, StartBlockTime, finalEndBlockTime, status, cont, t).execute();
+                            new AWSPartyOperations.addupdActiveParty(gateCrasherID, partyy, StartBlockTime, finalEndBlockTime, status, cont, t, accept, deny).execute();
 
                         }
                     });
@@ -407,7 +471,7 @@ public class RequestantFragment extends Fragment
         }
         else
         {
-            new AWSPartyOperations.addupdActiveParty(gateCrasherID, partyy, StartBlockTime, EndBlockTime, status, cont, t).execute();
+            new AWSPartyOperations.addupdActiveParty(gateCrasherID, partyy, StartBlockTime, EndBlockTime, status, cont, t, accept, deny).execute();
 
         }
 
@@ -416,7 +480,7 @@ public class RequestantFragment extends Fragment
 
 
 
-    private void setUnPaidUserApproval(Long currentApprovalTime, final String gateCrasherID, final PartyParceableData partyy, final String status, final Context cont, final TextView t)
+    private void setUnPaidUserApproval(Long currentApprovalTime, final String gateCrasherID, final PartyParceableData partyy, final String status, final Context cont, final TextView t, final Button accept, final Button deny)
     {
         final String StartBlockTime = String.valueOf(currentApprovalTime);
         final String EndBlockTime = String.valueOf(Long.parseLong(partyy.getStartTime()) +  ConstsCore.weekVal);
@@ -441,7 +505,7 @@ public class RequestantFragment extends Fragment
                         @Override
                         public void run() {
                             Log.e("inside handler","---");
-                            new AWSPartyOperations.addupdActiveParty(gateCrasherID, partyy, StartBlockTime, EndBlockTime, status, cont, t).execute();
+                            new AWSPartyOperations.addupdActiveParty(gateCrasherID, partyy, StartBlockTime, EndBlockTime, status, cont, t, accept, deny).execute();
                         }
                     });
                 }
@@ -460,8 +524,15 @@ public class RequestantFragment extends Fragment
         }
         else
         {
-            new AWSPartyOperations.addupdActiveParty(gateCrasherID, partyy, StartBlockTime, EndBlockTime, status, cont, t).execute();
+            new AWSPartyOperations.addupdActiveParty(gateCrasherID, partyy, StartBlockTime, EndBlockTime, status, cont, t, accept, deny).execute();
         }
     }
 
+
+
+
+
 }
+
+
+

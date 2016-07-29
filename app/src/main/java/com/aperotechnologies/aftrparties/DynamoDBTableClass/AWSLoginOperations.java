@@ -138,7 +138,7 @@ public class AWSLoginOperations {
                     user.setProfileStatus("N/A");
                     user.setDeviceToken("N/A");
                     user.setRegistrationStatus("No");
-                    user.setcurrentmaskstatus("Mask");
+                    //user.setcurrentmaskstatus("Mask");
                     user.setImageflag("No");
 
                     Log.e("AWS FBUser inserting ", " " + user.toString());

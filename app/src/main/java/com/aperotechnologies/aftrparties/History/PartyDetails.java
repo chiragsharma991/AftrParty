@@ -265,7 +265,7 @@ public class PartyDetails extends Activity
                     if(currentTime < Long.parseLong(partyStartTime)) {
                         GenerikFunctions.sDialog(cont, "Cancelling Request...");
                         String GCID = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
-                        new AWSPartyOperations.updateGCinPartyTable(GCID, PartyID, "Cancelled", cont, btnReqCancel).execute();
+                        new AWSPartyOperations.updateGCinPartyTable(GCID, PartyID, "Cancelled", cont, btnReqCancel, null, null).execute();
                     }
                     else
                     {

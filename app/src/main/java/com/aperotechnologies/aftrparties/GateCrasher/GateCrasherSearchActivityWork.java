@@ -31,7 +31,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
@@ -1036,6 +1035,17 @@ public class GateCrasherSearchActivityWork extends Activity {
             GenerikFunctions.hDialog();
         }
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mPPurchaseHelper != null) try {
+            mPPurchaseHelper.dispose();
+        } catch (IabHelper.IabAsyncInProgressException e) {
+            e.printStackTrace();
+        }
+        mPPurchaseHelper = null;
     }
 
     @Override

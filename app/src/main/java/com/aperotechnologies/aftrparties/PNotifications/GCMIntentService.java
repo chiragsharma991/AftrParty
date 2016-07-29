@@ -88,7 +88,7 @@ public class GCMIntentService extends IntentService {
         String dialog_id = extras.getString(ConstsCore.DIALOG_ID);
         String messagetype = extras.getString("type");
         Boolean isApplicationForeGround = BaseLifeCycleCallbacks.applicationStatus();//MyLifecycleHandler.isApplicationInForeground();
-        //Log.e("here", " " + message + " " + messagetype);
+        Log.e("here", " " + message + " " + messagetype);
 
         Log.e("isApplicationForeground ", "---- " + BaseLifeCycleCallbacks.applicationStatus());//MyLifecycleHandler.isApplicationInForeground());
 
@@ -100,21 +100,13 @@ public class GCMIntentService extends IntentService {
 //                CreateNotification(intent, message);
 
 
-                //for test purpose
 
 
-                messagetype = "requestApproved";
-                if (isApplicationForeGround == true)
-                {
-                    new ForegroundFunctionCall(extras, messagetype, message, this);
-                }
-                else{
-                    new BackgroundFunctionCall(extras, messagetype, message, this);
-                }
-                //
 
 
-            } else {
+            }
+            else
+            {
                 m_config.notificationManager = notificationManager;
                 //chat
                 if (isApplicationForeGround == true) {
