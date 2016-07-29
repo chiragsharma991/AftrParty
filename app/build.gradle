@@ -28,8 +28,8 @@ android {
         applicationId "com.aperotechnologies.aftrparties"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 8
-        versionName "1.7"
+        versionCode 15
+        versionName "2.04"
     }
     buildTypes {
         release {
@@ -91,5 +91,6 @@ dependencies {
         exclude group: 'com.google.android', module: 'support-v4'
     }
     compile files('libs/http-core-4.1.jar')
+    compile 'com.anjlab.android.iab.v3:library:1.0.+'
 
 }
