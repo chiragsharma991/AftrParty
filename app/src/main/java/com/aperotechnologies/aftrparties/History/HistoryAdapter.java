@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,13 +33,17 @@ public class HistoryAdapter extends BaseAdapter {
     Context cont;
     Configuration_Parameter m_config;
 
-
-    //    SQLiteDatabase sdb;
     public HistoryAdapter(Context cont, List<PartiesClass> PartiesList)
     {
         this.cont = cont;
         this.PartiesList = PartiesList;
         m_config= Configuration_Parameter.getInstance();
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build();
+        StrictMode.setThreadPolicy(policy);
 
 
 
@@ -144,6 +149,7 @@ public class HistoryAdapter extends BaseAdapter {
                     GenerikFunctions.sDialog(cont, "Fetching Party Mask Status");
                     try
                     {
+                        Log.e("here "," ");
                         String PartyId = finalParties.getPartyid();
                         PartyTable partytable = m_config.mapper.load(PartyTable.class, PartyId);
                         List<PartyMaskStatusClass> partymaskstatus = partytable.getPartymaskstatus();
@@ -170,14 +176,21 @@ public class HistoryAdapter extends BaseAdapter {
 
                             }else
                             {
+                                Log.e("Party status is Unmask"," subscription is expired");
                                 GenerikFunctions.hDialog();
                             }
 
+                        }
+                        else
+                        {
+                            Log.e("Party status is Mask","");
+                            GenerikFunctions.hDialog();
                         }
 
                     }
                     catch (Exception e)
                     {
+                        e.printStackTrace();
                         GenerikFunctions.hDialog();
 
                     }

@@ -7,6 +7,7 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.facebook.FacebookSdk;
 import com.quickblox.core.QBSettings;
 
 /**
@@ -44,6 +45,7 @@ public class MyApplication  extends Application
 
         QBSettings.getInstance().init(getApplicationContext(), APP_ID, AUTH_KEY, AUTH_SECRET);
         QBSettings.getInstance().setAccountKey(ACCOUNT_KEY);
+        FacebookSdk.sdkInitialize(getApplicationContext());
     }
 
 }

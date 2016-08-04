@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -61,7 +62,7 @@ public class QBSessionClass {
                         pBar.setVisibility(View.GONE);
                     }
 
-                    if(cont instanceof HostActivity || cont instanceof SettingsActivity)
+                    if(pBar == null)//if(cont instanceof HostActivity || cont instanceof SettingsActivity || cont instanceof TransparentActivity)
                     {
                         GenerikFunctions.hDialog();
                     }
@@ -98,28 +99,34 @@ public class QBSessionClass {
                                                 pBar.setVisibility(View.GONE);
                                             }
 
-                                            if(cont instanceof HostActivity || cont instanceof SettingsActivity)
+                                            if(pBar == null)//if(cont instanceof HostActivity || cont instanceof SettingsActivity || cont instanceof TransparentActivity)
                                             {
                                                 GenerikFunctions.hDialog();
                                             }
+
+                                            callback.onError(e);
                                         }
 
 
                                     });
 
-                                }catch (Exception e){
+                                }
+                                catch (Exception e){
+
+                                    Log.e("in catch Exception","");
+
                                     e.printStackTrace();
                                     GenerikFunctions.showToast(cont, "There was an error while loading data, please try again after some time.");
                                     if(pBar != null){
                                         pBar.setVisibility(View.GONE);
                                     }
 
-                                    if(cont instanceof HostActivity || cont instanceof SettingsActivity)
+                                    if(pBar == null)//if(cont instanceof HostActivity || cont instanceof SettingsActivity || cont instanceof TransparentActivity)
                                     {
                                         GenerikFunctions.hDialog();
                                     }
 
-
+                                    callback.onError((QBResponseException) e);
                                 }
 
                             }
@@ -133,11 +140,12 @@ public class QBSessionClass {
                                     pBar.setVisibility(View.GONE);
                                 }
 
-                                if(cont instanceof HostActivity || cont instanceof SettingsActivity)
+                                if(pBar == null)//cont instanceof HostActivity || cont instanceof SettingsActivity || cont instanceof TransparentActivity)
                                 {
                                     GenerikFunctions.hDialog();
                                 }
 
+                                callback.onError(e);
                             }
                         });
 
@@ -156,6 +164,7 @@ public class QBSessionClass {
                 {
                     GenerikFunctions.hDialog();
                 }
+
 
 
             }

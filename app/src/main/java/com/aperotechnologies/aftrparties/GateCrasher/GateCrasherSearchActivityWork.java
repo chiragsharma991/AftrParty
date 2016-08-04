@@ -525,7 +525,7 @@ public class GateCrasherSearchActivityWork extends Activity {
                     Toast.makeText(cont,"Current Location not available",Toast.LENGTH_SHORT).show();
 
                 }else{
-                    Intent i = new Intent(GateCrasherSearchActivityWork.this, GateCrasherActivity.class);
+                    Intent i = new Intent(GateCrasherSearchActivityWork.this, GateCrasherActivitywithoutLoadMore.class);
                     GCParceableData data = new GCParceableData();
                     data.setlatitude(String.valueOf(location.getLatitude()));
                     data.setlongitude(String.valueOf(location.getLongitude()));

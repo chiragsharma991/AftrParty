@@ -707,6 +707,8 @@ public class AWSPartyOperations {
             }else{
                 GenerikFunctions.hDialog();
                 GenerikFunctions.showToast(cont, "Approval failed, Please try again after some time");
+                accept.setEnabled(true);
+                deny.setEnabled(true);
             }
 
         }
@@ -817,6 +819,11 @@ public class AWSPartyOperations {
             }else{
 
                 GenerikFunctions.hDialog();
+                if(Status.equals("Approved") || Status.equals("Declined"))
+                {
+                    accept.setEnabled(true);
+                    deny.setEnabled(true);
+                }
 
             }
 
@@ -1027,8 +1034,15 @@ public class AWSPartyOperations {
                 }
 
 
-            }else{
+            }
+            else
+            {
                 GenerikFunctions.hDialog();
+                if(Status.equals("Approved") || Status.equals("Declined"))
+                {
+                    accept.setEnabled(true);
+                    deny.setEnabled(true);
+                }
             }
 
         }

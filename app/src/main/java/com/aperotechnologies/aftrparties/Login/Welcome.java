@@ -37,10 +37,12 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.History.RequestantActivity;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.SplashActivity;
+import com.aperotechnologies.aftrparties.TransparentActivity;
 import com.aperotechnologies.aftrparties.model.*;
 import com.aperotechnologies.aftrparties.model.LIPictureData;
 import com.facebook.AccessToken;
@@ -1025,7 +1027,7 @@ public class Welcome extends Activity
                 }
                 Log.e("User not exists in AWS","No");
                 //If not exists then call  normal registration flow
-                Toast.makeText(cont,"Your Registration Process Is imcomplete. Please Complete...",Toast.LENGTH_LONG).show();
+                Toast.makeText(cont,"You are not a user. Please Register...",Toast.LENGTH_LONG).show();
                 Intent i = new Intent(Welcome.this, RegistrationActivity.class);
                 startActivity(i);
                 finish();
@@ -1172,9 +1174,9 @@ public class Welcome extends Activity
             String PartyStartTime = getIntent().getExtras().getString("PartyStartTime");
             String PartyEndTime = getIntent().getExtras().getString("PartyEndTime");
             String PartyStatus = getIntent().getExtras().getString("PartyStatus");
-            String GCQBID = getIntent().getExtras().getString("GCQBID");
+            //String GCQBID = getIntent().getExtras().getString("GCQBID");
             String GCFBID = getIntent().getExtras().getString("GCFBID");
-            String message = getIntent().getExtras().getString("message");
+            //String message = getIntent().getExtras().getString("message");
 
             Intent i = new Intent(Welcome.this, RequestantActivity.class);
             PartyParceableData party1 = new PartyParceableData();
@@ -1183,10 +1185,9 @@ public class Welcome extends Activity
             party1.setStartTime(PartyStartTime);
             party1.setEndTime(PartyEndTime);
             party1.setPartyStatus(PartyStatus);
-            i.putExtra("from", "requestSend");
-            i.putExtra("GCQBID",GCQBID);
+            //i.putExtra("GCQBID",GCQBID);
             i.putExtra("GCFBID", GCFBID);
-            i.putExtra("message", message);
+            i.putExtra("from",from);
             Bundle mBundles = new Bundle();
             mBundles.putSerializable(ConstsCore.SER_KEY, party1);
             i.putExtras(mBundles);
@@ -1201,9 +1202,49 @@ public class Welcome extends Activity
             }
 
         }
-        else if(from.equals("chatoffline"))
+        else if(from.equals("requestApproved") || from.equals("requestDeclined"))
+        {
+            String GCFBID = getIntent().getExtras().getString("GCFBID");
+            //String message = getIntent().getExtras().getString("message");
+            Intent i = new Intent(Welcome.this, HistoryActivity.class);
+            i.putExtra("GCFBID", GCFBID);
+            i.putExtra("from",from);
+            startActivity(i);
+
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
+        else if(from.equals("PartyRetention"))
+        {
+            String PartyName = getIntent().getExtras().getString("PartyName");
+            String PartyId = getIntent().getExtras().getString("PartyId");
+            String DialogId = getIntent().getExtras().getString("DialogId");
+            Intent i = new Intent(Welcome.this, HomePageActivity.class);
+            i.putExtra("DialogId", DialogId);
+            i.putExtra("PartyId",PartyId);
+            i.putExtra("PartyName", PartyName);
+            i.putExtra("from",from);
+            startActivity(i);
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
+
+        else if(from.equals("chatoffline") || from.equals("1-1 Chat") || from.equals("1-1 Chat OfflineMsg"))
         {
             Intent i = new Intent(Welcome.this, DialogsActivity.class);
+            i.putExtra("from",from);
             startActivity(i);
 
             if(wl_pd!=null)
@@ -1214,43 +1255,7 @@ public class Welcome extends Activity
                 }
             }
         }
-        else if(from.equals("requestApproved"))
-        {
-            String GCFBID = getIntent().getExtras().getString("GCFBID");
-            String message = getIntent().getExtras().getString("message");
-            Intent i = new Intent(Welcome.this, HistoryActivity.class);
-            i.putExtra("GCFBID", GCFBID);
-            i.putExtra("from", "requestApproved");
-            i.putExtra("message", message);
-            startActivity(i);
 
 
-            if(wl_pd!=null)
-            {
-                if(wl_pd.isShowing())
-                {
-                    wl_pd.dismiss();
-                }
-            }
-        }
-        else if(from.equals("requestDeclined"))
-        {
-            String GCFBID = getIntent().getExtras().getString("GCFBID");
-            String message = getIntent().getExtras().getString("message");
-            Intent i = new Intent(Welcome.this, HistoryActivity.class);
-            i.putExtra("GCFBID", GCFBID);
-            i.putExtra("from", "requestDeclined");
-            i.putExtra("message", message);
-            startActivity(i);
-
-
-            if(wl_pd!=null)
-            {
-                if(wl_pd.isShowing())
-                {
-                    wl_pd.dismiss();
-                }
-            }
-        }
     }
 }

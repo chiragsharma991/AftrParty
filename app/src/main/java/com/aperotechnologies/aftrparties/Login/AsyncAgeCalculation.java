@@ -135,7 +135,7 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                 ConstsCore.validFriendsCount = "No";
             }
 
-          //  Log.e("Before Conditions check priflefald ageflag friendsflag", ConstsCore.profilePicAvailable + "    " + ConstsCore.ValidAge + "    " + ConstsCore.validFriendsCount);
+            //  Log.e("Before Conditions check priflefald ageflag friendsflag", ConstsCore.profilePicAvailable + "    " + ConstsCore.ValidAge + "    " + ConstsCore.validFriendsCount);
             if (ConstsCore.profilePicAvailable.equals("No"))
             {
                 Handler h = new Handler(cont.getMainLooper());

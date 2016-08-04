@@ -19,6 +19,8 @@ import com.quickblox.messages.model.QBNotificationType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+
 /**
  * Created by hasai on 15/06/16.
  */
@@ -26,7 +28,6 @@ public class QBPushNotifications {
 
     static Configuration_Parameter m_config;
     String TAG = ".QBPushNotifications";
-
 
     //PushNotification to Host after Party Request
     //public static void sendRequestPN(String HostQBID, String HostFBID, String partyName, String partyID,  Context cont) {
@@ -70,7 +71,7 @@ public class QBPushNotifications {
             json.put("PartyStartTime",jsonObject.getString("PartyStartTime"));
             json.put("PartyEndTime", jsonObject.getString("PartyEndTime"));
             json.put("PartyStatus", "Pending");
-            json.put("GCQBID", sharedPreferences.getString(m_config.QuickBloxID,""));//RequestantQBID
+            //json.put("GCQBID", sharedPreferences.getString(m_config.QuickBloxID,""));//RequestantQBID
             json.put("GCFBID", GCFBID);//RequestantFBID
 
 
@@ -214,7 +215,7 @@ public class QBPushNotifications {
     }
 
 
-    //PushNotification for 1-1 Chat Feature
+    //PushNotification when user is added 1-1 Chat Feature
     public static void sendPeerChatNotification(Context cont, Integer occupantId) {
 
         m_config = Configuration_Parameter.getInstance();
@@ -258,6 +259,102 @@ public class QBPushNotifications {
         });
 
     }
+
+
+
+    public static void sendPartyCancelledPN(List<Integer> gcqbidlist, String PartyID, String partyName, Context cont) {
+
+        // recipients
+        StringifyArrayList<Integer> userIds = new StringifyArrayList<Integer>();
+
+        for(int i = 0; i < gcqbidlist.size(); i++){
+            userIds.add(Integer.valueOf(gcqbidlist.get(i)));
+        }
+
+        QBEvent event = new QBEvent();
+        event.setUserIds(userIds);
+        event.setEnvironment(QBEnvironment.DEVELOPMENT);
+        event.setNotificationType(QBNotificationType.PUSH);
+
+
+        JSONObject json = new JSONObject();
+
+        try {
+            json.put("message",  partyName+ "Party has been cancelled ");
+            json.put("type","partyCancelled");
+            // custom parameters
+            json.put("PartyID", PartyID);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        event.setMessage(json.toString());
+
+        com.quickblox.messages.QBPushNotifications.createEvent(event, new QBEntityCallback<QBEvent>() {
+            @Override
+            public void onSuccess(QBEvent qbEvent, Bundle args) {
+                // sent
+                Log.e("notification ","success "+qbEvent);
+
+            }
+
+            @Override
+            public void onError(QBResponseException errors) {
+                Log.e("notification ","errors");
+            }
+        });
+
+    }
+
+
+    //PushNotification for messages when user is offline
+    public static void sendPrivateChatmessagePN(Context cont, Integer occupantId, String currentUser, String dialogId, String msg) {
+
+        m_config = Configuration_Parameter.getInstance();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+
+        // recipients
+        StringifyArrayList<Integer> userIds = new StringifyArrayList<Integer>();
+        userIds.add(Integer.valueOf(occupantId));
+        QBEvent event = new QBEvent();
+        event.setUserIds(userIds);
+        event.setEnvironment(QBEnvironment.DEVELOPMENT);
+        event.setNotificationType(QBNotificationType.PUSH);
+
+        JSONObject json = new JSONObject();
+
+        try {
+            json.put("message",  currentUser+": "+msg);
+            json.put("DialogId",dialogId);
+            json.put("type","1-1 Chat OfflineMsg");
+            // custom parameters
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        event.setMessage(json.toString());
+
+
+        com.quickblox.messages.QBPushNotifications.createEvent(event, new QBEntityCallback<QBEvent>() {
+            @Override
+            public void onSuccess(QBEvent qbEvent, Bundle args) {
+                // sent
+                Log.e("notification ","success "+qbEvent);
+
+            }
+
+            @Override
+            public void onError(QBResponseException errors) {
+                Log.e("notification ","errors");
+            }
+        });
+
+    }
+
+
 
 
 

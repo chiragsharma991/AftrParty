@@ -35,7 +35,7 @@ import de.keyboardsurfer.android.widget.crouton.Style;
 public class GCMIntentService extends IntentService {
 
     //public static final int NOTIFICATION_ID = 1;
-    private static final String TAG = ".GCMIntentService";
+    private static final String TAG = GCMIntentService.class.getSimpleName();
     private static NotificationManager notificationManager;
 
     Configuration_Parameter m_config;
@@ -44,11 +44,12 @@ public class GCMIntentService extends IntentService {
         super(ConstsCore.GCM_INTENT_SERVICE);
     }
 
+
+
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.i(TAG, "new push");
         m_config = Configuration_Parameter.getInstance();
-
         Bundle extras = intent.getExtras();
         GoogleCloudMessaging googleCloudMessaging = GoogleCloudMessaging.getInstance(this);
         // The getMessageType() intent parameter must be the intent you received
@@ -56,7 +57,7 @@ public class GCMIntentService extends IntentService {
         String messageType = googleCloudMessaging.getMessageType(intent);
 
 
-        Log.e("", " messageType  " + messageType);
+        Log.e("", " messageType  " + messageType+" ----  "+extras.getString("message"));
 
         if (!extras.isEmpty()) {  // has effect of unparcelling Bundle
 
@@ -93,65 +94,68 @@ public class GCMIntentService extends IntentService {
         Log.e("isApplicationForeground ", "---- " + BaseLifeCycleCallbacks.applicationStatus());//MyLifecycleHandler.isApplicationInForeground());
 
 
-        if (messagetype == null) {
+        if (messagetype == null || messagetype.equals(null))
+        {
             if (dialog_id == null) {
                 //no chat
-//                intent = new Intent(this, Welcome.class);
-//                CreateNotification(intent, message);
 
-
-
-
+                //this is for test purpose
+                Intent i = new Intent(this, Welcome.class);
+                i.putExtra("from","home");
+                CreateNotification(i, message, this);
 
 
             }
             else
             {
                 m_config.notificationManager = notificationManager;
-                //chat
+                //offline chat notification navigation
                 if (isApplicationForeGround == true) {
                     // application is in foreground
                     Log.e("activity", " " + m_config.foregroundCont + "----" + message +" ");
 
-                    Style style = new Style.Builder()
-                            .setBackgroundColor(R.color.colorAccent)
-                            .setPaddingInPixels(5)
-                            .setGravity(Gravity.CENTER)
-                            .setTextColor(android.R.color.white)
-                            .setHeight(100)
-                            .build();
-
-
-                    Crouton crouton = Crouton.makeText((Activity) m_config.foregroundCont, message, style);
-
-                    if(m_config.foregroundCont instanceof DialogsActivity){
-
-                    }else
+                    if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(this).getSession() == null || LISessionManager.getInstance(this).getSession().getAccessToken() == null)
                     {
-                        crouton.show();
-                        crouton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
+                        Intent i = new Intent(this, Welcome.class);
+                        i.putExtra("from","chatoffline");
+                        CreateNotification(i, message, this);
+                    }
+                    else {
 
-                                Log.e("here ","  click of crouton");
-                                Intent i = new Intent(m_config.foregroundCont, DialogsActivity.class);
-                                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(i);
-                            }
-                        });
+                        Style style = new Style.Builder()
+                                .setBackgroundColor(R.color.colorAccent)
+                                .setPaddingInPixels(5)
+                                .setGravity(Gravity.CENTER)
+                                .setTextColor(android.R.color.white)
+                                .setHeight(100)
+                                .build();
+
+
+                        Crouton crouton = Crouton.makeText((Activity) m_config.foregroundCont, message, style);
+
+//                        if (m_config.foregroundCont instanceof DialogsActivity) {
+//
+//                        } else {
+                            crouton.show();
+                            crouton.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                    Log.e("here ", "  click of crouton");
+                                    Intent i = new Intent(m_config.foregroundCont, DialogsActivity.class);
+                                    i.putExtra("from","chatoffline");
+                                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(i);
+                                }
+                            });
+                        //}
                     }
 
                 }
                 else
                 {
                     // application is in background or close
-                    if(LoginValidations.getFBAccessToken().getToken() == null)
-                    {
-                        Intent i = new Intent(this, Welcome.class);
-                        i.putExtra("from","chatoffline");
-                        CreateNotification(i, message, this);
-                    }
-                    else if(LISessionManager.getInstance(this).getSession().getAccessToken() == null)
+                    if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(this).getSession() == null || LISessionManager.getInstance(this).getSession().getAccessToken() == null)
                     {
                         Intent i = new Intent(this, Welcome.class);
                         i.putExtra("from","chatoffline");
@@ -160,6 +164,7 @@ public class GCMIntentService extends IntentService {
                     else
                     {
                         Intent i = new Intent(this, DialogsActivity.class);
+                        i.putExtra("from","chatoffline");
                         CreateNotification(i, message, this);
                     }
                 }
@@ -181,17 +186,6 @@ public class GCMIntentService extends IntentService {
 
 
         }
-
-
-//            mBuilder = new NotificationCompat.Builder(this)
-//                    .setSmallIcon(R.drawable.ic_launcher) // notification icon
-//                    .setContentTitle("Button notification") // notification title
-//                    .setContentText("Expand to show the buttons...") // content text
-//                    .setTicker("Showing button notification") // status bar message
-//                    .addAction(R.color.white, "Accept", contentIntent) // accept notification button
-//                    .addAction(R.color.white, "Cancel", contentIntent); // cancel notification button
-//            mBuilder.setAutoCancel(true);
-
 
         // notify activity
         Intent intentNewPush = new Intent(ConstsCore.NEW_PUSH_EVENT);
@@ -225,151 +219,5 @@ public class GCMIntentService extends IntentService {
     }
 
 
-    // application is in foreground
-    /*public void ForegroundFunctionCall(Bundle extras, String messagetype, String message)
-    {
-        //when request is send to host and it is received by host
-        if (messagetype.equals("requestSend"))
-        {
-            String PartyId = extras.getString("PartyID");
-            String PartyName = extras.getString("PartyName");
-            String PartyStartTime = extras.getString("PartyStartTime");
-            String PartyEndTime = extras.getString("PartyEndTime");
-            String PartyStatus = extras.getString("PartyStatus");
-            String GCQBID = extras.getString("GCQBID");
-            String GCFBID = extras.getString("GCFBID");
 
-
-            Log.e("PartyId "," "+PartyId+ " PartyName "+PartyName+" PartyStartTime "+PartyStartTime+" PartyEndTime "+PartyEndTime+" PartyStatus "+PartyStatus);
-
-            if(LoginValidations.getFBAccessToken().getToken() == null)
-            {
-                Intent i = new Intent(this, Welcome.class);
-                i.putExtra("PartyId", PartyId);
-                i.putExtra("PartyName",PartyName);
-                i.putExtra("PartyStartTime",PartyStartTime);
-                i.putExtra("PartyEndTime",PartyEndTime);
-                i.putExtra("PartyStatus",PartyStatus);
-                i.putExtra("GCQBID",GCQBID);
-                i.putExtra("GCFBID", GCFBID);
-                i.putExtra("from", "requestSend");
-                CreateNotification(i, message);
-            }
-            else if(LISessionManager.getInstance(this).getSession().getAccessToken() == null)
-            {
-                Intent i = new Intent(this, Welcome.class);
-                i.putExtra("PartyId", PartyId);
-                i.putExtra("PartyName",PartyName);
-                i.putExtra("PartyStartTime",PartyStartTime);
-                i.putExtra("PartyEndTime",PartyEndTime);
-                i.putExtra("PartyStatus",PartyStatus);
-                i.putExtra("GCQBID",GCQBID);
-                i.putExtra("GCFBID", GCFBID);
-                i.putExtra("from", "requestSend");
-                CreateNotification(i, message);
-            }
-            else
-            {
-
-                Intent i = new Intent(this, TransparentActivity.class);
-                i.putExtra("PartyId", PartyId);
-                i.putExtra("PartyName", PartyName);
-                i.putExtra("PartyStartTime", PartyStartTime);
-                i.putExtra("PartyEndTime", PartyEndTime);
-                i.putExtra("PartyStatus", PartyStatus);
-                i.putExtra("GCQBID",GCQBID);
-                i.putExtra("GCFBID", GCFBID);
-                i.putExtra("from", "requestSend");
-                i.putExtra("message", message);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                //CreateNotification(intent, message);
-                startActivity(i);
-            }
-
-        }
-        //when request is approvedBy to host and it is received by GC
-        else if (messagetype.equals("requestApproved")) {
-
-            String HostFBID = extras.getString("HostFBID");
-            String HostQBID = extras.getString("HostQBID");
-            String PartyID = extras.getString("PartyID");
-            String GCQBID = extras.getString("GCQBID");
-            String GCFBID = extras.getString("GCFBID");
-            Log.e("HostFBID", " " + HostFBID + " HostQBID" + " " + HostQBID + " PartyID" + " " + PartyID + " GateCrasherID" + " " + GCQBID);
-
-            Intent intent = new Intent(this, TransparentActivity.class);
-            intent = new Intent(this, HomePageActivity.class);
-            intent.putExtra("HostFBID", HostFBID);
-            intent.putExtra("HostQBID", HostFBID);
-            intent.putExtra("PartyID", PartyID);
-            intent.putExtra("GCQBID", GCQBID);
-            intent.putExtra("GCFBID", GCFBID);
-
-            CreateNotification(intent, message);
-
-        }
-    }*/
-
-
-//    // application is in background or close
-//    private void BackgroundFunctionCall(Bundle extras, String messagetype, String message) {
-//
-//
-//        //when request is send to host and it is received by host
-//        if (messagetype.equals("requestSend")) {
-//
-//            String PartyId = extras.getString("PartyID");
-//            String PartyName = extras.getString("PartyName");
-//            String PartyStartTime = extras.getString("PartyStartTime");
-//            String PartyEndTime = extras.getString("PartyEndTime");
-//            String PartyStatus = extras.getString("PartyStatus");
-//            String GCQBID = extras.getString("GCQBID");
-//            String GCFBID = extras.getString("GCFBID");
-//
-//            Log.e("PartyId "," "+PartyId+ " PartyName "+PartyName+" PartyStartTime "+PartyStartTime+" PartyEndTime "+PartyEndTime+" PartyStatus "+PartyStatus);
-//
-//
-//            if (LoginValidations.getFBAccessToken().getToken() == null) {
-//                Intent i = new Intent(this, Welcome.class);
-//                i.putExtra("PartyId", PartyId);
-//                i.putExtra("PartyName", PartyName);
-//                i.putExtra("PartyStartTime", PartyStartTime);
-//                i.putExtra("PartyEndTime", PartyEndTime);
-//                i.putExtra("PartyStatus", PartyStatus);
-//                i.putExtra("GCQBID",GCQBID);
-//                i.putExtra("GCFBID", GCFBID);
-//                i.putExtra("from", "requestSend");
-//                CreateNotification(i, message, this);
-//            } else if (LISessionManager.getInstance(this).getSession().getAccessToken() == null) {
-//                Intent i = new Intent(this, Welcome.class);
-//                i.putExtra("PartyId", PartyId);
-//                i.putExtra("PartyName", PartyName);
-//                i.putExtra("PartyStartTime", PartyStartTime);
-//                i.putExtra("PartyEndTime", PartyEndTime);
-//                i.putExtra("PartyStatus", PartyStatus);
-//                i.putExtra("GCQBID",GCQBID);
-//                i.putExtra("GCFBID", GCFBID);
-//                i.putExtra("from", "requestSend");
-//                CreateNotification(i, message, this);
-//            } else {
-//                Intent i = new Intent(this, RequestantActivity.class);
-//                PartyParceableData party1 = new PartyParceableData();
-//                party1.setPartyId(PartyId);
-//                party1.setPartyName(PartyName);
-//                party1.setStartTime(PartyStartTime);
-//                party1.setEndTime(PartyEndTime);
-//                party1.setPartyStatus(PartyStatus);
-//                i.putExtra("GCQBID",GCQBID);
-//                i.putExtra("GCFBID", GCFBID);
-//                i.putExtra("from", "requestSend");
-//                Bundle mBundles = new Bundle();
-//                mBundles.putSerializable(ConstsCore.SER_KEY, party1);
-//                i.putExtras(mBundles);
-//                CreateNotification(i, message, this);
-//            }
-//
-//        }
-//
-//
-//    }
 }

@@ -7,9 +7,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -43,22 +41,17 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 /**
  * Created by hasai on 06/05/16.
  */
-public class GateCrasherActivity extends Activity
+public class GateCrasherActivitywithoutLoadMore extends Activity
 {
 
     ListView listGateCrasher;
-    private ProgressBar footerView;
     ProgressBar pBar;
     TextView txtNoParties;
     GateCrasherAdapter adapter;
     Configuration_Parameter m_config;
     Context cont;
     RequestQueue queue;
-    JSONArray result;
-    JSONArray listadptresult;
-    private int index = 0;
-    private int count = 10;
-    private int iterations;
+
 
 
         public void onCreate(Bundle savedInstanceState) {
@@ -72,20 +65,13 @@ public class GateCrasherActivity extends Activity
             m_config = Configuration_Parameter.getInstance();
             Crouton.cancelAllCroutons();
             m_config.foregroundCont = this;
-            index = 0;
-            count = 10;
+
 
             listGateCrasher = (ListView) findViewById(R.id.listgatecrasher);
             txtNoParties = (TextView) findViewById(R.id.noParties);
             pBar = (ProgressBar) findViewById(R.id.progressBar);
             pBar.setVisibility(View.VISIBLE);
 
-
-            footerView = (ProgressBar) ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.list_footer, null, false);
-            listGateCrasher.addFooterView(footerView);
-
-            result = new JSONArray();
-            listadptresult = new JSONArray();
 
 
 
@@ -104,7 +90,6 @@ public class GateCrasherActivity extends Activity
                             public void run() {
 
                                 new GetData().execute();
-
                             }
                         });
                     }
@@ -160,7 +145,7 @@ public class GateCrasherActivity extends Activity
 
             Log.e("obj"," "+obj.toString());
 
-            queue = Volley.newRequestQueue(GateCrasherActivity.this);
+            queue = Volley.newRequestQueue(GateCrasherActivitywithoutLoadMore.this);
 
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, url, obj,
                     new Response.Listener<JSONObject>() {
@@ -178,48 +163,12 @@ public class GateCrasherActivity extends Activity
 
                                     txtNoParties.setVisibility(View.GONE);
                                     Log.e("response"," "+response.get("data"));
-                                    //JSONArray result = (JSONArray) response.get("data");
-                                    result = (JSONArray) response.get("data");
-//                                    adapter = new GateCrasherAdapter(GateCrasherActivity.this, result) {
-//                                    };
-//                                    listGateCrasher.setAdapter(adapter);
-//                                    pBar.setVisibility(View.GONE);
+                                    JSONArray result = (JSONArray) response.get("data");
+                                    adapter = new GateCrasherAdapter(GateCrasherActivitywithoutLoadMore.this, result) {
+                                    };
+                                    listGateCrasher.setAdapter(adapter);
+                                    pBar.setVisibility(View.GONE);
                                 }
-
-
-                                if(result.length()%10 == 0)
-                                {
-                                    iterations = (int) result.length()/10;
-                                }
-                                else
-                                {
-                                    iterations =  (int)(result.length()/10) + 1;
-                                }
-
-                                Log.e("iterations"," "+iterations +"   "+index);
-
-
-                                int maxLimit = count;
-                                if (maxLimit > result.length())
-                                {
-                                    maxLimit = result.length();
-                                    listGateCrasher.removeFooterView(footerView);
-                                }
-                                else
-                                {
-                                    listGateCrasher.removeFooterView(footerView);
-                                    listGateCrasher.addFooterView(footerView);
-                                }
-
-                                for(int i = index; i < maxLimit; i++)
-                                {
-                                    listadptresult.put(result.get(i));
-
-                                }
-
-                                setGCListAdapter();
-                                listGateCrasher.setOnScrollListener(onScrollListener());
-
 
 
                             } catch (JSONException e) {
@@ -253,72 +202,6 @@ public class GateCrasherActivity extends Activity
 
 
         }
-    }
-
-    private void setGCListAdapter()
-    {
-        adapter = new GateCrasherAdapter(GateCrasherActivity.this, listadptresult);
-        listGateCrasher.setAdapter(adapter);
-        pBar.setVisibility(View.GONE);
-        index++;
-
-    }
-
-    private AbsListView.OnScrollListener onScrollListener() {
-
-
-        return new AbsListView.OnScrollListener()
-        {
-
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState)
-            {
-                Log.e("count "," "+count+" "+result.length());
-
-
-                if (scrollState == SCROLL_STATE_IDLE)
-                {
-                    if(index < iterations)
-                    {
-                        // Execute LoadMoreDataTask AsyncTask
-
-                        int maxLimit = (index + 1) * count;
-                        if (maxLimit > result.length())
-                        {
-                            maxLimit = result.length();
-                            listGateCrasher.removeFooterView(footerView);
-                        }
-                        else
-                        {
-                            listGateCrasher.removeFooterView(footerView);
-                            listGateCrasher.addFooterView(footerView);
-                        }
-
-                        for (int i = (index * count); i < maxLimit; i++)
-                        {
-
-                            try {
-                                listadptresult.put(result.get(i));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-
-                        adapter.notifyDataSetChanged();
-                        index++;
-                    }
-                }
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-                                 int totalItemCount)
-            {
-
-            }
-
-        };
     }
 
     @Override

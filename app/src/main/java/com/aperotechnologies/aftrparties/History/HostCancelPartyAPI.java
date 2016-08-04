@@ -4,30 +4,26 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.ActivePartyClass;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.GateCrashersClass;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
+import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
-import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,13 +35,17 @@ public class HostCancelPartyAPI {
     String partyid;
     Configuration_Parameter m_config;
     TextView btnReqCancel;
+    List<Integer> gcqbidlist;
+    List<GateCrashersClass> gatecrasherList;
 
     public HostCancelPartyAPI(final Context cont,
-                              String partyid, final TextView btnReqCancel) {
+                              final String partyid, final TextView btnReqCancel) {
         this.cont = cont;
         this.partyid = partyid;
         m_config = Configuration_Parameter.getInstance();
         this.btnReqCancel = btnReqCancel;
+        gatecrasherList = new ArrayList<>();
+        gcqbidlist = new ArrayList<>();
 
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue((Activity) cont);
@@ -73,9 +73,41 @@ public class HostCancelPartyAPI {
                             if(response.getInt("confirm_status") == 1)
                             {
                                 GenerikFunctions.showToast(cont, "Party request has been cancelled");
-                                GenerikFunctions.hDialog();
-                                Intent i = new Intent(cont, HistoryActivity.class);
-                                cont.startActivity(i);
+
+                                try {
+                                    PartyTable selPartyTable = m_config.mapper.load(PartyTable.class, partyid);
+                                    gatecrasherList = selPartyTable.getGatecrashers();
+                                    String PartyName = selPartyTable.getPartyName();
+
+                                    if (gatecrasherList != null || gatecrasherList.size() > 0)
+                                    {
+                                        for(int i = 0; i < gatecrasherList.size(); i++)
+                                        {
+                                            Log.d("getCrashers ", "fid:" + gatecrasherList.get(i).getGatecrasherid());
+                                            gcqbidlist.add(Integer.valueOf(gatecrasherList.get(i).getgcqbid()));
+
+                                        }
+
+                                        QBPushNotifications.sendPartyCancelledPN(gcqbidlist, partyid, PartyName, cont);
+
+
+                                    }
+                                    else
+                                    {
+                                        //no gate crasher for party
+
+                                    }
+                                    GenerikFunctions.hDialog();
+                                    Intent i = new Intent(cont, HistoryActivity.class);
+                                    cont.startActivity(i);
+
+
+
+                                } catch (Exception e) {
+                                    GenerikFunctions.hDialog();
+                                    Intent i = new Intent(cont, HistoryActivity.class);
+                                    cont.startActivity(i);
+                                }
                             }
                             else
                             {

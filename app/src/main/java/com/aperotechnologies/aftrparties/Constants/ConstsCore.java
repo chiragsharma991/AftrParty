@@ -6,7 +6,6 @@ public class ConstsCore {
 
     public static final String EXTRA_DIALOG = "dialog";
     public static final String DIALOG_ID = "dialog_id";
-    public static final String DIALOG_TYPE = "dialog_type";
     public static final String PROPERTY_SAVE_TO_HISTORY = "save_to_history";
     public static final String EXTRA_DIALOG_ID = "dialog_id";
     public static final String PROJECT_NUMBER = "535559486986";//"446223844422";
@@ -17,6 +16,7 @@ public class ConstsCore {
     public static final String GCM_INTENT_SERVICE = "GcmIntentService";
     public static final String GCM_SEND_ERROR = "Send error: ";
     public static final String GCM_RECEIVED = "Received: ";
+
 
 
     public static final int FB_AGE = 16;
@@ -53,8 +53,9 @@ public class ConstsCore {
 
     /****/
     public static final String ITEM_MASK_SKU = "ap_unmasking";//android.test.purchased ";
-    public static final String ITEM_PARTYPURCHASE_SKU = "ap_party_purchase";//android.test.purchased ";
+    public static final String ITEM_PARTYPURCHASE_SKU = "ap_party_purchases";//android.test.purchased ";
     public static final String ITEM_PRIVATECHAT_SKU = "ap_privatechat";//android.test.purchased ";
+    public static final String ITEM_PARTYRETENTION_SKU = "ap_partyretain";//android.test.purchased ";
     public static final String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqiS7HW5sBPoBBxCNFf1OGtRMPVzuzqhQOq6T1ZBuO6PMHzpAaiVzVZfccoUmc0Lj/Wyu4lpaK9H+aQy3oEKS9EbyQQ6GVKFLFOCFo8w8TP/Z5U14oiTvmpnLDLxhCeKRbMow+Z04hhgbnezHsikIPkULezF6psxrZ6kvzlT23pg91Yn2y/kgiLJMnxpj2G1RUfVaFlVXA/SM23yWYkK1qeTxeoZ5l36TfPjazWN8TXHmQvPX9SVTWg0tnTtxDVNfNvRMUsLd9t75JGhRimqhhgEGleQtiMZYasnmGyvWa3QGSN5CjtzW6aNocC4Cw3DcnIzM/tcriK6M75PpRMXVpwIDAQAB";
     public static final int RequestCode = 10001;
 

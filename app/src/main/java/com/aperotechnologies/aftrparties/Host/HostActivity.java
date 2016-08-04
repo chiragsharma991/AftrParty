@@ -38,7 +38,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -46,7 +45,6 @@ import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -61,33 +59,20 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
-import com.aperotechnologies.aftrparties.GateCrasher.GCParceableData;
-import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherActivity;
-import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.QBSessionClass;
-import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
-import com.aperotechnologies.aftrparties.util.IabHelper;
-import com.aperotechnologies.aftrparties.util.IabResult;
-import com.aperotechnologies.aftrparties.util.Inventory;
-import com.aperotechnologies.aftrparties.util.Purchase;
-import com.facebook.login.LoginManager;
 import com.github.siyamed.shapeimageview.CircularImageView;
-import com.linkedin.platform.LISessionManager;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
@@ -551,7 +536,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
         cb_getLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cb_getLocation.setChecked(true);
+                cb_getLocation.setChecked(false);
                 cb_EnterAddress.setChecked(false);
                 llayoutenterAddress.setVisibility(View.GONE);
                 edt_address.setText("");
@@ -1484,6 +1469,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
     @Override
     public void onBillingInitialized() {
         //GenerikFunctions.showToast(cont,"onBillingInitialized");
+        Boolean consumed = bpMaskUnmask.consumePurchase(ConstsCore.ITEM_MASK_SKU);
         readyToPurchaseMaskUnmask = true;
     }
 
@@ -1992,12 +1978,14 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                     } else {
                         currentlocation = getLastBestLocation();
                         //Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
-                        if (currentlocation != null) {
+                        if (currentlocation != null)
+                        {
+
                             double latitude = currentlocation.getLatitude();
                             double longitude = currentlocation.getLongitude();
                             Geocoder geocoder = new Geocoder(HostActivity.this, Locale.getDefault());
                             try {
-
+                                cb_getLocation.setChecked(true);
 
                                 List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
                                 Log.e("here", " " + addresses);
@@ -2042,14 +2030,17 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
         } else {
 
             currentlocation = getLastBestLocation();
-            Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
-            if (currentlocation != null) {
 
+            if (currentlocation != null)
+            {
+
+                Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
                 double latitude = currentlocation.getLatitude();
                 double longitude = currentlocation.getLongitude();
                 Geocoder geocoder = new Geocoder(this, Locale.getDefault());
                 try
                 {
+                    cb_getLocation.setChecked(true);
                     List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
                     Log.e("here", " " + addresses);
 
@@ -2168,7 +2159,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
         }
         catch(Exception e)
         {
-            Toast.makeText(getApplicationContext(),"Purchase Failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"Data is not saved Successfully", Toast.LENGTH_SHORT).show();
             GenerikFunctions.hDialog();
         }
 

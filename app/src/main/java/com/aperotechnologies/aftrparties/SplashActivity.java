@@ -69,9 +69,10 @@ public class SplashActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FacebookSdk.sdkInitialize(getApplicationContext());
+        //FacebookSdk.sdkInitialize(getApplicationContext());
         Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_splash);
+
 
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         m_config = Configuration_Parameter.getInstance();

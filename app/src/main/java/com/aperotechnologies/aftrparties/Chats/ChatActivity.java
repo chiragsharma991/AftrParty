@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
 import com.aperotechnologies.aftrparties.R;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.model.QBChatMessage;
@@ -29,6 +30,7 @@ import com.quickblox.chat.model.QBDialogType;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.quickblox.core.request.QBRequestGetBuilder;
+import com.quickblox.users.model.QBUser;
 
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.SmackException;
@@ -64,9 +66,6 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
     String lastMessage = "";
     private int totalMessagesCount = 0;
 
-
-
-
 //    public static void start(Context context, Bundle bundle) {
 //        Intent intent = new Intent(context, ChatActivity.class);
 //        intent.putExtras(bundle);
@@ -88,11 +87,14 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
         Intent intent = getIntent();
         dialog = (QBDialog) intent.getSerializableExtra(ConstsCore.EXTRA_DIALOG);
         m_config.lastMessge = dialog.getLastMessage();
+        Log.e("ChatActivity onCreate  m_config.lastMessge"," "+ m_config.lastMessge);
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         listView = (ListView) findViewById(R.id.messagesContainer);
+        listView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+        listView.setStackFromBottom(true);
+
         listadptchatMessages = new ArrayList<>();
-        Log.e("listadptchatMessages"," "+listadptchatMessages);
         adapter = new ChatAdapter(ChatActivity.this, listadptchatMessages, dialog.getType());
         listView.setAdapter(adapter);
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -154,7 +156,6 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
     @Override
     public void onRefresh() {
         index = index + 20;
-
         loadChatHistory(index, "pulling page");
     }
 
@@ -174,6 +175,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
         bundle.putSerializable(ConstsCore.EXTRA_DIALOG, selectedDialog);
         // Open chat activity
         //ChatActivity.start(DialogsActivity.this, bundle);
+
+        Log.e("onBacKpressed m_config.lastMessge"," "+m_config.lastMessge);
 
         Intent resultIntent = new Intent();
         resultIntent.putExtras(bundle);
@@ -205,19 +208,36 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
 
     //function for sending chat message
     private void sendChatMessage(String messageText) {
+
+        QBUser currentUser = ChatService.getInstance().getCurrentUser();
+
         QBChatMessage chatMessage = new QBChatMessage();
         chatMessage.setBody(messageText);
         chatMessage.setProperty(ConstsCore.PROPERTY_SAVE_TO_HISTORY, "1");
         chatMessage.setDateSent(new Date().getTime() / 1000);
+        chatMessage.setProperty("dialog_name",currentUser.getFullName());
+        chatMessage.setDialogId(dialog.getDialogId());
+
 
         try {
             chat.sendMessage(chatMessage);
+            m_config.lastMessge = edt_message.getText().toString().replaceAll("\\s+", " ").trim();
+
+            //Notification for 1-1 Chat msg
+//            Integer opponentID = getOpponentIDForPrivateDialog(dialog);
+//
+//            if (dialog.getType() == QBDialogType.PRIVATE) {
+//                QBPushNotifications.sendPrivateChatmessagePN(ChatActivity.this, opponentID, currentUser.getFullName(), dialog.getDialogId(), edt_message.getText().toString().replaceAll("\\s+", " ").trim());
+//            }
+
 
         } catch (XMPPException e) {
             Log.e(TAG, "failed to send a message", e);
+
         } catch (SmackException sme) {
             Log.e(TAG, "failed to send a message", sme);
         }
+
 
         edt_message.setText("");
 
@@ -233,16 +253,14 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
     private void initChat() {
 
 
-
         if (dialog.getType() == QBDialogType.GROUP) {
             chat = new GroupChatImpl(this);//this variable will be use for sending message
-            //progressBar.setVisibility(View.VISIBLE);
+
             // Join group chat
-            //
             joinGroupChat();
 
         } else if (dialog.getType() == QBDialogType.PRIVATE) {
-            swipeRefreshLayout.setRefreshing(true);
+            //swipeRefreshLayout.setRefreshing(true);
 
             Integer opponentID = getOpponentIDForPrivateDialog(dialog);
             chat = new PrivateChatImpl(this, opponentID);//this variable will be use for sending message
@@ -263,8 +281,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
             @Override
             public void onError(QBResponseException e) {
                 AlertDialog.Builder dialog = new AlertDialog.Builder(ChatActivity.this);
-                dialog.setMessage("error when join group chat: " + e.toString()).create().show();
-                //progressBar.setVisibility(View.GONE);
+                dialog.setMessage("error:  No response received within reply timeout.Please try after some time." + e.toString()).create().show();
+                progressBar.setVisibility(View.GONE);
             }
 
 
@@ -273,7 +291,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
 
     public void loadChatHistory(final int index, final String check)
     {
-        swipeRefreshLayout.setRefreshing(true);
+        //swipeRefreshLayout.setRefreshing(true);
         Log.e("index "," count "+index);
 
         QBRequestGetBuilder customObjectRequestBuilder = new QBRequestGetBuilder();
@@ -286,6 +304,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
             @Override
             public void onSuccess(ArrayList<QBChatMessage> messages, Bundle args)
             {
+
+                m_config.peerchatDialogId = dialog.getDialogId();
 
                 totalMessagesCount = totalMessagesCount + messages.size();
                 Log.e("messages","size "+messages.size());
@@ -306,6 +326,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
                     }
                     adapter.notifyDataSetChanged();
                     m_config.lastMessge = listadptchatMessages.get(totalMessagesCount - 1).getBody();
+                    Log.e("m_config.lastMessge"," "+m_config.lastMessge);
                     sendButton.setVisibility(View.VISIBLE);
                     edt_message.setVisibility(View.VISIBLE);
 
@@ -317,23 +338,29 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
                     else
                     {
 
-                        listView.setSelection(selVal);
+                        listView.setSelection(selVal - 1);
                     }
 
                 }else{
-                    if(totalMessagesCount == 0){
+                    if(totalMessagesCount == 0)
+                    {
                         m_config.lastMessge = "";
+                        Log.e("totalMessagesCount=0 m_config.lastMessge"," "+m_config.lastMessge);
                     }
                     sendButton.setVisibility(View.VISIBLE);
                     edt_message.setVisibility(View.VISIBLE);
 
                 }
                 swipeRefreshLayout.setRefreshing(false);
+                progressBar.setVisibility(View.GONE);
             }
 
             @Override
             public void onError(QBResponseException e) {
                 e.printStackTrace();
+                AlertDialog.Builder dialog = new AlertDialog.Builder(ChatActivity.this);
+                dialog.setMessage("error: " + e.toString()).create().show();
+                progressBar.setVisibility(View.GONE);
             }
 
 
@@ -359,7 +386,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
 
     private void scrollDown()
     {
-        Log.e("messagesContainer.getCount()"," "+(listView.getCount() - 1));
+       // Log.e("messagesContainer.getCount()"," "+(listView.getCount() - 1));
         listView.setSelection(listView.getCount() - 1);
     }
 
@@ -443,7 +470,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
         for(Integer userID : dialog.getOccupants()){
             if(!userID.equals(Integer.valueOf(sharedpreferences.getString(m_config.QuickBloxID,"")))){
                 opponentID = userID;
-                Log.e("opponentId ",""+opponentID);
+                //Log.e("opponentId ",""+opponentID);
                 break;
             }
         }

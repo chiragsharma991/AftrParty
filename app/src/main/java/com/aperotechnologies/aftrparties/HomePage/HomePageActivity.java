@@ -27,6 +27,7 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
+import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
@@ -37,6 +38,7 @@ import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Settings.SettingsActivity;
 import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.TipsActivity;
+import com.aperotechnologies.aftrparties.TransparentActivity;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.aperotechnologies.aftrparties.util.IabHelper;
 import com.aperotechnologies.aftrparties.util.IabResult;
@@ -134,7 +136,6 @@ public class HomePageActivity extends Activity
 
 
 
-
 //        imguser = (CircularImageView) findViewById(R.id.userimage);
 //        txtuserName = (TextView) findViewById(R.id.userName);
 //        txtuserEmail = (TextView) findViewById(R.id.userEmail);
@@ -149,6 +150,21 @@ public class HomePageActivity extends Activity
         faceOverlayView = (FaceOverlayView)findViewById(R.id.face_overlay);
 
         loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
+
+        if(getIntent().getExtras() != null){
+            if(getIntent().getExtras().getString("from").equals("PartyRetention")){
+                String PartyName = getIntent().getExtras().getString("PartyName");
+                String PartyId = getIntent().getExtras().getString("PartyId");
+                String DialogId = getIntent().getExtras().getString("DialogId");
+                Intent i = new Intent(HomePageActivity.this, TransparentActivity.class);
+                i.putExtra("DialogId", DialogId);
+                i.putExtra("PartyId",PartyId);
+                i.putExtra("PartyName", PartyName);
+                i.putExtra("from", "PartyRetention");
+                startActivity(i);
+            }
+        }
+
 
 
 //        txtuserName.setText(sharedPreferences.getString(m_config.Entered_User_Name,""));
@@ -236,6 +252,7 @@ public class HomePageActivity extends Activity
 
                 Intent i = new Intent(HomePageActivity.this, TipsActivity.class);
                 startActivity(i);
+
 
             }
         });
@@ -370,13 +387,16 @@ public class HomePageActivity extends Activity
 //                    String accessToken = LoginValidations.getFBAccessToken().getToken();
 //                    QBSessionRestart.QBSession(cont, accessToken, "GCActivity");
 //                }
-//                else {
+//                else
+//                {
                     Intent i = new Intent(HomePageActivity.this, GateCrasherSearchActivity.class);
                     startActivity(i);
 //                }
 
             }
         });
+
+        //SetLocalNotifications.setLNotificationPartyRetention(cont, "hhh", "87878" , "57985d4aa28f9adb3b00006a", "777777777777");
 
     }
 
@@ -386,18 +406,18 @@ public class HomePageActivity extends Activity
         //Harshada
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(HomePageActivity.this);
         alertDialogBuilder
-                .setTitle("Logout")
-                .setMessage("Are you sure you want to logout?")
+                .setTitle("Exit")
+                .setMessage("Are you sure you want to exit?")
                 .setCancelable(false)
                 .setNegativeButton("No", null)
                 .setPositiveButton("Yes",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                finish();
-                                Intent intent = new Intent(Intent.ACTION_MAIN);
-                                intent.addCategory(Intent.CATEGORY_HOME);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
+                                //finish();
+                                Intent i = new Intent(Intent.ACTION_MAIN);
+                                i.addCategory(Intent.CATEGORY_HOME);
+                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(i);
                             }
                         });
         alertDialogBuilder.show();

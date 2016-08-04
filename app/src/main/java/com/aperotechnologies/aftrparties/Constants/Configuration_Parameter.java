@@ -70,7 +70,7 @@ public class Configuration_Parameter
     //lastMessge variable is used for updating lastmessage of chat dialog while navigating from ChatActivity to DialogsActivity
     public String lastMessge = "";
     public String QbIdforInappPChat = "";//used for returning QuickbloxId from fragment to Activity for  In app purchase(1-1Chat)
-
+    public static String peerchatDialogId = "dialogid ";
 
     /**
      * Create private constructor

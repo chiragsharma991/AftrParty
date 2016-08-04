@@ -36,7 +36,7 @@ public class DateUtils
         int mDay = calendar1.get(Calendar.DAY_OF_MONTH);
 
         int mHour = calendar1.get(Calendar.HOUR_OF_DAY);
-        Log.e("mHour"," "+mHour);
+        //Log.e("mHour"," "+mHour);
         int mMin = calendar1.get(Calendar.MINUTE);
 //        String finalHour = "";
 //        String finalMin = "";

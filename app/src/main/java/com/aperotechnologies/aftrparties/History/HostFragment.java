@@ -187,6 +187,8 @@ public class HostFragment extends Fragment
             @Override
             public void onClick(View v)
             {
+
+
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
                 alertDialogBuilder
                         .setTitle("Pay for 1-1 Chat.")
@@ -219,6 +221,9 @@ public class HostFragment extends Fragment
 
                                 });
                 alertDialogBuilder.show();
+
+
+
 
 
             }

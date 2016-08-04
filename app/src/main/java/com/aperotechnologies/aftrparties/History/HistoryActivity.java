@@ -2,6 +2,7 @@ package com.aperotechnologies.aftrparties.History;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -17,6 +18,7 @@ import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartiesClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
@@ -107,7 +109,7 @@ public class HistoryActivity extends Activity
             }
             else
             {
-                iterations =  (int)(PartiesList.size()/10) +1;
+                iterations =  (int)(PartiesList.size()/10) + 1;
             }
 
             Log.e("iterations"," "+iterations +"   "+index);
@@ -259,7 +261,20 @@ public class HistoryActivity extends Activity
 
     @Override
     public void onBackPressed() {
-        finish();
+
+
+        if(getIntent() == null || getIntent().equals(null) || getIntent().getExtras() == null || getIntent().getExtras().equals(null))
+        {
+            super.onBackPressed();
+        }
+        else if(getIntent().getExtras().getString("from").equals("requestApproved") || getIntent().getExtras().getString("from").equals("requestDeclined"))
+        {
+            Intent i = new Intent(HistoryActivity.this, HomePageActivity.class);
+            startActivity(i);
+            finish();
+        }
+
     }
 
 }
+//1470123780000 , 1470733200000

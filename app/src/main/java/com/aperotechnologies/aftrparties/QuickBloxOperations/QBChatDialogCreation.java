@@ -1,5 +1,6 @@
 package com.aperotechnologies.aftrparties.QuickBloxOperations;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,10 +15,12 @@ import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
 import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.aperotechnologies.aftrparties.TransparentActivity;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBGroupChatManager;
 import com.quickblox.chat.QBPrivateChatManager;
 import com.quickblox.chat.model.QBDialog;
+import com.quickblox.chat.model.QBDialogCustomData;
 import com.quickblox.chat.model.QBDialogType;
 import com.quickblox.chat.request.QBDialogRequestBuilder;
 import com.quickblox.core.QBEntityCallback;
@@ -33,7 +36,6 @@ import java.util.List;
  * Created by hasai on 15/06/16.
  */
 public class QBChatDialogCreation {
-
 
 
     public static void createPrivateChat(final Integer occupantId, final Context cont){
@@ -130,7 +132,7 @@ public class QBChatDialogCreation {
                 Log.e("onSuccess", " ");
 
                 AWSPartyOperations.updateDialogId(cont, dialog.getDialogId(), GCFBID, GCQBID, PartyID, PartyName);
-                //SetLocalNotifications.setLNotificationPartyRetention(cont, PartyName, PartyID , dialog.getDialogId(), PartyEndTime);
+                SetLocalNotifications.setLNotificationPartyRetention(cont, PartyName, PartyID , dialog.getDialogId(), PartyEndTime);
 
 
 
@@ -203,12 +205,16 @@ public class QBChatDialogCreation {
             public void onSuccess(Void aVoid, Bundle bundle)
             {
                 Log.e("Onsuccess","delete Dialog ");
+                GenerikFunctions.hDialog();
+
+
             }
 
             @Override
             public void onError(QBResponseException errors)
             {
                 Log.e("onError","delete Dialog ");
+                GenerikFunctions.hDialog();
             }
         });
     }

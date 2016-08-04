@@ -477,7 +477,6 @@ public class Validations {
         int startMin = calendar.get(Calendar.MINUTE);
 
         Calendar calendar1 = Calendar.getInstance();
-
         calendar1.set(Calendar.DAY_OF_MONTH, startDate);
         calendar1.set(Calendar.MONTH, startMon);
         calendar1.set(Calendar.YEAR, startYear);
@@ -492,6 +491,9 @@ public class Validations {
     }
 
 
-
+    public static String escapeXml(String s) {
+        Log.e("escapeXml"," "+s.contains("&amp;")+" "+s);
+        return s.replaceAll("&amp;","&").replaceAll("&gt;", ">").replaceAll("&lt;", "<").replaceAll("&quot;", "\"").replaceAll("&apos;", "'").replaceAll("&euro;","€");
+    }
 
 }

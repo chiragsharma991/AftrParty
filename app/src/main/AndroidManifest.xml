@@ -51,32 +51,36 @@
             android:name="com.aperotechnologies.aftrparties.HomePage.HomePageActivity"
             android:screenOrientation="portrait"></activity>
 
+        <!--<activity-->
+            <!--android:name=".TransparentActivity" android:theme="@android:style/Theme.Translucent"-->
+            <!--android:screenOrientation="portrait"></activity>-->
+
         <activity
-            android:name=".TransparentActivity" android:theme="@android:style/Theme.Translucent"
+            android:name=".TransparentActivity" android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.TipsActivity"
+            android:name=".TipsActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.Settings.SettingsActivity"
+            android:name=".Settings.SettingsActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.History.HistoryActivity"
+            android:name=".History.HistoryActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.History.PartyDetails"
+            android:name=".History.PartyDetails"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.History.HostProfileActivity"
+            android:name=".History.HostProfileActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.History.RequestantActivity"
+            android:name=".History.RequestantActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
@@ -84,23 +88,23 @@
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.Host.HostActivity"
+            android:name=".Host.HostActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity"
+            android:name=".GateCrasher.GateCrasherSearchActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.GateCrasher.GateCrasherActivity"
+            android:name=".GateCrasher.GateCrasherActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.Chats.DialogsActivity"
+            android:name=".Chats.DialogsActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity
-            android:name="com.aperotechnologies.aftrparties.Chats.ChatActivity"
+            android:name=".Chats.ChatActivity"
             android:screenOrientation="portrait"></activity>
 
         <activity android:name=".Login.OTPActivity"
@@ -114,10 +118,8 @@
 
 
         <!-- Local Notification receiver-->
-
         <receiver android:name=".LocalNotifications.RatingsAlarmReceiver">
         </receiver>
-
 
 
         <!-- GCM (Push Notifications) setup: http://developer.android.com/google/gcm/gs.html#android-app -->
@@ -130,7 +132,6 @@
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
                 <category android:name="com.aperotechnologies.aftrparties" />
             </intent-filter>
         </receiver>

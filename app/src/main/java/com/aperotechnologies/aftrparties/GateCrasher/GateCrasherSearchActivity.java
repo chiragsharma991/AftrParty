@@ -9,7 +9,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,12 +24,9 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -40,18 +36,14 @@ import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.ActivePartyClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
-import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.aperotechnologies.aftrparties.util.IabHelper;
-import com.aperotechnologies.aftrparties.util.IabResult;
-import com.aperotechnologies.aftrparties.util.Inventory;
-import com.aperotechnologies.aftrparties.util.Purchase;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -59,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
@@ -70,11 +61,11 @@ import static com.aperotechnologies.aftrparties.Reusables.Validations.getMonthNo
 /**
  * Created by hasai on 02/05/16.
  */
-public class GateCrasherSearchActivity extends Activity {
+public class GateCrasherSearchActivity extends Activity implements BillingProcessor.IBillingHandler {
 
 
     TextView txtStartDate;
-    Button btn_getCurrentLocation , btn_SearchGCParty;
+    Button btn_getCurrentLocation, btn_SearchGCParty;
     CheckBox cb_byobYes, cb_byobNo;
 
     String timeSelection;
@@ -99,9 +90,8 @@ public class GateCrasherSearchActivity extends Activity {
 
     private String loginUserFBID;
     private UserTable user;
-    private BillingProcessor bp;
-    private boolean readyToPurchase = false;
-
+    private BillingProcessor bpGCParties;
+    private boolean readyToPurchaseGCParties = false;
 
 
     @Override
@@ -135,7 +125,6 @@ public class GateCrasherSearchActivity extends Activity {
 //        List<String> byobList = new ArrayList<String>();
 //        byobList.add("Yes");
 //        byobList.add("No");
-
 
 
 //        final ArrayAdapter<String> startTime = new ArrayAdapter<String>(GateCrasherSearchActivity.this, R.layout.spinner_item, startTimelist);
@@ -182,93 +171,42 @@ public class GateCrasherSearchActivity extends Activity {
         });
 
 
-
-        if(!BillingProcessor.isIabServiceAvailable(this)) {
-            GenerikFunctions.showToast(cont,"In-app billing service is unavailable, please upgrade Android Market/Play to version >= 3.9.16");
+        if (!BillingProcessor.isIabServiceAvailable(this)) {
+            GenerikFunctions.showToast(cont, "In-app billing service is unavailable, please upgrade Android Market/Play to version >= 3.9.16");
         }
 
-        bp = new BillingProcessor(this, ConstsCore.base64EncodedPublicKey, new BillingProcessor.IBillingHandler() {
-            @Override
-            public void onProductPurchased(String productId, TransactionDetails details) {
-                //GenerikFunctions.showToast(cont,"onProductPurchased: " + productId+" ");
-                GenerikFunctions.showToast(cont,"Purchase Successful");
-                Boolean consumed = bp.consumePurchase(ConstsCore.ITEM_PARTYPURCHASE_SKU);
-                GenerikFunctions.sDialog(cont,"Saving Data");
-
-                if (consumed)
-                {
-                    setPartyPurchaseinAWS();
-                }
-                else{
-                    GenerikFunctions.hDialog();
-                }
-
-
-            }
-            @Override
-            public void onBillingError(int errorCode, Throwable error) {
-                //GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
-            }
-
-            @Override
-            public void onBillingInitialized() {
-                //GenerikFunctions.showToast(cont,"onBillingInitialized");
-                readyToPurchase = true;
-
-
-            }
-
-            @Override
-            public void onPurchaseHistoryRestored() {
-                //GenerikFunctions.showToast(cont,"onPurchaseHistoryRestored");
-                for(String sku : bp.listOwnedProducts())
-                    Log.d("", "Owned Managed Product: " + sku);
-                for(String sku : bp.listOwnedSubscriptions())
-                    Log.d("", "Owned Subscription: " + sku);
-
-            }
-        });
-
+        bpGCParties = new BillingProcessor(this, ConstsCore.base64EncodedPublicKey, this);
 
 
         btninapppurchase.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
 
                 //Check mask status of user for party request
-                try
-                {
+                try {
                     user = m_config.mapper.load(UserTable.class, loginUserFBID);
                     Log.e("----", " " + user.getPaidgc());
                     List<PaidGCClass> paidgclist = user.getPaidgc();
-                    if (paidgclist == null || paidgclist.size() == 0)
-                    {
+                    if (paidgclist == null || paidgclist.size() == 0) {
 
                         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(GateCrasherSearchActivity.this);
                         alertDialogBuilder
                                 .setTitle("Pay for Unmasking Party.")
                                 .setMessage("Are you sure you want to pay for Party?")
                                 .setCancelable(false)
-                                .setNegativeButton("No", new DialogInterface.OnClickListener()
-                                {
-                                    public void onClick(DialogInterface dialog, int id)
-                                    {
+                                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
 
                                     }
                                 })
                                 .setPositiveButton("Yes",
                                         new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id)
-                                            {
-                                                if (!readyToPurchase)
-                                                {
-                                                    GenerikFunctions.showToast(cont,"Billing not initialized.");
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                if (!readyToPurchaseGCParties) {
+                                                    GenerikFunctions.showToast(cont, "Billing not initialized.");
                                                     return;
-                                                }
-                                                else
-                                                {
-                                                    bp.purchase((Activity) cont,ConstsCore.ITEM_PARTYPURCHASE_SKU);
+                                                } else {
+                                                    bpGCParties.purchase((Activity) cont, ConstsCore.ITEM_PARTYPURCHASE_SKU);
 
                                                 }
                                             }
@@ -276,46 +214,34 @@ public class GateCrasherSearchActivity extends Activity {
                                         });
                         alertDialogBuilder.show();
 
-                    }
-                    else
-                    {
+                    } else {
 
 
-                        if (paidgclist.get(0).getPaidstatus().equals("Yes"))
-                        {
+                        if (paidgclist.get(0).getPaidstatus().equals("Yes")) {
 
                             Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
-                            if (currTime < Long.parseLong(paidgclist.get(0).getSubscriptiondate()))
-                            {
+                            if (currTime < Long.parseLong(paidgclist.get(0).getSubscriptiondate())) {
                                 GenerikFunctions.showToast(cont, "Your subscription is upto date.");
 
-                            }
-                            else
-                            {
+                            } else {
                                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(GateCrasherSearchActivity.this);
                                 alertDialogBuilder
-                                        .setTitle("Pay for Unmasking Party.")
+                                        .setTitle("Pay for Multiple Party Request.")
                                         .setMessage("Are you sure you want to pay for Party?")
                                         .setCancelable(false)
-                                        .setNegativeButton("No", new DialogInterface.OnClickListener()
-                                        {
-                                            public void onClick(DialogInterface dialog, int id)
-                                            {
+                                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
 
                                             }
                                         })
                                         .setPositiveButton("Yes",
-                                                new DialogInterface.OnClickListener()
-                                                {
-                                                    public void onClick(DialogInterface dialog, int id)
-                                                    {
-                                                        if (!readyToPurchase) {
-                                                            GenerikFunctions.showToast(cont,"Billing not initialized.");
+                                                new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
+                                                        if (!readyToPurchaseGCParties) {
+                                                            GenerikFunctions.showToast(cont, "Billing not initialized.");
                                                             return;
-                                                        }
-                                                        else
-                                                        {
-                                                            bp.purchase((Activity) cont,ConstsCore.ITEM_PARTYPURCHASE_SKU);
+                                                        } else {
+                                                            bpGCParties.purchase((Activity) cont, ConstsCore.ITEM_PARTYPURCHASE_SKU);
                                                         }
                                                     }
 
@@ -331,25 +257,19 @@ public class GateCrasherSearchActivity extends Activity {
                                     .setTitle("Pay for Unmasking Party.")
                                     .setMessage("Are you sure you want to pay for Party?")
                                     .setCancelable(false)
-                                    .setNegativeButton("No", new DialogInterface.OnClickListener()
-                                    {
-                                        public void onClick(DialogInterface dialog, int id)
-                                        {
+                                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
 
                                         }
                                     })
                                     .setPositiveButton("Yes",
-                                            new DialogInterface.OnClickListener()
-                                            {
-                                                public void onClick(DialogInterface dialog, int id)
-                                                {
-                                                    if (!readyToPurchase) {
-                                                        GenerikFunctions.showToast(cont,"Billing not initialized.");
+                                            new DialogInterface.OnClickListener() {
+                                                public void onClick(DialogInterface dialog, int id) {
+                                                    if (!readyToPurchaseGCParties) {
+                                                        GenerikFunctions.showToast(cont, "Billing not initialized.");
                                                         return;
-                                                    }
-                                                    else
-                                                    {
-                                                        bp.purchase((Activity) cont,ConstsCore.ITEM_PARTYPURCHASE_SKU);
+                                                    } else {
+                                                        bpGCParties.purchase((Activity) cont, ConstsCore.ITEM_PARTYPURCHASE_SKU);
                                                     }
                                                 }
 
@@ -363,11 +283,8 @@ public class GateCrasherSearchActivity extends Activity {
                 }
 
 
-
             }
         });
-
-
 
 
         // selection of Spinner Now/Later and start DatePicker
@@ -433,7 +350,6 @@ public class GateCrasherSearchActivity extends Activity {
         });
 
 
-
         cb_byobNo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -450,12 +366,9 @@ public class GateCrasherSearchActivity extends Activity {
 
                 //this is a check for build version below 23
 
-                if ((int) Build.VERSION.SDK_INT < 23)
-                {
+                if ((int) Build.VERSION.SDK_INT < 23) {
                     getSelfLocation();
-                }
-                else
-                {
+                } else {
                     if (ActivityCompat.checkSelfPermission(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                             &&
                             ActivityCompat.checkSelfPermission(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -465,11 +378,9 @@ public class GateCrasherSearchActivity extends Activity {
 //                return locationNet;
 
                         ActivityCompat.requestPermissions((Activity) cont,
-                                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,Manifest.permission.ACCESS_FINE_LOCATION},
+                                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
                                 MY_PERMISSIONS_ACCESS_CF_LOCATION);
-                    }
-                    else
-                    {
+                    } else {
                         getSelfLocation();
                     }
                 }
@@ -478,25 +389,20 @@ public class GateCrasherSearchActivity extends Activity {
 
 
         // create party button click
-        btn_SearchGCParty.setOnClickListener(new View.OnClickListener()
-        {
+        btn_SearchGCParty.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v)
-            {
+            public void onClick(View v) {
 
-                if(cb_byobYes.isChecked()){
+                if (cb_byobYes.isChecked()) {
                     selected_byob = "Yes";
-                }else{
+                } else {
                     selected_byob = "No";
                 }
 
-                if (compareWithCurrentTime(startHour, startMin) == false)
-                {
-                    GenerikFunctions.showToast(cont,"PartyStartTime should be greater than current time.");
+                if (compareWithCurrentTime(startHour, startMin) == false) {
+                    GenerikFunctions.showToast(cont, "PartyStartTime should be greater than current time.");
 
-                }
-                else
-                {
+                } else {
 
 
                     if ((int) Build.VERSION.SDK_INT < 23) {
@@ -543,7 +449,6 @@ public class GateCrasherSearchActivity extends Activity {
 //                }
 
 
-
             }
         });
     }
@@ -577,30 +482,27 @@ public class GateCrasherSearchActivity extends Activity {
 
 
             location = getLastBestLocation();
-            Log.e("Func  ", location.getLatitude() + "     " + location.getLongitude());
-
-            if(location == null){
-                    Toast.makeText(cont,"Current Location not available",Toast.LENGTH_SHORT).show();
-
-                }else{
-                    Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
-                    GCParceableData data = new GCParceableData();
-                    data.setlatitude(String.valueOf(location.getLatitude()));
-                    data.setlongitude(String.valueOf(location.getLongitude()));
-                    data.setdistance(sharedPreferences.getString(m_config.Distance,"3"));
-                    data.setatdatetime(String.valueOf(selected_startTimeVal));
-                    data.setbyob(selected_byob);
-                    data.setgenderpreference(sharedPreferences.getString(m_config.GenderPreference,"N/A"));
-                    Bundle mBundles = new Bundle();
-                    mBundles.putSerializable(ConstsCore.SER_KEY, data);
-                    i.putExtras(mBundles);
-                    cont.startActivity(i);
 
 
-                }
+            if (location == null) {
+                Toast.makeText(cont, "Current Location not available", Toast.LENGTH_SHORT).show();
+
+            } else {
+                Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
+                GCParceableData data = new GCParceableData();
+                data.setlatitude(String.valueOf(location.getLatitude()));
+                data.setlongitude(String.valueOf(location.getLongitude()));
+                data.setdistance(sharedPreferences.getString(m_config.Distance, "3"));
+                data.setatdatetime(String.valueOf(selected_startTimeVal));
+                data.setbyob(selected_byob);
+                data.setgenderpreference(sharedPreferences.getString(m_config.GenderPreference, "N/A"));
+                Bundle mBundles = new Bundle();
+                mBundles.putSerializable(ConstsCore.SER_KEY, data);
+                i.putExtras(mBundles);
+                cont.startActivity(i);
 
 
-
+            }
 
 
         }
@@ -608,34 +510,24 @@ public class GateCrasherSearchActivity extends Activity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
-    {
-        switch (requestCode)
-        {
-            case MY_PERMISSIONS_ACCESS_CF_LOCATION:
-            {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_ACCESS_CF_LOCATION: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     getSelfLocation();
-                }
-                else
-                {
+                } else {
                     // permission was not granted
-                    if (cont == null)
-                    {
+                    if (cont == null) {
                         return;
                     }
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_FINE_LOCATION))
-                    {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                         //showStoragePermissionRationale();
 
                         new AlertDialog.Builder(GateCrasherSearchActivity.this)
                                 .setTitle("Permission Denied")
                                 .setMessage(getResources().getString(R.string.message_cf_location_permission))
-                                .setPositiveButton("Retry", new DialogInterface.OnClickListener()
-                                {
-                                    public void onClick(DialogInterface dialog, int which)
-                                    {
+                                .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
                                         // continue with delete
                                         ActivityCompat.requestPermissions(GateCrasherSearchActivity.this,
                                                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
@@ -650,9 +542,7 @@ public class GateCrasherSearchActivity extends Activity {
                                 .show();
                         break;
 
-                    }
-                    else
-                    {
+                    } else {
 
                     }
                     break;
@@ -663,8 +553,7 @@ public class GateCrasherSearchActivity extends Activity {
         }
     }
 
-    private Location getLastBestLocation()
-    {
+    private Location getLastBestLocation() {
         Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -679,7 +568,9 @@ public class GateCrasherSearchActivity extends Activity {
         Location locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
         long GPSLocationTime = 0;
-        if (null != locationGPS) { GPSLocationTime = locationGPS.getTime(); }
+        if (null != locationGPS) {
+            GPSLocationTime = locationGPS.getTime();
+        }
 
         long NetLocationTime = 0;
 
@@ -687,15 +578,12 @@ public class GateCrasherSearchActivity extends Activity {
             NetLocationTime = locationNet.getTime();
         }
 
-        if ( 0 < GPSLocationTime - NetLocationTime ) {
+        if (0 < GPSLocationTime - NetLocationTime) {
             return locationGPS;
-        }
-        else {
+        } else {
             return locationNet;
         }
     }
-
-
 
 
     // calendar function
@@ -708,12 +596,11 @@ public class GateCrasherSearchActivity extends Activity {
     // function for displaying time in AM/PM
     public StringBuilder showTime(int hour, int min) {
         StringBuilder time;
-        String hours,mins;
+        String hours, mins;
         if (hour == 0) {
             hour += 12;
             format = "AM";
-        }
-        else if (hour == 12) {
+        } else if (hour == 12) {
             format = "PM";
         } else if (hour > 12) {
             hour -= 12;
@@ -722,15 +609,15 @@ public class GateCrasherSearchActivity extends Activity {
             format = "AM";
         }
 
-        if(hour < 10){
+        if (hour < 10) {
             hours = "0" + hour;
-        }else{
+        } else {
             hours = String.valueOf(hour);
         }
 
-        if(min < 10){
+        if (min < 10) {
             mins = "0" + min;
-        }else{
+        } else {
             mins = String.valueOf(min);
         }
 
@@ -741,7 +628,7 @@ public class GateCrasherSearchActivity extends Activity {
 
 
     //function for converting values in milliseconds
-    public long getTimeinMs(int mDay, int mMonth, int mYear, int hour, int minute){
+    public long getTimeinMs(int mDay, int mMonth, int mYear, int hour, int minute) {
 
         //Log.e("hour "," "+hour+" minute "+minute);
 
@@ -759,7 +646,7 @@ public class GateCrasherSearchActivity extends Activity {
 
         long TimeinMs = calendar.getTimeInMillis();
 
-        Log.e("TimeinMs ",""+TimeinMs);
+        Log.e("TimeinMs ", "" + TimeinMs);
         return TimeinMs;
 
 
@@ -780,7 +667,6 @@ public class GateCrasherSearchActivity extends Activity {
     }
 
 
-
     // function for StartTime DatePicker
     private DatePicker startDateDialog(String check) {
 
@@ -792,7 +678,7 @@ public class GateCrasherSearchActivity extends Activity {
         tempstartmonth = startMon;
         tempstartyear = startYear;
 
-        DatePickerDialog dp = new DatePickerDialog(GateCrasherSearchActivity.this,new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog dp = new DatePickerDialog(GateCrasherSearchActivity.this, new DatePickerDialog.OnDateSetListener() {
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
             }
 
@@ -804,7 +690,7 @@ public class GateCrasherSearchActivity extends Activity {
             public void onDateChanged(DatePicker datePicker, int year, int month, int dayOfMonth) {
                 //DatePicker change listener
 
-                Log.e("-------","change "+startDate);
+                Log.e("-------", "change " + startDate);
 
 
                 startDate = dayOfMonth;
@@ -818,9 +704,9 @@ public class GateCrasherSearchActivity extends Activity {
         dp.setButton(DatePickerDialog.BUTTON_POSITIVE, "Set", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         //checks whether selected date and current date is same or not
-                        if(getCurrentDate(startDate, startMon, startYear) == false){
-                            Toast.makeText(getApplicationContext(),"Party can be searched for current day only",Toast.LENGTH_SHORT).show();
-                        }else{
+                        if (getCurrentDate(startDate, startMon, startYear) == false) {
+                            Toast.makeText(getApplicationContext(), "Party can be searched for current day only", Toast.LENGTH_SHORT).show();
+                        } else {
                             //call to Start TimePicker
                             startTimeDialog("show");
                         }
@@ -830,7 +716,7 @@ public class GateCrasherSearchActivity extends Activity {
 
         dp.setButton(DatePickerDialog.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Log.e("-------","cancel "+ tempstartdate);
+                        Log.e("-------", "cancel " + tempstartdate);
                         startDate = tempstartdate;
                         startMon = tempstartmonth;
                         startYear = tempstartyear;
@@ -843,7 +729,7 @@ public class GateCrasherSearchActivity extends Activity {
         //dp.getDatePicker().setMaxDate(calendar.getTimeInMillis());
         dp.getDatePicker().setCalendarViewShown(true);
         dp.setTitle("Set Date");
-        if(check == "show"){
+        if (check == "show") {
             dp.show();
         }
         return dp.getDatePicker();
@@ -872,20 +758,17 @@ public class GateCrasherSearchActivity extends Activity {
                     public void onClick(DialogInterface dialog, int which) {
                         startHour = timePicker.getCurrentHour();
                         startMin = timePicker.getCurrentMinute();
-                        tempstartTimeVal[0] = getTimeinMs(startDate, startMon, startYear, startHour,startMin);
+                        tempstartTimeVal[0] = getTimeinMs(startDate, startMon, startYear, startHour, startMin);
                         Log.e("diff ", "  " + (tempstartTimeVal[0] - selected_startTimeVal));
 
-                        if (compareWithCurrentTime(startHour, startMin) == false)
-                        {
+                        if (compareWithCurrentTime(startHour, startMin) == false) {
                             startHour = tempstarthour;
                             startMin = tempstartmin;
                             Toast.makeText(getApplication(), "StartTime Should be greater than or equal to currentTime", Toast.LENGTH_SHORT).show();
-                        }
-                        else
-                        {
+                        } else {
                             txtStartDate.setText(getDateNo(startDate) + "-" + getMonthNo(startMon) + "-" + startYear + ", " + showTime(startHour, startMin));
                             selected_startTimeVal = tempstartTimeVal[0];
-                            Log.e("selected_startTimeVal", " " + selected_startTimeVal+" "+new Date(selected_startTimeVal));
+                            Log.e("selected_startTimeVal", " " + selected_startTimeVal + " " + new Date(selected_startTimeVal));
 
                         }
                     }
@@ -905,24 +788,23 @@ public class GateCrasherSearchActivity extends Activity {
     //compare starttime with currenttime
     private boolean compareWithCurrentTime(int startHour, int startMin) {
         Boolean value = false;
-        Log.e("startHour"+startHour+"     "+startMin,"");
+        Log.e("startHour" + startHour + "     " + startMin, "");
 
 
         Calendar calendar = Validations.getCalendar();
         int currHour, currMin;
         currHour = calendar.get(Calendar.HOUR_OF_DAY);
-        currMin = calendar.get(Calendar.MINUTE);        Log.e("currHour"+currHour+"     "+currMin,"");
-        if(startHour < currHour){
+        currMin = calendar.get(Calendar.MINUTE);
+        Log.e("currHour" + currHour + "     " + currMin, "");
+        if (startHour < currHour) {
             value = false;
-        }
-        else if(startHour == currHour){
-            if(startMin < currMin) {
+        } else if (startHour == currHour) {
+            if (startMin < currMin) {
                 value = false;
-            }
-            else{
+            } else {
                 value = true;
             }
-        }else{
+        } else {
             value = true;
         }
         return value;
@@ -931,21 +813,21 @@ public class GateCrasherSearchActivity extends Activity {
 
 
     //function for comparing dates
-    public boolean getCurrentDate(int startDate, int startMon, int startYear){
+    public boolean getCurrentDate(int startDate, int startMon, int startYear) {
         Boolean flag = null;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Calendar c = getCalendar();
-        int day  = c.get(Calendar.DAY_OF_MONTH);
+        int day = c.get(Calendar.DAY_OF_MONTH);
         int mon = c.get(Calendar.MONTH);//mMonth;
         int year = c.get(Calendar.YEAR);//mYear;
-        String date = year+"-"+getMonthNo(mon)+"-"+day;
-        String startdate = startYear+"-"+getMonthNo(startMon)+"-"+startDate;
+        String date = year + "-" + getMonthNo(mon) + "-" + day;
+        String startdate = startYear + "-" + getMonthNo(startMon) + "-" + startDate;
         try {
             Date date1 = sdf.parse(date);
             Date date2 = sdf.parse(startdate);
-            if(date1.compareTo(date2)==0){
+            if (date1.compareTo(date2) == 0) {
                 flag = true;
-            }else{
+            } else {
                 flag = false;
             }
         } catch (ParseException e) {
@@ -956,15 +838,10 @@ public class GateCrasherSearchActivity extends Activity {
     }
 
 
-
-
-
-    private void setPartyPurchaseinAWS()
-    {
+    private void setPartyPurchaseinAWS() {
         Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
 
-        try
-        {
+        try {
             if (user.getPaidgc() == null || user.getPaidgc().size() == 0)
             {
                 PaidGCClass paidGCClass = new PaidGCClass();
@@ -972,32 +849,96 @@ public class GateCrasherSearchActivity extends Activity {
                 paidGCClass.setSubscriptiondate(String.valueOf(subVal));
                 List<PaidGCClass> paidgclist = new ArrayList<>();
                 paidgclist.add(paidGCClass);
-                user.setPaidgc(paidgclist);
-                m_config.mapper.save(user);
 
-                Toast.makeText(getApplicationContext(),"Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                GenerikFunctions.hDialog();
+                List<ActivePartyClass> ActivePartyList = user.getActiveparty();
+                if (ActivePartyList != null || ActivePartyList.size() != 0)
+                {
+                    ActivePartyClass ActiveParty = ActivePartyList.get(0);
+
+                    String EndBlockTime = "";
+                    if ((Long.parseLong(ActiveParty.getStartblocktime() + ConstsCore.hourVal)) > Long.parseLong(ActiveParty.getEndtime())) {
+                        EndBlockTime = ActiveParty.getEndtime();
+                    } else {
+                        EndBlockTime = String.valueOf(Long.parseLong(ActiveParty.getStarttime()) + ConstsCore.hourVal);
+                    }
 
 
-            }
-            else
-            {
+                    ActiveParty.setPartyid(ActiveParty.getPartyid());
+                    ActiveParty.setPartyname(ActiveParty.getPartyname());
+                    ActiveParty.setStarttime(ActiveParty.getStarttime());
+                    ActiveParty.setEndtime(ActiveParty.getEndtime());
+                    ActiveParty.setPartystatus(ActiveParty.getPartystatus());
+                    ActiveParty.setStartblocktime(ActiveParty.getStartblocktime());
+                    ActiveParty.setEndblocktime(EndBlockTime);
+                    ActivePartyList.set(0, ActiveParty);
+                    user.setActiveparty(ActivePartyList);
+                    user.setPaidgc(paidgclist);
+                    m_config.mapper.save(user);
+
+                    Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
+                    GenerikFunctions.hDialog();
+
+                }
+                else
+                {
+                    user.setPaidgc(paidgclist);
+                    m_config.mapper.save(user);
+
+                    Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
+                    GenerikFunctions.hDialog();
+                }
+
+
+
+
+            } else {
                 List<PaidGCClass> paidgclist = user.getPaidgc();
                 PaidGCClass paidGCClass = paidgclist.get(0);
                 paidGCClass.setPaidstatus("Yes");
                 paidGCClass.setSubscriptiondate(String.valueOf(subVal));
                 paidgclist.add(0, paidGCClass);
-                user.setPaidgc(paidgclist);
-                m_config.mapper.save(user);
 
-                Toast.makeText(getApplicationContext(),"Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                GenerikFunctions.hDialog();
+                List<ActivePartyClass> ActivePartyList = user.getActiveparty();
+                if (ActivePartyList != null || ActivePartyList.size() != 0)
+                {
+                    ActivePartyClass ActiveParty = ActivePartyList.get(0);
+
+                    String EndBlockTime = "";
+                    if ((Long.parseLong(ActiveParty.getStartblocktime() + ConstsCore.hourVal)) > Long.parseLong(ActiveParty.getEndtime())) {
+                        EndBlockTime = ActiveParty.getEndtime();
+                    } else {
+                        EndBlockTime = String.valueOf(Long.parseLong(ActiveParty.getStarttime()) + ConstsCore.hourVal);
+                    }
+
+
+                    ActiveParty.setPartyid(ActiveParty.getPartyid());
+                    ActiveParty.setPartyname(ActiveParty.getPartyname());
+                    ActiveParty.setStarttime(ActiveParty.getStarttime());
+                    ActiveParty.setEndtime(ActiveParty.getEndtime());
+                    ActiveParty.setPartystatus(ActiveParty.getPartystatus());
+                    ActiveParty.setStartblocktime(ActiveParty.getStartblocktime());
+                    ActiveParty.setEndblocktime(EndBlockTime);
+                    ActivePartyList.set(0, ActiveParty);
+                    user.setActiveparty(ActivePartyList);
+                    user.setPaidgc(paidgclist);
+                    m_config.mapper.save(user);
+
+                    Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
+                    GenerikFunctions.hDialog();
+
+                }
+                else
+                {
+                    user.setPaidgc(paidgclist);
+                    m_config.mapper.save(user);
+
+                    Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
+                    GenerikFunctions.hDialog();
+                }
 
             }
-        }
-        catch(Exception e)
-        {
-            Toast.makeText(getApplicationContext(),"Purchase Failed", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "Data is not saved Successfully", Toast.LENGTH_SHORT).show();
             GenerikFunctions.hDialog();
         }
 
@@ -1005,22 +946,21 @@ public class GateCrasherSearchActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (!bp.handleActivityResult(requestCode, resultCode, data))
+        if (!bpGCParties.handleActivityResult(requestCode, resultCode, data))
             super.onActivityResult(requestCode, resultCode, data);
     }
 
 
     @Override
     public void onDestroy() {
-        if (bp != null)
-            bp.release();
+        if (bpGCParties != null)
+            bpGCParties.release();
 
         super.onDestroy();
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
@@ -1028,10 +968,47 @@ public class GateCrasherSearchActivity extends Activity {
 
 
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed() {
         finish();
     }
+
+    @Override
+    public void onProductPurchased(String productId, TransactionDetails details) {
+        GenerikFunctions.showToast(cont, "Purchase Successful");
+        Boolean consumed = bpGCParties.consumePurchase(ConstsCore.ITEM_PARTYPURCHASE_SKU);
+        GenerikFunctions.sDialog(cont, "Saving Data");
+
+        if (consumed) {
+            setPartyPurchaseinAWS();
+        } else {
+            GenerikFunctions.hDialog();
+        }
+
+    }
+
+    @Override
+    public void onPurchaseHistoryRestored() {
+        //GenerikFunctions.showToast(cont,"onPurchaseHistoryRestored");
+        for (String sku : bpGCParties.listOwnedProducts())
+            Log.d("", "Owned Managed Product: " + sku);
+        for (String sku : bpGCParties.listOwnedSubscriptions())
+            Log.d("", "Owned Subscription: " + sku);
+
+    }
+
+    @Override
+    public void onBillingError(int errorCode, Throwable error) {
+        //GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
+    }
+
+    @Override
+    public void onBillingInitialized() {
+        //GenerikFunctions.showToast(cont,"onBillingInitialized");
+        Boolean consumed = bpGCParties.consumePurchase(ConstsCore.ITEM_PARTYPURCHASE_SKU);
+        readyToPurchaseGCParties = true;
+
+    }
+
 
 }
 

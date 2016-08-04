@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.aperotechnologies.aftrparties.utils.DateUtils;
 import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.chat.model.QBDialogType;
@@ -87,7 +88,7 @@ public class ChatAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         final ViewHolder holder;
         final QBChatMessage chatMessage = getItem(position);
-        Log.e("chatMessage" ," "+chatMessage);
+        //Log.e("chatMessage" ," "+chatMessage);
         LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         if (convertView == null) {
@@ -107,9 +108,23 @@ public class ChatAdapter extends BaseAdapter {
         QBUser currentUser = ChatService.getInstance().getCurrentUser();
         boolean isOutgoing = chatMessage.getSenderId() == null || chatMessage.getSenderId().equals(currentUser.getId());
         setAlignment(holder, isOutgoing);
+
         if (holder.txtMessage != null) {
-            Log.e("---- html---"," "+chatMessage.getBody() +" " +Html.escapeHtml(chatMessage.getBody()));
-            holder.txtMessage.setText(chatMessage.getBody());
+            String lastmsg = "";
+            if(chatMessage.getBody().contains("&euro;") || chatMessage.getBody().contains("&amp;") || chatMessage.getBody().contains("&gt;") || chatMessage.getBody().contains("&lt;") || chatMessage.getBody().contains("&quot;") || chatMessage.getBody().contains("&apos;"))
+            {
+                lastmsg = Validations.escapeXml(chatMessage.getBody());
+                holder.txtMessage.setText(lastmsg);//chatMessage.getBody());
+
+            }
+            else
+            {
+                lastmsg = chatMessage.getBody();
+                holder.txtMessage.setText(lastmsg);//chatMessage.getBody());
+
+            }
+
+
         }
 
         if (chatMessage.getSenderId() != null)
@@ -126,7 +141,7 @@ public class ChatAdapter extends BaseAdapter {
                 else
                 {
 
-                    Log.e("----"," "+chatMessage.getSenderId()+"------"+ChatService.getInstance().getDialogsUsers().get(chatMessage.getSenderId()));
+                    //Log.e("----"," "+chatMessage.getSenderId()+"------"+ChatService.getInstance().getDialogsUsers().get(chatMessage.getSenderId()));
                     holder.txtInfo.setText(ChatService.getInstance().getDialogsUsers().get(chatMessage.getSenderId()).getFullName() + ": " + DateUtils.longToMessageDate(chatMessage.getDateSent()));
                 }
             }

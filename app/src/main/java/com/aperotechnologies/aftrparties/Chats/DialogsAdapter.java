@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.R;
 
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.quickblox.chat.model.QBDialog;
 import com.quickblox.chat.model.QBDialogType;
@@ -156,15 +157,26 @@ public class DialogsAdapter extends BaseAdapter
                 view.grpChatImage.setTag(position);
             }
 
-
         }
 
-
         view.roomName.setText(dialog.getName());
+
         if(dialog.getLastMessage() != null)
         {
+            String lastmsg = "";
+            if(dialog.getLastMessage().contains("&euro;") || dialog.getLastMessage().contains("&amp;") || dialog.getLastMessage().contains("&gt;") || dialog.getLastMessage().contains("&lt;") || dialog.getLastMessage().contains("&quot;") || dialog.getLastMessage().contains("&apos;"))
+            {
+                lastmsg = Validations.escapeXml(dialog.getLastMessage());
+                view.lastMessage.setText(lastmsg);
+            }
+            else
+            {
+                lastmsg = dialog.getLastMessage();
+                view.lastMessage.setText(lastmsg);
+            }
 
-            view.lastMessage.setText(dialog.getLastMessage());
+
+
         }
         else
         {

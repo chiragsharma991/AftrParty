@@ -121,6 +121,7 @@ public class HostProfileActivity extends AppCompatActivity implements BillingPro
     @Override
     public void onBillingInitialized() {
         //GenerikFunctions.showToast(cont,"onBillingInitialized");
+        Boolean consumed = bpHostChat.consumePurchase(ConstsCore.ITEM_PRIVATECHAT_SKU);
         readyToPurchaseHChat = true;
     }
 

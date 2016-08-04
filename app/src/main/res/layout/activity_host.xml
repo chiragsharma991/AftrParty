@@ -244,7 +244,7 @@
                         android:layout_marginRight="5dp"
                         android:paddingLeft="5dp"
                         android:hint="Party Name"
-                        android:inputType="textCapWords|textAutoComplete"
+                        android:inputType="textCapWords"
                         android:nextFocusDown="@+id/edt_Description"
                         android:layout_height="wrap_content"
                         android:layout_width="0dp"
@@ -278,6 +278,7 @@
 
                     <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
                         android:textCursorDrawable="@null"
+                        android:maxLines="4"
                         android:padding="10dp"
                         android:textColor="@android:color/black"
                         android:layout_marginRight="5dp"

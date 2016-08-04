@@ -111,10 +111,8 @@ public class RequestantFragment extends Fragment
         deny = (Button) layoutView.findViewById(R.id.decline);
         m_config.QbIdforInappPChat = "";
 
-
-
         System.out.println(status);
-        if(status.get(position).equals("Pending"))
+        if(status.get(position).equals("Pending") && (Validations.getCurrentTime() <= Long.parseLong(RequestantActivity.partyy.getEndTime())))
         {
             accept.setVisibility(View.VISIBLE);
             deny.setVisibility(View.VISIBLE);
@@ -212,8 +210,8 @@ public class RequestantFragment extends Fragment
 
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
                 alertDialogBuilder
-                        .setTitle("Pay for Unmasking Party.")
-                        .setMessage("Are you sure you want to pay for Party?")
+                        .setTitle("Pay for 1-1 Chat.")
+                        .setMessage("Are you sure you want to pay for 1-1 Chat ?")
                         .setCancelable(false)
                         .setNegativeButton("No", new DialogInterface.OnClickListener()
                         {
@@ -286,6 +284,8 @@ public class RequestantFragment extends Fragment
                         //paid user
                         GenerikFunctions.showToast(cont, "You cannot approve the request as " + message);
                         GenerikFunctions.hDialog();
+                        accept.setEnabled(true);
+                        deny.setEnabled(true);
 
                     }
                     else
@@ -293,6 +293,8 @@ public class RequestantFragment extends Fragment
                         //unpaid user
                         GenerikFunctions.showToast(cont, "You cannot approve the request as " + message);
                         GenerikFunctions.hDialog();
+                        accept.setEnabled(true);
+                        deny.setEnabled(true);
                     }
                 }
             }
@@ -404,6 +406,8 @@ public class RequestantFragment extends Fragment
                     //if currentTime is less than approved party BlockEndTime
                     allowStatus = false;
                     message = user.getName()+" is blocked for another party";
+                    accept.setEnabled(true);
+                    deny.setEnabled(true);
                 }
 
             }
@@ -411,6 +415,8 @@ public class RequestantFragment extends Fragment
         catch(Exception e){
             allowStatus = false;
             message = "user is blocked for another party";
+            accept.setEnabled(true);
+            deny.setEnabled(true);
         }
         finally {
             return allowStatus;
@@ -463,6 +469,8 @@ public class RequestantFragment extends Fragment
 
                     GenerikFunctions.hDialog();
                     GenerikFunctions.showToast(cont, "There was an error while loading data, please try again after some time.");
+                    accept.setEnabled(true);
+                    deny.setEnabled(true);
 
                 }
 
@@ -515,7 +523,8 @@ public class RequestantFragment extends Fragment
 
                     GenerikFunctions.hDialog();
                     GenerikFunctions.showToast(cont, "There was an error while loading data, please try again after some time.");
-
+                    accept.setEnabled(true);
+                    deny.setEnabled(true);
                 }
 
             }, accessToken, null, cont);

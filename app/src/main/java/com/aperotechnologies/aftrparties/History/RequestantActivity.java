@@ -24,6 +24,7 @@ import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.GateCrashersClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.R;
@@ -407,12 +408,19 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
     @Override
     public void onBillingInitialized() {
         //GenerikFunctions.showToast(cont,"onBillingInitialized");
+        Boolean consumed = bpReqChat.consumePurchase(ConstsCore.ITEM_PRIVATECHAT_SKU);
         readyToPurchaseRChat = true;
     }
 
     @Override
     public void onBackPressed() {
 
+        if(getIntent().getExtras().getString("from").equals("requestSend")){
+
+            Intent i = new Intent(RequestantActivity.this, HomePageActivity.class);
+            startActivity(i);
+            finish();
+        }
         m_config.QbIdforInappPChat = "";
         finish();
     }

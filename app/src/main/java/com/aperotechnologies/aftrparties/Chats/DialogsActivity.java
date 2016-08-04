@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
@@ -164,7 +165,7 @@ public class DialogsActivity extends Activity implements AbsListView.OnScrollLis
                     QBDialog selectedDialog = (QBDialog) data.getSerializableExtra(ConstsCore.EXTRA_DIALOG);
                     String newText = data.getStringExtra("lastmessage");
                     String position = data.getStringExtra("position");
-                    Log.e("newText", " "+newText+" ");
+                    Log.e("onActivityResult m_config.lastMessge", " "+newText+" ");
                     if(!newText.equals(null) || newText != null)
                     {
                         if(newText.length() != 0) {
@@ -350,7 +351,18 @@ public class DialogsActivity extends Activity implements AbsListView.OnScrollLis
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+
+        if(getIntent() == null || getIntent().equals(null) || getIntent().getExtras() == null || getIntent().getExtras().equals(null))
+        {
+            super.onBackPressed();
+        }
+        else if(getIntent().getExtras().getString("from").equals("chatoffline") || getIntent().getExtras().getString("from").equals("1-1 Chat") || getIntent().getExtras().getString("from").equals("1-1 Chat OfflineMsg"))
+        {
+            Intent i = new Intent(DialogsActivity.this, HomePageActivity.class);
+            startActivity(i);
+            finish();
+        }
+
     }
 
     @Override
