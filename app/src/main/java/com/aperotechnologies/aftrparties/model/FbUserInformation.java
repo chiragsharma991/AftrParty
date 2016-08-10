@@ -1,5 +1,7 @@
 package com.aperotechnologies.aftrparties.model;
 
+import java.util.List;
+
 /**
  * Created by mpatil on 12/05/16.
  */
@@ -12,6 +14,8 @@ public class FbUserInformation
     String birthday = "N/A";
     String email = "N/A";
     String name = "N/A";
+    Object age_range = "N/A";
+    String age = "N/A";
 
     FBCurrentLocationInformation location=null;
     FbProfilePictureData picture=null;
@@ -43,6 +47,26 @@ public class FbUserInformation
     public void setBirthday(String birthday)
     {
         this.birthday = birthday;
+    }
+
+
+    public String getAge()
+    {
+        return age;
+    }
+    public void setAge(String age)
+    {
+        this.age = age;
+    }
+
+
+    public Object getAgerange()
+    {
+        return age_range;
+    }
+    public void setAgerange(Object age_range)
+    {
+        this.age_range = age_range;
     }
 
     public String getEmail()

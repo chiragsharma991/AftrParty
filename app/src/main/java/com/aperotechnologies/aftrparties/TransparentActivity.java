@@ -15,6 +15,7 @@ import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.History.RequestantActivity;
@@ -33,6 +34,7 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
     public static BillingProcessor bp;
     public static boolean readyToPurchase = false;
     Context cont;
+    String DialogId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +75,7 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
 
         String PartyName = getIntent().getExtras().getString("PartyName");
         String PartyId = getIntent().getExtras().getString("PartyId");
-        final String DialogId = getIntent().getExtras().getString("DialogId");
+        DialogId = getIntent().getExtras().getString("DialogId");
         final String message = getIntent().getExtras().getString("message");
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle("Notification Arrives");
@@ -307,13 +309,13 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
 
     @Override
     public void onProductPurchased(String productId, TransactionDetails details) {
-        GenerikFunctions.showToast(cont,"Purchase Successful.");
+        GenerikFunctions.sDialog(cont, "Retaining Data...");
         Boolean consumed = bp.consumePurchase(ConstsCore.ITEM_PARTYRETENTION_SKU);
-        GenerikFunctions.sDialog(cont, "Saving Data");
+        new AWSPaymentOperations.storechathistoryretention(cont, DialogId).execute();
 
         if (consumed)
         {
-            GenerikFunctions.showToast(cont,"Successfully Retained");
+            GenerikFunctions.showToast(cont,"Successfully Consumed");
         }
         else
         {
@@ -332,7 +334,45 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
 
     @Override
     public void onBillingError(int errorCode, Throwable error) {
-        //GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
+        GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
+        GenerikFunctions.sDialog(cont, "Deleting....");
+
+        if (ChatService.getInstance().getCurrentUser() == null)
+        {
+            String accessToken = LoginValidations.getFBAccessToken().getToken();
+
+            QBSessionClass.getInstance().getQBSession(new QBEntityCallback() {
+
+                @Override
+                public void onSuccess(Object o, Bundle bundle) {
+
+                    Handler h = new Handler();
+                    h.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            deleteGroupDialog(DialogId);
+                        }
+                    });
+
+
+                }
+
+                @Override
+                public void onError(QBResponseException e) {
+                    GenerikFunctions.hDialog();
+                    finish();
+
+                }
+
+            }, accessToken, null, cont);
+
+
+        }
+        else
+        {
+            deleteGroupDialog(DialogId);
+
+        }
 
     }
 

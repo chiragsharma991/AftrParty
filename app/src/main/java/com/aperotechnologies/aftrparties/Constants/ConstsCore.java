@@ -20,8 +20,8 @@ public class ConstsCore {
 
 
     public static final int FB_AGE = 16;
-    public static final int FB_FRIENDS = 1;//50
-    public static final int LI_CONNECTIONS = 1;//50
+    public static final int FB_FRIENDS = 0;//50
+    public static final int LI_CONNECTIONS = 0;//50
 
     public static String ValidAge="No";
     public static String profilePicAvailable="No";

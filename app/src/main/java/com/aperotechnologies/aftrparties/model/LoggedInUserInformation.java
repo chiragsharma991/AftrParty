@@ -11,6 +11,7 @@ public class LoggedInUserInformation
     String    FB_USER_NAME= "N/A";
     String    FB_USER_GENDER="N/A";
     String    FB_USER_BIRTHDATE="N/A";
+    String    FB_USER_AGE="N/A";
     String    FB_USER_EMAIL="N/A";
     String    FB_USER_PROFILE_PIC="N/A";
     String    FB_USER_HOMETOWN_ID="N/A";
@@ -61,6 +62,15 @@ public class LoggedInUserInformation
     public void setFB_USER_BIRTHDATE(String FB_USER_BIRTHDATE)
     {
         this.FB_USER_BIRTHDATE=FB_USER_BIRTHDATE;
+    }
+
+    public String getFB_USER_AGE()
+    {
+        return FB_USER_AGE;
+    }
+    public void setFB_USER_AGE(String FB_USER_AGE)
+    {
+        this.FB_USER_AGE=FB_USER_AGE;
     }
 
     public String getFB_USER_EMAIL()

@@ -19,6 +19,7 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
 
 import java.util.ArrayList;
@@ -152,40 +153,63 @@ public class HistoryAdapter extends BaseAdapter {
                         Log.e("here "," ");
                         String PartyId = finalParties.getPartyid();
                         PartyTable partytable = m_config.mapper.load(PartyTable.class, PartyId);
-                        List<PartyMaskStatusClass> partymaskstatus = partytable.getPartymaskstatus();
-                        if(partymaskstatus.get(0).getMaskstatus().equals("Unmask"))
+
+                        if(finalParties.getPartystatus().equals("Cancelled") && LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID().equals(partytable.getHostFBID()))
                         {
-                            Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
-                            if(currTime < Long.parseLong(partymaskstatus.get(0).getMasksubscriptiondate()))
-                            {
-                                Log.e("Party status is Unmask"," ");
-
-                                // check whether party is Unmasked
-                                Intent i = new Intent(cont,PartyDetails.class);
-                                PartyParceableData party = new PartyParceableData();
-                                party.setPartyId(finalParties.getPartyid());
-                                party.setPartyName(finalParties.getPartyname());
-                                party.setStartTime(finalParties.getStarttime());
-                                party.setEndTime(finalParties.getEndtime());
-                                party.setPartyStatus(finalParties.getPartystatus());
-                                Bundle mBundles = new Bundle();
-                                mBundles.putSerializable(ConstsCore.SER_KEY, party);
-                                i.putExtras(mBundles);
-                                cont.startActivity(i);
-                                GenerikFunctions.hDialog();
-
-                            }else
-                            {
-                                Log.e("Party status is Unmask"," subscription is expired");
-                                GenerikFunctions.hDialog();
-                            }
-
+                            //check whether host is current user or not if party is cancelled
+                            Intent i = new Intent(cont,PartyDetails.class);
+                            PartyParceableData party = new PartyParceableData();
+                            party.setPartyId(finalParties.getPartyid());
+                            party.setPartyName(finalParties.getPartyname());
+                            party.setStartTime(finalParties.getStarttime());
+                            party.setEndTime(finalParties.getEndtime());
+                            party.setPartyStatus(finalParties.getPartystatus());
+                            Bundle mBundles = new Bundle();
+                            mBundles.putSerializable(ConstsCore.SER_KEY, party);
+                            i.putExtras(mBundles);
+                            cont.startActivity(i);
+                            GenerikFunctions.hDialog();
                         }
                         else
                         {
-                            Log.e("Party status is Mask","");
-                            GenerikFunctions.hDialog();
+                            // check whether host had unmask the party for status declined, pending, cancelled
+                            List<PartyMaskStatusClass> partymaskstatus = partytable.getPartymaskstatus();
+                            Log.e("partymaskstatus",""+partymaskstatus);
+                            if(partymaskstatus != null && partymaskstatus.get(0).getMaskstatus().equals("Unmask"))
+                            {
+                                Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
+                                if(currTime < Long.parseLong(partymaskstatus.get(0).getMasksubscriptiondate()))
+                                {
+                                    Log.e("Party status is Unmask"," ");
+
+                                    // check whether party is Unmasked
+                                    Intent i = new Intent(cont,PartyDetails.class);
+                                    PartyParceableData party = new PartyParceableData();
+                                    party.setPartyId(finalParties.getPartyid());
+                                    party.setPartyName(finalParties.getPartyname());
+                                    party.setStartTime(finalParties.getStarttime());
+                                    party.setEndTime(finalParties.getEndtime());
+                                    party.setPartyStatus(finalParties.getPartystatus());
+                                    Bundle mBundles = new Bundle();
+                                    mBundles.putSerializable(ConstsCore.SER_KEY, party);
+                                    i.putExtras(mBundles);
+                                    cont.startActivity(i);
+                                    GenerikFunctions.hDialog();
+
+                                }else
+                                {
+                                    Log.e("Party status is Unmask"," subscription is expired");
+                                    GenerikFunctions.hDialog();
+                                }
+
+                            }
+                            else
+                            {
+                                Log.e("Party status is Mask","");
+                                GenerikFunctions.hDialog();
+                            }
                         }
+
 
                     }
                     catch (Exception e)

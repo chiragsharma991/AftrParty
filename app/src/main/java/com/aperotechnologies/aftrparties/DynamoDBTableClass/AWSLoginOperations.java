@@ -92,7 +92,8 @@ public class AWSLoginOperations {
                 String FBUserName = loggedInUserInfo.getFB_USER_NAME();
                 String FBCurrentLocation = loggedInUserInfo.getFB_USER_CURRENT_LOCATION_NAME();
                 String FBHomeLocation = loggedInUserInfo.getFB_USER_HOMETOWN_NAME();
-                String BirthDate = loggedInUserInfo.getFB_USER_BIRTHDATE();
+                //String BirthDate = loggedInUserInfo.getFB_USER_BIRTHDATE();
+                String BirthDate = loggedInUserInfo.getFB_USER_AGE();
                 int FBFriendsCount;
                 if (loggedInUserInfo.getFB_USER_FRIENDS() == null)
                 {
@@ -140,7 +141,6 @@ public class AWSLoginOperations {
                     user.setRegistrationStatus("No");
                     //user.setcurrentmaskstatus("Mask");
                     user.setImageflag("No");
-
                     Log.e("AWS FBUser inserting ", " " + user.toString());
                     m_config.mapper.save(user);
                     Log.e("", "AWS FBUser Inserted ---"+user.getRegistrationStatus());
@@ -148,22 +148,17 @@ public class AWSLoginOperations {
                 }
                 else
                 {
-                    selUserData.setFBUserName(FBUserName);
-                    selUserData.setFBCurrentLocation(FBCurrentLocation);
-                    selUserData.setFBHomeLocation(FBHomeLocation);
-                    selUserData.setBirthDate(BirthDate);
-                    selUserData.setFBFriendsCount(FBFriendsCount);
-                    selUserData.setGender(Gender);
-                    selUserData.setName(Name);
-                    selUserData.setEmail(Email);
-                    selUserData.setPhoneNumber(PhoneNumber);
-                    //ProfilePicUrlList.remove(0);
-                    if(selUserData.getImageflag().equals("Yes"))
-                    {
 
-                    }
-                    else
-                    {
+                    if(selUserData.getRegistrationStatus().equals("No")) {
+                        selUserData.setFBUserName(FBUserName);
+                        selUserData.setFBCurrentLocation(FBCurrentLocation);
+                        selUserData.setFBHomeLocation(FBHomeLocation);
+                        selUserData.setBirthDate(BirthDate);
+                        selUserData.setFBFriendsCount(FBFriendsCount);
+                        selUserData.setGender(Gender);
+                        selUserData.setName(Name);
+                        selUserData.setEmail(Email);
+                        selUserData.setPhoneNumber(PhoneNumber);
                         ProfilePicUrlList.set(0, FBProfilePicUrl);
 
                         String Update = "Update " + LoginTableColumns.USERTABLE + " set "
@@ -172,13 +167,32 @@ public class AWSLoginOperations {
 
                         Log.i("update User  "+ LoginTableColumns.FB_USER_ID , Update);
                         sqldb.execSQL(Update);
-                    }
-                    selUserData.setProfilePicUrl(ProfilePicUrlList);
 
-                    Log.e("AWS FBUser updated ", " " + selUserData.toString());
-                    m_config.mapper.save(selUserData);
-                    Log.e("", "AWS FBUser updated");
-                    value = true;
+                        selUserData.setProfilePicUrl(ProfilePicUrlList);
+
+//                    if(selUserData.getImageflag().equals("Yes"))
+//                    {
+//
+//                    }
+//                    else
+//                    {
+//                        ProfilePicUrlList.set(0, FBProfilePicUrl);
+//
+//                        String Update = "Update " + LoginTableColumns.USERTABLE + " set "
+//                                + LoginTableColumns.FB_USER_PROFILE_PIC  + " = '" + FBProfilePicUrl + "'"
+//                                + " where " + LoginTableColumns.FB_USER_ID + " = '" + FacebookID + "'";
+//
+//                        Log.i("update User  "+ LoginTableColumns.FB_USER_ID , Update);
+//                        sqldb.execSQL(Update);
+//                    }
+//                        selUserData.setProfilePicUrl(ProfilePicUrlList);
+
+
+                        Log.e("AWS FBUser updated ", " " + selUserData.toString());
+                        m_config.mapper.save(selUserData);
+                        Log.e("", "AWS FBUser updated");
+                        value = true;
+                    }
                 }
             }
             catch (Exception ex)

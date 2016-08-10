@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
@@ -85,6 +87,9 @@ public class HomePageActivity extends Activity
     String url;
     FaceOverlayView faceOverlayView;
     public static ProgressDialog hp_pd = null;
+    DBHelper helper;
+    SQLiteDatabase sqldb;
+
 
 
     public void onCreate(Bundle savedInstanceState)
@@ -105,6 +110,9 @@ public class HomePageActivity extends Activity
         m_config.foregroundCont = this;
         btn_logout = (ImageButton) findViewById(R.id.btn_logout);
         txt_Header = (TextView) findViewById(R.id.activity_title);
+        helper= DBHelper.getInstance(cont);
+        sqldb=helper.getWritableDatabase();
+
 
         hp_pd= new ProgressDialog(this);
         if (SplashActivity.pd != null)
@@ -151,6 +159,8 @@ public class HomePageActivity extends Activity
 
         loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
 
+        Log.e("loggedInUserInfo", " "+loggedInUserInformation);
+
         if(getIntent().getExtras() != null){
             if(getIntent().getExtras().getString("from").equals("PartyRetention")){
                 String PartyName = getIntent().getExtras().getString("PartyName");
@@ -192,7 +202,7 @@ public class HomePageActivity extends Activity
 //        }
 
 
-        if(sharedPreferences.getString(m_config.Entered_User_Name,"").equals("")){
+        //if(.equals("")){
             try {
                 UserTable user = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
                 txt_Header.setText("Welcome " + user.getName());
@@ -200,9 +210,12 @@ public class HomePageActivity extends Activity
 
             }
 
-        }else{
-            txt_Header.setText("Welcome " +sharedPreferences.getString(m_config.Entered_User_Name,""));
-        }
+
+        Log.e("here "," "+sharedPreferences.getString(m_config.QuickBloxID,""));
+
+//        }else{
+//            txt_Header.setText("Welcome " +sharedPreferences.getString(m_config.Entered_User_Name,""));
+//        }
 
 
         btn_logout.setOnClickListener(new View.OnClickListener()
@@ -223,10 +236,13 @@ public class HomePageActivity extends Activity
                                     {
                                         LISessionManager.getInstance(getApplicationContext()).clearSession();
                                         LoginManager.getInstance().logOut();
+                                        sqldb.delete("UserTable", "fb_user_id='" + loggedInUserInformation.getFB_USER_ID()  + "'", null);
+
 
                                         Log.e("----"," "+LoginValidations.getFBAccessToken());
                                         SharedPreferences.Editor editor = sharedPreferences.edit();
                                         editor.putString(m_config.FinalStepDone,"No");
+                                        editor.putString(m_config.LoggedInFBUserID,"N/A");
                                         editor.apply();
 
                                         if(LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken() == null)
@@ -455,7 +471,7 @@ public class HomePageActivity extends Activity
             try
             {
                 selUserData = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
-                Log.e("selUserClass", " " + selUserData);
+                Log.e("selUserClass", " " + loggedInUserInformation.getFB_USER_ID());
             }
             catch (Exception e)
             {

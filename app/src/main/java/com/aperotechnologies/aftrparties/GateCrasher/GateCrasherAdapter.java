@@ -257,11 +257,11 @@ public class GateCrasherAdapter extends BaseAdapter
 
                 if(b.getText().toString().trim().equals("Request"))
                 {
+                    b.setEnabled(false);
                     GenerikFunctions.sDialog(cont, "Sending Request for Party");
                     Log.e("PartyName  " , finalHolder.partyName.getText() + " Check Conditions here  aa"+"  "+ finalParty.getPartyName());
                     Long currentReqTime = Validations.getCurrentTime();//System.currentTimeMillis();
                     String PartyId = finalParty.getPartyID();
-
 
                     try {
 
@@ -272,6 +272,7 @@ public class GateCrasherAdapter extends BaseAdapter
                         e.printStackTrace();
                         GenerikFunctions.showToast(cont, "Unable to send request, Please try again after some time.");
                         GenerikFunctions.hDialog();
+                        b.setEnabled(true);
                     }
 
                 }
@@ -447,6 +448,7 @@ public class GateCrasherAdapter extends BaseAdapter
                     Log.e("if there is any active party ---- ", "if currentTime is less than approved party BlockEndTime");
                     GenerikFunctions.showToast(cont, "You are already approved for another party. You have been blocked till "+PartyEndBlockTime);
                     GenerikFunctions.hDialog();
+                    b.setEnabled(true);
                 }
 
 
@@ -458,6 +460,7 @@ public class GateCrasherAdapter extends BaseAdapter
                 if (currentReqTime > Long.parseLong(SubscriptionTime)) {
                     GenerikFunctions.showToast(cont, "Your subscription has been expired");
                     GenerikFunctions.hDialog();
+                    b.setEnabled(true);
 
                 } else {
                     //Within subscription Time
@@ -472,6 +475,7 @@ public class GateCrasherAdapter extends BaseAdapter
                         Log.e("if there is any active party ---- ", "if currentTime is less than approved party BlockEndTime");
                         GenerikFunctions.showToast(cont, "You are already approved for another party. You have been blocked till "+PartyEndBlockTime);
                         GenerikFunctions.hDialog();
+                        b.setEnabled(true);
                     }
 
                 }

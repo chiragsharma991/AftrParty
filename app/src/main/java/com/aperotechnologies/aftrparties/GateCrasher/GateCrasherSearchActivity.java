@@ -16,8 +16,10 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -38,6 +40,7 @@ import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.ActivePartyClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
@@ -837,112 +840,145 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
 
     }
 
+    private class setPartyPurchaseinAWS extends AsyncTask<String, Void, Void>
+    {
 
-    private void setPartyPurchaseinAWS() {
-        Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
+        @Override
+        protected Void doInBackground(String... params)
+        {
 
-        try {
-            if (user.getPaidgc() == null || user.getPaidgc().size() == 0)
-            {
-                PaidGCClass paidGCClass = new PaidGCClass();
-                paidGCClass.setPaidstatus("Yes");
-                paidGCClass.setSubscriptiondate(String.valueOf(subVal));
-                List<PaidGCClass> paidgclist = new ArrayList<>();
-                paidgclist.add(paidGCClass);
+            Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
+            List<PaidGCClass> paidgclist = user.getPaidgc();
 
-                List<ActivePartyClass> ActivePartyList = user.getActiveparty();
-                if (ActivePartyList != null || ActivePartyList.size() != 0)
+            try {
+                //check whether is paid or unpaid user
+                if (paidgclist == null || paidgclist.size() == 0)
                 {
-                    ActivePartyClass ActiveParty = ActivePartyList.get(0);
+                    // here user is unpaid user
 
-                    String EndBlockTime = "";
-                    if ((Long.parseLong(ActiveParty.getStartblocktime() + ConstsCore.hourVal)) > Long.parseLong(ActiveParty.getEndtime())) {
-                        EndBlockTime = ActiveParty.getEndtime();
-                    } else {
-                        EndBlockTime = String.valueOf(Long.parseLong(ActiveParty.getStarttime()) + ConstsCore.hourVal);
+                    PaidGCClass paidGCClass = new PaidGCClass();
+                    paidGCClass.setPaidstatus("Yes");
+                    paidGCClass.setSubscriptiondate(String.valueOf(subVal));
+                    paidgclist = new ArrayList<>();
+                    paidgclist.add(paidGCClass);
+
+                    List<ActivePartyClass> ActivePartyList = user.getActiveparty();
+                    if (ActivePartyList != null || ActivePartyList.size() != 0)
+                    {
+                        //if there is an active party update endblocktime of active party
+                        ActivePartyClass ActiveParty = ActivePartyList.get(0);
+
+                        String EndBlockTime = "";
+                        if ((Long.parseLong(ActiveParty.getStartblocktime() + ConstsCore.hourVal)) > Long.parseLong(ActiveParty.getEndtime())) {
+                            EndBlockTime = ActiveParty.getEndtime();
+                        } else {
+                            EndBlockTime = String.valueOf(Long.parseLong(ActiveParty.getStarttime()) + ConstsCore.hourVal);
+                        }
+
+
+                        ActiveParty.setPartyid(ActiveParty.getPartyid());
+                        ActiveParty.setPartyname(ActiveParty.getPartyname());
+                        ActiveParty.setStarttime(ActiveParty.getStarttime());
+                        ActiveParty.setEndtime(ActiveParty.getEndtime());
+                        ActiveParty.setPartystatus(ActiveParty.getPartystatus());
+                        ActiveParty.setStartblocktime(ActiveParty.getStartblocktime());
+                        ActiveParty.setEndblocktime(EndBlockTime);
+                        ActivePartyList.set(0, ActiveParty);
+                        user.setActiveparty(ActivePartyList);
+                        user.setPaidgc(paidgclist);
+                        m_config.mapper.save(user);
+                        Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
+                        GenerikFunctions.hDialog();
+
+
+
+                    }
+                    else
+                    {
+                        user.setPaidgc(paidgclist);
+                        m_config.mapper.save(user);
+
+                        Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
+                        GenerikFunctions.hDialog();
+
                     }
 
 
-                    ActiveParty.setPartyid(ActiveParty.getPartyid());
-                    ActiveParty.setPartyname(ActiveParty.getPartyname());
-                    ActiveParty.setStarttime(ActiveParty.getStarttime());
-                    ActiveParty.setEndtime(ActiveParty.getEndtime());
-                    ActiveParty.setPartystatus(ActiveParty.getPartystatus());
-                    ActiveParty.setStartblocktime(ActiveParty.getStartblocktime());
-                    ActiveParty.setEndblocktime(EndBlockTime);
-                    ActivePartyList.set(0, ActiveParty);
-                    user.setActiveparty(ActivePartyList);
-                    user.setPaidgc(paidgclist);
-                    m_config.mapper.save(user);
+                } else {
 
-                    Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                    GenerikFunctions.hDialog();
+                    // here user is paid user
+                    PaidGCClass paidGCClass = paidgclist.get(0);
+                    paidGCClass.setPaidstatus("Yes");
+                    paidGCClass.setSubscriptiondate(String.valueOf(subVal));
+                    paidgclist.add(0, paidGCClass);
 
-                }
-                else
-                {
-                    user.setPaidgc(paidgclist);
-                    m_config.mapper.save(user);
+                    List<ActivePartyClass> ActivePartyList = user.getActiveparty();
+                    if (ActivePartyList != null || ActivePartyList.size() != 0)
+                    {
+                        //if there is an active party update endblocktime of active party
+                        ActivePartyClass ActiveParty = ActivePartyList.get(0);
 
-                    Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                    GenerikFunctions.hDialog();
-                }
+                        String EndBlockTime = "";
+                        if ((Long.parseLong(ActiveParty.getStartblocktime() + ConstsCore.hourVal)) > Long.parseLong(ActiveParty.getEndtime())) {
+                            EndBlockTime = ActiveParty.getEndtime();
+                        } else {
+                            EndBlockTime = String.valueOf(Long.parseLong(ActiveParty.getStarttime()) + ConstsCore.hourVal);
+                        }
 
 
+                        ActiveParty.setPartyid(ActiveParty.getPartyid());
+                        ActiveParty.setPartyname(ActiveParty.getPartyname());
+                        ActiveParty.setStarttime(ActiveParty.getStarttime());
+                        ActiveParty.setEndtime(ActiveParty.getEndtime());
+                        ActiveParty.setPartystatus(ActiveParty.getPartystatus());
+                        ActiveParty.setStartblocktime(ActiveParty.getStartblocktime());
+                        ActiveParty.setEndblocktime(EndBlockTime);
+                        ActivePartyList.set(0, ActiveParty);
+                        user.setActiveparty(ActivePartyList);
+                        user.setPaidgc(paidgclist);
+                        m_config.mapper.save(user);
 
 
-            } else {
-                List<PaidGCClass> paidgclist = user.getPaidgc();
-                PaidGCClass paidGCClass = paidgclist.get(0);
-                paidGCClass.setPaidstatus("Yes");
-                paidGCClass.setSubscriptiondate(String.valueOf(subVal));
-                paidgclist.add(0, paidGCClass);
+                        Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
+                        GenerikFunctions.hDialog();
 
-                List<ActivePartyClass> ActivePartyList = user.getActiveparty();
-                if (ActivePartyList != null || ActivePartyList.size() != 0)
-                {
-                    ActivePartyClass ActiveParty = ActivePartyList.get(0);
 
-                    String EndBlockTime = "";
-                    if ((Long.parseLong(ActiveParty.getStartblocktime() + ConstsCore.hourVal)) > Long.parseLong(ActiveParty.getEndtime())) {
-                        EndBlockTime = ActiveParty.getEndtime();
-                    } else {
-                        EndBlockTime = String.valueOf(Long.parseLong(ActiveParty.getStarttime()) + ConstsCore.hourVal);
+                    }
+                    else
+                    {
+                        user.setPaidgc(paidgclist);
+                        m_config.mapper.save(user);
+
+                        Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
+                        GenerikFunctions.hDialog();
+
                     }
 
-
-                    ActiveParty.setPartyid(ActiveParty.getPartyid());
-                    ActiveParty.setPartyname(ActiveParty.getPartyname());
-                    ActiveParty.setStarttime(ActiveParty.getStarttime());
-                    ActiveParty.setEndtime(ActiveParty.getEndtime());
-                    ActiveParty.setPartystatus(ActiveParty.getPartystatus());
-                    ActiveParty.setStartblocktime(ActiveParty.getStartblocktime());
-                    ActiveParty.setEndblocktime(EndBlockTime);
-                    ActivePartyList.set(0, ActiveParty);
-                    user.setActiveparty(ActivePartyList);
-                    user.setPaidgc(paidgclist);
-                    m_config.mapper.save(user);
-
-                    Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                    GenerikFunctions.hDialog();
-
                 }
-                else
-                {
-                    user.setPaidgc(paidgclist);
-                    m_config.mapper.save(user);
+            } catch (Exception e) {
 
-                    Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                    GenerikFunctions.hDialog();
-                }
+                Toast.makeText(getApplicationContext(), "Data is not saved Successfully", Toast.LENGTH_SHORT).show();
+                GenerikFunctions.hDialog();
 
             }
-        } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "Data is not saved Successfully", Toast.LENGTH_SHORT).show();
-            GenerikFunctions.hDialog();
+            return null;
         }
 
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void v)
+        {
+
+
+        }
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -974,12 +1010,13 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
 
     @Override
     public void onProductPurchased(String productId, TransactionDetails details) {
-        GenerikFunctions.showToast(cont, "Purchase Successful");
-        Boolean consumed = bpGCParties.consumePurchase(ConstsCore.ITEM_PARTYPURCHASE_SKU);
+        //GenerikFunctions.showToast(cont, "Purchase Successful");
         GenerikFunctions.sDialog(cont, "Saving Data");
+        new setPartyPurchaseinAWS().execute();
+        Boolean consumed = bpGCParties.consumePurchase(ConstsCore.ITEM_PARTYPURCHASE_SKU);
 
         if (consumed) {
-            setPartyPurchaseinAWS();
+            GenerikFunctions.showToast(cont,"Successfully consumed");
         } else {
             GenerikFunctions.hDialog();
         }

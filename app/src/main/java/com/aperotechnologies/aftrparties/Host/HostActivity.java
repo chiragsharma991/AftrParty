@@ -23,6 +23,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -150,7 +151,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
         m_config.foregroundCont = this;
         cont = this;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-        m_config.pDialog = new ProgressDialog(cont);
+
 
         imgParty = (CircularImageView) findViewById(R.id.partyImage);
         uploadPartyImage = (TextView) findViewById(R.id.uploadPartyImage);
@@ -1436,19 +1437,16 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
     @Override
     public void onProductPurchased(String productId, TransactionDetails details) {
         //GenerikFunctions.showToast(cont,"onProductPurchased: " + productId+" ");
-        GenerikFunctions.showToast(cont,"Purchase Successful.");
+        GenerikFunctions.sDialog(cont,"Saving Data...");
+        new  setInAppPurchaseinAWSUser().execute();
         Boolean consumed = bpMaskUnmask.consumePurchase(ConstsCore.ITEM_MASK_SKU);
-        GenerikFunctions.sDialog(cont, "Saving Data");
 
         if (consumed)
         {
-           // GenerikFunctions.showToast(cont,"Successfully consumed");
-            setInAppPurchaseinAWSUser();
+           GenerikFunctions.showToast(cont,"Successfully consumed");
+
         }
-        else
-        {
-            GenerikFunctions.hDialog();
-        }
+
     }
 
     @Override
@@ -1462,7 +1460,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
 
     @Override
     public void onBillingError(int errorCode, Throwable error) {
-        //GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
+        GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
 
     }
 
@@ -1920,10 +1918,6 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
         party.setPartyImage(picturePath);
 
         //adding mask status in Partytable
-
-
-
-
         PartyMaskStatusClass partymaskstatus = new PartyMaskStatusClass();
         if(cb_mask.isChecked() == true)
         {
@@ -1985,7 +1979,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                             double longitude = currentlocation.getLongitude();
                             Geocoder geocoder = new Geocoder(HostActivity.this, Locale.getDefault());
                             try {
-                                cb_getLocation.setChecked(true);
+
 
                                 List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
                                 Log.e("here", " " + addresses);
@@ -2006,7 +2000,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                                 edt_pincode.setText(postalCode);
                                 edt_address.requestFocus();
                                 llayoutenterAddress.setVisibility(View.VISIBLE);
-
+                                cb_getLocation.setChecked(true);
 
                             }
                             catch (Exception e)
@@ -2040,7 +2034,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                 Geocoder geocoder = new Geocoder(this, Locale.getDefault());
                 try
                 {
-                    cb_getLocation.setChecked(true);
+
                     List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
                     Log.e("here", " " + addresses);
 
@@ -2059,6 +2053,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                     edt_pincode.setText(postalCode);
                     edt_address.requestFocus();
                     llayoutenterAddress.setVisibility(View.VISIBLE);
+                    cb_getLocation.setChecked(true);
 
                 }
                 catch (Exception e)
@@ -2114,56 +2109,95 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
     }
 
 
-
-
-    private void setInAppPurchaseinAWSUser()
+    private class setInAppPurchaseinAWSUser extends AsyncTask<String, Void, Void>
     {
-        Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
-        try {
-            if (user.getPartymaskstatus() == null || user.getPartymaskstatus().size() == 0) {
-                PartyMaskStatusClass partymaskstatus = new PartyMaskStatusClass();
-                partymaskstatus.setMaskstatus("Unmask");
-                partymaskstatus.setMasksubscriptiondate(String.valueOf(subVal));
-                masksubscriptionTime = String.valueOf(subVal);
-                List<PartyMaskStatusClass> partymaskstatuslist = new ArrayList<>();
-                partymaskstatuslist.add(partymaskstatus);
-                user.setPartymaskstatus(partymaskstatuslist);
-                m_config.mapper.save(user);
 
-                Toast.makeText(getApplicationContext(),"Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                GenerikFunctions.hDialog();
-                cb_unmask.setChecked(true);
-                cb_mask.setChecked(false);
-                cb_unmask.setEnabled(false);
-                cb_mask.setEnabled(false);
-
-            }
-            else
-            {
-                List<PartyMaskStatusClass> partymaskstatuslist = user.getPartymaskstatus();
-                PartyMaskStatusClass partymaskstatus = partymaskstatuslist.get(0);
-                partymaskstatus.setMaskstatus("Unmask");
-                partymaskstatus.setMasksubscriptiondate(String.valueOf(subVal));
-                masksubscriptionTime = String.valueOf(subVal);
-                partymaskstatuslist.add(0, partymaskstatus);
-                user.setPartymaskstatus(partymaskstatuslist);
-                m_config.mapper.save(user);
-
-                Toast.makeText(getApplicationContext(),"Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                GenerikFunctions.hDialog();
-                cb_unmask.setChecked(true);
-                cb_mask.setChecked(false);
-                cb_unmask.setEnabled(false);
-                cb_mask.setEnabled(false);
-            }
-        }
-        catch(Exception e)
+        @Override
+        protected Void doInBackground(String... params)
         {
-            Toast.makeText(getApplicationContext(),"Data is not saved Successfully", Toast.LENGTH_SHORT).show();
-            GenerikFunctions.hDialog();
+
+            Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
+            List<PartyMaskStatusClass> partymaskstatuslist = user.getPartymaskstatus();
+
+            try {
+                if (partymaskstatuslist == null || partymaskstatuslist.size() == 0) {
+                    PartyMaskStatusClass partymaskstatus = new PartyMaskStatusClass();
+                    partymaskstatus.setMaskstatus("Unmask");
+                    partymaskstatus.setMasksubscriptiondate(String.valueOf(subVal));
+                    masksubscriptionTime = String.valueOf(subVal);
+                    partymaskstatuslist = new ArrayList<>();
+                    partymaskstatuslist.add(partymaskstatus);
+                    user.setPartymaskstatus(partymaskstatuslist);
+                    m_config.mapper.save(user);
+                    Toast.makeText(getApplicationContext(),"Data is saved Successfully", Toast.LENGTH_SHORT).show();
+                    GenerikFunctions.hDialog();
+
+
+                    Handler h = new Handler();
+                    h.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            cb_unmask.setChecked(true);
+                            cb_mask.setChecked(false);
+                            cb_unmask.setEnabled(false);
+                            cb_mask.setEnabled(false);
+                        }
+                    });
+
+
+                }
+                else
+                {
+                    //
+                    PartyMaskStatusClass partymaskstatus = partymaskstatuslist.get(0);
+                    partymaskstatus.setMaskstatus("Unmask");
+                    partymaskstatus.setMasksubscriptiondate(String.valueOf(subVal));
+                    masksubscriptionTime = String.valueOf(subVal);
+                    partymaskstatuslist.add(0, partymaskstatus);
+                    user.setPartymaskstatus(partymaskstatuslist);
+                    m_config.mapper.save(user);
+                    Toast.makeText(getApplicationContext(), "Data is updated Successfully", Toast.LENGTH_SHORT).show();
+                    GenerikFunctions.hDialog();
+
+
+                    Handler h = new Handler();
+                    h.post(new Runnable() {
+                        @Override
+                        public void run() {
+                           cb_unmask.setChecked(true);
+                            cb_mask.setChecked(false);
+                            cb_unmask.setEnabled(false);
+                            cb_mask.setEnabled(false);
+                        }
+                    });
+                }
+            }
+            catch(Exception e)
+            {
+                Toast.makeText(getApplicationContext(), "Data is not saved Successfully", Toast.LENGTH_SHORT).show();
+                GenerikFunctions.hDialog();
+
+            }
+            return null;
         }
 
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void v)
+        {
+
+
+        }
     }
+
+
+
 
     @Override
     protected void onResume() {

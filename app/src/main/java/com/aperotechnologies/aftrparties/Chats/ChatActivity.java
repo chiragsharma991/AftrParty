@@ -23,6 +23,7 @@ import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.model.QBChatMessage;
 import com.quickblox.chat.model.QBDialog;
@@ -65,6 +66,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
     private int selCount = 0;
     String lastMessage = "";
     private int totalMessagesCount = 0;
+    int unreadmsgcount = 0;
+
 
 //    public static void start(Context context, Bundle bundle) {
 //        Intent intent = new Intent(context, ChatActivity.class);
@@ -101,7 +104,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
         groupName = (TextView) findViewById(R.id.groupName);
         edt_message = (EditText) findViewById(R.id.messageEdit);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
-
+        unreadmsgcount = dialog.getUnreadMessageCount();
+        Log.e("here ",""+unreadmsgcount);
 
 
         if (dialog.getType() == QBDialogType.GROUP)
@@ -187,6 +191,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
         }
 
         resultIntent.putExtra("position", getIntent().getExtras().getString("position"));
+        resultIntent.putExtra("unreadmsg", String.valueOf(unreadmsgcount));
+
         setResult(Activity.RESULT_OK, resultIntent);
             try {
                 chat.release();
@@ -233,11 +239,13 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
 
         } catch (XMPPException e) {
             Log.e(TAG, "failed to send a message", e);
+            GenerikFunctions.showToast(ChatActivity.this,"Failed to send a message");
 
         } catch (SmackException sme) {
             Log.e(TAG, "failed to send a message", sme);
-        }
+            GenerikFunctions.showToast(ChatActivity.this,"Can't send a message, You are not connected to chat");
 
+        }
 
         edt_message.setText("");
 
@@ -305,16 +313,20 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
             public void onSuccess(ArrayList<QBChatMessage> messages, Bundle args)
             {
 
-                m_config.peerchatDialogId = dialog.getDialogId();
+                //m_config.peerchatDialogId = dialog.getDialogId();
+
 
                 totalMessagesCount = totalMessagesCount + messages.size();
                 Log.e("messages","size "+messages.size());
                 selCount += messages.size();
                 int selVal = selCount - index;
                 Log.e("selVal"," "+selVal);
+                unreadmsgcount = 0;
 
                 if(messages.size() > 0)
                 {
+
+
 
                     for (int i = 0; i < messages.size(); i++)
                     {
@@ -334,6 +346,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
                     if(check == "loading page")
                     {
                         scrollDown();
+
                     }
                     else
                     {

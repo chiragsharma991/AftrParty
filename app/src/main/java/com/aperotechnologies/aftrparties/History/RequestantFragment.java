@@ -119,8 +119,8 @@ public class RequestantFragment extends Fragment
         }
         else
         {
-            accept.setVisibility(View.GONE);
-            deny.setVisibility(View.GONE);
+            accept.setVisibility(View.INVISIBLE);
+            deny.setVisibility(View.INVISIBLE);
         }
 
         txt_fbid.setText(facebookId.get(position));

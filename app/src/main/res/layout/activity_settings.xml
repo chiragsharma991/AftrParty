@@ -105,7 +105,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="100dp"
                 android:layout_margin="2dp"
-
                 android:scrollbars="none" />
 
             <View
@@ -152,21 +151,21 @@
                 android:layout_height="5dp"
                 android:layout_width="3dp"     />
 
-            <com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:layout_margin="5dp"
-                android:drawablePadding="10dp"
-                android:hint="Age"
-                android:id="@+id/edt_Age"
-                android:textSize="@dimen/text_size"
-                android:inputType="textNoSuggestions"
-                android:background="@color/white"
-                android:layout_gravity="center_horizontal"
-                android:padding="5dp"
-                android:textCursorDrawable="@null"
-                android:focusable="true"   />
+            <!--<com.aperotechnologies.aftrparties.Reusables.EditTextPopUpFixed-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:singleLine="true"-->
+                <!--android:layout_margin="5dp"-->
+                <!--android:drawablePadding="10dp"-->
+                <!--android:hint="Age"-->
+                <!--android:id="@+id/edt_Age"-->
+                <!--android:textSize="@dimen/text_size"-->
+                <!--android:inputType="textNoSuggestions"-->
+                <!--android:background="@color/white"-->
+                <!--android:layout_gravity="center_horizontal"-->
+                <!--android:padding="5dp"-->
+                <!--android:textCursorDrawable="@null"-->
+                <!--android:focusable="true"   />-->
 
             <View
                 android:layout_height="5dp"

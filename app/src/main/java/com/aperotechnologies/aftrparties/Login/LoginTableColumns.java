@@ -17,6 +17,7 @@ public class LoginTableColumns
         public static final String FB_USER_NAME                   = "fb_user_name";
         public static final String FB_USER_GENDER                 = "fb_user_gender";
         public static final String FB_USER_BIRTHDATE              = "fb_user_birthdate";
+        public static final String FB_USER_AGE                    = "fb_user_age";
         public static final String FB_USER_EMAIL                  = "fb_user_email";
         public static final String FB_USER_PROFILE_PIC            = "fb_user_profile_pic";
         public static final String FB_USER_HOMETOWN_ID            = "fb_user_hometown_id";

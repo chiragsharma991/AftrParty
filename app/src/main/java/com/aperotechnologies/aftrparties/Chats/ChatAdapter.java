@@ -125,6 +125,7 @@ public class ChatAdapter extends BaseAdapter {
             }
 
 
+
         }
 
         if (chatMessage.getSenderId() != null)

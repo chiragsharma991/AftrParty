@@ -89,6 +89,7 @@ import com.linkedin.platform.listeners.AuthListener;
 import com.linkedin.platform.utils.Scope;
 import com.quickblox.core.QBSettings;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -197,7 +198,7 @@ public class RegistrationActivity extends Activity
         permissions.add("public_profile");
         permissions.add("email");
         permissions.add("user_location");
-        permissions.add("user_birthday");
+        //permissions.add("user_birthday");
         permissions.add("user_friends");
         permissions.add("user_hometown");
         permissions.add("user_photos");
@@ -804,23 +805,49 @@ public class RegistrationActivity extends Activity
 
                         String emptyFields="";
 
+                        Log.e("object ", " "+object.toString());
+
                         // Application code
 
                         fbUserInformation = gson.fromJson(object.toString(), FbUserInformation.class);
+                        Log.e("fb object"," "+response.toString());
+
                         Log.e("User FB Information --->","Information");
                         Log.e("getFbId Id: " , fbUserInformation.getFbId());
 //                      Log.e("getGender: " , fbUserInformation.getGender());
 //                      Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
 //                      Log.e("getEmail: " ,fbUserInformation.getEmail());
-//                      Log.e("getBirthday: " ,fbUserInformation.getBirthday());
+                       Log.e("getAgeRange: " ,""+fbUserInformation.getAgerange());
 
 
-                        if(fbUserInformation.getBirthday().equals(null))
+//                        if(fbUserInformation.getBirthday().equals(null))
+//                        {
+//                            fbUserInformation.setBirthday("N/A");
+//                        }
+
+                        //harshada
+                        if(fbUserInformation.getAgerange().equals(null) || fbUserInformation.getAgerange() == null)
                         {
-                            fbUserInformation.setBirthday("N/A");
+                            fbUserInformation.setAge("N/A");
+                        }
+                        else
+                        {
+
+                            Object age_range = fbUserInformation.getAgerange();
+                            String age = null;
+                            try {
+                                JSONObject obj = new JSONObject(age_range.toString());
+                                age = obj.getString("min");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                            String finalAge = age.replace(".0","");
+                            Log.e("age_range ", " "+ finalAge);
+                            fbUserInformation.setAge(finalAge);
                         }
 
-                       // Log.e("getBirthday : " , fbUserInformation.getBirthday());
+
 
                         if(fbUserInformation.getEmail().equals(null))
                         {
@@ -828,14 +855,12 @@ public class RegistrationActivity extends Activity
                         }
                         else
                         {
-                          //  Log.e("getEmail: " ,fbUserInformation.getEmail());
                         }
                         if(fbUserInformation.getFBLocationInformation()!= null)
                         {
                             fBCurrentLocationInformation = new FBCurrentLocationInformation();
                             if(fBCurrentLocationInformation.equals(fbUserInformation.getFBLocationInformation()))
                             {
-                               // Log.e("Both current Location ","Is Empty");
                             }
                             else
                             {
@@ -846,15 +871,12 @@ public class RegistrationActivity extends Activity
                         {
                             fBCurrentLocationInformation = new FBCurrentLocationInformation();
                         }
-//                        Log.e("CUrrent Location --->","Details");
-//                        Log.e("getLocationId Id: " , fBCurrentLocationInformation.getLocationId());
-//                        Log.e("getLocationName " , fBCurrentLocationInformation.getLocationName());
+
                         if(fbUserInformation.getFbHomelocationInformation() != null)
                         {
                             fbHomelocationInformation = new FbHomelocationInformation();
                             if(fbHomelocationInformation.equals(fbUserInformation.getFbHomelocationInformation()))
                             {
-                              //  Log.e("Both Home Location ","Is Empty");
                             }
                             else
                             {
@@ -866,9 +888,7 @@ public class RegistrationActivity extends Activity
                             fbHomelocationInformation = new FbHomelocationInformation();
                         }
 
-//                        Log.e("Home Location --->","Details");
-//                        Log.e("getLocationId Id: " , fbHomelocationInformation.getLocationId() +"  aa");
-//                        Log.e("getLocationName " , fbHomelocationInformation.getLocationName()+"  aa");
+
 
                         if(fbUserInformation.getFbProfilePictureData().equals(null))
                         {
@@ -898,17 +918,19 @@ public class RegistrationActivity extends Activity
                             }
                             else
                             {
+
                               //Update User Entry
                                 String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
                                         LoginTableColumns.FB_USER_NAME + " = '" + fbUserInformation.getFbUserName().trim() + "', " +
                                         LoginTableColumns.FB_USER_GENDER + " = '" + fbUserInformation.getGender().trim() + "', " +
-                                LoginTableColumns.FB_USER_BIRTHDATE + " = '" + fbUserInformation.getBirthday().trim() + "', " +
-                                LoginTableColumns.FB_USER_EMAIL + " = '" + fbUserInformation.getEmail().trim() + "', " +
-                                LoginTableColumns.FB_USER_HOMETOWN_ID + " = '" + fbHomelocationInformation.getLocationId().trim() + "', " +
-                                LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + fbHomelocationInformation.getLocationName().trim() + "', " +
-                                LoginTableColumns.FB_USER_CURRENT_LOCATION_ID + " = '" + fBCurrentLocationInformation.getLocationId().trim() + "', " +
-                                LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + fBCurrentLocationInformation.getLocationName().trim() + "'  where "
-                                 + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
+                                        //LoginTableColumns.FB_USER_BIRTHDATE + " = '" + fbUserInformation.getBirthday().trim() + "', " +
+                                        LoginTableColumns.FB_USER_AGE + " = '" + fbUserInformation.getAge().trim() + "', " +
+                                        LoginTableColumns.FB_USER_EMAIL + " = '" + fbUserInformation.getEmail().trim() + "', " +
+                                        LoginTableColumns.FB_USER_HOMETOWN_ID + " = '" + fbHomelocationInformation.getLocationId().trim() + "', " +
+                                        LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + fbHomelocationInformation.getLocationName().trim() + "', " +
+                                        LoginTableColumns.FB_USER_CURRENT_LOCATION_ID + " = '" + fBCurrentLocationInformation.getLocationId().trim() + "', " +
+                                        LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + fBCurrentLocationInformation.getLocationName().trim() + "'  where "
+                                        + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
 
                                 Log.i("update User  "+ LoginTableColumns.FB_USER_ID , updateUser);
                                 sqldb.execSQL(updateUser);
@@ -918,9 +940,10 @@ public class RegistrationActivity extends Activity
                                 loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
                                 loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
                                 loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
-                                loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+                                //loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+                                loggedInUserInfo.setFB_USER_AGE(fbUserInformation.getBirthday());
                                 loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
-                              //  loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
+                                //  loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
                                 loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
                                 loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
                                 loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
@@ -938,11 +961,13 @@ public class RegistrationActivity extends Activity
 //                            Log.e("emptyFields " ,emptyFields);
                             GenerikFunctions.showToast(cont,"Please specify your "+ emptyFields + " in Facebook");
                         }
-                    }
+                }
+
                 });
 
         Bundle parameters1 = new Bundle();
-        parameters1.putString("fields", "id,name,birthday,gender,email,location,picture.type(large),hometown");//,albums.fields(name,photos.fields(name,picture,source,created_time))");
+        //parameters1.putString("fields", "id,name,birthday,gender,email,location,picture.type(large),hometown,age_range");//,albums.fields(name,photos.fields(name,picture,source,created_time))");
+        parameters1.putString("fields", "id,name,gender,email,location,picture.type(large),hometown,age_range");//,albums.fields(name,photos.fields(name,picture,source,created_time))");
         request1.setParameters(parameters1);
         request1.executeAsync();
     }
@@ -954,7 +979,8 @@ public class RegistrationActivity extends Activity
         values.put(LoginTableColumns.FB_USER_ID,fbUserInformation.getFbId().trim());
         values.put(LoginTableColumns.FB_USER_NAME,fbUserInformation.getFbUserName().trim());
         values.put(LoginTableColumns.FB_USER_GENDER,fbUserInformation.getGender().trim());
-        values.put(LoginTableColumns.FB_USER_BIRTHDATE,fbUserInformation.getBirthday().trim());
+        //values.put(LoginTableColumns.FB_USER_BIRTHDATE,fbUserInformation.getBirthday().trim());
+        values.put(LoginTableColumns.FB_USER_AGE,fbUserInformation.getAge().trim());
         values.put(LoginTableColumns.FB_USER_EMAIL,fbUserInformation.getEmail().trim());
         values.put(LoginTableColumns.FB_USER_PROFILE_PIC,fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl().trim());
         values.put(LoginTableColumns.FB_USER_HOMETOWN_ID,fbHomelocationInformation.getLocationId().trim());
@@ -971,7 +997,8 @@ public class RegistrationActivity extends Activity
         loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
         loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
         loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
-        loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+        //loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+        loggedInUserInfo.setFB_USER_AGE(fbUserInformation.getAge());
         loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
         loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
         loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
@@ -980,6 +1007,8 @@ public class RegistrationActivity extends Activity
         loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
 
         /******/
+
+        /* make the API call */
         getFbFriendsCount();
     }
 

@@ -85,7 +85,8 @@ public  class LoginValidations
         loggedInUserInfo.setFB_USER_ID(cursor.getString(cursor.getColumnIndexOrThrow("fb_user_id")));
         loggedInUserInfo.setFB_USER_NAME(cursor.getString(cursor.getColumnIndexOrThrow("fb_user_name")));
         loggedInUserInfo.setFB_USER_GENDER(cursor.getString(cursor.getColumnIndexOrThrow("fb_user_gender")));
-        loggedInUserInfo.setFB_USER_BIRTHDATE(cursor.getString(cursor.getColumnIndexOrThrow("fb_user_birthdate")));
+        //loggedInUserInfo.setFB_USER_BIRTHDATE(cursor.getString(cursor.getColumnIndexOrThrow("fb_user_birthdate")));
+        loggedInUserInfo.setFB_USER_AGE(cursor.getString(cursor.getColumnIndexOrThrow("fb_user_age")));
         loggedInUserInfo.setFB_USER_EMAIL(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.FB_USER_EMAIL)));
         loggedInUserInfo.setFB_USER_PROFILE_PIC(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.FB_USER_PROFILE_PIC)));
         loggedInUserInfo.setFB_USER_HOMETOWN_ID(cursor.getString(cursor.getColumnIndexOrThrow(LoginTableColumns.FB_USER_HOMETOWN_ID)));

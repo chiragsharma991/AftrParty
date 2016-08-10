@@ -448,6 +448,7 @@ public class AWSPartyOperations {
                 {
                     GenerikFunctions.hDialog();
                     GenerikFunctions.showToast(cont,"Party Request Failed, Please try again after some time.");
+                    b.setEnabled(true);
                 }
             }
 
@@ -589,6 +590,7 @@ public class AWSPartyOperations {
             }else{
                 GenerikFunctions.hDialog();
                 GenerikFunctions.showToast(cont,"Party Request Failed, Please try after some time.");
+                b.setEnabled(true);
                 //addGCtoPartyTable(cont, partytable, "Pending", pc);
             }
 
@@ -1026,8 +1028,8 @@ public class AWSPartyOperations {
                 else if(Status.equals("Declined"))
                 {
                     t.setText(Status);
-                    accept.setVisibility(View.GONE);
-                    deny.setVisibility(View.GONE);
+                    accept.setVisibility(View.INVISIBLE);
+                    deny.setVisibility(View.INVISIBLE);
                     QBPushNotifications.sendDeclinedPN(gateCrasherFBID, gateCrasherQBID, partyID, PartyName, cont);
                     Toast.makeText(cont, "Request has been declined",Toast.LENGTH_SHORT).show();
                     GenerikFunctions.hDialog();
@@ -1235,8 +1237,8 @@ public class AWSPartyOperations {
                                 if(response.getInt("confirm_status") == 1)
                                 {
                                     t.setText(Status);
-                                    accept.setVisibility(View.GONE);
-                                    deny.setVisibility(View.GONE);
+                                    accept.setVisibility(View.INVISIBLE);
+                                    deny.setVisibility(View.INVISIBLE);
                                     Toast.makeText(cont, "Request has been approved",Toast.LENGTH_SHORT).show();
                                     GenerikFunctions.hDialog();
 

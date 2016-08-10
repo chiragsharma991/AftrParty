@@ -43,6 +43,7 @@ import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSLoginOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.Contact;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.ContactTable;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
@@ -224,6 +225,25 @@ public class OTPActivity extends Activity
                 }
                 else
                 {
+
+                    // Update phone number in AWS Table if no is changed
+                    try
+                    {
+                        UserTable selUserData = m_config.mapper.load(UserTable.class, loggedInUserInformation);
+                        if(!mobileNumber.equals(selUserData.getPhoneNumber())){
+                            selUserData.setPhoneNumber(mobileNumber);
+                            m_config.mapper.save(selUserData);
+                            SharedPreferences.Editor editor = sharedpreferences.edit();
+                            editor.putString(m_config.Entered_Contact_No, mobileNumber);
+                            editor.apply();
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+
                     //  Log.e("Not Same As previous mobile no","New OTP Cycle");
                     edt_mob_no.setVisibility(View.GONE);
                     btn_submit.setVisibility(View.GONE);

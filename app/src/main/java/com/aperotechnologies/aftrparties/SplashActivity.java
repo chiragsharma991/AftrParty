@@ -71,7 +71,25 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         //FacebookSdk.sdkInitialize(getApplicationContext());
         Fabric.with(this, new Crashlytics());
-        setContentView(R.layout.activity_splash);
+
+        Calendar c = Calendar.getInstance();
+        int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
+
+        if(timeOfDay >= 0 && timeOfDay < 12){
+            //Toast.makeText(this, "Good Morning", Toast.LENGTH_SHORT).show();
+            setContentView(R.layout.activity_splash);
+        }else if(timeOfDay >= 12 && timeOfDay < 16){
+            //Toast.makeText(this, "Good Afternoon", Toast.LENGTH_SHORT).show();
+            setContentView(R.layout.activity_splash);
+        }else if(timeOfDay >= 16 && timeOfDay < 21){
+            //Toast.makeText(this, "Good Evening", Toast.LENGTH_SHORT).show();
+            setContentView(R.layout.activity_splashevening);
+        }else if(timeOfDay >= 21 && timeOfDay < 24){
+            //Toast.makeText(this, "Good Night", Toast.LENGTH_SHORT).show();
+            setContentView(R.layout.activity_splashevening);
+        }
+
+
 
 
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());

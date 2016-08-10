@@ -8,10 +8,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -20,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
@@ -43,6 +48,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<SettingsRecyclerVi
     private Context context;
     ImageView img;
     Configuration_Parameter m_config;
+    ViewGroup mainGroup;
+    int prevPos = 0;
+
     public RecyclerViewAdapter(Context context, ArrayList<String> arrayList,ImageView primaryImage)
     {
       //  Log.e("Inside recycler adapter","Yes  "+arrayList.size()+"");
@@ -62,8 +70,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<SettingsRecyclerVi
     public void onBindViewHolder(SettingsRecyclerViewHolder holder, final int position)
     {
         final String model = arrayList.get(position);
-
-        SettingsRecyclerViewHolder mainHolder = (SettingsRecyclerViewHolder) holder;
+        final SettingsRecyclerViewHolder mainHolder = (SettingsRecyclerViewHolder) holder;
 
         // settings images in recycler view
         Picasso.with(context).load(model).fit().centerCrop()
@@ -71,10 +78,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<SettingsRecyclerVi
                 .error(R.drawable.placeholder_user)
                 .into(mainHolder.imageview);
 
+
+
+//        RelativeLayout layout = null;
+//        prevPos = 0;
+//        if(position == 0){
+//            layout = (RelativeLayout) mainHolder.imageview.getParent();
+//            layout.setBackgroundColor(Color.RED);
+//        }
+//        else{
+//            layout = (RelativeLayout) mainHolder.imageview.getParent();
+//            layout.setBackgroundColor(Color.WHITE);
+//        }
+
+
         mainHolder.imageview.setOnClickListener(new View.OnClickListener()
         {
             @Override
-            public void onClick(View v)
+            public void onClick(final View v)
             {
 
             //Users choice to make image preimary or remove it from list
@@ -108,7 +129,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<SettingsRecyclerVi
                                             .placeholder(R.drawable.placeholder_user)
                                             .error(R.drawable.placeholder_user)
                                             .into(img);
+
                                     img.setTag(""+position);
+
+//                                    RelativeLayout layout = (RelativeLayout) mainHolder.imageview.getParent();
+//                                    layout.setBackgroundColor(Color.RED);
+//
+//                                    RelativeLayout layout1 = (RelativeLayout)mainGroup.findViewById(R.id.layout);
+//                                    CardView cardView = (CardView)layout1.getParent();
+//                                    RecyclerView recyclerView = (RecyclerView)cardView.getParent();
+//                                    Log.e("i", " "+prevPos+" " +recyclerView.getChildAt(prevPos));
+//                                    prevPos = position;
+//                                    Log.e("-----", " "+prevPos+" " +recyclerView.getChildAt(prevPos));
+//                                    cardView = (CardView) recyclerView.getChildAt(prevPos);
+//                                    if(cardView != null){
+//                                        RelativeLayout layout2 = (RelativeLayout)cardView.getChildAt(0);
+//                                        layout2.setBackgroundColor(Color.WHITE);
+//                                    }
+
                                 }
                                 else
                                 {
@@ -178,6 +216,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<SettingsRecyclerVi
                 builderSingle.show();
             }
         });
+
+
     }
 
     @Override
@@ -186,12 +226,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<SettingsRecyclerVi
         // This method will inflate the custom layout and return as viewholder
         LayoutInflater mInflater = LayoutInflater.from(viewGroup.getContext());
 
-        ViewGroup mainGroup = (ViewGroup) mInflater.inflate(
+         mainGroup = (ViewGroup) mInflater.inflate(
                 R.layout.settings_images_xml, viewGroup, false);
         SettingsRecyclerViewHolder listHolder = new SettingsRecyclerViewHolder(mainGroup);
         return listHolder;
 
     }
+
 
 
 }

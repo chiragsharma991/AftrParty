@@ -2,6 +2,8 @@ package com.aperotechnologies.aftrparties.History;
 
 import android.support.v4.view.ViewPager;
 
+import com.aperotechnologies.aftrparties.DepthPageTransformer;
+
 /**
  * Created by mpatil on 19/07/16.
  */
@@ -19,6 +21,7 @@ public class CircularViewPagerHandler implements ViewPager.OnPageChangeListener 
     @Override
     public void onPageSelected(final int position) {
         mCurrentPosition = position;
+        //mViewPager.setPageTransformer(true, new DepthPageTransformer());
     }
 
     @Override
@@ -43,6 +46,7 @@ public class CircularViewPagerHandler implements ViewPager.OnPageChangeListener 
 
     private boolean isScrollStateSettling() {
         return mScrollState == ViewPager.SCROLL_STATE_SETTLING;
+
     }
 
     private void handleSetNextItem() {
@@ -50,13 +54,21 @@ public class CircularViewPagerHandler implements ViewPager.OnPageChangeListener 
         if(mCurrentPosition == 0) {
             mViewPager.setCurrentItem(lastPosition, false);
         } else if(mCurrentPosition == lastPosition) {
+            mViewPager.setPageTransformer(true, new DepthPageTransformer());
             mViewPager.setCurrentItem(0, false);
+
         }
+
     }
+
+
 
     @Override
     public void onPageScrolled(final int position, final float positionOffset, final int positionOffsetPixels)
     {
 
     }
+
+
+
 }

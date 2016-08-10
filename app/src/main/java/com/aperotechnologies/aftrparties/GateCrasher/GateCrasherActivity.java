@@ -2,6 +2,7 @@ package com.aperotechnologies.aftrparties.GateCrasher;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,6 +28,7 @@ import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
@@ -330,6 +332,8 @@ public class GateCrasherActivity extends Activity
 
     @Override
     public void onBackPressed() {
+        Intent i = new Intent(GateCrasherActivity.this, HomePageActivity.class);
+        startActivity(i);
         finish();
     }
 

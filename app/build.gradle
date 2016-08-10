@@ -28,8 +28,8 @@ android {
         applicationId "com.aperotechnologies.aftrparties"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 19
-        versionName "2.08"
+        versionCode 21
+        versionName "2.10"
     }
     buildTypes {
         release {

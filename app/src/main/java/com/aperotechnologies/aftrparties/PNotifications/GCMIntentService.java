@@ -28,6 +28,7 @@ import com.linkedin.platform.LISessionManager;
 
 import java.util.Random;
 
+import de.keyboardsurfer.android.widget.crouton.Configuration;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
@@ -122,7 +123,11 @@ public class GCMIntentService extends IntentService {
                     }
                     else {
 
+                        // Define configuration options
+                        Configuration croutonConfiguration = new Configuration.Builder()
+                                .setDuration(2500).build();
                         Style style = new Style.Builder()
+                                .setConfiguration(croutonConfiguration)
                                 .setBackgroundColor(R.color.colorAccent)
                                 .setPaddingInPixels(5)
                                 .setGravity(Gravity.CENTER)
@@ -132,20 +137,19 @@ public class GCMIntentService extends IntentService {
 
 
                         Crouton crouton = Crouton.makeText((Activity) m_config.foregroundCont, message, style);
-
+                        crouton.show();
 //                        if (m_config.foregroundCont instanceof DialogsActivity) {
 //
 //                        } else {
-                            crouton.show();
-                            crouton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
+                        crouton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
 
-                                    Log.e("here ", "  click of crouton");
-                                    Intent i = new Intent(m_config.foregroundCont, DialogsActivity.class);
-                                    i.putExtra("from","chatoffline");
-                                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    startActivity(i);
+                                Log.e("here ", "  click of crouton");
+                                Intent i = new Intent(m_config.foregroundCont, DialogsActivity.class);
+                                i.putExtra("from","chatoffline");
+                                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
                                 }
                             });
                         //}

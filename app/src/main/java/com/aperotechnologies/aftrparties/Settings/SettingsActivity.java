@@ -103,7 +103,7 @@ public class SettingsActivity extends Activity
     Configuration_Parameter m_config;
     SharedPreferences sharedPreferences;
     CircularImageView imguser;
-    EditTextPopUpFixed edt_usermsgStatus, edt_Age, edt_userName;
+    EditTextPopUpFixed edt_usermsgStatus, edt_userName;
     //TextView txtrangeseekbarval, txtseekbarval, txtseekbarval1;
     TextView txtseekbarval1;
     //RangeSeekBar rangeSeekBar;
@@ -160,7 +160,6 @@ public class SettingsActivity extends Activity
 
         imguser = (CircularImageView) findViewById(R.id.userimage);
         edt_usermsgStatus = (EditTextPopUpFixed) findViewById(R.id.edt_usermsgStatus);
-        edt_Age = (EditTextPopUpFixed) findViewById(R.id.edt_Age);
         edt_userName = (EditTextPopUpFixed) findViewById(R.id.edt_userName);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(SettingsActivity.this, LinearLayoutManager.HORIZONTAL, false));
@@ -209,8 +208,11 @@ public class SettingsActivity extends Activity
 
         for(int i=0;i<imagesArray.length;i++)
         {
+
             validPics.add(imagesArray[i]);
+
             Log.e("Received images",validPics.get(i));
+
         }
 
 
@@ -492,11 +494,7 @@ public class SettingsActivity extends Activity
             }
         }
 
-//        if(progressDialog.isShowing())
-//        {
-//            progressDialog.dismiss();
-//            progressDialog.cancel();
-//        }
+
     }
 
     //Retrieve AWS info of USer and update UI component
@@ -504,9 +502,6 @@ public class SettingsActivity extends Activity
     {
 
         Log.e("Inside setUserInfo","setUserInfo");
-//        progressDialog.setMessage("Loading");
-//        progressDialog.setCancelable(false);
-//        progressDialog.show();
 
         try
         {
@@ -561,9 +556,8 @@ public class SettingsActivity extends Activity
                     Log.e("Inside setUserInfo","setUserInfo  11");
 
                     edt_userName.setText(user_name);
-                    edt_Age.setText(user_age);
                     edt_userName.setEnabled(false);
-                    edt_Age.setEnabled(false);
+                    //edt_Age.setEnabled(false);
                 }
              });
 
@@ -925,7 +919,7 @@ public class SettingsActivity extends Activity
     {
 
         String[] images = new String[validPics.size()];
-        for(int i=0;i<validPics.size();i++)
+        for(int i=0; i<validPics.size(); i++)
         {
             Log.e("updateUserSettings    "+i,validPics.get(i));
             images[i] =validPics.get(i);
@@ -948,13 +942,13 @@ public class SettingsActivity extends Activity
 
             //Update AWS user entry
 
+            //UserTable userTable = m_config.mapper.load(UserTable.class, FacebookID);
+            if(!userTable.getProfileStatus().equals(edt_usermsgStatus.getText().toString().replaceAll("\\s+", " ").trim())){
+                userTable.setProfileStatus(profileStatus);
+            }
 
 
-            UserTable userTable = m_config.mapper.load(UserTable.class, FacebookID);
-
-            userTable.setProfileStatus(profileStatus);
             userTable.setProfilePicUrl(validPics);
-            //userTable.setcurrentmaskstatus(selected_maskStatus);
             userTable.setImageflag("Yes");
             m_config.mapper.save(userTable);
 
@@ -1006,7 +1000,9 @@ public class SettingsActivity extends Activity
                     int faces = faceOverlayView.setBitmap(finalbitmap);
                     if(faces>0)
                     {
+
                         validPics.add(picturePath);
+
                         getFBProfilePictures();
 
                         picturePath = Validations.getUrlfromCloudinary(cont,picturePath);
@@ -1061,6 +1057,7 @@ public class SettingsActivity extends Activity
 
                 if(faces>0)
                 {
+
                     validPics.add(picturePath+"");
 
                     picturePath = Validations.getUrlfromCloudinary(cont,picturePath);

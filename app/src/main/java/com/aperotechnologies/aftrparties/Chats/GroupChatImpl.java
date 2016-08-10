@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBGroupChat;
 import com.quickblox.chat.QBGroupChatManager;
@@ -116,16 +117,18 @@ public class GroupChatImpl extends QBMessageListenerImpl<QBGroupChat> implements
                 groupChat.sendMessage(message);
             } catch (SmackException.NotConnectedException nce){
                 nce.printStackTrace();
+                GenerikFunctions.showToast(chatActivity,"Can't send a message, You are not connected to chat");
                 Log.i("","Can't send a message, You are not connected to chat");
-                //Toast.makeText(chatActivity, "Can't send a message, You are not connected to chat", Toast.LENGTH_SHORT).show();
             } catch (IllegalStateException e){
                 e.printStackTrace();
+                GenerikFunctions.showToast(chatActivity,"You are still joining a group chat, please wait a bit");
                 Log.i("","You are still joining a group chat, please wait a bit");
-                //Toast.makeText(chatActivity, "You are still joining a group chat, please wait a bit", Toast.LENGTH_LONG).show();
+
             }
         } else {
             //Toast.makeText(chatActivity, "Join unsuccessful", Toast.LENGTH_LONG).show();
             Log.i("","Join unsuccessful");
+            GenerikFunctions.showToast(chatActivity,"Join unsuccessful");
         }
     }
 

@@ -6,26 +6,19 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
-
-import com.andtinder.model.CardModel;
 import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
-import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.GateCrashersClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
-import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
@@ -42,14 +35,10 @@ import com.linkedin.platform.LISessionManager;
 import com.linkedin.platform.errors.LIAuthError;
 import com.linkedin.platform.listeners.AuthListener;
 import com.linkedin.platform.utils.Scope;
-import com.quickblox.core.QBEntityCallback;
-import com.quickblox.core.exception.QBResponseException;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
 /**
@@ -168,6 +157,7 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
             RequestantPagerAdapter adapter = new RequestantPagerAdapter(cont,getSupportFragmentManager(),facebookId,liId, QbId,imageArray,status);
             viewPager.setAdapter(adapter);
             viewPager.setOnPageChangeListener(new CircularViewPagerHandler(viewPager));
+
 
 
 

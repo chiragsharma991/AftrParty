@@ -165,12 +165,14 @@ public class DialogsActivity extends Activity implements AbsListView.OnScrollLis
                     QBDialog selectedDialog = (QBDialog) data.getSerializableExtra(ConstsCore.EXTRA_DIALOG);
                     String newText = data.getStringExtra("lastmessage");
                     String position = data.getStringExtra("position");
+                    String unreadmsgcount = data.getStringExtra("unreadmsg");
                     Log.e("onActivityResult m_config.lastMessge", " "+newText+" ");
                     if(!newText.equals(null) || newText != null)
                     {
                         if(newText.length() != 0) {
                             selectedDialog.setLastMessage(newText);
-                            selectedDialog.setUnreadMessageCount(0);
+                            //selectedDialog.setUnreadMessageCount(0);
+                            selectedDialog.setUnreadMessageCount(Integer.valueOf(unreadmsgcount));
                             listadpDialogs.set(Integer.parseInt(position), selectedDialog);
                             adapter.notifyDataSetChanged();
                         }

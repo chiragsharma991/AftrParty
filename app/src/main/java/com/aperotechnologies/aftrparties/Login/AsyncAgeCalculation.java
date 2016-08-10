@@ -68,8 +68,8 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
     @Override
     protected Boolean doInBackground(Void... params)
     {
-        //String dtStart=params[0];
 
+        /*harshada
         String  dtStart = loggedInUserInformation.getFB_USER_BIRTHDATE();
         SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
         try
@@ -85,10 +85,23 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
             else
             {
                 ConstsCore.ValidAge = "Yes";
-            }
-          //  Log.e("Valid Age", ConstsCore.ValidAge + "");
+            }*/
 
-            // basicValidation();
+        //harshada
+        String  dtage = loggedInUserInformation.getFB_USER_AGE();
+        Log.e("dtage ", " "+dtage);
+        try
+        {
+
+            if (dtage.equals("21") || dtage.equals("18"))
+            {
+                ConstsCore.ValidAge = "Yes";
+            }
+            else
+            {
+                ConstsCore.ValidAge = "No";
+            }
+
 
             //Check for profile pic first
             if (loggedInUserInformation.getFB_USER_PROFILE_PIC().equals("N/A") || loggedInUserInformation.getFB_USER_PROFILE_PIC().equals(null))

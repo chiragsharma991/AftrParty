@@ -3,6 +3,7 @@ package com.aperotechnologies.aftrparties.History;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -17,8 +18,13 @@ import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.GateCrashersClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
+import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.quickblox.chat.QBChatService;
+import com.quickblox.chat.QBGroupChatManager;
+import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.exception.QBResponseException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,9 +93,9 @@ public class HostCancelPartyAPI {
                                             gcqbidlist.add(Integer.valueOf(gatecrasherList.get(i).getgcqbid()));
 
                                         }
-
+                                        Log.d("gcqbidlist ", ":" + gcqbidlist);
+                                        //QBChatDialogCreation.deleteGroupDialog(selPartyTable.getDialogID());
                                         QBPushNotifications.sendPartyCancelledPN(gcqbidlist, partyid, PartyName, cont);
-
 
                                     }
                                     else

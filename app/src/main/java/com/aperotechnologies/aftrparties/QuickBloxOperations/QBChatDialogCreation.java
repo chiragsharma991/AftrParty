@@ -205,7 +205,7 @@ public class QBChatDialogCreation {
             public void onSuccess(Void aVoid, Bundle bundle)
             {
                 Log.e("Onsuccess","delete Dialog ");
-                GenerikFunctions.hDialog();
+
 
 
             }
@@ -214,7 +214,7 @@ public class QBChatDialogCreation {
             public void onError(QBResponseException errors)
             {
                 Log.e("onError","delete Dialog ");
-                GenerikFunctions.hDialog();
+
             }
         });
     }
