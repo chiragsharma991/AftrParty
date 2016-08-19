@@ -9,7 +9,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -57,6 +56,7 @@ import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
@@ -95,7 +95,8 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
     TextView edtEndDate;
     EditText edt_PartyName, edt_Description;
     CheckBox cb_byobYes, cb_byobNo;
-    CheckBox cb_mask, cb_unmask;
+    CheckBox cb_mask;
+    CheckBox cb_unmask;
 
     CheckBox cb_getLocation, cb_EnterAddress;
     EditText edt_address, edt_street,edt_city, edt_pincode;
@@ -118,9 +119,9 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
     //temp variables for storing StartTime and EndTime in milliseconds
     final long[] tempstartTimeVal = new long[1];
     final long[] tempendTimeVal = new long[1];
-    Configuration_Parameter m_config;
+    static Configuration_Parameter m_config;
     SharedPreferences sharedPreferences;
-    Context cont;
+    static Context cont;
     Uri fileUri;
     String picturePath = "";
     LocationManager locationManager;
@@ -128,8 +129,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
     Location currentlocation = null;
 
     private String loginUserFBID;
-    private UserTable user;
-    private String masksubscriptionTime;
+    private  UserTable user;
     private BillingProcessor bpMaskUnmask;
     private boolean readyToPurchaseMaskUnmask = false;
 
@@ -157,7 +157,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
         uploadPartyImage = (TextView) findViewById(R.id.uploadPartyImage);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        masksubscriptionTime = String.valueOf(Validations.getCurrentTime());
+        m_config.masksubscriptionTime = String.valueOf(Validations.getCurrentTime());
 
 
         if(!BillingProcessor.isIabServiceAvailable(cont)) {
@@ -213,6 +213,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
         {
 
             user = m_config.mapper.load(UserTable.class,loginUserFBID);
+
             Log.e("Here"," "+user.getPartymaskstatus());
             List<PartyMaskStatusClass> partymaskstatus = user.getPartymaskstatus();
             if(partymaskstatus != null || partymaskstatus.size() != 0)
@@ -224,7 +225,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                     if(currTime < Long.parseLong(partymaskstatus.get(0).getMasksubscriptiondate()))
                     {
 
-                        masksubscriptionTime = partymaskstatus.get(0).getMasksubscriptiondate();
+                        m_config.masksubscriptionTime = partymaskstatus.get(0).getMasksubscriptiondate();
                         cb_mask.setEnabled(false);
                         cb_unmask.setEnabled(false);
                         cb_mask.setChecked(false);
@@ -483,8 +484,6 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
         cb_unmask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
 
                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(HostActivity.this);
                 alertDialogBuilder
@@ -917,7 +916,6 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
 
                 }
 
-
             }
 
 
@@ -1050,6 +1048,8 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                 builderSingle.show();
             }
         });
+
+
 
     }
 
@@ -1438,13 +1438,13 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
     public void onProductPurchased(String productId, TransactionDetails details) {
         //GenerikFunctions.showToast(cont,"onProductPurchased: " + productId+" ");
         GenerikFunctions.sDialog(cont,"Saving Data...");
-        new  setInAppPurchaseinAWSUser().execute();
+        Long subscriptiondate = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
+        new  AWSPaymentOperations.setInAppPurchaseinAWSUser(cont, subscriptiondate, loginUserFBID, cb_mask, cb_unmask).execute();
         Boolean consumed = bpMaskUnmask.consumePurchase(ConstsCore.ITEM_MASK_SKU);
 
         if (consumed)
         {
-           GenerikFunctions.showToast(cont,"Successfully consumed");
-
+           //GenerikFunctions.showToast(cont,"Successfully consumed");
         }
 
     }
@@ -1921,20 +1921,20 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
         PartyMaskStatusClass partymaskstatus = new PartyMaskStatusClass();
         if(cb_mask.isChecked() == true)
         {
-            GenerikFunctions.showToast(cont, "Mask");
+            //GenerikFunctions.showToast(cont, "Mask");
 
             partymaskstatus.setMaskstatus("Mask");
-            partymaskstatus.setMasksubscriptiondate(masksubscriptionTime);
+            partymaskstatus.setMasksubscriptiondate(m_config.masksubscriptionTime);
             List<PartyMaskStatusClass> partymaskstatuslist = new ArrayList<>();
             partymaskstatuslist.add(partymaskstatus);
             party.setPartymaskstatus(partymaskstatuslist);
         }
         else if(cb_unmask.isChecked() == true)
         {
-            GenerikFunctions.showToast(cont, "Unmask");
+            //GenerikFunctions.showToast(cont, "Unmask");
 
             partymaskstatus.setMaskstatus("Unmask");
-            partymaskstatus.setMasksubscriptiondate(masksubscriptionTime);
+            partymaskstatus.setMasksubscriptiondate(m_config.masksubscriptionTime);
             List<PartyMaskStatusClass> partymaskstatuslist = new ArrayList<>();
             partymaskstatuslist.add(partymaskstatus);
             party.setPartymaskstatus(partymaskstatuslist);
@@ -2109,92 +2109,8 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
     }
 
 
-    private class setInAppPurchaseinAWSUser extends AsyncTask<String, Void, Void>
-    {
-
-        @Override
-        protected Void doInBackground(String... params)
-        {
-
-            Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
-            List<PartyMaskStatusClass> partymaskstatuslist = user.getPartymaskstatus();
-
-            try {
-                if (partymaskstatuslist == null || partymaskstatuslist.size() == 0) {
-                    PartyMaskStatusClass partymaskstatus = new PartyMaskStatusClass();
-                    partymaskstatus.setMaskstatus("Unmask");
-                    partymaskstatus.setMasksubscriptiondate(String.valueOf(subVal));
-                    masksubscriptionTime = String.valueOf(subVal);
-                    partymaskstatuslist = new ArrayList<>();
-                    partymaskstatuslist.add(partymaskstatus);
-                    user.setPartymaskstatus(partymaskstatuslist);
-                    m_config.mapper.save(user);
-                    Toast.makeText(getApplicationContext(),"Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                    GenerikFunctions.hDialog();
 
 
-                    Handler h = new Handler();
-                    h.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            cb_unmask.setChecked(true);
-                            cb_mask.setChecked(false);
-                            cb_unmask.setEnabled(false);
-                            cb_mask.setEnabled(false);
-                        }
-                    });
-
-
-                }
-                else
-                {
-                    //
-                    PartyMaskStatusClass partymaskstatus = partymaskstatuslist.get(0);
-                    partymaskstatus.setMaskstatus("Unmask");
-                    partymaskstatus.setMasksubscriptiondate(String.valueOf(subVal));
-                    masksubscriptionTime = String.valueOf(subVal);
-                    partymaskstatuslist.add(0, partymaskstatus);
-                    user.setPartymaskstatus(partymaskstatuslist);
-                    m_config.mapper.save(user);
-                    Toast.makeText(getApplicationContext(), "Data is updated Successfully", Toast.LENGTH_SHORT).show();
-                    GenerikFunctions.hDialog();
-
-
-                    Handler h = new Handler();
-                    h.post(new Runnable() {
-                        @Override
-                        public void run() {
-                           cb_unmask.setChecked(true);
-                            cb_mask.setChecked(false);
-                            cb_unmask.setEnabled(false);
-                            cb_mask.setEnabled(false);
-                        }
-                    });
-                }
-            }
-            catch(Exception e)
-            {
-                Toast.makeText(getApplicationContext(), "Data is not saved Successfully", Toast.LENGTH_SHORT).show();
-                GenerikFunctions.hDialog();
-
-            }
-            return null;
-        }
-
-
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Void v)
-        {
-
-
-        }
-    }
 
 
 
@@ -2234,9 +2150,14 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
             inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         }
         finish();
+        m_config.masksubscriptionTime = "";
     }
 
 }
+
+
+
+
 
 
 ///keytool -exportcert -alias aftrparties -keystore /Users/hasai/Documents/Harshada/AftrParties/Docs/AftrPartiesKey/aftrpartieskeystore -storepass apero@123 | openssl sha1 -binary | openssl base64

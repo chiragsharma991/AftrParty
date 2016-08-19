@@ -16,6 +16,7 @@ import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.GateCrashersClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
@@ -23,6 +24,7 @@ import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreatio
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookAuthorizationException;
@@ -95,6 +97,7 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
 
         //   pd = (ProgressBar)findViewById(R.id.pd);
         viewPager = (ViewPager)findViewById(R.id.pager);
+
 
         GCList = new ArrayList();
         gc_list = new ArrayList<GateCrashersClass>();
@@ -367,17 +370,19 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
 
     @Override
     public void onProductPurchased(String productId, TransactionDetails details) {
-        GenerikFunctions.showToast(cont,"Purchase Successful");
-        Boolean consumed = bpReqChat.consumePurchase(ConstsCore.ITEM_PRIVATECHAT_SKU);
-        GenerikFunctions.sDialog(cont, "Creating 1-1 Chat...");
+        GenerikFunctions.sDialog(cont,"Creating 1-1 Chat...");
+        Long subscriptiondate = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
+        if(m_config.DialogidforReqInappPChat.equals("")){
+            QBChatDialogCreation.createPrivateChat(Integer.valueOf(m_config.QbIdforInappPChat), cont, subscriptiondate,  m_config.FbIdforInappPChat,"1-1 Chat Created Successfully");
+        }
+        else{
+            new AWSPaymentOperations.storePrivateChat(cont, subscriptiondate , m_config.DialogidforReqInappPChat, m_config.FbIdforInappPChat, null, "1-1 Chat Updated Successfully").execute();
+        }
 
+        Boolean consumed = bpReqChat.consumePurchase(ConstsCore.ITEM_PRIVATECHAT_SKU);
         if (consumed)
         {
             //GenerikFunctions.showToast(cont,"Successfully consumed");
-            QBChatDialogCreation.createPrivateChat(Integer.valueOf(m_config.QbIdforInappPChat), cont);
-        }
-        else{
-            GenerikFunctions.hDialog();
         }
     }
 
@@ -392,7 +397,15 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
 
     @Override
     public void onBillingError(int errorCode, Throwable error) {
-        GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
+        if(!m_config.DialogidforReqInappPChat.equals("")){
+            String oppfbid = m_config.FbIdforInappPChat;
+            String facebookid = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+            QBChatDialogCreation.deletePrivateDialog(cont, m_config.DialogidforReqInappPChat, facebookid, oppfbid);
+        }
+
+
+
+        //GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
     }
 
     @Override

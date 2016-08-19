@@ -103,7 +103,6 @@ public class QBPushNotifications {
     }
 
 
-
     //PushNotification to Guest after Party request is Approved
     public static void sendApprovedPN(String GCFBID, String GCQBID, String PartyID, String partyName, Context cont) {
 
@@ -261,7 +260,7 @@ public class QBPushNotifications {
     }
 
 
-
+    //PushNotifications when jost cancel party
     public static void sendPartyCancelledPN(List<Integer> gcqbidlist, String PartyID, String partyName, Context cont) {
 
         // recipients

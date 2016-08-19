@@ -662,7 +662,7 @@ public class OTPActivity extends Activity
             SharedPreferences.Editor editor= sharedpreferences.edit();
             editor.putString(m_config.OTPValidationDone,"Yes");
             editor.apply();
-            Log.e("--- "," loggedInUserInformation    "+loggedInUserInformation.getFB_USER_ID());
+            //Log.e("--- "," loggedInUserInformation    "+loggedInUserInformation.getFB_USER_ID());
             new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
 
 

@@ -105,6 +105,8 @@ public class AWSLoginOperations {
                 }
                 String Gender = loggedInUserInfo.getFB_USER_GENDER();
                 String FBProfilePicUrl = loggedInUserInfo.getFB_USER_PROFILE_PIC();
+
+                Log.e("here "," FBProfilePicUrl "+FBProfilePicUrl);
                 List ProfilePicUrlList = new ArrayList();
                 ProfilePicUrlList.add(FBProfilePicUrl);
 
@@ -161,12 +163,12 @@ public class AWSLoginOperations {
                         selUserData.setPhoneNumber(PhoneNumber);
                         ProfilePicUrlList.set(0, FBProfilePicUrl);
 
-                        String Update = "Update " + LoginTableColumns.USERTABLE + " set "
-                                + LoginTableColumns.FB_USER_PROFILE_PIC  + " = '" + FBProfilePicUrl + "'"
-                                + " where " + LoginTableColumns.FB_USER_ID + " = '" + FacebookID + "'";
-
-                        Log.i("update User  "+ LoginTableColumns.FB_USER_ID , Update);
-                        sqldb.execSQL(Update);
+//                        String Update = "Update " + LoginTableColumns.USERTABLE + " set "
+//                                + LoginTableColumns.FB_USER_PROFILE_PIC  + " = '" + FBProfilePicUrl + "'"
+//                                + " where " + LoginTableColumns.FB_USER_ID + " = '" + FacebookID + "'";
+//
+//                        Log.i("update User  "+ LoginTableColumns.FB_USER_ID , Update);
+//                        sqldb.execSQL(Update);
 
                         selUserData.setProfilePicUrl(ProfilePicUrlList);
 
@@ -247,10 +249,18 @@ public class AWSLoginOperations {
                 if(from.equals("Registration"))
                 {
                     RegistrationActivity.startLinkedInProcess();
+
+//                    harshada 10Aug
+//                    SharedPreferences.Editor editor1 = sharedPreferences.edit();
+//                    editor.putString(m_config.LILoginDone,"Yes");
+//                    editor.apply();
+//                    LoginValidations.QBStartSession(cont);
+
+
                 }
                 else
                 {
-                   // Welcome.startLinkedInProcess();
+
                 }
             }
             else
@@ -325,8 +335,8 @@ public class AWSLoginOperations {
                 selUserData.setLKProfilePicUrl(LKProfilePicUrl);
                 selUserData.setLKConnectionsCount(LKConnectionsCount);
                 selUserData.setLKHeadLine(LKHeadLine);
-
                 Log.e("AWS LIUser inserted ", " " + selUserData.toString());
+                Log.e("----"," "+sharedPreferences.getString(m_config.Entered_User_Name,""));
                 m_config.mapper.save(selUserData);
                 Log.e("", "AWS LIUser Inserted");
                 value = true;
@@ -759,6 +769,9 @@ public class AWSLoginOperations {
             {
                 SharedPreferences.Editor editor= sharedPreferences.edit();
                 editor.putString(m_config.FinalStepDone,"Yes");
+                editor.putString(m_config.TempEntered_User_Name,"");
+                editor.putString(m_config.TempEntered_Email,"");
+                editor.putString(m_config.TempEntered_Contact_No,"");
                 editor.apply();
 
                 Intent intent = new Intent(cont, HomePageActivity.class);

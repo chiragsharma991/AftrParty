@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,15 +14,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartiesClass;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.SearchedParties;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
+import com.aperotechnologies.aftrparties.History.PartyDetails;
+import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
@@ -53,26 +60,16 @@ public class GateCrasherAdapter extends BaseAdapter
     Configuration_Parameter m_config;
     public List<PartyConversion> pc;
 
-    Intent notificationIntent;
-    AlarmManager alarmManager;
-
 
     //    SQLiteDatabase sdb;
     public GateCrasherAdapter(Context context, JSONArray result)//PaginatedScanList<PartyTable> result)
     {
         this.cont = context;
         this.result = result;
-        //   this.reqStartTime = reqStartTime;
         m_config = Configuration_Parameter.getInstance();
-
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().build());
-
         pc = new ArrayList<PartyConversion>();
 
-        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-
-        notificationIntent = new Intent("android.media.action.DISPLAY_NOTIFICATION");
-        notificationIntent.addCategory("android.intent.category.DEFAULT");
 
     }
 
@@ -300,8 +297,59 @@ public class GateCrasherAdapter extends BaseAdapter
 
         });
 
+        participentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GenerikFunctions.sDialog(cont, "Loading...");
 
-        //convertView.setTag(party.getPartyID());
+               try{
+                   PartyTable partytable = m_config.mapper.load(PartyTable.class, finalParty.getPartyID());
+                   List<PartyMaskStatusClass> partymaskstatus = partytable.getPartymaskstatus();
+                   Log.e("partymaskstatus",""+partymaskstatus);
+                   if(partymaskstatus != null && partymaskstatus.get(0).getMaskstatus().equals("Unmask")) {
+                       Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
+                       if (currTime < Long.parseLong(partymaskstatus.get(0).getMasksubscriptiondate())) {
+                           Log.e("Party status is Unmask", " ");
+
+                           // check whether party is Unmasked
+                           Intent i = new Intent(cont, GCPartyDetails.class);
+                           GCPartyParceableData party = new GCPartyParceableData();
+                           party.setPartyId(finalParty.getPartyID());
+                           party.setPartyName(finalParty.getPartyName());
+                           party.setHostName(finalParty.getHostName());
+                           party.setStartTime(finalParty.getStartTime());
+                           party.setEndTime(finalParty.getEndTime());
+                           party.setBYOB(finalParty.getBYOB());
+                           party.setDescription(finalParty.getPartyDescription());
+                           party.setPartyaddress(finalParty.getPartyAddress());
+                           Bundle mBundles = new Bundle();
+                           mBundles.putSerializable(ConstsCore.SER_KEY, party);
+                           i.putExtras(mBundles);
+                           cont.startActivity(i);
+                           GenerikFunctions.hDialog();
+
+                       } else {
+                           Log.e("Party status is Unmask", " subscription is expired");
+                           GenerikFunctions.hDialog();
+                       }
+                   }
+                   else
+                   {
+                       Log.e("Party status is Mask","");
+                       GenerikFunctions.hDialog();
+                   }
+               }
+               catch (Exception e)
+               {
+                   GenerikFunctions.hDialog();
+               }
+
+
+            }
+        });
+
+
+        //participentView.setTag(party.getPartyID());
         return participentView;
     }
 
@@ -330,41 +378,6 @@ public class GateCrasherAdapter extends BaseAdapter
         private Button btn_Request;
 
     }
-
-    public  void setLocalNotification(int position)
-    {
-        Long currentTimeMillis = System.currentTimeMillis();
-        Log.e("Current Time Millis",currentTimeMillis + "");
-        PartyTable party = null;
-        try {
-            party = (PartyTable) result.get(position);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        Log.e("=====","======");
-        Log.e("Party Name",party.getPartyName());
-        Log.e("Party Host",party.getHostName());
-        Log.e("Party end time",party.getEndTime() +"");
-
-        long timeDifference= Long.parseLong(party.getEndTime().trim())  - currentTimeMillis;
-
-        notificationIntent.putExtra("PartyName",party.getPartyName());
-        notificationIntent.putExtra("HostName",party.getHostName());
-
-        PendingIntent broadcast = PendingIntent.getBroadcast(cont, 100, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        if (Build.VERSION.SDK_INT >= 19)
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, (System.currentTimeMillis() + (5000))
-
-                     /*Long.parseLong(party.getEndTime())*/, broadcast);
-        else if (Build.VERSION.SDK_INT >= 15)
-            alarmManager.set(AlarmManager.RTC_WAKEUP, (System.currentTimeMillis() + (5000)) /*Long.parseLong(party.getEndTime())*/, broadcast);
-
-    }
-
-
-
 
 
 

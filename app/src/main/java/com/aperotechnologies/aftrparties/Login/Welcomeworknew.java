@@ -81,7 +81,7 @@ import static com.aperotechnologies.aftrparties.Login.LoginTableColumns.FB_USER_
 /**
  * Created by mpatil on 25/05/16.
  */
-public class Welcome extends Activity
+public class Welcomeworknew extends Activity
 {
     Button btn_login, btn_register;
     SharedPreferences sharedPreferences;
@@ -173,7 +173,7 @@ public class Welcome extends Activity
             @Override
             public void onClick(View v)
             {
-                Log.e("Shrd Pref in Welcome on login click",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
+                Log.e("Shrd Pref in Welcomeworknew on login click",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                         sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "  + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A")+"    "+
                         sharedPreferences.getString(m_config.LoggedInFBUserID,"N/A"));
 
@@ -188,7 +188,7 @@ public class Welcome extends Activity
 
                         try
                         {
-                            loginManager.logInWithReadPermissions(Welcome.this,permissions);
+                            loginManager.logInWithReadPermissions(Welcomeworknew.this,permissions);
                             Log.e("Inside login", "yes");
                             FacebookDataRetieval();
                         }
@@ -203,7 +203,7 @@ public class Welcome extends Activity
                         //If locally stored then initialise the FB Session
                         linkedinStart="";
                         Log.e("FB Session","");
-                        loginManager.logInWithReadPermissions(Welcome.this,permissions);
+                        loginManager.logInWithReadPermissions(Welcomeworknew.this,permissions);
                         FacebookDataRetievalNew();
                     }
                 }
@@ -213,14 +213,9 @@ public class Welcome extends Activity
             }
         });
 
-        //call to PlayServiceHelper
 
-        String registrationId = sharedPreferences.getString(m_config.REG_ID, "");
-        if (registrationId.isEmpty()) {
-            Log.e("here","");
-            new PlayServicesHelper(Welcome.this, null);
-        }
-
+//        //call to PlayServiceHelper
+//        new PlayServicesHelper((Activity)cont, LoginValidations.initialiseLoggedInUser(cont));
     }
 
     //FB Login to retrieve FB ID
@@ -237,12 +232,12 @@ public class Welcome extends Activity
                         @Override
                         public void onSuccess(LoginResult loginResult)
                         {
-                            Log.e("FB Login Success Welcome FacebookDataRetievalNew","");
+                            Log.e("FB Login Success Welcomeworknew FacebookDataRetievalNew","");
                             token = loginResult.getAccessToken();
-                            Log.e("AccessToken from Welcome FacebookDataRetievalNew", token.toString() + "    " +token);
+                            Log.e("AccessToken from Welcomeworknew FacebookDataRetievalNew", token.toString() + "    " +token);
                             if(wl_pd == null)
                             {
-                                wl_pd = new ProgressDialog(Welcome.this);
+                                wl_pd = new ProgressDialog(Welcomeworknew.this);
                             }
                             RegistrationActivity.reg_pd = null;
                             SplashActivity.pd = null;
@@ -265,32 +260,20 @@ public class Welcome extends Activity
                         public void onCancel()
                         {
                             GenerikFunctions.showToast(cont, "FB Login failed");
-                            Log.e("FBLogin onCancel Welcome FacebookDataRetievalNew", "Yes");
-
+                            Log.e("FBLogin onCancel Welcomeworknew FacebookDataRetievalNew", "Yes");
                         }
 
                         @Override
                         public void onError(FacebookException error)
                         {
+                            Log.e("FB Login error Welcomeworknew FacebookDataRetievalNew",error.toString());
+                            GenerikFunctions.showToast(cont, "FB Login failed");
                             error.printStackTrace();
-                            Log.e("FB Login error Welcome FacebookDataRetievalNew",error.toString());
-                            if(error.getMessage().equals("net::ERR_CONNECTION_CLOSED"))
-                            {
-                                GenerikFunctions.showToast(cont, "FB is blocked on your server.");
-                            }
-                            else {
-                                GenerikFunctions.showToast(cont, "FB Login failed");
-                            }
-
-
-
-
                         }
                     });
         }
         catch(Exception e)
         {
-            GenerikFunctions.showToast(cont, "FB Login failed");
         }
     }
     //Meghana
@@ -305,6 +288,8 @@ public class Welcome extends Activity
             Log.e("onActivityResult","fb :");
             super.onActivityResult(requestCode, resultCode, data);
             callbackManager.onActivityResult(requestCode, resultCode, data);
+
+
 
         }
         else
@@ -323,28 +308,26 @@ public class Welcome extends Activity
                     }
                 }
 
-                GenerikFunctions.showToast(cont, "Linked In Login Failed");
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
+                alertDialogBuilder
+                        .setMessage("You have declined permissions without those permissions you can't proceed to registration process ")
+                        .setCancelable(false)
+                        .setNegativeButton("Don't Allow",null)
+                        .setPositiveButton("Allow",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        if (GenerikFunctions.chkStatus(cont))
+                                        {
+                                            btn_login.performClick();
+                                        }
+                                        else
+                                        {
+                                            GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                                        }
 
-//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
-//                alertDialogBuilder
-//                        .setMessage("You have declined permissions without those permissions you can't proceed to registration process ")
-//                        .setCancelable(false)
-//                        .setNegativeButton("Don't Allow",null)
-//                        .setPositiveButton("Allow",
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialog, int id) {
-//                                        if (GenerikFunctions.chkStatus(cont))
-//                                        {
-//                                            btn_login.performClick();
-//                                        }
-//                                        else
-//                                        {
-//                                            GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
-//                                        }
-//
-//                                    }
-//                                });
-//                alertDialogBuilder.show();
+                                    }
+                                });
+                alertDialogBuilder.show();
 
 
             }
@@ -432,7 +415,7 @@ public class Welcome extends Activity
                     LoginTableColumns.FB_USER_ID +" = '" + fbUserInformation.getFbId() + "'";
             Log.i("User Query  : ", Query);
             Cursor cursor = sqldb.rawQuery(Query, null);
-           // Log.e("Cursor count",cursor.getCount()+"");
+            // Log.e("Cursor count",cursor.getCount()+"");
             if(cursor.getCount() == 0)
             {
                 Log.e("Onside update if","Yes");
@@ -485,7 +468,7 @@ public class Welcome extends Activity
         //Meghana
         //Clear Focus from all edit texts
         //Harshada
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(Welcome.this);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(Welcomeworknew.this);
         alertDialogBuilder
                 .setTitle("Exit")
                 .setMessage("Are you sure you want to exit?")
@@ -509,7 +492,7 @@ public class Welcome extends Activity
     //Ask user again for declined FB permissions
     public void askForDeclinedFBPermissions(ArrayList<String> declined_perm)
     {
-        loginManager.logInWithReadPermissions(Welcome.this, declined_perm);
+        loginManager.logInWithReadPermissions(Welcomeworknew.this, declined_perm);
         FacebookDataRetieval();
     }
 
@@ -523,32 +506,32 @@ public class Welcome extends Activity
         {
             Log.e("Inside try","Yes");
             loginManager.registerCallback(callbackManager,
-                new FacebookCallback<LoginResult>()
-                {
-                    @Override
-                    public void onSuccess(LoginResult loginResult)
+                    new FacebookCallback<LoginResult>()
                     {
-                        // App code
-                        Log.e("Login Success", "Yes");
-                        token = loginResult.getAccessToken();
-                        Log.e("AccessToken", token.toString() + "    " +token);
-
-
-                        Set<String> given_perm = token.getPermissions();
-                        iterator = given_perm.iterator();
-
-                        final ArrayList<String> declined_permissions = new ArrayList<String>();
-                        Set<String> declined_perm = token.getDeclinedPermissions();
-                        iterator = declined_perm.iterator();
-
-                        String permissionname = declined_perm.toString().replace("[","");
-                        permissionname = permissionname.replace("]","");
-
-                        while (iterator.hasNext())
+                        @Override
+                        public void onSuccess(LoginResult loginResult)
                         {
-                            String perm_name = iterator.next().toString();
-                            declined_permissions.add(perm_name);
-                        }
+                            // App code
+                            Log.e("Login Success", "Yes");
+                            token = loginResult.getAccessToken();
+                            Log.e("AccessToken", token.toString() + "    " +token);
+
+
+                            Set<String> given_perm = token.getPermissions();
+                            iterator = given_perm.iterator();
+
+                            final ArrayList<String> declined_permissions = new ArrayList<String>();
+                            Set<String> declined_perm = token.getDeclinedPermissions();
+                            iterator = declined_perm.iterator();
+
+                            String permissionname = declined_perm.toString().replace("[","");
+                            permissionname = permissionname.replace("]","");
+
+                            while (iterator.hasNext())
+                            {
+                                String perm_name = iterator.next().toString();
+                                declined_permissions.add(perm_name);
+                            }
 
 
 //                        if (declined_perm.size() > 0)
@@ -560,58 +543,13 @@ public class Welcome extends Activity
 //                            retrieveFBMeData();
 //                        }
 
-                        if (declined_perm.size() > 0)
-                        {
+                            if (declined_perm.size() > 0)
+                            {
 
 
-                            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
-                            alertDialogBuilder
-                                    .setMessage("You have declined some permissions without those permissions you can't proceed to registration process "+permissionname)
-                                    .setCancelable(false)
-                                    .setNegativeButton("Don't Allow", null)
-                                    .setPositiveButton("Allow",
-                                            new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int id) {
-                                                    askForDeclinedFBPermissions(declined_permissions);
-                                                }
-                                            });
-                            alertDialogBuilder.show();
-                        }
-                        else
-                        {
-                            retrieveFBMeData();
-                        }
-
-
-                    }
-
-                    @Override
-                    public void onCancel()
-                    {
-                        Log.e("Login onCancel", "Yes");
-                        //GenerikFunctions.showToast(cont,"Please provide permissions for app login");
-
-                        if(AccessToken.getCurrentAccessToken() != null) {
-                            token = AccessToken.getCurrentAccessToken();
-                            Set<String> given_perm = token.getPermissions();
-                            iterator = given_perm.iterator();
-
-                            final ArrayList<String> declined_permissions = new ArrayList<String>();
-                            Set<String> declined_perm = token.getDeclinedPermissions();
-                            iterator = declined_perm.iterator();
-                            String permissionname = declined_perm.toString().replace("[", "");
-                            permissionname = permissionname.replace("]", "");
-
-                            while (iterator.hasNext()) {
-                                String perm_name = iterator.next().toString();
-                                //Log.e("declined_permission in: ", perm_name + " ");
-                                declined_permissions.add(perm_name);
-                            }
-
-                            if (declined_perm.size() > 0) {
                                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
                                 alertDialogBuilder
-                                        .setMessage("You have declined some permissions without those permissions you can't proceed to registration process " + permissionname)
+                                        .setMessage("You have declined some permissions without those permissions you can't proceed to registration process "+permissionname)
                                         .setCancelable(false)
                                         .setNegativeButton("Don't Allow", null)
                                         .setPositiveButton("Allow",
@@ -621,73 +559,89 @@ public class Welcome extends Activity
                                                     }
                                                 });
                                 alertDialogBuilder.show();
-                            } else {
+                            }
+                            else
+                            {
                                 retrieveFBMeData();
                             }
 
 
                         }
-                        else
+
+                        @Override
+                        public void onCancel()
                         {
-                            GenerikFunctions.showToast(cont, "FB Login failed");
+                            Log.e("Login onCancel", "Yes");
+                            //GenerikFunctions.showToast(cont,"Please provide permissions for app login");
 
-                        }
+                            if(AccessToken.getCurrentAccessToken() != null) {
+                                token = AccessToken.getCurrentAccessToken();
+                                Set<String> given_perm = token.getPermissions();
+                                iterator = given_perm.iterator();
 
-                        if(wl_pd != null){
-                            if (wl_pd.isShowing()) {
-                                wl_pd.dismiss();
-                            }
-                        }
-                    }
+                                final ArrayList<String> declined_permissions = new ArrayList<String>();
+                                Set<String> declined_perm = token.getDeclinedPermissions();
+                                iterator = declined_perm.iterator();
+                                String permissionname = declined_perm.toString().replace("[", "");
+                                permissionname = permissionname.replace("]", "");
 
-                    @Override
-                    public void onError(FacebookException error)
-                    {
-                        error.printStackTrace();
-                        Log.e("Login error", "error" + error.getMessage());
-
-
-                        if (error instanceof FacebookAuthorizationException)
-                        {
-                            if (AccessToken.getCurrentAccessToken() != null)
-                            {
-                                LoginManager.getInstance().logOut();
-                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                editor.putString(m_config.Entered_User_Name, "");
-                                editor.putString(m_config.Entered_Email, "");
-                                editor.putString(m_config.Entered_Contact_No, "");
-                                editor.putString(m_config.TempEntered_User_Name, "");
-                                editor.putString(m_config.TempEntered_Email, "");
-                                editor.putString(m_config.TempEntered_Contact_No, "");
-                                editor.commit();
-                                startFBLoginScenario();
-                            }
-                            else
-                            {
-                                //Log.e(" error "," ---- "+error.getMessage());
-                                if(error.getMessage().equals("net::ERR_CONNECTION_CLOSED"))
-                                {
-                                    GenerikFunctions.showToast(cont, "FB is blocked on your server.");
-                                }else
-                                {
-                                    GenerikFunctions.showToast(cont, "FB Login failed");
+                                while (iterator.hasNext()) {
+                                    String perm_name = iterator.next().toString();
+                                    //Log.e("declined_permission in: ", perm_name + " ");
+                                    declined_permissions.add(perm_name);
                                 }
 
+                                if (declined_perm.size() > 0) {
+                                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
+                                    alertDialogBuilder
+                                            .setMessage("You have declined some permissions without those permissions you can't proceed to registration process " + permissionname)
+                                            .setCancelable(false)
+                                            .setNegativeButton("Don't Allow", null)
+                                            .setPositiveButton("Allow",
+                                                    new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int id) {
+                                                            askForDeclinedFBPermissions(declined_permissions);
+                                                        }
+                                                    });
+                                    alertDialogBuilder.show();
+                                } else {
+                                    retrieveFBMeData();
+                                }
+
+                                if (wl_pd.isShowing()) {
+                                    wl_pd.dismiss();
+                                }
                             }
                         }
-                        else
+
+                        @Override
+                        public void onError(FacebookException error)
                         {
+                            error.printStackTrace();
+                            Log.e("Login error", "error" + error.toString());
 
-                            GenerikFunctions.showToast(cont, "FB Login failed");
-
+                            if(wl_pd.isShowing())
+                            {
+                                wl_pd.dismiss();
+                            }
+                            if (error instanceof FacebookAuthorizationException)
+                            {
+                                if (AccessToken.getCurrentAccessToken() != null)
+                                {
+                                    LoginManager.getInstance().logOut();
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putString(m_config.Entered_User_Name, "");
+                                    editor.putString(m_config.Entered_Email, "");
+                                    editor.putString(m_config.Entered_Contact_No, "");
+                                    editor.putString(m_config.TempEntered_User_Name, "");
+                                    editor.putString(m_config.TempEntered_Email, "");
+                                    editor.putString(m_config.TempEntered_Contact_No, "");
+                                    editor.commit();
+                                    startFBLoginScenario();
+                                }
+                            }
                         }
-
-                        if(wl_pd.isShowing())
-                        {
-                            wl_pd.dismiss();
-                        }
-                    }
-                });
+                    });
 
             Log.e("After ","After");
         }
@@ -750,7 +704,7 @@ public class Welcome extends Activity
         }
         else
         {
-           // processLogin();
+            // processLogin();
         }
     }
 
@@ -758,17 +712,15 @@ public class Welcome extends Activity
     //Get user data from FB
     public void retrieveFBMeData()
     {
-        Log.e("token"," "+token);
-
         GraphRequest request1 = GraphRequest.newMeRequest(token,
                 new GraphRequest.GraphJSONObjectCallback()
                 {
                     @Override
                     public void onCompleted(JSONObject object, GraphResponse response)
                     {
-                            wl_pd.setMessage("Loading Data...");
-                            wl_pd.setCancelable(false);
-                            wl_pd.show();
+                        wl_pd.setMessage("Loading Data...");
+                        wl_pd.setCancelable(false);
+                        wl_pd.show();
 
 
                         String emptyFields="";
@@ -839,7 +791,7 @@ public class Welcome extends Activity
                             fbHomelocationInformation = new FbHomelocationInformation();
                             if(fbHomelocationInformation.equals(fbUserInformation.getFbHomelocationInformation()))
                             {
-                               // Log.e("Both Home Location ","Is Empty");
+                                // Log.e("Both Home Location ","Is Empty");
                             }
                             else
                             {
@@ -865,7 +817,7 @@ public class Welcome extends Activity
                             fbProfilePictureData=fbUserInformation.getFbProfilePictureData();
                         }
 
-                      //  Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
+                        //  Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
 
 
                         if(emptyFields.equals(""))
@@ -1081,8 +1033,8 @@ public class Welcome extends Activity
                 sqldb.execSQL(updateUser);
 
 
-                String li_userprofile_pic = "";
-                if(user.getLKProfilePicUrl() == null || user.getLKProfilePicUrl().equals(null) || user.getLKProfilePicUrl().toString() == null ||  user.getLKProfilePicUrl().toString().equals(null) || user.getLKProfilePicUrl().toString().equals("N/A"))
+                String li_userprofile_pic = user.getLKProfilePicUrl().toString();
+                if(user.getLKProfilePicUrl().toString() == null || user.getLKProfilePicUrl().toString().equals(null) || user.getLKProfilePicUrl().toString().equals("N/A"))
                 {
                     li_userprofile_pic = "N/A";
                 }
@@ -1091,8 +1043,8 @@ public class Welcome extends Activity
                     li_userprofile_pic = user.getLKProfilePicUrl().toString();
                 }
 
-                String li_user_headline = "";
-                if(user.getLKHeadLine() == null || user.getLKHeadLine().equals(null) || user.getLKHeadLine().toString() == null || user.getLKHeadLine().toString().equals(null) || user.getLKHeadLine().toString().equals("N/A"))
+                String li_user_headline = user.getLKHeadLine().toString();
+                if(user.getLKHeadLine().toString() == null || user.getLKHeadLine().toString().equals(null) || user.getLKHeadLine().toString().equals("N/A"))
                 {
                     li_user_headline = "N/A";
                 }
@@ -1100,7 +1052,6 @@ public class Welcome extends Activity
                 {
                     li_user_headline = user.getLKHeadLine().toString();
                 }
-
 
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                         + LoginTableColumns.LI_USER_ID  + " = '" + user.getLinkedInID() + "', "
@@ -1210,8 +1161,8 @@ public class Welcome extends Activity
             sqldb.execSQL(updateUser);
 
 
-            String li_userprofile_pic = "";
-            if(user.getLKProfilePicUrl() == null || user.getLKProfilePicUrl().equals(null) || user.getLKProfilePicUrl().toString() == null ||  user.getLKProfilePicUrl().toString().equals(null) || user.getLKProfilePicUrl().toString().equals("N/A"))
+            String li_userprofile_pic = user.getLKProfilePicUrl().toString();
+            if(user.getLKProfilePicUrl().toString() == null || user.getLKProfilePicUrl().toString().equals(null) || user.getLKProfilePicUrl().toString().equals("N/A"))
             {
                 li_userprofile_pic = "N/A";
             }
@@ -1220,8 +1171,8 @@ public class Welcome extends Activity
                 li_userprofile_pic = user.getLKProfilePicUrl().toString();
             }
 
-            String li_user_headline = "";
-            if(user.getLKHeadLine() == null || user.getLKHeadLine().equals(null) || user.getLKHeadLine().toString() == null || user.getLKHeadLine().toString().equals(null) || user.getLKHeadLine().toString().equals("N/A"))
+            String li_user_headline = user.getLKHeadLine().toString();
+            if(user.getLKHeadLine().toString() == null || user.getLKHeadLine().toString().equals(null) || user.getLKHeadLine().toString().equals("N/A"))
             {
                 li_user_headline = "N/A";
             }
@@ -1332,14 +1283,23 @@ public class Welcome extends Activity
                         }
                     }
 
+
+
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString(m_config.TempEntered_User_Name, selUserData.getName());
                     editor.putString(m_config.TempEntered_Email, selUserData.getEmail());
                     editor.putString(m_config.TempEntered_Contact_No, selUserData.getPhoneNumber());
                     editor.commit();
 
+
                     Log.e("User registration status in AWS","No");
                     Toast.makeText(cont,"Your Registration Process is incomplete. Please Complete...",Toast.LENGTH_LONG).show();
+                    Intent i = new Intent(Welcomeworknew.this, Welcomeworknew.class);
+                    startActivity(i);
+                    finish();
+
+
+
                 }
             }
             else
@@ -1355,7 +1315,9 @@ public class Welcome extends Activity
                 Log.e("User not exists in AWS","No");
                 //If not exists then call  normal registration flow
                 Toast.makeText(cont,"Not a user. Please Register...",Toast.LENGTH_LONG).show();
-
+                Intent i = new Intent(Welcomeworknew.this, Welcomeworknew.class);
+                startActivity(i);
+                finish();
             }
         }
     }
@@ -1378,8 +1340,7 @@ public class Welcome extends Activity
                             Context.TELEPHONY_SERVICE);
                     SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(cont);
                     String regId = pref.getString(m_config.temp_regId,"");
-                    m_config.mTelephony = mTelephony;
-                    //new LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont).execute();
+                    new LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont).execute();
                 }
                 else
                 {
@@ -1391,7 +1352,7 @@ public class Welcome extends Activity
                     if(should)
                     {
                         //user denied without Never ask again, just show rationale explanation
-                        new android.app.AlertDialog.Builder(Welcome.this)
+                        new android.app.AlertDialog.Builder(Welcomeworknew.this)
                                 .setTitle("Permission Denied")
                                 .setMessage("Without this permission the app will be unable to receive Push Notifications.Are you sure you want to deny this permission?")
                                 .setPositiveButton("RE-TRY", new DialogInterface.OnClickListener()
@@ -1433,17 +1394,14 @@ public class Welcome extends Activity
     public void getDeviceIdAndroid(String regId, Activity context)
     {
 
-        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
 
         if ((int) Build.VERSION.SDK_INT < 23)
         {
             //this is a check for build version below 23
             mTelephony = (TelephonyManager) context.getSystemService(
                     Context.TELEPHONY_SERVICE);
-            Log.e("m_config", " "+m_config);
-            m_config.mTelephony = mTelephony;
 
-            //new LoginValidations.subscribeToPushNotifications(regId,mTelephony,context).execute();
+            new LoginValidations.subscribeToPushNotifications(regId,mTelephony,context).execute();
         }
         else
         {
@@ -1464,8 +1422,7 @@ public class Welcome extends Activity
             {
                 mTelephony = (TelephonyManager) context.getSystemService(
                         Context.TELEPHONY_SERVICE);
-                m_config.mTelephony = mTelephony;
-                //new LoginValidations.subscribeToPushNotifications(regId,mTelephony, context).execute();
+                new LoginValidations.subscribeToPushNotifications(regId,mTelephony, context).execute();
                 Log.e("If Permission is granted","");
             }
         }
@@ -1510,7 +1467,7 @@ public class Welcome extends Activity
             String GCFBID = getIntent().getExtras().getString("GCFBID");
             String message = getIntent().getExtras().getString("message");
 
-            Intent i = new Intent(Welcome.this, RequestantActivity.class);
+            Intent i = new Intent(Welcomeworknew.this, RequestantActivity.class);
             PartyParceableData party1 = new PartyParceableData();
             party1.setPartyId(PartyId);
             party1.setPartyName(PartyName);
@@ -1537,7 +1494,7 @@ public class Welcome extends Activity
         }
         else if(from.equals("chatoffline"))
         {
-            Intent i = new Intent(Welcome.this, DialogsActivity.class);
+            Intent i = new Intent(Welcomeworknew.this, DialogsActivity.class);
             startActivity(i);
 
             if(wl_pd!=null)
@@ -1552,7 +1509,7 @@ public class Welcome extends Activity
         {
             String GCFBID = getIntent().getExtras().getString("GCFBID");
             String message = getIntent().getExtras().getString("message");
-            Intent i = new Intent(Welcome.this, HistoryActivity.class);
+            Intent i = new Intent(Welcomeworknew.this, HistoryActivity.class);
             i.putExtra("GCFBID", GCFBID);
             i.putExtra("from", "requestApproved");
             i.putExtra("message", message);
@@ -1571,7 +1528,7 @@ public class Welcome extends Activity
         {
             String GCFBID = getIntent().getExtras().getString("GCFBID");
             String message = getIntent().getExtras().getString("message");
-            Intent i = new Intent(Welcome.this, HistoryActivity.class);
+            Intent i = new Intent(Welcomeworknew.this, HistoryActivity.class);
             i.putExtra("GCFBID", GCFBID);
             i.putExtra("from", "requestDeclined");
             i.putExtra("message", message);

@@ -1,6 +1,5 @@
 package com.aperotechnologies.aftrparties.QuickBloxOperations;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,14 +12,13 @@ import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations;
 import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
-import com.aperotechnologies.aftrparties.TransparentActivity;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBGroupChatManager;
 import com.quickblox.chat.QBPrivateChatManager;
 import com.quickblox.chat.model.QBDialog;
-import com.quickblox.chat.model.QBDialogCustomData;
 import com.quickblox.chat.model.QBDialogType;
 import com.quickblox.chat.request.QBDialogRequestBuilder;
 import com.quickblox.core.QBEntityCallback;
@@ -37,8 +35,9 @@ import java.util.List;
  */
 public class QBChatDialogCreation {
 
+    static QBDialog dialogs;
 
-    public static void createPrivateChat(final Integer occupantId, final Context cont){
+    public static void createPrivateChat(final Integer occupantId, final Context cont, final Long subscriptiondate, final String oppfbid, final String msg){
 
         final QBPrivateChatManager privateChatManager = QBChatService.getInstance().getPrivateChatManager();
 
@@ -49,49 +48,9 @@ public class QBChatDialogCreation {
 
                 QBPushNotifications.sendPeerChatNotification(cont, occupantId);
 
-                List<Integer> usersIDs = new ArrayList<Integer>();
-                for(Integer dialog : dialogs.getOccupants()){
+                new AWSPaymentOperations.storePrivateChat(cont, subscriptiondate , dialogs.getDialogId(), oppfbid, dialogs,msg).execute();
 
-                    Log.e("Dialog Occupants "," "+dialogs.getOccupants());
-                    usersIDs.add(dialog);
-                }
-
-                // Get all occupants info
-                //
-                QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder();
-                requestBuilder.setPage(1);
-                requestBuilder.setPerPage(usersIDs.size());
-                //
-                QBUsers.getUsersByIDs(usersIDs, requestBuilder, new QBEntityCallback<ArrayList<QBUser>>() {
-                    @Override
-                    public void onSuccess(ArrayList<QBUser> users, Bundle params) {
-
-                        Log.e(":ChatService users"," "+users);
-                        ChatService.getInstance().setDialogsUsers(users);
-
-
-                        Bundle bundle = new Bundle();
-                        bundle.putSerializable(ConstsCore.EXTRA_DIALOG, dialogs);
-                        Intent i = new Intent(cont,ChatActivity.class);
-                        i.putExtras(bundle);
-                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        cont.startActivity(i);
-                        GenerikFunctions.hDialog();
-                        GenerikFunctions.showToast(cont, "1-1 Chat Created Successfully.");
-
-                    }
-
-                    @Override
-                    public void onError(QBResponseException e) {
-
-                        GenerikFunctions.hDialog();
-                        GenerikFunctions.showToast(cont, "1-1 Chat Created Successfully.");
-                        e.printStackTrace();
-                    }
-
-
-
-                });
+//
             }
 
             @Override
@@ -106,6 +65,8 @@ public class QBChatDialogCreation {
 
         });
     }
+
+
 
 
     public static void createGroupChat(final String PartyName, String PartyImage, final String GCQBID, final String GCFBID, final String PartyID, final Context cont, final String PartyEndTime)
@@ -194,10 +155,10 @@ public class QBChatDialogCreation {
 
 
 
-    public static void deleteGroupDialog(String DialogId)
+    public static void deletePrivateDialog(Context cont, final String DialogId, final String facebookid, final String oppfbid)
     {
 
-        QBGroupChatManager groupChatManager = QBChatService.getInstance().getGroupChatManager();
+        QBPrivateChatManager groupChatManager = QBChatService.getInstance().getPrivateChatManager();
         groupChatManager.deleteDialog(DialogId, true, new QBEntityCallback<Void>()
         {
 
@@ -205,8 +166,7 @@ public class QBChatDialogCreation {
             public void onSuccess(Void aVoid, Bundle bundle)
             {
                 Log.e("Onsuccess","delete Dialog ");
-
-
+                AWSPaymentOperations.deletePrivateChatData(facebookid, oppfbid);
 
             }
 
@@ -218,6 +178,52 @@ public class QBChatDialogCreation {
             }
         });
     }
+
+    public static void openPChat(final Context cont, final QBDialog dialogs){
+        List<Integer> usersIDs = new ArrayList<Integer>();
+
+
+        for(Integer dialog : dialogs.getOccupants()){
+
+            Log.e("Dialog Occupants "," "+ dialogs.getOccupants());
+            usersIDs.add(dialog);
+        }
+
+        // Get all occupants info
+        //
+        QBPagedRequestBuilder requestBuilder = new QBPagedRequestBuilder();
+        requestBuilder.setPage(1);
+        requestBuilder.setPerPage(usersIDs.size());
+        //
+        QBUsers.getUsersByIDs(usersIDs, requestBuilder, new QBEntityCallback<ArrayList<QBUser>>() {
+            @Override
+            public void onSuccess(ArrayList<QBUser> users, Bundle params) {
+
+                Log.e(":ChatService users"," "+users);
+                ChatService.getInstance().setDialogsUsers(users);
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(ConstsCore.EXTRA_DIALOG, dialogs);
+                Intent i = new Intent(cont,ChatActivity.class);
+                i.putExtras(bundle);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                cont.startActivity(i);
+
+
+            }
+
+            @Override
+            public void onError(QBResponseException e) {
+
+
+            }
+
+
+
+        });
+    }
+
+
 
 
 }

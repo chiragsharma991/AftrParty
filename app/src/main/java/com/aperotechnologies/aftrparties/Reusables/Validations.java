@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -495,5 +497,7 @@ public class Validations {
         Log.e("escapeXml"," "+s.contains("&amp;")+" "+s);
         return s.replaceAll("&amp;","&").replaceAll("&gt;", ">").replaceAll("&lt;", "<").replaceAll("&quot;", "\"").replaceAll("&apos;", "'").replaceAll("&euro;","€");
     }
+
+
 
 }

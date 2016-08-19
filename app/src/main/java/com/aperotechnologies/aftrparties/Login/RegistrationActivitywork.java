@@ -18,7 +18,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -36,24 +35,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
-import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSLoginOperations;
-
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
-import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
-//import com.aperotechnologies.aftrparties.MyLifecycleHandler;
-import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
@@ -61,7 +46,6 @@ import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.model.FBCurrentLocationInformation;
 import com.aperotechnologies.aftrparties.model.FbHomelocationInformation;
-
 import com.aperotechnologies.aftrparties.model.FbProfilePictureData;
 import com.aperotechnologies.aftrparties.model.FbUserInformation;
 import com.aperotechnologies.aftrparties.model.LIPictureData;
@@ -87,24 +71,21 @@ import com.linkedin.platform.listeners.ApiListener;
 import com.linkedin.platform.listeners.ApiResponse;
 import com.linkedin.platform.listeners.AuthListener;
 import com.linkedin.platform.utils.Scope;
-import com.quickblox.core.QBSettings;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
-import de.keyboardsurfer.android.widget.crouton.Style;
 
 import static com.aperotechnologies.aftrparties.Login.LoginTableColumns.FB_USER_ID;
+
+//import com.aperotechnologies.aftrparties.MyLifecycleHandler;
 
 
 /**
@@ -115,13 +96,13 @@ import static com.aperotechnologies.aftrparties.Login.LoginTableColumns.FB_USER_
 /*LinkedIn App
 Client ID: 752m6fkgel868f
 Client Secret: yxNWdXkj0iZwG3wq*/
-public class RegistrationActivity extends Activity
+public class RegistrationActivitywork extends Activity
 {
     //Harshada
     private static final String TAG = "LoginActivity";
 
     //Meghana
-    static Button btn_register;
+    static Button btn_login;
     CallbackManager callbackManager;
     LoginManager loginManager;
     ArrayList<String> permissions;
@@ -187,7 +168,7 @@ public class RegistrationActivity extends Activity
         edt_usr_name = (EditText) findViewById(R.id.edt_usr_name);
         edt_usr_email = (EditText) findViewById(R.id.edt_usr_email);
         edt_usr_phone = (EditText) findViewById(R.id.edt_usr_phone);
-        btn_register = (Button) findViewById(R.id.btn_login);
+        btn_login = (Button) findViewById(R.id.btn_login);
         layout_parent_login = (RelativeLayout) findViewById(R.id.layout_parent_login);
 
         //FB Variables
@@ -216,7 +197,7 @@ public class RegistrationActivity extends Activity
             }
         });
 
-        btn_register.setOnClickListener(new View.OnClickListener()
+        btn_login.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
@@ -272,7 +253,7 @@ public class RegistrationActivity extends Activity
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if ((event != null && (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE) || (actionId == EditorInfo.IME_ACTION_NEXT) || (actionId == EditorInfo.IME_ACTION_NONE)) {
                     edt_usr_phone.clearFocus();
-                    btn_register.performClick();
+                    btn_login.performClick();
                     handled = true;
                 }
                 return handled;
@@ -308,36 +289,34 @@ public class RegistrationActivity extends Activity
                     }
                 }
 
-                GenerikFunctions.showToast(cont, "Linked In Login Failed");
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
+                alertDialogBuilder
+                        .setMessage("You have declined permissions without those permissions you can't proceed to registration process ")
+                        .setCancelable(false)
+                        .setNegativeButton("Don't Allow", new DialogInterface.OnClickListener(){
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                dialog.cancel();
+                            }
+                        })
 
-//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
-//                alertDialogBuilder
-//                        .setMessage("You have declined permissions without those permissions you can't proceed to registration process ")
-//                        .setCancelable(false)
-//                        .setNegativeButton("Don't Allow", new DialogInterface.OnClickListener(){
-//                            @Override
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                dialog.dismiss();
-//                                dialog.cancel();
-//                            }
-//                        })
-//
-//                        .setPositiveButton("Allow",
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialog, int id) {
-//                                        if (GenerikFunctions.chkStatus(cont))
-//                                        {
-//                                            btn_register.performClick();
-//                                        }
-//                                        else
-//                                        {
-//                                            GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
-//                                        }
-//                                        dialog.dismiss();
-//                                        dialog.cancel();
-//                                    }
-//                                });
-//                alertDialogBuilder.show();
+                        .setPositiveButton("Allow",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        if (GenerikFunctions.chkStatus(cont))
+                                        {
+                                            btn_login.performClick();
+                                        }
+                                        else
+                                        {
+                                            GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                                        }
+                                        dialog.dismiss();
+                                        dialog.cancel();
+                                    }
+                                });
+                alertDialogBuilder.show();
 
             }
             else
@@ -533,7 +512,7 @@ public class RegistrationActivity extends Activity
             inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         }
         finish();
-        Intent i = new Intent(RegistrationActivity.this, Welcome.class);
+        Intent i = new Intent(RegistrationActivitywork.this, Welcome.class);
         i.putExtra("from","registration");
         startActivity(i);
     }
@@ -655,7 +634,8 @@ public class RegistrationActivity extends Activity
     {
         try
         {
-            loginManager.logInWithReadPermissions(RegistrationActivity.this, permissions);
+            loginManager.logInWithReadPermissions(RegistrationActivitywork.this, permissions);
+
             FacebookDataRetieval();
         }
         catch (Exception e)
@@ -669,7 +649,7 @@ public class RegistrationActivity extends Activity
     public void askForDeclinedFBPermissions(ArrayList<String> declined_perm)
     {
 
-        loginManager.logInWithReadPermissions(RegistrationActivity.this, declined_perm);
+        loginManager.logInWithReadPermissions(RegistrationActivitywork.this, declined_perm);
         FacebookDataRetieval();
     }
 
@@ -776,9 +756,6 @@ public class RegistrationActivity extends Activity
                         } else {
                             retrieveFBMeData();
                         }
-                    }else
-                    {
-                        GenerikFunctions.showToast(cont, "FB Login failed");
                     }
                 }
 
@@ -786,7 +763,7 @@ public class RegistrationActivity extends Activity
                 public void onError(FacebookException error)
                 {
                     error.printStackTrace();
-                    //Log.e("Login error", "error" + error.toString());
+                    Log.e("Login error", "error" + error.toString());
 
                     if (error instanceof FacebookAuthorizationException)
                     {
@@ -804,24 +781,6 @@ public class RegistrationActivity extends Activity
 
                          //   startFBLoginScenario();
                         }
-
-                        else
-                        {
-                            //Log.e(" error "," ---- "+error.getMessage());
-                            if(error.getMessage().equals("net::ERR_CONNECTION_CLOSED"))
-                            {
-                                GenerikFunctions.showToast(cont, "FB is blocked on your server.");
-                            }else
-                            {
-                                GenerikFunctions.showToast(cont, "FB Login failed");
-                            }
-
-                        }
-                    }
-                    else
-                    {
-
-                        GenerikFunctions.showToast(cont, "FB Login failed");
                     }
                 }
             });
@@ -894,7 +853,7 @@ public class RegistrationActivity extends Activity
                     public void onCompleted(JSONObject object, GraphResponse response)
                     {
 
-                        Log.e("Inside retrieveMeFbData","Yes");
+                        Log.e("Inside requestMeFbData","Yes");
 
                         if(reg_pd != null){
                             reg_pd.setMessage("Loading Data...");
@@ -903,13 +862,20 @@ public class RegistrationActivity extends Activity
                         }
 
                         String emptyFields="";
-                        //Log.e("object ", " "+object.toString());
+
+                        Log.e("object ", " "+object.toString());
 
                         // Application code
+
                         fbUserInformation = gson.fromJson(object.toString(), FbUserInformation.class);
                         Log.e("fb object"," "+response.toString());
+
+                        Log.e("User FB Information --->","Information");
                         Log.e("getFbId Id: " , fbUserInformation.getFbId());
-                        Log.e("getAgeRange: " ,""+fbUserInformation.getAgerange());
+//                      Log.e("getGender: " , fbUserInformation.getGender());
+//                      Log.e("getFbUserName: " , fbUserInformation.getFbUserName());
+//                      Log.e("getEmail: " ,fbUserInformation.getEmail());
+                       Log.e("getAgeRange: " ,""+fbUserInformation.getAgerange());
 
 
 //                        if(fbUserInformation.getBirthday().equals(null))
@@ -1028,24 +994,6 @@ public class RegistrationActivity extends Activity
                                 sqldb.execSQL(updateUser);
 
                                 loggedInUserInfo = new LoggedInUserInformation();
-                                String updateProfilePic = "No";
-                                try{
-                                    UserTable user = m_config.mapper.load(UserTable.class,fbUserInformation.getFbId());
-                                    if(user != null){
-                                        if(user.getImageflag().equals("No"))
-                                        {
-                                            updateProfilePic = "Yes";
-                                        }
-                                        else {
-                                            updateProfilePic = "No";
-                                        }
-                                    }
-                                }
-                                catch (Exception e){
-
-                                }
-
-
 
                                 loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
                                 loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
@@ -1059,16 +1007,6 @@ public class RegistrationActivity extends Activity
                                 loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
                                 loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
 
-                                if(updateProfilePic.equals("Yes"))
-                                {
-                                    loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
-                                    String Update = "Update " + LoginTableColumns.USERTABLE + " set "
-                                            + LoginTableColumns.FB_USER_PROFILE_PIC  + " = '" + loggedInUserInfo.getFB_USER_PROFILE_PIC() + "'"
-                                            + " where " + LoginTableColumns.FB_USER_ID + " = '" + loggedInUserInfo.getFB_USER_ID() + "'";
-
-                                    Log.i("update User  "+ LoginTableColumns.FB_USER_ID , Update);
-                                    sqldb.execSQL(Update);
-                                }
                                 getFbFriendsCount();
                             }
 
@@ -1231,7 +1169,7 @@ public class RegistrationActivity extends Activity
                 {
                     //Registration is already done
                     GenerikFunctions.showToast(cont," You are an existing user. Please Login...");
-                    Intent i = new Intent(RegistrationActivity.this, Welcome.class);
+                    Intent i = new Intent(RegistrationActivitywork.this, Welcome.class);
                     i.putExtra("from","registration");
                     startActivity(i);
 
@@ -1300,10 +1238,10 @@ public class RegistrationActivity extends Activity
 
                 if(error.toString().trim().contains("USER_CANCELLED"))
                 {
-                    if(RegistrationActivity.reg_pd != null)
+                    if(RegistrationActivitywork.reg_pd != null)
                     {
-                        if (RegistrationActivity.reg_pd.isShowing()) {
-                            RegistrationActivity.reg_pd.dismiss();
+                        if (RegistrationActivitywork.reg_pd.isShowing()) {
+                            RegistrationActivitywork.reg_pd.dismiss();
                         }
                     }
                     //GenerikFunctions.showToast(cont, "Please accept permissions " );
@@ -1315,11 +1253,11 @@ public class RegistrationActivity extends Activity
                 {
                     GenerikFunctions.showToast(cont, "Linked In Login failed.");
 
-                    if(RegistrationActivity.reg_pd != null)
+                    if(RegistrationActivitywork.reg_pd != null)
                     {
-                        if (RegistrationActivity.reg_pd.isShowing())
+                        if (RegistrationActivitywork.reg_pd.isShowing())
                         {
-                            RegistrationActivity.reg_pd.dismiss();
+                            RegistrationActivitywork.reg_pd.dismiss();
                         }
                     }
                     Log.e("Inside Else","Yes");
@@ -1337,9 +1275,8 @@ public class RegistrationActivity extends Activity
             //this is a check for build version below 23
             mTelephony = (TelephonyManager) context.getSystemService(
                     Context.TELEPHONY_SERVICE);
-            m_config.mTelephony = mTelephony;
 
-            //new LoginValidations.subscribeToPushNotifications(regId,mTelephony,context).execute();
+            new LoginValidations.subscribeToPushNotifications(regId,mTelephony,context).execute();
         }
         else
         {
@@ -1360,9 +1297,7 @@ public class RegistrationActivity extends Activity
             {
                 mTelephony = (TelephonyManager) context.getSystemService(
                         Context.TELEPHONY_SERVICE);
-
-                m_config.mTelephony = mTelephony;
-                //new LoginValidations.subscribeToPushNotifications(regId,mTelephony, context).execute();
+                new LoginValidations.subscribeToPushNotifications(regId,mTelephony, context).execute();
                 Log.e("If Permission is granted","");
             }
 
@@ -1387,8 +1322,7 @@ public class RegistrationActivity extends Activity
                             Context.TELEPHONY_SERVICE);
                     SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(cont);
                     String regId = pref.getString(m_config.temp_regId,"");
-                    m_config.mTelephony = mTelephony;
-                    //new LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont).execute();
+                    new LoginValidations.subscribeToPushNotifications(regId, mTelephony, (Activity) cont).execute();
                 }
                 else
                 {
@@ -1400,7 +1334,7 @@ public class RegistrationActivity extends Activity
                     if(should)
                     {
                         //user denied without Never ask again, just show rationale explanation
-                        new android.app.AlertDialog.Builder(RegistrationActivity.this)
+                        new android.app.AlertDialog.Builder(RegistrationActivitywork.this)
                                 .setTitle("Permission Denied")
                                 .setMessage("Without this permission the app will be unable to receive Push Notifications.Are you sure you want to deny this permission?")
                                 .setPositiveButton("RE-TRY", new DialogInterface.OnClickListener()
@@ -1421,7 +1355,7 @@ public class RegistrationActivity extends Activity
                                     {
                                         // do nothing
                                         Log.e("Click of I m sure",", permission request is denied");
-                                        //LoginValidations.checkPendingLoginFlags(cont);
+                                        LoginValidations.checkPendingLoginFlags(cont);
                                     }
                                 })
                                 .show();
@@ -1430,7 +1364,7 @@ public class RegistrationActivity extends Activity
                     {
                         //user has denied with `Never Ask Again`
                         Log.e("Click of Never ask again",", permission request is denied");
-                        //LoginValidations.checkPendingLoginFlags(cont);
+                        LoginValidations.checkPendingLoginFlags(cont);
                     }
                 }
                 break;

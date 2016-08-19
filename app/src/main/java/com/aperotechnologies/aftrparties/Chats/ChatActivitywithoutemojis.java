@@ -1,6 +1,19 @@
 package com.aperotechnologies.aftrparties.Chats;
 
 import android.app.Activity;
+import android.os.Bundle;
+
+public class ChatActivitywithoutemojis extends Activity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+}
+
+/*package com.aperotechnologies.aftrparties.Chats;
+
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -43,7 +56,7 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 
 
 public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefreshListener {
-    
+
     private static final String TAG = ChatActivity.class.getSimpleName();
     Configuration_Parameter m_config;
     SharedPreferences sharedpreferences;
@@ -234,25 +247,19 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
 //            if (dialog.getType() == QBDialogType.PRIVATE) {
 //                QBPushNotifications.sendPrivateChatmessagePN(ChatActivity.this, opponentID, currentUser.getFullName(), dialog.getDialogId(), edt_message.getText().toString().replaceAll("\\s+", " ").trim());
 //            }
-            edt_message.setText("");
+
 
         } catch (XMPPException e) {
             Log.e(TAG, "failed to send a message", e);
             GenerikFunctions.showToast(ChatActivity.this,"Failed to send a message");
 
-
-
         } catch (SmackException sme) {
             Log.e(TAG, "failed to send a message", sme);
             GenerikFunctions.showToast(ChatActivity.this,"Can't send a message, You are not connected to chat");
 
-
-        }
-        catch (IllegalStateException e) {
-            Log.e("", "You are still joining a group chat, please wait a bit");
-            GenerikFunctions.showToast(ChatActivity.this, "You are still joining a group chat, please wait a bit");
         }
 
+        edt_message.setText("");
 
         if (dialog.getType() == QBDialogType.PRIVATE) {
 
@@ -331,6 +338,8 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
                 if(messages.size() > 0)
                 {
 
+
+
                     for (int i = 0; i < messages.size(); i++)
                     {
 
@@ -349,9 +358,11 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
                     if(check == "loading page")
                     {
                         scrollDown();
+
                     }
                     else
                     {
+
                         listView.setSelection(selVal - 1);
                     }
 
@@ -501,4 +512,6 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
     }
 
 }
+
+*/
 

@@ -44,65 +44,204 @@ public class RatingsAlarmReceiver extends BroadcastReceiver{
         Bundle extras = intent.getExtras();
         String from = extras.getString("from");
 
-
         Boolean isApplicationForeGround = BaseLifeCycleCallbacks.applicationStatus();
 
-        String PartyID = extras.getString("PartyId");
-        String PartyName = extras.getString("PartyName");
-        String DialogId = extras.getString("DialogId");
-        Log.e("PartyName", " " + PartyName + " PartyID" + " " + PartyID );
 
         //Notification for PartyRetention
-        if (isApplicationForeGround == true)
+        if(from.equals("partyretention")) {
+
+            String PartyID = extras.getString("PartyId");
+            String PartyName = extras.getString("PartyName");
+            String DialogId = extras.getString("DialogId");
+            Log.e("PartyName", " " + PartyName + " PartyID" + " " + PartyID);
+
+            if (isApplicationForeGround == true) {
+
+                if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
+                    Intent i = new Intent(cont, Welcome.class);
+                    i.putExtra("DialogId", DialogId);
+                    i.putExtra("PartyId", PartyID);
+                    i.putExtra("PartyName", PartyName);
+                    i.putExtra("from", "PartyRetention");
+                    CreateNotification(i, "hello", cont);
+                } else {
+                    Intent i = new Intent(context, TransparentActivity.class);
+                    i.putExtra("DialogId", DialogId);
+                    i.putExtra("PartyId", PartyID);
+                    i.putExtra("PartyName", PartyName);
+                    i.putExtra("from", "PartyRetention");
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(i);
+                }
+
+
+            } else {
+                if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
+                    Intent i = new Intent(cont, Welcome.class);
+                    i.putExtra("DialogId", DialogId);
+                    i.putExtra("PartyId", PartyID);
+                    i.putExtra("PartyName", PartyName);
+                    i.putExtra("from", "PartyRetention");
+                    CreateNotification(i, "hello", cont);
+                } else {
+
+                    Intent i = new Intent(cont, HomePageActivity.class);
+                    i.putExtra("DialogId", DialogId);
+                    i.putExtra("PartyId", PartyID);
+                    i.putExtra("PartyName", PartyName);
+                    i.putExtra("from", "PartyRetention");
+                    CreateNotification(i, "hello", cont);
+
+                }
+
+            }
+        }
+        else if(from.equals("privatechatsubs")) {
+
+            String subscriptiondate = extras.getString("subscriptiondate");
+            String dialogId = extras.getString("dialogId");
+            String oppFbId = extras.getString("oppFbId");
+            String loginUserFbId = extras.getString("loginUserFbId");
+
+            Log.e("loginUserFbId", " " + loginUserFbId + " oppFbId" + " " + oppFbId);
+
+
+            if (isApplicationForeGround == true) {
+
+                if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
+                    Intent i = new Intent(cont, Welcome.class);
+                    i.putExtra("dialogId", dialogId);
+                    i.putExtra("oppFbId", oppFbId);
+                    i.putExtra("loginUserFbId", loginUserFbId);
+                    i.putExtra("from", "privatechatsubs");
+                    CreateNotification(i, "hello", cont);
+                } else {
+                    Intent i = new Intent(context, TransparentActivity.class);
+                    i.putExtra("dialogId", dialogId);
+                    i.putExtra("oppFbId", oppFbId);
+                    i.putExtra("loginUserFbId", loginUserFbId);
+                    i.putExtra("from", "privatechatsubs");
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(i);
+                }
+
+
+            } else {
+                if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
+                    Intent i = new Intent(cont, Welcome.class);
+                    i.putExtra("dialogId", dialogId);
+                    i.putExtra("oppFbId", oppFbId);
+                    i.putExtra("loginUserFbId", loginUserFbId);
+                    i.putExtra("from", "privatechatsubs");
+                    CreateNotification(i, "hello", cont);
+                } else {
+
+                    Intent i = new Intent(cont, HomePageActivity.class);
+                    i.putExtra("dialogId", dialogId);
+                    i.putExtra("oppFbId", oppFbId);
+                    i.putExtra("loginUserFbId", loginUserFbId);
+                    i.putExtra("from", "privatechatsubs");
+                    CreateNotification(i, "hello", cont);
+
+                }
+
+            }
+        }
+
+        else if(from.equals("partymaskstatus"))
         {
 
-            if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null)
-            {
-                Intent i = new Intent(cont, Welcome.class);
-                i.putExtra("DialogId", DialogId);
-                i.putExtra("PartyId",PartyID);
-                i.putExtra("PartyName", PartyName);
-                i.putExtra("from", "PartyRetention");
-                CreateNotification(i, "hello", cont);
+            String loginUserFbId = extras.getString("loginUserFbId");
+
+            Log.e("loginUserFbId", " " + loginUserFbId);
+
+
+            if (isApplicationForeGround == true) {
+
+                if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
+                    Intent i = new Intent(cont, Welcome.class);
+                    i.putExtra("loginUserFbId", loginUserFbId);
+                    i.putExtra("from", "partymaskstatus");
+                    CreateNotification(i, "hello", cont);
+                } else {
+                    Intent i = new Intent(context, TransparentActivity.class);
+                    i.putExtra("loginUserFbId", loginUserFbId);
+                    i.putExtra("from", "partymaskstatus");
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(i);
+                }
+
+
+            } else {
+                if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
+                    Intent i = new Intent(cont, Welcome.class);
+                    i.putExtra("loginUserFbId", loginUserFbId);
+                    i.putExtra("from", "partymaskstatus");
+                    CreateNotification(i, "hello", cont);
+                } else {
+
+                    Intent i = new Intent(cont, HomePageActivity.class);
+                    i.putExtra("loginUserFbId", loginUserFbId);
+                    i.putExtra("from", "partymaskstatus");
+                    CreateNotification(i, "hello", cont);
+
+                }
+
             }
-            else
-            {
-                Intent i = new Intent(context, TransparentActivity.class);
-                i.putExtra("DialogId", DialogId);
-                i.putExtra("PartyId",PartyID);
-                i.putExtra("PartyName", PartyName);
-                i.putExtra("from", "PartyRetention");
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(i);
+        }
+
+        else if(from.equals("gcmultipleparty"))
+        {
+
+            String subscriptiondate = extras.getString("subscriptiondate");
+            String loginUserFbId = extras.getString("loginUserFbId");
+
+            Log.e("loginUserFbId", " " + loginUserFbId);
+
+
+            if (isApplicationForeGround == true) {
+
+                if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
+                    Intent i = new Intent(cont, Welcome.class);
+                    i.putExtra("loginUserFbId",loginUserFbId);
+                    i.putExtra("from","gcmultipleparty");
+                    CreateNotification(i, "hello", cont);
+
+                } else {
+                    Intent i = new Intent(context, TransparentActivity.class);
+                    i.putExtra("loginUserFbId",loginUserFbId);
+                    i.putExtra("from","gcmultipleparty");
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(i);
+                }
+
+
+            } else {
+                if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
+                    Intent i = new Intent(cont, Welcome.class);
+
+                    i.putExtra("loginUserFbId",loginUserFbId);
+                    i.putExtra("from","gcmultipleparty");
+                    CreateNotification(i, "hello", cont);
+                } else {
+
+                    Intent i = new Intent(cont, HomePageActivity.class);
+                    i.putExtra("loginUserFbId",loginUserFbId);
+                    i.putExtra("from","gcmultipleparty");
+                    CreateNotification(i, "hello", cont);
+
+                }
+
             }
 
 
         }
-        else
-        {
-            if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null)
-            {
-                Intent i = new Intent(cont, Welcome.class);
-                i.putExtra("DialogId", DialogId);
-                i.putExtra("PartyId",PartyID);
-                i.putExtra("PartyName", PartyName);
-                i.putExtra("from", "PartyRetention");
-                CreateNotification(i, "hello", cont);
-            }
-            else
-            {
 
-                Intent i = new Intent(cont, HomePageActivity.class);
-                i.putExtra("DialogId", DialogId);
-                i.putExtra("PartyId",PartyID);
-                i.putExtra("PartyName", PartyName);
-                i.putExtra("from", "PartyRetention");
-                CreateNotification(i, "hello", cont);
-
-            }
-
-        }
-
+//        else if(from.equals("trial"))
+//        {
+//            Intent i = new Intent(cont, Welcome.class);
+//            CreateNotification(i, "hello", cont);
+//        }
 
     }
 

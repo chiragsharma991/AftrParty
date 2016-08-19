@@ -3,6 +3,7 @@ package com.aperotechnologies.aftrparties.Constants;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.telephony.TelephonyManager;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -39,6 +40,9 @@ public class Configuration_Parameter
     public String Entered_User_Name = "UserName";
     public String Entered_Email = "Email";
     public String Entered_Contact_No = "ContactNo";
+    public String TempEntered_User_Name = "username";
+    public String TempEntered_Email = "email";
+    public String TempEntered_Contact_No = "contactno";
     public String LoggedInFBUserID = "";
     public String FBLoginDone = "FBLoginDone";
     public String LILoginDone = "LILoginDone";
@@ -59,7 +63,7 @@ public class Configuration_Parameter
     public String QBLoginDone = "QBLoginDone";
     public String QuickBloxID = "QuickBloxId";
     public String REG_ID = "registration_id";
-    public String temp_regId = "registration_id";
+    public String temp_regId = "temp_registration_id";
     public String AWSUserDataDone = "No";
     public Context foregroundCont;
     //*//Cloudinary Variables
@@ -70,7 +74,13 @@ public class Configuration_Parameter
     //lastMessge variable is used for updating lastmessage of chat dialog while navigating from ChatActivity to DialogsActivity
     public String lastMessge = "";
     public String QbIdforInappPChat = "";//used for returning QuickbloxId from fragment to Activity for  In app purchase(1-1Chat)
+    public String DialogidforHostInappPChat = "";//used for returning DialogId from fragment to Activity for  In app purchase(1-1Chat)
+    public String DialogidforReqInappPChat = "";
+    public String FbIdforInappPChat = "";//used for returning DialogId from fragment to Activity for  In app purchase(1-1Chat)
     public static String peerchatDialogId = "dialogid ";
+    public static String masksubscriptionTime = "";
+
+    public TelephonyManager mTelephony;
 
     /**
      * Create private constructor

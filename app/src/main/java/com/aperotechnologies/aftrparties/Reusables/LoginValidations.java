@@ -598,8 +598,18 @@ public  class LoginValidations
                     Log.e("ChatServicelogin","Success ");
 
                     //call to PlayServiceHelper
-                    new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+                    //new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
 
+                    String registrationId = sharedPreferences.getString(m_config.REG_ID, "");
+
+                    if (registrationId.isEmpty() && (m_config.mTelephony != null))
+                    {
+                        String regId = sharedPreferences.getString(m_config.temp_regId,"");
+                        new LoginValidations.subscribeToPushNotifications(regId, m_config.mTelephony, (Activity) cont).execute();
+                    }
+                    else{
+                        LoginValidations.checkPendingLoginFlags(cont);
+                    }
 
                 }
 
@@ -746,119 +756,103 @@ public  class LoginValidations
 
     public static void FaceDetect(final Context cont)
     {
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
-        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
-        Activity act = (Activity)cont;
-        faceOverlayView = (FaceOverlayView)act.findViewById(R.id.face_overlay);
-        try
-        {
-            GenerikFunctions.showDialog(m_config.pDialog,"Validationg...");
-            LoggedInUserInformation loggedInUserInformation = initialiseLoggedInUser(cont);
-            // Log.e("Inside try","yes");
-            String  url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
-            Log.e("URL for FB",url+"");
-            if(url.equals(null) || url.equals("") || url.equals("N/A"))
-            {
-              // Log.e("Users FB Pic not Avail","Yes");
-                url = "";
-            }
-            else
-            {
-                url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
-            }
-            // Log.e("URL",url);
-            if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
-            {
-                // Log.e("Before Picasso play service","yes");
-                Target mTarget = new Target()
-                {
-                    @Override
-                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom)
+        Handler h = new Handler(cont.getMainLooper());
+        h.post(new Runnable() {
+            @Override
+            public void run() {
+
+                final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+                final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+
+                Activity act = (Activity) cont;
+                faceOverlayView = (FaceOverlayView) act.findViewById(R.id.face_overlay);
+
+                try {
+
+                    LoggedInUserInformation loggedInUserInformation = initialiseLoggedInUser(cont);
+                    // Log.e("Inside try","yes");
+                    String url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
+                    Log.e("URL for FB in LoginValidations", url + "");
+                    if (url.equals(null) || url.equals("") || url.equals("N/A"))
                     {
-                        Log.e("FB bitmap loaded ","sucessfully  " + bitmap.toString() );
-                        faces = faceOverlayView.setBitmap(bitmap);
-                        Log.e("No of faces from post",faces+"");
+                        url = "";
 
-                        if(faces>0)
-                        {
-                            Log.e("There is face in pic",faces+"");
-                            Log.e("GO for OTP","Yes");
-                            //Set  Face detect flag here to true
-                            SharedPreferences.Editor editorq = sharedPreferences.edit();
-                            editorq.putString(m_config.FaceDetectDone,"Yes");
-                            editorq.apply();
-                            Intent intent = new Intent(cont,OTPActivity.class);
-                            cont.startActivity(intent);
-                        }
-                        else
-                        {
-                            //Set  Face detect flag here to false
-                            Log.e("There is no face in pic","");
-                            Handler h = new Handler(cont.getMainLooper());
-                            h.post(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    if(RegistrationActivity.reg_pd!=null)
-                                    {
-                                        if(RegistrationActivity.reg_pd.isShowing())
-                                        {
-                                            RegistrationActivity.reg_pd.dismiss();
-                                        }
-                                    }
-                                    if(Welcome.wl_pd!=null)
-                                    {
-                                        if(Welcome.wl_pd.isShowing())
-                                        {
-                                            Welcome.wl_pd.dismiss();
-                                        }
-                                    }
-                                    if(SplashActivity.pd!=null)
-                                    {
-                                        if(SplashActivity.pd.isShowing())
-                                        {
-                                            SplashActivity.pd.dismiss();
-                                        }
-                                    }
+                    } else {
+                        url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
+                    }
 
+                    if (!url.equals("") || !url.equals(null) || !url.equals("N/A")) {
+                        // Log.e("Before Picasso play service","yes");
+                        Target mTarget = new Target() {
+                            @Override
+                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
+                                Log.e("FB bitmap loaded ", "sucessfully  " + bitmap.toString());
+                                faces = faceOverlayView.setBitmap(bitmap);
+                                Log.e("No of faces from post in LoginValidations", faces + "");
+
+                                if (faces > 0) {
+                                    Log.e("There is face in pic", faces + "");
+                                    Log.e("GO for OTP", "Yes");
+                                    //Set  Face detect flag here to true
+                                    SharedPreferences.Editor editorq = sharedPreferences.edit();
+                                    editorq.putString(m_config.FaceDetectDone, "Yes");
+                                    editorq.apply();
+                                    Intent intent = new Intent(cont, OTPActivity.class);
+                                    cont.startActivity(intent);
+                                } else {
+                                    //Set  Face detect flag here to false
+                                    Log.e("There is no face in pic", "");
+                                    Handler h = new Handler(cont.getMainLooper());
+                                    h.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (RegistrationActivity.reg_pd != null) {
+                                                if (RegistrationActivity.reg_pd.isShowing()) {
+                                                    RegistrationActivity.reg_pd.dismiss();
+                                                }
+                                            }
+                                            if (Welcome.wl_pd != null) {
+                                                if (Welcome.wl_pd.isShowing()) {
+                                                    Welcome.wl_pd.dismiss();
+                                                }
+                                            }
+                                            if (SplashActivity.pd != null) {
+                                                if (SplashActivity.pd.isShowing()) {
+                                                    SplashActivity.pd.dismiss();
+                                                }
+                                            }
+
+                                        }
+                                    });
+
+
+                                    SharedPreferences.Editor editorq = sharedPreferences.edit();
+                                    editorq.putString(m_config.FaceDetectDone, "No");
+                                    editorq.apply();
+                                    GenerikFunctions.showToast(cont, "There is no face in your profile pic");
                                 }
-                            });
-//                            if(RegistrationActivity.reg_pd.isShowing())
-//                            {
-//                                RegistrationActivity.reg_pd.dismiss();
-//                            }
+                            }
 
-                            SharedPreferences.Editor editorq = sharedPreferences.edit();
-                            editorq.putString(m_config.FaceDetectDone,"No");
-                            editorq.apply();
-                            GenerikFunctions.showToast(cont,"There is no face in your profile pic");
-                        }
-                       // GenerikFunctions.hideDialog(m_config.pDialog);
+                            @Override
+                            public void onBitmapFailed(Drawable drawable) {
+                                Log.e("On FB bitmap failed", drawable.toString());
+                            }
+
+                            @Override
+                            public void onPrepareLoad(Drawable drawable) {
+                            }
+                        };
+
+                        Picasso.with(cont)
+                                .load(url)
+                                .into(mTarget);
+                        faceOverlayView.setTag(mTarget);
                     }
-
-                    @Override
-                    public void onBitmapFailed(Drawable drawable)
-                    {
-                        Log.e("On FB bitmap failed",drawable.toString());
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable drawable)
-                    {
-                    }
-                };
-
-                Picasso.with(cont)
-                        .load(url)
-                        .into(mTarget);
-                faceOverlayView.setTag(mTarget);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
+        });
     }
 
     public static void checkPendingLoginFlags(Context cont)
@@ -879,15 +873,30 @@ public  class LoginValidations
                 if(sharedPreferences.getString(m_config.OTPValidationDone,"No").equals("Yes"))
                 {
 
-                    new AWSLoginOperations.addUserRegStatus(cont,loggedInUserInformation).execute();///only for testing
+                    if(sharedPreferences.getString(m_config.FinalStepDone,"No").equals("Yes"))
+                    {
+                        //harshada
+                        Intent intent = new Intent(cont,HomePageActivity.class);
+                        cont.startActivity(intent);
+                        if(RegistrationActivity.reg_pd!=null)
+                        {
+                            if(RegistrationActivity.reg_pd.isShowing())
+                            {
+                                RegistrationActivity.reg_pd.dismiss();
+                            }
+                        }
 
-                    //  GenerikFunctions.hideDialog(m_config.pDialog);
+                    }
+                    else{
+
+                        new AWSLoginOperations.addUserRegStatus(cont, loggedInUserInformation).execute();
+
+                    }
+
+                    //harshada
                 }
                 else
                 {
-                   //  new AWSLoginOperations.addUserRegStatus(cont,loggedInUserInformation).execute();///only for testing
-
-                    //Uncomment this later
 
 
                     if(RegistrationActivity.reg_pd!=null)
@@ -913,8 +922,13 @@ public  class LoginValidations
                     }
                     Log.e("Here at OTP Activity","Yes");
 
-                    Intent intent = new Intent(cont,OTPActivity.class);
+//                    Intent intent = new Intent(cont,OTPActivity.class);
+//                    cont.startActivity(intent);
+
+                    Intent intent = new Intent(cont,HomePageActivity.class);
                     cont.startActivity(intent);
+
+
                 }
             }
             else
@@ -975,13 +989,29 @@ public  class LoginValidations
     }
 
     public static void checkChatLoginExist(final Context cont, final QBUser user){
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+
         boolean isLoggedIn = QBChatService.getInstance().isLoggedIn();
         Log.e("isLoggedIn "," "+isLoggedIn);
         if(isLoggedIn)
         {
             Log.e("here" ," inLoggedIn");
             //if chat is LoggedIn give a call to PlayServiceHelper
-            new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+            //new PlayServicesHelper((Activity)cont, initialiseLoggedInUser(cont));
+            Log.e("m_config"," "+m_config);
+
+            String registrationId = sharedPreferences.getString(m_config.REG_ID, "");
+
+            if (registrationId.isEmpty() && ( m_config.mTelephony != null))
+            {
+                String regId = sharedPreferences.getString(m_config.temp_regId,"");
+                new LoginValidations.subscribeToPushNotifications(regId, m_config.mTelephony, (Activity) cont).execute();
+            }
+            else{
+                LoginValidations.checkPendingLoginFlags(cont);
+            }
+
         }
         else
         {

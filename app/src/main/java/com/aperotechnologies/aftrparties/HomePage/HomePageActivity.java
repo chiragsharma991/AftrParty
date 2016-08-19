@@ -1,6 +1,8 @@
 package com.aperotechnologies.aftrparties.HomePage;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,6 +12,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -24,11 +27,16 @@ import android.widget.Toast;
 import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
+import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
+import com.aperotechnologies.aftrparties.History.HostFragment;
+import com.aperotechnologies.aftrparties.History.HostProfileActivity;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
+import com.aperotechnologies.aftrparties.LocalNotifications.RatingsAlarmReceiver;
 import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
@@ -37,6 +45,7 @@ import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.aperotechnologies.aftrparties.Settings.SettingsActivity;
 import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.TipsActivity;
@@ -54,6 +63,8 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.linkedin.platform.LISessionManager;
+import com.quickblox.chat.QBChatService;
+import com.quickblox.chat.QBPrivateChatManager;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.squareup.picasso.Picasso;
@@ -62,6 +73,7 @@ import com.squareup.picasso.Target;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,8 +125,14 @@ public class HomePageActivity extends Activity
         helper= DBHelper.getInstance(cont);
         sqldb=helper.getWritableDatabase();
 
+        SharedPreferences.Editor editor= sharedPreferences.edit();
+        editor.putString(m_config.TempEntered_User_Name,"");
+        editor.putString(m_config.TempEntered_Email,"");
+        editor.putString(m_config.TempEntered_Contact_No,"");
+        editor.apply();
 
-        hp_pd= new ProgressDialog(this);
+
+        hp_pd = new ProgressDialog(this);
         if (SplashActivity.pd != null)
         {
             if(SplashActivity.pd.isShowing())
@@ -173,6 +191,17 @@ public class HomePageActivity extends Activity
                 i.putExtra("from", "PartyRetention");
                 startActivity(i);
             }
+            else if(getIntent().getExtras().getString("from").equals("PartyRetention")){
+                String PartyName = getIntent().getExtras().getString("PartyName");
+                String PartyId = getIntent().getExtras().getString("PartyId");
+                String DialogId = getIntent().getExtras().getString("DialogId");
+                Intent i = new Intent(HomePageActivity.this, TransparentActivity.class);
+                i.putExtra("DialogId", DialogId);
+                i.putExtra("PartyId",PartyId);
+                i.putExtra("PartyName", PartyName);
+                i.putExtra("from", "PartyRetention");
+                startActivity(i);
+            }
         }
 
 
@@ -203,15 +232,16 @@ public class HomePageActivity extends Activity
 
 
         //if(.equals("")){
-            try {
-                UserTable user = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
-                txt_Header.setText("Welcome " + user.getName());
-            }catch (Exception e){
+//            try {
+//                UserTable user = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
+//                txt_Header.setText("Welcome " + user.getName());
+//            }catch (Exception e){
+//
+//            }
+              txt_Header.setText("Welcome " + sharedPreferences.getString(m_config.Entered_User_Name,""));
 
-            }
 
 
-        Log.e("here "," "+sharedPreferences.getString(m_config.QuickBloxID,""));
 
 //        }else{
 //            txt_Header.setText("Welcome " +sharedPreferences.getString(m_config.Entered_User_Name,""));
@@ -225,8 +255,8 @@ public class HomePageActivity extends Activity
             {
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(HomePageActivity.this);
                 alertDialogBuilder
-                        .setTitle("Exit")
-                        .setMessage("Are you sure you want to exit?")
+                        .setTitle("Logout")
+                        .setMessage("Are you sure you want to Logout?")
                         .setCancelable(false)
                         .setNegativeButton("No", null)
                         .setPositiveButton("Yes",
@@ -243,6 +273,15 @@ public class HomePageActivity extends Activity
                                         SharedPreferences.Editor editor = sharedPreferences.edit();
                                         editor.putString(m_config.FinalStepDone,"No");
                                         editor.putString(m_config.LoggedInFBUserID,"N/A");
+                                        editor.putString(m_config.Entered_User_Name,"");
+                                        editor.putString(m_config.Entered_Email,"");
+                                        editor.putString(m_config.Entered_Contact_No,"");
+                                        editor.putString(m_config.BasicFBLIValidationsDone,"No");
+                                        editor.putString(m_config.FaceDetectDone,"No");
+                                        editor.putString(m_config.OTPValidationDone,"No");
+                                        editor.putString(m_config.FinalStepDone,"No");
+                                        editor.putString(m_config.FBLoginDone,"No");
+                                        editor.putString(m_config.LILoginDone,"No");
                                         editor.apply();
 
                                         if(LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken() == null)
@@ -266,8 +305,28 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-                Intent i = new Intent(HomePageActivity.this, TipsActivity.class);
-                startActivity(i);
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
+
+//                Intent i = new Intent(HomePageActivity.this, TipsActivity.class);
+//                startActivity(i);
+
+                AlarmManager alarmManager = (AlarmManager) cont.getSystemService(Context.ALARM_SERVICE);
+                Intent notificationIntent = new Intent(cont, RatingsAlarmReceiver.class);
+                notificationIntent.putExtra("from","trial");
+
+                long notificationTime = System.currentTimeMillis() + 50000;//Long.parseLong(PartyEndTime) + 10000;
+                Log.e("notificationTime "," "+(notificationTime + 50000));
+
+                //notificationIntent.addCategory("android.intent.category.DEFAULT");
+                PendingIntent broadcast = PendingIntent.getBroadcast(cont, 123450, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                if (Build.VERSION.SDK_INT >= 19)
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, notificationTime, broadcast);
+                else if (Build.VERSION.SDK_INT >= 15)
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, notificationTime, broadcast);
 
 
             }
@@ -278,7 +337,11 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v)
             {
-                Log.e("----"," came here");
+
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
 
                 hp_pd.setMessage("Loading");
                 hp_pd.setCancelable(false);
@@ -335,21 +398,14 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
 
-                Log.e("--current user -- "," "+ChatService.getInstance().getCurrentUser());
-
-//                if(ChatService.getInstance().getCurrentUser() == null)
-//                {
-//                    GenerikFunctions.sDialog(cont, "Loading...");
-//                    String accessToken = LoginValidations.getFBAccessToken().getToken();
-//                    QBSessionRestart.QBSession(cont, accessToken, "ChatActivity");
-//                }
-//                else
-//                {
-                    Intent i = new Intent(HomePageActivity.this, DialogsActivity.class);
-                    startActivity(i);
-                //}
-
+                //Log.e("--current user -- "," "+ChatService.getInstance().getCurrentUser());
+                Intent i = new Intent(HomePageActivity.this, DialogsActivity.class);
+                startActivity(i);
 
             }
         });
@@ -358,18 +414,13 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-//                if(ChatService.getInstance().getCurrentUser() == null)
-//                {
-//                    GenerikFunctions.sDialog(cont, "Loading...");
-//                    String accessToken = LoginValidations.getFBAccessToken().getToken();
-//                    QBSessionRestart.QBSession(cont, accessToken, "HistoryActivity");
-//                }
-//                else
-//                {
-                    Intent i = new Intent(HomePageActivity.this, HistoryActivity.class);
-                    startActivity(i);
-//                }
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
 
+                Intent i = new Intent(HomePageActivity.this, HistoryActivity.class);
+                startActivity(i);
 
             }
         });
@@ -378,17 +429,14 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-//                if(ChatService.getInstance().getCurrentUser() == null)
-//                {
-//                    GenerikFunctions.sDialog(cont, "Loading...");
-//                    String accessToken = LoginValidations.getFBAccessToken().getToken();
-//                    QBSessionRestart.QBSession(cont, accessToken, "HostActivity");
-//                }
-//                else
-//                {
-                    Intent i = new Intent(HomePageActivity.this, HostActivity.class);
-                    startActivity(i);
-//                }
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
+
+                Intent i = new Intent(HomePageActivity.this, HostActivity.class);
+                startActivity(i);
+
 
             }
         });
@@ -397,17 +445,13 @@ public class HomePageActivity extends Activity
             @Override
             public void onClick(View v) {
 
-//                if(ChatService.getInstance().getCurrentUser() == null)
-//                {
-//                    GenerikFunctions.sDialog(cont, "Loading...");
-//                    String accessToken = LoginValidations.getFBAccessToken().getToken();
-//                    QBSessionRestart.QBSession(cont, accessToken, "GCActivity");
-//                }
-//                else
-//                {
-                    Intent i = new Intent(HomePageActivity.this, GateCrasherSearchActivity.class);
-                    startActivity(i);
-//                }
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
+
+                Intent i = new Intent(HomePageActivity.this, GateCrasherSearchActivity.class);
+                startActivity(i);
 
             }
         });
@@ -434,9 +478,23 @@ public class HomePageActivity extends Activity
                                 i.addCategory(Intent.CATEGORY_HOME);
                                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(i);
+
+//                                Intent intent = new Intent(cont, RatingsAlarmReceiver.class);
+//                                PendingIntent pendingIntent = PendingIntent.getBroadcast(cont, 123450, intent, 0);
+//                                AlarmManager alarmManager = (AlarmManager)cont.getSystemService(Context.ALARM_SERVICE);
+//                                alarmManager.cancel(pendingIntent);
+//                                alarmManager = null;
+//                                pendingIntent = null;
+//
+//
+//                                Log.e("here ", " "+alarmManager+" "+pendingIntent);
+
                             }
                         });
-        alertDialogBuilder.show();
+
+                    alertDialogBuilder.show();
+
+
     }
 
 
@@ -451,7 +509,7 @@ public class HomePageActivity extends Activity
 
     public class AsyncFBFaces extends AsyncTask<Void,Void,Void>
     {
-        UserTable selUserData =null;
+        UserTable selUserData = null;
 
         @Override
         protected void onPreExecute()
@@ -471,7 +529,7 @@ public class HomePageActivity extends Activity
             try
             {
                 selUserData = m_config.mapper.load(UserTable.class, loggedInUserInformation.getFB_USER_ID());
-                Log.e("selUserClass", " " + loggedInUserInformation.getFB_USER_ID());
+                Log.e("selUserData", " " + selUserData);
             }
             catch (Exception e)
             {
@@ -522,15 +580,22 @@ public class HomePageActivity extends Activity
                 }
                 else
                 {
-                    getFBProfilePictures();
+                    getFBProfilePictures(selUserData.getProfilePicUrl());
                 }
             }
 
         }
     }
 
-    public void getFBProfilePictures()
+    public void getFBProfilePictures(final List<String> profilePic)
     {
+
+        File f = new File(profilePic.get(0));
+        String profilepicname = f.getName();
+        profilepicname = profilepicname.split("\\?")[0];
+        Log.e("profilepicname"," "+profilepicname);
+
+        final String finalProfilepicname = profilepicname;
         GraphRequest request1 = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(),
                 new GraphRequest.GraphJSONObjectCallback()
                 {
@@ -539,23 +604,55 @@ public class HomePageActivity extends Activity
                     {
                         profilePics = new ArrayList<String>();
                         validPics = new ArrayList<String>();
+                        ArrayList imgsplit = new ArrayList();
                         try
                         {
+
                             JSONObject FBAlbum = object;
                             JSONObject Albums = FBAlbum.getJSONObject("albums");
+                            //Log.e(" in "," getFBProfilePictures Albums"+Albums);
                             JSONArray data = Albums.getJSONArray("data");
-                            for (int i = 0 ;i<data.length();i++)
+
+                            for (int i = 0 ; i<data.length(); i++)
                             {
+                                Log.e(" i "," "+data.getJSONObject(i).getString("name"));
+
                                 JSONObject AlbumContainer = data.getJSONObject(i);
                                 if(AlbumContainer.getString("name").equals("Profile Pictures"))
                                 {
                                     JSONObject photos = AlbumContainer.getJSONObject("photos");
                                     JSONArray innerData = photos.getJSONArray("data");
+
                                     for(int j=0;j<innerData.length();j++)
                                     {
                                         JSONObject innerAlbum = innerData.getJSONObject(j);
+
+                                        File f = new File(innerAlbum.getString("picture"));
+                                        String albimagename = f.getName();
+                                        albimagename = albimagename.split("\\?")[0];
+                                        Log.e("imagename"," "+albimagename);
+
                                         profilePics.add(innerAlbum.getString("picture"));
+                                        imgsplit.add(albimagename);
+
                                     }
+
+                                    if(imgsplit.contains(finalProfilepicname))
+                                    {
+                                        String imgpos0 = profilePics.get(0);
+                                        int posprPic = imgsplit.indexOf(finalProfilepicname);
+                                        String imgposprPic = profilePics.get(imgsplit.indexOf(finalProfilepicname));
+
+                                        profilePics.set(0,imgposprPic);
+                                        profilePics.set(posprPic, imgpos0);
+
+                                    }
+                                    else{
+                                        profilePics.set(0,profilePic.get(0));
+                                    }
+
+
+
                                     break;
                                 }
                             }
@@ -578,7 +675,8 @@ public class HomePageActivity extends Activity
                 });
 
         Bundle parameters1 = new Bundle();
-        parameters1.putString("fields", "albums.fields(name,photos.fields(name,picture,source,created_time))");//,)");
+        //parameters1.putString("fields", "albums.fields(name,photos.fields(name,picture,source,created_time))");//,)");
+        parameters1.putString("fields", "albums.fields(name,photos.fields(name,picture,source,created_time))");
         request1.setParameters(parameters1);
         request1.executeAsync();
     }

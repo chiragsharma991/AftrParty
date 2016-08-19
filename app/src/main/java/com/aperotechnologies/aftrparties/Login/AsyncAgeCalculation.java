@@ -108,17 +108,7 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
             {
                 hasFBImage = false;
                 ConstsCore.profilePicAvailable = "No";
-                //Check for LI profile Pic
-//                if (loggedInUserInformation.getLI_USER_PROFILE_PIC().equals("N/A") || loggedInUserInformation.getLI_USER_PROFILE_PIC().equals(null))
-//                {
-//                    ConstsCore.profilePicAvailable = "No";
-//                    hasLIImage = false;
-//                }
-//                else
-//                {
-//                    hasLIImage = true;
-//                    ConstsCore.profilePicAvailable = "Yes";
-//                }
+
             }
             else
             {
@@ -128,35 +118,60 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
 
 
             //Connection Count
-            if (Integer.parseInt(loggedInUserInformation.getFB_USER_FRIENDS()) >= ConstsCore.FB_FRIENDS)
+
+            if (!loggedInUserInformation.getFB_USER_FRIENDS().equals("N/A") && Integer.parseInt(loggedInUserInformation.getFB_USER_FRIENDS()) >= ConstsCore.FB_FRIENDS)
             {
-                if (Integer.parseInt(loggedInUserInformation.getLI_USER_CONNECTIONS()) < ConstsCore.LI_CONNECTIONS)
+                Log.e("--- "," "+loggedInUserInformation.getLI_USER_CONNECTIONS());
+
+                if(loggedInUserInformation.getLI_USER_CONNECTIONS().equals("N/A"))
                 {
-                    //fb valid  li invalid
                     ConstsCore.validFriendsCount = "Yes";
                     ConstsCore.validConnCount = "No";
+
                 }
                 else
                 {
-                    // fb valid li valid
-                    ConstsCore.validFriendsCount = "Yes";
-                    ConstsCore.validConnCount = "Yes";
+                    if (Integer.parseInt(loggedInUserInformation.getLI_USER_CONNECTIONS()) < ConstsCore.LI_CONNECTIONS)
+                    {
+                        //fb valid  li invalid
+                        ConstsCore.validFriendsCount = "Yes";
+                        ConstsCore.validConnCount = "No";
+                    }
+                    else
+                    {
+                        // fb valid li valid
+                        ConstsCore.validFriendsCount = "Yes";
+                        ConstsCore.validConnCount = "Yes";
+                    }
                 }
+
             }
             else
             {
                 ConstsCore.validFriendsCount = "No";
             }
 
-            //  Log.e("Before Conditions check priflefald ageflag friendsflag", ConstsCore.profilePicAvailable + "    " + ConstsCore.ValidAge + "    " + ConstsCore.validFriendsCount);
+//            //harshada 8Aug Temporary data
+//            ConstsCore.validFriendsCount = "Yes";
+//            ConstsCore.validConnCount = "Yes";
+//            //harshada
+
+
+            //final check for all basic validations
+            //check for profile pic
             if (ConstsCore.profilePicAvailable.equals("No"))
             {
+                //does not Have profile picture
                 Handler h = new Handler(cont.getMainLooper());
                 h.post(new Runnable()
                 {
                     @Override
                     public void run()
                     {
+                        if(RegistrationActivity.reg_pd.isShowing())
+                        {
+                            RegistrationActivity.reg_pd.dismiss();
+                        }
                         GenerikFunctions.showToast(cont, "Don't have profile picture");
                     }
                 });
@@ -164,27 +179,29 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
             else
             {
                 //Have profile picture
+                //check for valid age
                 if (ConstsCore.ValidAge.equals("No"))
                 {
+                    //Invalid age
                     Handler h = new Handler(cont.getMainLooper());
                     h.post(new Runnable()
                     {
                         @Override
                         public void run()
                         {
-                            GenerikFunctions.showToast(cont, "Invalid age");
 
                             if(RegistrationActivity.reg_pd.isShowing())
                             {
                                 RegistrationActivity.reg_pd.dismiss();
                             }
-
+                            GenerikFunctions.showToast(cont, "Invalid age");
                         }
                     });
                 }
                 else
                 {
                     //Valid age
+                    //check for fb count
                     if (ConstsCore.validFriendsCount.equals("No"))
                     {
                         Handler h = new Handler(cont.getMainLooper());
@@ -203,6 +220,7 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
                     }
                     else
                     {
+                        //check for linkedin count
                         if (ConstsCore.validConnCount.equals("No"))
                         {
                             Handler h = new Handler(cont.getMainLooper());
@@ -238,33 +256,23 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
     @Override
     protected void onPostExecute(Boolean result)
     {
-        if (result==true)
+        if (result == true)
         {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(m_config.BasicFBLIValidationsDone,"Yes");
             editor.apply();
 
-            // GO for face detect
-            // new AsyncFaceDetection(cont).execute();
 
             try
             {
-                // Log.e("Inside try","yes");
+
                 String  url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
-                Log.e("URL for FB",url+"");
+                Log.e("URL for FB",url+"" + url.equals(null));
                 if(url.equals(null) || url.equals("") || url.equals("N/A"))
                 {
                     Log.e("Users FB Pic not Avail","Yes");
                     url = "";
 
-//                    if( loggedInUserInformation.getLI_USER_PROFILE_PIC() == null || loggedInUserInformation.equals("") || loggedInUserInformation.getLI_USER_PROFILE_PIC().equals("N/A") )
-//                    {
-//                        url = "";
-//                    }
-//                    else
-//                    {
-//                        url = loggedInUserInformation.getLI_USER_PROFILE_PIC();
-//                    }
                 }
                 else
                 {
@@ -359,231 +367,4 @@ public class AsyncAgeCalculation extends AsyncTask<Void, Void, Boolean>
     }
 }
 
-//    public void basicValidation()
-//    {
-//        if(loggedInUserInformation.getFB_USER_PROFILE_PIC().equals("N/A") || loggedInUserInformation.getFB_USER_PROFILE_PIC().equals(null))
-//        {
-//            hasFBImage=false;
-//            //Check for LI profile Pic
-//            if(loggedInUserInformation.getLI_USER_PROFILE_PIC().equals("N/A") || loggedInUserInformation.getLI_USER_PROFILE_PIC().equals(null))
-//            {
-//                ConstsCore.profilePicAvailable="No";
-//                hasLIImage=false;
-//            }
-//            else
-//            {
-//                hasLIImage=true;
-//                ConstsCore.profilePicAvailable="Yes";
-//            }
-//        }
-//        else
-//        {
-//            hasFBImage=true;
-//            ConstsCore.profilePicAvailable="Yes";
-//        }
-//
-//        //Connection Count
-//        if(Integer.parseInt(loggedInUserInformation.getFB_USER_FRIENDS()) >= ConstsCore.FB_FRIENDS)
-//        {
-//
-//            if(Integer.parseInt(loggedInUserInformation.getLI_USER_CONNECTIONS())<ConstsCore.LI_CONNECTIONS)
-//            {
-//                //fb valid  li invalid
-//                ConstsCore.validFriendsCount="Yes";
-//                ConstsCore.validConnCount="No";
-//            }
-//            else
-//            {
-//                // fb valid li valid
-//                ConstsCore.validFriendsCount="Yes";
-//                ConstsCore.validConnCount="Yes";
-//            }
-//        }
-//        else
-//        {
-//            ConstsCore.validFriendsCount="No";
-//        }
-//
-//        GenerikFunctions.hideDialog(m_config.pDialog);
-//
-////                    profilePicAvailable="No";
-////                    String validAge="No";
-////                    String validFriendsCount="No";
-////                    String validConnCount="No";
-//
-//        Log.e("Before Conditions check priflefald ageflag friendsflag",ConstsCore.profilePicAvailable +"    " +ConstsCore.ValidAge +"    " + ConstsCore.validFriendsCount);
-//        if(ConstsCore.profilePicAvailable.equals("No"))
-//        {
-//            Handler h = new Handler(context.getMainLooper());
-//            h.post(new Runnable()
-//            {
-//                @Override
-//                public void run()
-//                {
-//                    GenerikFunctions.showToast(context,"DOnt have profile picture");
-//                }
-//            });
-//
-//        }
-//        else
-//        {
-//            //Have profile picture
-//            if(ConstsCore.ValidAge.equals("No"))
-//            {
-//
-//                Handler h = new Handler(context.getMainLooper());
-//                h.post(new Runnable()
-//                {
-//                    @Override
-//                    public void run()
-//                    {
-//                        GenerikFunctions.showToast(context,"Invalid age");
-//                    }
-//                });
-//
-//            }
-//            else
-//            {
-//                //Valid age
-//                if(ConstsCore.validFriendsCount.equals("No"))
-//                {
-//                    Handler h = new Handler(context.getMainLooper());
-//                    h.post(new Runnable()
-//                    {
-//                        @Override
-//                        public void run()
-//                        {
-//                            GenerikFunctions.showToast(context,"Face book friends count is less than " +ConstsCore.FB_FRIENDS);
-//                        }
-//                    });
-//                }
-//                else
-//                {
-//                    if(ConstsCore.validConnCount.equals("No"))
-//                    {
-//                        Handler h = new Handler(context.getMainLooper());
-//                        h.post(new Runnable()
-//                        {
-//                            @Override
-//                            public void run()
-//                            {
-//                                GenerikFunctions.showToast(context,"LI conn count is less than "+ConstsCore.LI_CONNECTIONS);
-//                            }
-//                        });
-//                    }
-//                    else
-//                    {
-//                        //Start Face Detection Page
-//                        //Set Validation FLags Here
-//                        SharedPreferences.Editor editor = sharedPreferences.edit();
-//                        editor.putString(m_config.BasicFBLIValidationsDone,"Yes");
-//                        editor.apply();
-//
-//                        // Log.e("Go for Face Detect","Yes");
-//
-//                        //Go for Face Detection
-//                        //  new Imageverification(context).execute();
-//
-//                        try
-//                        {
-//                            // Log.e("Inside try","yes");
-//                            String url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
-//
-//                            if(url.equals(null) || url.equals("") || url.equals("N/A"))
-//                            {
-//                                if(loggedInUserInformation.getLI_USER_PROFILE_PIC() == null ||
-//                                        loggedInUserInformation.equals("") ||
-//                                        loggedInUserInformation.getLI_USER_PROFILE_PIC().equals("N/A"))
-//                                {
-//                                    url = "";
-//                                }
-//                                else
-//                                {
-//                                    url = loggedInUserInformation.getLI_USER_PROFILE_PIC();
-//                                }
-//                            }
-//                            else
-//                            {
-//                                url = loggedInUserInformation.getFB_USER_PROFILE_PIC();
-//                            }
-//
-//                            // Log.e("URL",url);
-//
-//                            if(!url.equals("") || !url.equals(null) || !url.equals("N/A"))
-//                            {
-//
-//                                Log.e("Before Picasso play service","yes");
-//
-//                                Target mTarget = new Target()
-//                                {
-//                                    @Override
-//                                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom)
-//                                    {
-//                                        Log.e("FB bitmap loaded ","sucessfully  " + bitmap.toString() );
-//
-//
-//                                        int faces = faceOverlayView.setBitmap(bitmap);
-//
-//                                        GenerikFunctions.showToast(context,"No of faces  "+faces);
-//
-//                                        if(faces>0)
-//                                        {
-//                                            Log.e("There is face in pic",faces+"");
-//                                            Log.e("GO for OTP","Yes");
-//
-//                                            //Set  Face detect flag here to true
-//                                            SharedPreferences.Editor editor = sharedPreferences.edit();
-//                                            editor.putString(m_config.FaceDetectDone,"Yes");
-//                                            editor.apply();
-//                                        }
-//                                        else
-//                                        {
-//
-//                                            //Set  Face detect flag here to false
-//                                            Log.e("There is no face in pic","");
-//                                            SharedPreferences.Editor editor = sharedPreferences.edit();
-//                                            editor.putString(m_config.FaceDetectDone,"No");
-//                                            editor.apply();
-//
-//                                            GenerikFunctions.showToast(context,"There is no face in your profile pic");
-//                                        }
-//
-//                                    }
-//
-//                                    @Override
-//                                    public void onBitmapFailed(Drawable drawable)
-//                                    {
-//                                        Log.e("On FB bitmap failed",drawable.toString());
-//                                    }
-//
-//                                    @Override
-//                                    public void onPrepareLoad(Drawable drawable) {
-//
-//                                    }
-//
-//                                };
-//
-//
-//                                Picasso.with(context)
-//                                        .load(url)
-//                                        .into(mTarget);
-//
-//
-//                                faceOverlayView.setTag(mTarget);
-//
-//
-//
-//                            }
-//                        }
-//
-//                        catch(Exception e)
-//                        {
-//                            e.printStackTrace();
-////                            Log.e(TAG,e.getMessage());
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//    }
+

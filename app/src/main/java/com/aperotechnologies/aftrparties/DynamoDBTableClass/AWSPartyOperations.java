@@ -426,6 +426,7 @@ public class AWSPartyOperations {
                 {
                     GenerikFunctions.hDialog();
                     GenerikFunctions.showToast(cont,"Party created successfully");
+                    m_config.masksubscriptionTime = "";
                     cont.startActivity(new Intent(cont, HistoryActivity.class));
                     ((Activity) cont).finish();
 

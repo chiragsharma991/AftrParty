@@ -36,7 +36,6 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.History.RequestantActivity;
-import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
@@ -70,6 +69,7 @@ import com.linkedin.platform.listeners.AuthListener;
 import com.linkedin.platform.utils.Scope;
 import com.squareup.picasso.Target;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -135,15 +135,6 @@ public class WelcomeWork extends Activity
         sqldb=helper.getWritableDatabase();
         loginManager = LoginManager.getInstance();
 
-        // Initialize the Amazon Cognito credentials provider
-        final CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
-                getApplicationContext(),
-                "us-east-1:bd2ea8c9-5aa9-4e32-b8e5-20235fc7f4ac", // Identity Pool ID
-                Regions.US_EAST_1 // Region
-        );
-
-        m_config.ddbClient = new AmazonDynamoDBClient(credentialsProvider);
-        m_config.mapper = new DynamoDBMapper(m_config.ddbClient);
 
         btn_login = (Button) findViewById(R.id.btn_login);
         btn_register = (Button) findViewById(R.id.btn_register);
@@ -164,10 +155,6 @@ public class WelcomeWork extends Activity
         permissions.add("user_friends");
         //permissions.add("user_hometown");
         //permissions.add("user_photos");
-
-
-//         Log.e("Shrd Pref in Welcome",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
-//                    sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "  + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
 
 
         //Start Registration activity on Register button click
@@ -193,31 +180,41 @@ public class WelcomeWork extends Activity
                         sharedPreferences.getString(m_config.LoggedInFBUserID,"N/A"));
 
 
-                //Check for local storage of FB ID
-                if(sharedPreferences.getString(m_config.LoggedInFBUserID,"N/A").equals("N/A"))
+                if(GenerikFunctions.chkStatus(cont))
                 {
-                    //If not stored locally, initialise the FB lofgin
-                    linkedinStart = "";
-                    try
+                    //Check for local storage of FB ID
+                    if(sharedPreferences.getString(m_config.LoggedInFBUserID,"N/A").equals("N/A"))
                     {
-                        loginManager.logInWithReadPermissions(WelcomeWork.this, permissions);
-                        Log.e("Inside start login", "yes");
-                        FacebookDataRetieval();
+                        //If not stored locally, initialise the FB login
+                        linkedinStart = "";
+
+                        try
+                        {
+                            loginManager.logInWithReadPermissions(WelcomeWork.this,permissions);
+                            Log.e("Inside login", "yes");
+                            FacebookDataRetieval();
+                        }
+                        catch (Exception e)
+                        {
+                            Log.e("External Exception", e.toString());
+                            e.printStackTrace();
+                        }
                     }
-                    catch (Exception e)
+                    else
                     {
-                        Log.e("External Exception", e.toString());
-                        e.printStackTrace();
+                        //If locally stored then initialise the FB Session
+                        linkedinStart="";
+                        Log.e("FB Session","");
+                        loginManager.logInWithReadPermissions(WelcomeWork.this,permissions);
+                        FacebookDataRetievalNew();
                     }
                 }
-                else
-                {
-                    //Iflocally stored then initialise the FB Session
-                    linkedinStart="";
-                    Log.e("Inside the Login of FB","Yes");
-                    loginManager.logInWithReadPermissions(WelcomeWork.this,permissions);
-                    FacebookDataRetievalNew();
+                else{
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
                 }
+
+
+
 
             }
         });
@@ -226,8 +223,9 @@ public class WelcomeWork extends Activity
     //FB Login to retrieve FB ID
     public void FacebookDataRetievalNew()
     {
-        Log.e("Inside FB data retreive new","Yes");
-        linkedinStart="";
+        Log.e("Inside FacebookDataRetievalNew","Yes");
+        linkedinStart = "";
+
         try
         {
             loginManager.registerCallback(callbackManager,
@@ -236,10 +234,10 @@ public class WelcomeWork extends Activity
                         @Override
                         public void onSuccess(LoginResult loginResult)
                         {
-                            Log.e("FB Login Success FacebookDataRetievalNew", "Yes");
+                            Log.e("FB Login Success Welcome FacebookDataRetievalNew","");
                             token = loginResult.getAccessToken();
                             Log.e("AccessToken from Welcome FacebookDataRetievalNew", token.toString() + "    " +token);
-                            if(wl_pd==null)
+                            if(wl_pd == null)
                             {
                                 wl_pd = new ProgressDialog(WelcomeWork.this);
                             }
@@ -249,10 +247,8 @@ public class WelcomeWork extends Activity
                             wl_pd.setCancelable(false);
                             wl_pd.show();
 
-
-
                             LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
-                            Log.e("Info in storage",loggedInUserInformation.getFB_USER_ID() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
+                            Log.e("FB data in FBnewRetrieval",loggedInUserInformation.getFB_USER_ID() +"   " +loggedInUserInformation.getFB_USER_HOMETOWN_NAME());
 
                             fbUserInformation = new FbUserInformation();
                             fbUserInformation.setFbId(loggedInUserInformation.getFB_USER_ID() );
@@ -264,13 +260,15 @@ public class WelcomeWork extends Activity
                         @Override
                         public void onCancel()
                         {
-                            Log.e("Login onCancel FacebookDataRetievalNew", "Yes");
+                            GenerikFunctions.showToast(cont, "FB Login failed");
+                            Log.e("FBLogin onCancel Welcome FacebookDataRetievalNew", "Yes");
                         }
 
                         @Override
                         public void onError(FacebookException error)
                         {
-                            Log.e("Inside FacebookDataRetievalNew error",error.toString());
+                            Log.e("FB Login error Welcome FacebookDataRetievalNew",error.toString());
+                            GenerikFunctions.showToast(cont, "FB Login failed");
                             error.printStackTrace();
                         }
                     });
@@ -288,15 +286,16 @@ public class WelcomeWork extends Activity
         if (linkedinStart.equals(""))
         {
             //For FB
+            Log.e("onActivityResult","fb :");
             super.onActivityResult(requestCode, resultCode, data);
             callbackManager.onActivityResult(requestCode, resultCode, data);
         }
         else
         {
             //For LI
-
+            Log.e("onActivityResult","linkedIn");
             LISessionManager.getInstance(getApplicationContext()).onActivityResult(this, requestCode, resultCode, data);
-            Log.e("Token from start", Token + "");
+            Log.e("Token LI on ActivityRes", Token + "");
             if (Token == null)
             {
                 GenerikFunctions.showToast(cont,"LI Login Failed");
@@ -312,7 +311,7 @@ public class WelcomeWork extends Activity
                         try
                         {
                             JSONObject jsonObject = result.getResponseDataAsJson();
-                            Log.e("jsonresponse", "=====  " + result.toString() + " ");
+                            Log.e("LI jsonresponse", "=====  " + result.toString() + " ");
                             setLIUserProfile(jsonObject.toString());
 
                         }
@@ -356,28 +355,27 @@ public class WelcomeWork extends Activity
     {
         try
         {
-
+            Log.e("setLIUserProfile response", response + "");
             if (response.length() == 0 || response.equals(""))
             {
                 liUserInformation = new LIUserInformation();
                 liPictureData = new LIPictureData();
             }
-            else
-            {
+            else {
                 liUserInformation = gson.fromJson(response.toString(), LIUserInformation.class);
 
 
-                liPictureData = new LIPictureData();
-                if (liPictureData.equals(liUserInformation.getLIPictureData()))
-                {
-                   // Log.e("Empty Pictures", "Equal both lipicdata local and received  " + "  both empty");
+                if (liUserInformation.getLIPictureData() != null) {
+                    liPictureData = new LIPictureData();
+                    if (liPictureData.equals(liUserInformation.getLIPictureData())) {
+                        Log.e("Both LI  Pics Empty  ", "Is Empty");
+                    } else {
+                        liPictureData = liUserInformation.getLIPictureData();
+                    }
+                } else {
+                    liPictureData = new LIPictureData();
                 }
-                else
-                {
-                    //Log.e("Not equal ", "Has LI Puicture data");
-                    liPictureData = liUserInformation.getLIPictureData();
-                }
-
+                Log.e("LI Pic Info ", liPictureData.get_total() + "     " + liPictureData.getvalues().size() + "    " + liPictureData.getvalues().get(0));
             }
 
 
@@ -386,9 +384,10 @@ public class WelcomeWork extends Activity
                     LoginTableColumns.FB_USER_ID +" = '" + fbUserInformation.getFbId() + "'";
             Log.i("User Query  : ", Query);
             Cursor cursor = sqldb.rawQuery(Query, null);
+           // Log.e("Cursor count",cursor.getCount()+"");
             if(cursor.getCount() == 0)
             {
-
+                Log.e("Onside update if","Yes");
             }
             else
             {
@@ -407,18 +406,20 @@ public class WelcomeWork extends Activity
                 sqldb.execSQL(Update);
 
 
+                //AWS Storage of LI data
 
                 SharedPreferences.Editor editor= sharedPreferences.edit();
                 editor.putString(m_config.LILoginDone,"Yes");
                 editor.apply();
 
-
-
+                String from = getIntent().getExtras().getString("from");
+                Log.e("from"," "+from);
 
                 Log.e("Shrd Pref aftr LILginDne",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
                         sharedPreferences.getString(m_config.Entered_Email,"N/A") + "   "
                         + sharedPreferences.getString(m_config.Entered_Contact_No,"N/A"));
 
+                //checkfromWhere(from);
             }
 
         }
@@ -467,12 +468,12 @@ public class WelcomeWork extends Activity
     //Check for user permissions acceptance for FB
     public void FacebookDataRetieval()
     {
-
+        Log.e("Inside FB data retreive","Yes");
         linkedinStart="";
 
         try
         {
-
+            Log.e("Inside try","Yes");
             loginManager.registerCallback(callbackManager,
                 new FacebookCallback<LoginResult>()
                 {
@@ -480,8 +481,10 @@ public class WelcomeWork extends Activity
                     public void onSuccess(LoginResult loginResult)
                     {
                         // App code
+                        Log.e("Login Success", "Yes");
                         token = loginResult.getAccessToken();
-                        //Log.e("AccessToken", token.toString() + "    " +token);
+                        Log.e("AccessToken", token.toString() + "    " +token);
+
 
                         Set<String> given_perm = token.getPermissions();
                         iterator = given_perm.iterator();
@@ -492,6 +495,7 @@ public class WelcomeWork extends Activity
                         while (iterator.hasNext())
                         {
                             String perm_name = iterator.next().toString();
+                            //Log.e("declined_permission in: ", perm_name + " ");
                             declined_permissions.add(perm_name);
                         }
                         if (declined_perm.size() > 0)
@@ -502,13 +506,13 @@ public class WelcomeWork extends Activity
                         {
                             retrieveFBMeData();
                         }
-                        //DELETE /{user-id}/permissions/{permission-name}
+
                     }
 
                     @Override
                     public void onCancel()
                     {
-
+                        Log.e("Login onCancel", "Yes");
                         GenerikFunctions.showToast(cont,"Please provide permissions for app login");
                         if(wl_pd.isShowing())
                         {
@@ -520,7 +524,7 @@ public class WelcomeWork extends Activity
                     public void onError(FacebookException error)
                     {
                         error.printStackTrace();
-                        Log.e("FB Login error", " -- " + error.toString());
+                        Log.e("Login error", "error" + error.toString());
 
                         if(wl_pd.isShowing())
                         {
@@ -535,6 +539,9 @@ public class WelcomeWork extends Activity
                                 editor.putString(m_config.Entered_User_Name, "");
                                 editor.putString(m_config.Entered_Email, "");
                                 editor.putString(m_config.Entered_Contact_No, "");
+                                editor.putString(m_config.TempEntered_User_Name, "");
+                                editor.putString(m_config.TempEntered_Email, "");
+                                editor.putString(m_config.TempEntered_Contact_No, "");
                                 editor.commit();
                                 startFBLoginScenario();
                             }
@@ -542,7 +549,7 @@ public class WelcomeWork extends Activity
                     }
                 });
 
-
+            Log.e("After ","After");
         }
         catch(Exception e)
         {
@@ -550,7 +557,7 @@ public class WelcomeWork extends Activity
             {
                 wl_pd.dismiss();
             }
-
+            Log.e("Error in print ",e.toString());
             e.printStackTrace();
         }
     }
@@ -561,6 +568,7 @@ public class WelcomeWork extends Activity
         if (LoginValidations.isFBLoggedIn())
         {
             token = AccessToken.getCurrentAccessToken();
+            Log.e("Token of current user","yes");
             Set<String> given_perm = token.getPermissions();
             iterator = given_perm.iterator();
             while (iterator.hasNext())
@@ -575,7 +583,7 @@ public class WelcomeWork extends Activity
             while (iterator.hasNext())
             {
                 String perm_name = iterator.next().toString();
-
+                //
                 // Log.e("declined_permission from already loggoed in : ", perm_name + " ");
                 declined_permissions.add(perm_name);
             }
@@ -592,6 +600,7 @@ public class WelcomeWork extends Activity
         }
         else
         {
+           // processLogin();
         }
     }
 
@@ -605,20 +614,48 @@ public class WelcomeWork extends Activity
                     @Override
                     public void onCompleted(JSONObject object, GraphResponse response)
                     {
-                        wl_pd.setMessage("Loading Data...");
-                        wl_pd.setCancelable(false);
-                        wl_pd.show();
+                        if(wl_pd != null){
+                            wl_pd.setMessage("Loading Data...");
+                            wl_pd.setCancelable(false);
+                            wl_pd.show();
+                        }
+
                         String emptyFields="";
                         // Application code
                         Log.i("Me Request", object.toString());
 //                      AddFriends addFriends = new AddFriends();
 //                      addFriends.requestInvitableFriends(cont,token);
                         fbUserInformation = gson.fromJson(object.toString(), FbUserInformation.class);
+                        Log.e("User Information --->","Information");
+                        Log.e("getFbId Id: " , fbUserInformation.getFbId());
+
+//                        if(fbUserInformation.getBirthday().equals(null))
+//                        {
+//                            fbUserInformation.setBirthday("N/A");
+//                        }
 
 
-                        if(fbUserInformation.getBirthday().equals(null))
+                        //harshada
+                        if(fbUserInformation.getAgerange().equals(null) || fbUserInformation.getAgerange() == null)
                         {
-                            fbUserInformation.setBirthday("N/A");
+                            fbUserInformation.setAge("N/A");
+                        }
+                        else
+                        {
+
+                            Object age_range = fbUserInformation.getAgerange();
+                            String age = null;
+                            try {
+                                JSONObject obj = new JSONObject(age_range.toString());
+                                age = obj.getString("min");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                            String finalAge = age.replace(".0","");
+                            Log.e("age_range ", " "+ finalAge);
+                            fbUserInformation.setAge(finalAge);
+
                         }
 
                         if(fbUserInformation.getEmail().equals(null))
@@ -627,14 +664,14 @@ public class WelcomeWork extends Activity
                         }
                         else
                         {
-
+                            Log.e("getEmail: " ,fbUserInformation.getEmail());
                         }
                         if(fbUserInformation.getFBLocationInformation()!= null)
                         {
                             fBCurrentLocationInformation = new FBCurrentLocationInformation();
                             if(fBCurrentLocationInformation.equals(fbUserInformation.getFBLocationInformation()))
                             {
-
+                                Log.e("Both current Location ","Is Empty");
                             }
                             else
                             {
@@ -645,12 +682,13 @@ public class WelcomeWork extends Activity
                         {
                             fBCurrentLocationInformation = new FBCurrentLocationInformation();
                         }
-
+//
                         if(fbUserInformation.getFbHomelocationInformation() != null)
                         {
                             fbHomelocationInformation = new FbHomelocationInformation();
                             if(fbHomelocationInformation.equals(fbUserInformation.getFbHomelocationInformation()))
                             {
+                               // Log.e("Both Home Location ","Is Empty");
                             }
                             else
                             {
@@ -662,6 +700,9 @@ public class WelcomeWork extends Activity
                             fbHomelocationInformation = new FbHomelocationInformation();
                         }
 
+//                        Log.e("Home Location --->","Details");
+//                        Log.e("getLocationId Id: " , fbHomelocationInformation.getLocationId() +"  aa");
+//                        Log.e("getLocationName " , fbHomelocationInformation.getLocationName()+"  aa");
 
                         if(fbUserInformation.getFbProfilePictureData().equals(null))
                         {
@@ -673,11 +714,16 @@ public class WelcomeWork extends Activity
                             fbProfilePictureData=fbUserInformation.getFbProfilePictureData();
                         }
 
+                      //  Log.e("getImgLink",fbProfilePictureData.getFbPictureInformation().getUrl());
+
+
                         if(emptyFields.equals(""))
                         {
                             String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
                                     LoginTableColumns.FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
+//                            Log.i("User Query  : ", Query);
                             Cursor cursor = sqldb.rawQuery(Query, null);
+//                            Log.e("Cursir count",cursor.getCount()+"");
                             if(cursor.getCount() == 0)
                             {
                                 //  Store use info in SQLIte
@@ -689,7 +735,8 @@ public class WelcomeWork extends Activity
                                 String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
                                         LoginTableColumns.FB_USER_NAME + " = '" + fbUserInformation.getFbUserName().trim() + "', " +
                                         LoginTableColumns.FB_USER_GENDER + " = '" + fbUserInformation.getGender().trim() + "', " +
-                                        LoginTableColumns.FB_USER_BIRTHDATE + " = '" + fbUserInformation.getBirthday().trim() + "', " +
+                                        //LoginTableColumns.FB_USER_BIRTHDATE + " = '" + fbUserInformation.getBirthday().trim() + "', " +
+                                        LoginTableColumns.FB_USER_AGE + " = '" + fbUserInformation.getAge().trim() + "', " +
                                         LoginTableColumns.FB_USER_EMAIL + " = '" + fbUserInformation.getEmail().trim() + "', " +
                                         LoginTableColumns.FB_USER_HOMETOWN_ID + " = '" + fbHomelocationInformation.getLocationId().trim() + "', " +
                                         LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + fbHomelocationInformation.getLocationName().trim() + "', " +
@@ -697,11 +744,23 @@ public class WelcomeWork extends Activity
                                         LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + fBCurrentLocationInformation.getLocationName().trim() + "'  where "
                                         + LoginTableColumns.FB_USER_ID + " = '" + fbUserInformation.getFbId().trim() + "'";
 
-                                Log.i("update User  "+ LoginTableColumns.FB_USER_ID , updateUser);
+                                Log.i("update User  ==="+ LoginTableColumns.FB_USER_ID , updateUser);
                                 sqldb.execSQL(updateUser);
 
-                                getFbFriendsCount();
+                                loggedInUserInfo = new LoggedInUserInformation();
 
+                                loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
+                                loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
+                                loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
+                                //loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+                                loggedInUserInfo.setFB_USER_AGE(fbUserInformation.getAge());
+                                loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
+                                //  loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
+                                loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
+                                loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
+                                loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
+                                loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
+                                getFbFriendsCount();
                             }
                             cursor.close();
                         }
@@ -717,7 +776,7 @@ public class WelcomeWork extends Activity
                 });
 
         Bundle parameters1 = new Bundle();
-        parameters1.putString("fields", "id,name,birthday,gender,email,location,picture.type(large),hometown");//,albums.fields(name,photos.fields(name,picture,source,created_time))");
+        parameters1.putString("fields", "id,name,gender,email,location,picture.type(large),hometown,age_range");//,albums.fields(name,photos.fields(name,picture,source,created_time))");
         request1.setParameters(parameters1);
         request1.executeAsync();
     }
@@ -730,7 +789,8 @@ public class WelcomeWork extends Activity
         values.put(LoginTableColumns.FB_USER_ID,fbUserInformation.getFbId().trim());
         values.put(LoginTableColumns.FB_USER_NAME,fbUserInformation.getFbUserName().trim());
         values.put(LoginTableColumns.FB_USER_GENDER,fbUserInformation.getGender().trim());
-        values.put(LoginTableColumns.FB_USER_BIRTHDATE,fbUserInformation.getBirthday().trim());
+        //values.put(LoginTableColumns.FB_USER_BIRTHDATE,fbUserInformation.getBirthday().trim());
+        values.put(LoginTableColumns.FB_USER_AGE,fbUserInformation.getAge().trim());
         values.put(LoginTableColumns.FB_USER_EMAIL,fbUserInformation.getEmail().trim());
         values.put(LoginTableColumns.FB_USER_PROFILE_PIC,fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl().trim());
         values.put(LoginTableColumns.FB_USER_HOMETOWN_ID,fbHomelocationInformation.getLocationId().trim());
@@ -741,6 +801,20 @@ public class WelcomeWork extends Activity
 
         Log.i("Inserted User ", fbUserInformation.getFbId().trim() + "   " +
                 fbHomelocationInformation.getLocationId() +"   aa   " + fbHomelocationInformation.getLocationName());
+
+        loggedInUserInfo =new LoggedInUserInformation();
+
+        loggedInUserInfo.setFB_USER_ID(fbUserInformation.getFbId());
+        loggedInUserInfo.setFB_USER_NAME(fbUserInformation.getFbUserName());
+        loggedInUserInfo.setFB_USER_GENDER(fbUserInformation.getGender());
+        //loggedInUserInfo.setFB_USER_BIRTHDATE(fbUserInformation.getBirthday());
+        loggedInUserInfo.setFB_USER_AGE(fbUserInformation.getAge());
+        loggedInUserInfo.setFB_USER_EMAIL(fbUserInformation.getEmail());
+        loggedInUserInfo.setFB_USER_PROFILE_PIC(fbUserInformation.getFbProfilePictureData().getFbPictureInformation().getUrl());
+        loggedInUserInfo.setFB_USER_HOMETOWN_ID(fbHomelocationInformation.getLocationId().trim());
+        loggedInUserInfo.setFB_USER_HOMETOWN_NAME(fbHomelocationInformation.getLocationName().trim());
+        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_ID(fBCurrentLocationInformation.getLocationId().trim());
+        loggedInUserInfo.setFB_USER_CURRENT_LOCATION_NAME(fBCurrentLocationInformation.getLocationName().trim());
 
         /******/
 
@@ -760,11 +834,10 @@ public class WelcomeWork extends Activity
                     public void onCompleted(GraphResponse response)
                     {
                         Log.e(" user friends list", response + "");
-
                         try
                         {
                             JSONObject graphObject = response.getJSONObject();
-                            //Log.e("graphObject",graphObject.toString());
+                            Log.e("graphObject",graphObject.toString());
                             JSONObject summary = graphObject.getJSONObject("summary");
                             String totCount = summary.getString("total_count");
                             Log.e("Summary  totCount ", summary + "      " + totCount);
@@ -773,9 +846,9 @@ public class WelcomeWork extends Activity
 
                             String Query = "Select * from "+ LoginTableColumns.USERTABLE + " where " +
                                     FB_USER_ID +" = '" + fbUserInformation.getFbId().trim() + "'";
-                            //Log.i("User Query  : ", Query);
+                            Log.i("User Query  : ", Query);
                             Cursor cursor = sqldb.rawQuery(Query, null);
-                            //Log.e("Cursor count",cursor.getCount()+"");
+                            Log.e("Cursor count",cursor.getCount()+"");
 
                             if(cursor.getCount() == 0)
                             {
@@ -790,11 +863,12 @@ public class WelcomeWork extends Activity
                                 sqldb.execSQL(Update);
 
                                 //AWS Storage of FB Data
+                                Log.e("Before FB AWS Storage","Yes");
 
-                                LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
-                                new checkFBUserInfo(loggedInUserInformation).execute();
+                                new checkFBUserInfo(loggedInUserInfo).execute();
 
                             }
+
 
 
                         }
@@ -832,7 +906,8 @@ public class WelcomeWork extends Activity
                 String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
                         LoginTableColumns.FB_USER_NAME + " = '" + user.getFBUserName() + "', " +
                         LoginTableColumns.FB_USER_GENDER + " = '" + user.getGender().trim() + "', " +
-                        LoginTableColumns.FB_USER_BIRTHDATE + " = '" + user.getBirthDate().trim() + "', " +
+                        //LoginTableColumns.FB_USER_BIRTHDATE + " = '" + user.getBirthDate().trim() + "', " +
+                        LoginTableColumns.FB_USER_AGE + " = '" + user.getBirthDate().trim() + "', " +
                         LoginTableColumns.FB_USER_EMAIL + " = '" + user.getSocialEmail().trim() + "', " +
                         LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + user.getFBHomeLocation().trim() + "', " +
                         LoginTableColumns.FB_USER_PROFILE_PIC + " = '" + user.getProfilePicUrl().get(0) + "', " +
@@ -842,11 +917,32 @@ public class WelcomeWork extends Activity
                 Log.i("update User "+user.getFacebookID().trim(), updateUser);
                 sqldb.execSQL(updateUser);
 
+
+                String li_userprofile_pic = user.getLKProfilePicUrl().toString();
+                if(user.getLKProfilePicUrl().toString() == null || user.getLKProfilePicUrl().toString().equals(null) || user.getLKProfilePicUrl().toString().equals("N/A"))
+                {
+                    li_userprofile_pic = "N/A";
+                }
+                else
+                {
+                    li_userprofile_pic = user.getLKProfilePicUrl().toString();
+                }
+
+                String li_user_headline = user.getLKHeadLine().toString();
+                if(user.getLKHeadLine().toString() == null || user.getLKHeadLine().toString().equals(null) || user.getLKHeadLine().toString().equals("N/A"))
+                {
+                    li_user_headline = "N/A";
+                }
+                else
+                {
+                    li_user_headline = user.getLKHeadLine().toString();
+                }
+
                 String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                         + LoginTableColumns.LI_USER_ID  + " = '" + user.getLinkedInID() + "', "
-                        + LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + user.getLKProfilePicUrl().toString() + "', "
+                        + LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + li_userprofile_pic + "', "
                         + LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + user.getLKConnectionsCount() + "', "
-                        + LoginTableColumns.LI_USER_HEADLINE + " = '" + user.getLKHeadLine() + "' "
+                        + LoginTableColumns.LI_USER_HEADLINE + " = '" + li_user_headline + "' "
                         + " where " + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
 
                 Log.i("update User "+ user.getFacebookID().trim(), Update);
@@ -866,11 +962,10 @@ public class WelcomeWork extends Activity
                 editor.putString(m_config.FinalStepDone,"Yes");
                 editor.apply();
 
-               // Log.e("Updated all flags","yes");
-
-                // StartQbSession or Navigate to different pages based on notification
+                Log.e("Updated all flags","yes");
                 String from = getIntent().getExtras().getString("from");
-                Log.e("from startLinkedInProcess "," "+from);
+                Log.e("from"," "+from);
+
                 checkfromWhere(from);
 
             }
@@ -883,10 +978,10 @@ public class WelcomeWork extends Activity
                 {
                     startLinkedInProcess(user);
                 }
-                else
+                else //if(error.toString().trim().contains("UNKNOWN_ERROR"))
                 {
                     Log.e("Inside Else","Yes");
-                    if(wl_pd!=null)
+                    if(wl_pd != null)
                     {
                         if(wl_pd.isShowing())
                         {
@@ -894,6 +989,7 @@ public class WelcomeWork extends Activity
                         }
                     }
 
+                    //GenerikFunctions.showToast(cont, "failed  linked in login " + error.toString());
                 }
             }
         }, true);
@@ -902,40 +998,69 @@ public class WelcomeWork extends Activity
     //Update local SQLite storage and shared preferences
     public void updateUserTableAndPrefs(UserTable user)
     {
-
+        Log.e("Inside Update User flags","Yes");
         if(LISessionManager.getInstance(cont).getSession().getAccessToken() == null)
         {
-
+            Log.e("LI out","Yes");
             linkedinStart="Yes";
             startLinkedInProcess(user);
         }
         else
         {
-
+            Log.e("LI out","No");
             String  litok = LISessionManager.getInstance(cont).getSession().getAccessToken().toString();
+            Log.e("litok","litok");
 
             String updateUser = "Update " + LoginTableColumns.USERTABLE + " set " +
                     LoginTableColumns.FB_USER_NAME + " = '" + user.getFBUserName() + "', " +
                     LoginTableColumns.FB_USER_GENDER + " = '" + user.getGender().trim() + "', " +
-                    LoginTableColumns.FB_USER_BIRTHDATE + " = '" + user.getBirthDate().trim() + "', " +
+                    //LoginTableColumns.FB_USER_BIRTHDATE + " = '" + user.getBirthDate().trim() + "', " +
+                    LoginTableColumns.FB_USER_AGE + " = '" + user.getBirthDate().trim() + "', " +
                     LoginTableColumns.FB_USER_EMAIL + " = '" + user.getSocialEmail().trim() + "', " +
                     LoginTableColumns.FB_USER_HOMETOWN_NAME + " = '" + user.getFBHomeLocation().trim() + "', " +
                     LoginTableColumns.FB_USER_PROFILE_PIC + " = '" + user.getProfilePicUrl().get(0) + "', " +
                     LoginTableColumns.FB_USER_CURRENT_LOCATION_NAME + " = '" + user.getFBCurrentLocation().trim() + "'  where "
                     + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
 
-            //Log.i("update User "+user.getFacebookID().trim(), updateUser);
+            Log.i("update User "+user.getFacebookID().trim(), updateUser);
             sqldb.execSQL(updateUser);
+
+
+            String li_userprofile_pic = user.getLKProfilePicUrl().toString();
+            if(user.getLKProfilePicUrl().toString() == null || user.getLKProfilePicUrl().toString().equals(null) || user.getLKProfilePicUrl().toString().equals("N/A"))
+            {
+                li_userprofile_pic = "N/A";
+            }
+            else
+            {
+                li_userprofile_pic = user.getLKProfilePicUrl().toString();
+            }
+
+            String li_user_headline = user.getLKHeadLine().toString();
+            if(user.getLKHeadLine().toString() == null || user.getLKHeadLine().toString().equals(null) || user.getLKHeadLine().toString().equals("N/A"))
+            {
+                li_user_headline = "N/A";
+            }
+            else
+            {
+                li_user_headline = user.getLKHeadLine().toString();
+            }
+
+
+
 
             String Update = "Update " + LoginTableColumns.USERTABLE + " set "
                     + LoginTableColumns.LI_USER_ID  + " = '" + user.getLinkedInID() + "', "
-                    + LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + user.getLKProfilePicUrl().toString() + "', "
+                    + LoginTableColumns.LI_USER_PROFILE_PIC  + " = '" + li_userprofile_pic + "', "
                     + LoginTableColumns.LI_USER_CONNECTIONS  + " = '" + user.getLKConnectionsCount() + "', "
-                    + LoginTableColumns.LI_USER_HEADLINE + " = '" + user.getLKHeadLine() + "' "
+                    + LoginTableColumns.LI_USER_HEADLINE + " = '" + li_user_headline + "' "
                     + " where " + LoginTableColumns.FB_USER_ID + " = '" + user.getFacebookID().trim() + "'";
 
-            //Log.i("update User "+ user.getFacebookID().trim() , Update);
+            Log.i("update User "+ user.getFacebookID().trim() , Update);
             sqldb.execSQL(Update);
+
+
+
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(m_config.Entered_User_Name,user.getName());
@@ -951,21 +1076,21 @@ public class WelcomeWork extends Activity
             editor.putString(m_config.FinalStepDone,"Yes");
             editor.apply();
 
-            //Log.e("Updated all flags","yes");
+            Log.e("Check LI Token"," "+LISessionManager.getInstance(cont).getSession().getAccessToken().toString());
             //Start LI Session
             if(LISessionManager.getInstance(cont).getSession().getAccessToken().toString() == null)
             {
-
+                Log.e("LI out","Yes");
                 linkedinStart="Yes";
                 startLinkedInProcess(user);
             }
             else
             {
+                //LoginValidations.QBStartSession(cont);
 
-
-                // StartQbSession or Navigate to different pages based on notification
                 String from = getIntent().getExtras().getString("from");
-                Log.e("from in updateUserTableAndPrefs"," "+from);
+                Log.e("from"," "+from);
+
                 checkfromWhere(from);
             }
 
@@ -973,6 +1098,10 @@ public class WelcomeWork extends Activity
         }
 
 
+        //Start QB Session Here
+//
+//        Intent intent = new Intent(cont, HomePageActivity.class);
+//        startActivity(intent);
 
 
     }
@@ -1008,30 +1137,50 @@ public class WelcomeWork extends Activity
                     Log.e("User registration status in AWS","Yes");
                     //Registration is already done
                     updateUserTableAndPrefs(selUserData);
+
                 }
                 else
+                {
+                    if(wl_pd != null){
+                        if(wl_pd.isShowing())
+                        {
+                            wl_pd.dismiss();
+                        }
+                    }
+
+
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(m_config.TempEntered_User_Name, selUserData.getName());
+                    editor.putString(m_config.TempEntered_Email, selUserData.getEmail());
+                    editor.putString(m_config.TempEntered_Contact_No, selUserData.getPhoneNumber());
+                    editor.commit();
+
+
+                    Log.e("User registration status in AWS","No");
+                    Toast.makeText(cont,"Your Registration Process is incomplete. Please Complete...",Toast.LENGTH_LONG).show();
+                    Intent i = new Intent(WelcomeWork.this, WelcomeWork.class);
+                    startActivity(i);
+                    finish();
+
+
+
+                }
+            }
+            else
+            {
+                if(wl_pd != null)
                 {
                     if(wl_pd.isShowing())
                     {
                         wl_pd.dismiss();
                     }
-                    Log.e("User registration status in AWS","No");
-                    Toast.makeText(cont,"Your Registration Process is incomplete. Please Complete...",Toast.LENGTH_LONG).show();
-                    Intent i = new Intent(WelcomeWork.this, RegistrationActivity.class);
-                    startActivity(i);
-                    finish();
                 }
-            }
-            else
-            {
-                if(wl_pd.isShowing())
-                {
-                    wl_pd.dismiss();
-                }
+
                 Log.e("User not exists in AWS","No");
                 //If not exists then call  normal registration flow
-                Toast.makeText(cont,"You are not a user. Please Register...",Toast.LENGTH_LONG).show();
-                Intent i = new Intent(WelcomeWork.this, RegistrationActivity.class);
+                Toast.makeText(cont,"Not a user. Please Register...",Toast.LENGTH_LONG).show();
+                Intent i = new Intent(WelcomeWork.this, WelcomeWork.class);
                 startActivity(i);
                 finish();
             }
@@ -1042,7 +1191,7 @@ public class WelcomeWork extends Activity
     //Callback function for Android M Permission
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
     {
-        //Log.e("grantResults.length"," "+grantResults.length+" "+grantResults[0]);
+        Log.e("grantResults.length"," "+grantResults.length+" "+grantResults[0]);
 
         switch (requestCode)
         {
@@ -1166,6 +1315,8 @@ public class WelcomeWork extends Activity
 
     public void checkfromWhere(String from)
     {
+        Log.e("here "," "+sharedPreferences.getString(m_config.Entered_User_Name,""));
+
         if(from.equals("registration") || from.equals("splash") || from.equals("homepage"))
         {
             LoginValidations.QBStartSession(cont);
@@ -1177,9 +1328,9 @@ public class WelcomeWork extends Activity
             String PartyStartTime = getIntent().getExtras().getString("PartyStartTime");
             String PartyEndTime = getIntent().getExtras().getString("PartyEndTime");
             String PartyStatus = getIntent().getExtras().getString("PartyStatus");
-            //String GCQBID = getIntent().getExtras().getString("GCQBID");
+            String GCQBID = getIntent().getExtras().getString("GCQBID");
             String GCFBID = getIntent().getExtras().getString("GCFBID");
-            //String message = getIntent().getExtras().getString("message");
+            String message = getIntent().getExtras().getString("message");
 
             Intent i = new Intent(WelcomeWork.this, RequestantActivity.class);
             PartyParceableData party1 = new PartyParceableData();
@@ -1188,9 +1339,10 @@ public class WelcomeWork extends Activity
             party1.setStartTime(PartyStartTime);
             party1.setEndTime(PartyEndTime);
             party1.setPartyStatus(PartyStatus);
-            //i.putExtra("GCQBID",GCQBID);
+            i.putExtra("from", "requestSend");
+            i.putExtra("GCQBID",GCQBID);
             i.putExtra("GCFBID", GCFBID);
-            i.putExtra("from",from);
+            i.putExtra("message", message);
             Bundle mBundles = new Bundle();
             mBundles.putSerializable(ConstsCore.SER_KEY, party1);
             i.putExtras(mBundles);
@@ -1205,49 +1357,9 @@ public class WelcomeWork extends Activity
             }
 
         }
-        else if(from.equals("requestApproved") || from.equals("requestDeclined"))
-        {
-            String GCFBID = getIntent().getExtras().getString("GCFBID");
-            //String message = getIntent().getExtras().getString("message");
-            Intent i = new Intent(WelcomeWork.this, HistoryActivity.class);
-            i.putExtra("GCFBID", GCFBID);
-            i.putExtra("from",from);
-            startActivity(i);
-
-
-            if(wl_pd!=null)
-            {
-                if(wl_pd.isShowing())
-                {
-                    wl_pd.dismiss();
-                }
-            }
-        }
-        else if(from.equals("PartyRetention"))
-        {
-            String PartyName = getIntent().getExtras().getString("PartyName");
-            String PartyId = getIntent().getExtras().getString("PartyId");
-            String DialogId = getIntent().getExtras().getString("DialogId");
-            Intent i = new Intent(WelcomeWork.this, HomePageActivity.class);
-            i.putExtra("DialogId", DialogId);
-            i.putExtra("PartyId",PartyId);
-            i.putExtra("PartyName", PartyName);
-            i.putExtra("from",from);
-            startActivity(i);
-
-            if(wl_pd!=null)
-            {
-                if(wl_pd.isShowing())
-                {
-                    wl_pd.dismiss();
-                }
-            }
-        }
-
-        else if(from.equals("chatoffline") || from.equals("1-1 Chat") || from.equals("1-1 Chat OfflineMsg"))
+        else if(from.equals("chatoffline"))
         {
             Intent i = new Intent(WelcomeWork.this, DialogsActivity.class);
-            i.putExtra("from",from);
             startActivity(i);
 
             if(wl_pd!=null)
@@ -1258,7 +1370,43 @@ public class WelcomeWork extends Activity
                 }
             }
         }
+        else if(from.equals("requestApproved"))
+        {
+            String GCFBID = getIntent().getExtras().getString("GCFBID");
+            String message = getIntent().getExtras().getString("message");
+            Intent i = new Intent(WelcomeWork.this, HistoryActivity.class);
+            i.putExtra("GCFBID", GCFBID);
+            i.putExtra("from", "requestApproved");
+            i.putExtra("message", message);
+            startActivity(i);
 
 
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
+        else if(from.equals("requestDeclined"))
+        {
+            String GCFBID = getIntent().getExtras().getString("GCFBID");
+            String message = getIntent().getExtras().getString("message");
+            Intent i = new Intent(WelcomeWork.this, HistoryActivity.class);
+            i.putExtra("GCFBID", GCFBID);
+            i.putExtra("from", "requestDeclined");
+            i.putExtra("message", message);
+            startActivity(i);
+
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
     }
 }

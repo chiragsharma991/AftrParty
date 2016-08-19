@@ -19,7 +19,6 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -38,15 +37,14 @@ import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.ActivePartyClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyMaskStatusClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
-import com.aperotechnologies.aftrparties.util.IabHelper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -185,12 +183,15 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
             @Override
             public void onClick(View v) {
 
+
                 //Check mask status of user for party request
+                GenerikFunctions.sDialog(cont, "Loading...");
                 try {
                     user = m_config.mapper.load(UserTable.class, loginUserFBID);
                     Log.e("----", " " + user.getPaidgc());
                     List<PaidGCClass> paidgclist = user.getPaidgc();
                     if (paidgclist == null || paidgclist.size() == 0) {
+                        GenerikFunctions.hDialog();
 
                         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(GateCrasherSearchActivity.this);
                         alertDialogBuilder
@@ -225,8 +226,10 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
                             Long currTime = Validations.getCurrentTime();//System.currentTimeMillis();
                             if (currTime < Long.parseLong(paidgclist.get(0).getSubscriptiondate())) {
                                 GenerikFunctions.showToast(cont, "Your subscription is upto date.");
+                                GenerikFunctions.hDialog();
 
                             } else {
+                                GenerikFunctions.hDialog();
                                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(GateCrasherSearchActivity.this);
                                 alertDialogBuilder
                                         .setTitle("Pay for Multiple Party Request.")
@@ -253,7 +256,7 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
                             }
 
                         } else {
-
+                            GenerikFunctions.hDialog();
                             ///10001 - is requestCode
                             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(GateCrasherSearchActivity.this);
                             alertDialogBuilder
@@ -282,7 +285,7 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
 
                     }
                 } catch (Exception e) {
-
+                    GenerikFunctions.hDialog();
                 }
 
 
@@ -427,29 +430,6 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
                         }
                     }
                 }
-
-
-                //Log.e("location"," ----- "+location+" ---- "+selected_byob);
-
-//                if(location == null){
-//                    Toast.makeText(cont,"Current Location not available",Toast.LENGTH_SHORT).show();
-//
-//                }else{
-//                    Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
-//                    GCParceableData data = new GCParceableData();
-//                    data.setlatitude(String.valueOf(location.getLatitude()));
-//                    data.setlongitude(String.valueOf(location.getLongitude()));
-//                    data.setdistance(sharedPreferences.getString(m_config.Distance,"3"));
-//                    data.setatdatetime(String.valueOf(selected_startTimeVal));
-//                    data.setbyob(selected_byob);
-//                    data.setpreference(sharedPreferences.getString(m_config.GenderPreference,""));
-//                    Bundle mBundles = new Bundle();
-//                    mBundles.putSerializable(ConstsCore.SER_KEY, data);
-//                    i.putExtras(mBundles);
-//                    cont.startActivity(i);
-//
-//
-//                }
 
 
             }
@@ -840,144 +820,9 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
 
     }
 
-    private class setPartyPurchaseinAWS extends AsyncTask<String, Void, Void>
-    {
-
-        @Override
-        protected Void doInBackground(String... params)
-        {
-
-            Long subVal = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
-            List<PaidGCClass> paidgclist = user.getPaidgc();
-
-            try {
-                //check whether is paid or unpaid user
-                if (paidgclist == null || paidgclist.size() == 0)
-                {
-                    // here user is unpaid user
-
-                    PaidGCClass paidGCClass = new PaidGCClass();
-                    paidGCClass.setPaidstatus("Yes");
-                    paidGCClass.setSubscriptiondate(String.valueOf(subVal));
-                    paidgclist = new ArrayList<>();
-                    paidgclist.add(paidGCClass);
-
-                    List<ActivePartyClass> ActivePartyList = user.getActiveparty();
-                    if (ActivePartyList != null || ActivePartyList.size() != 0)
-                    {
-                        //if there is an active party update endblocktime of active party
-                        ActivePartyClass ActiveParty = ActivePartyList.get(0);
-
-                        String EndBlockTime = "";
-                        if ((Long.parseLong(ActiveParty.getStartblocktime() + ConstsCore.hourVal)) > Long.parseLong(ActiveParty.getEndtime())) {
-                            EndBlockTime = ActiveParty.getEndtime();
-                        } else {
-                            EndBlockTime = String.valueOf(Long.parseLong(ActiveParty.getStarttime()) + ConstsCore.hourVal);
-                        }
-
-
-                        ActiveParty.setPartyid(ActiveParty.getPartyid());
-                        ActiveParty.setPartyname(ActiveParty.getPartyname());
-                        ActiveParty.setStarttime(ActiveParty.getStarttime());
-                        ActiveParty.setEndtime(ActiveParty.getEndtime());
-                        ActiveParty.setPartystatus(ActiveParty.getPartystatus());
-                        ActiveParty.setStartblocktime(ActiveParty.getStartblocktime());
-                        ActiveParty.setEndblocktime(EndBlockTime);
-                        ActivePartyList.set(0, ActiveParty);
-                        user.setActiveparty(ActivePartyList);
-                        user.setPaidgc(paidgclist);
-                        m_config.mapper.save(user);
-                        Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                        GenerikFunctions.hDialog();
 
 
 
-                    }
-                    else
-                    {
-                        user.setPaidgc(paidgclist);
-                        m_config.mapper.save(user);
-
-                        Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                        GenerikFunctions.hDialog();
-
-                    }
-
-
-                } else {
-
-                    // here user is paid user
-                    PaidGCClass paidGCClass = paidgclist.get(0);
-                    paidGCClass.setPaidstatus("Yes");
-                    paidGCClass.setSubscriptiondate(String.valueOf(subVal));
-                    paidgclist.add(0, paidGCClass);
-
-                    List<ActivePartyClass> ActivePartyList = user.getActiveparty();
-                    if (ActivePartyList != null || ActivePartyList.size() != 0)
-                    {
-                        //if there is an active party update endblocktime of active party
-                        ActivePartyClass ActiveParty = ActivePartyList.get(0);
-
-                        String EndBlockTime = "";
-                        if ((Long.parseLong(ActiveParty.getStartblocktime() + ConstsCore.hourVal)) > Long.parseLong(ActiveParty.getEndtime())) {
-                            EndBlockTime = ActiveParty.getEndtime();
-                        } else {
-                            EndBlockTime = String.valueOf(Long.parseLong(ActiveParty.getStarttime()) + ConstsCore.hourVal);
-                        }
-
-
-                        ActiveParty.setPartyid(ActiveParty.getPartyid());
-                        ActiveParty.setPartyname(ActiveParty.getPartyname());
-                        ActiveParty.setStarttime(ActiveParty.getStarttime());
-                        ActiveParty.setEndtime(ActiveParty.getEndtime());
-                        ActiveParty.setPartystatus(ActiveParty.getPartystatus());
-                        ActiveParty.setStartblocktime(ActiveParty.getStartblocktime());
-                        ActiveParty.setEndblocktime(EndBlockTime);
-                        ActivePartyList.set(0, ActiveParty);
-                        user.setActiveparty(ActivePartyList);
-                        user.setPaidgc(paidgclist);
-                        m_config.mapper.save(user);
-
-
-                        Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                        GenerikFunctions.hDialog();
-
-
-                    }
-                    else
-                    {
-                        user.setPaidgc(paidgclist);
-                        m_config.mapper.save(user);
-
-                        Toast.makeText(getApplicationContext(), "Data is saved Successfully", Toast.LENGTH_SHORT).show();
-                        GenerikFunctions.hDialog();
-
-                    }
-
-                }
-            } catch (Exception e) {
-
-                Toast.makeText(getApplicationContext(), "Data is not saved Successfully", Toast.LENGTH_SHORT).show();
-                GenerikFunctions.hDialog();
-
-            }
-            return null;
-        }
-
-
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Void v)
-        {
-
-
-        }
-    }
 
 
     @Override
@@ -1012,13 +857,12 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
     public void onProductPurchased(String productId, TransactionDetails details) {
         //GenerikFunctions.showToast(cont, "Purchase Successful");
         GenerikFunctions.sDialog(cont, "Saving Data");
-        new setPartyPurchaseinAWS().execute();
+        Long subscriptiondate = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
+        new AWSPaymentOperations.setPartyPurchaseinAWS(cont,subscriptiondate,loginUserFBID).execute();
         Boolean consumed = bpGCParties.consumePurchase(ConstsCore.ITEM_PARTYPURCHASE_SKU);
 
         if (consumed) {
-            GenerikFunctions.showToast(cont,"Successfully consumed");
-        } else {
-            GenerikFunctions.hDialog();
+            //GenerikFunctions.showToast(cont,"Successfully consumed");
         }
 
     }
@@ -1045,6 +889,9 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
         readyToPurchaseGCParties = true;
 
     }
+
+
+
 
 
 }

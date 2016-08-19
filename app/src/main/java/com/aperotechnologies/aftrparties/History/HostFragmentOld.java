@@ -318,7 +318,7 @@ public class HostFragmentOld extends Fragment {
                         Toast.makeText(cont,"consume success", Toast.LENGTH_SHORT).show();
 
                         GenerikFunctions.sDialog(cont, "Creating 1-1 Chat...");
-                        QBChatDialogCreation.createPrivateChat(Integer.valueOf(qbid) ,cont);
+                        //QBChatDialogCreation.createPrivateChat(Integer.valueOf(qbid) ,cont, subscriptiondate);
 
 
 

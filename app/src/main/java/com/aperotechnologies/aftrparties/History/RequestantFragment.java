@@ -19,16 +19,16 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.anjlab.android.iab.v3.BillingProcessor;
-import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Chats.ChatService;
+import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.ActivePartyClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaymentTable;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
@@ -36,11 +36,6 @@ import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
-import com.aperotechnologies.aftrparties.util.IabException;
-import com.aperotechnologies.aftrparties.util.IabHelper;
-import com.aperotechnologies.aftrparties.util.IabResult;
-import com.aperotechnologies.aftrparties.util.Inventory;
-import com.aperotechnologies.aftrparties.util.Purchase;
 import com.facebook.AccessToken;
 import com.linkedin.platform.DeepLinkHelper;
 import com.linkedin.platform.errors.LIDeepLinkError;
@@ -49,13 +44,9 @@ import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by mpatil on 19/07/16.
@@ -208,38 +199,42 @@ public class RequestantFragment extends Fragment
             public void onClick(View v)
             {
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
-                alertDialogBuilder
-                        .setTitle("Pay for 1-1 Chat.")
-                        .setMessage("Are you sure you want to pay for 1-1 Chat ?")
-                        .setCancelable(false)
-                        .setNegativeButton("No", new DialogInterface.OnClickListener()
-                        {
-                            public void onClick(DialogInterface dialog, int id)
-                            {
+                GenerikFunctions.sDialog(cont, "Loading...");
+                checkforPrivateChat(cont, facebookId.get(position));
 
-                            }
-                        })
-                        .setPositiveButton("Yes",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id)
-                                    {
-                                        if (!RequestantActivity.readyToPurchaseRChat)
-                                        {
-                                            GenerikFunctions.showToast(cont,"Billing not initialized.");
-                                            return;
-                                        }
-                                        else
-                                        {
-                                            m_config.QbIdforInappPChat = QbId.get(position);
-                                            RequestantActivity.bpReqChat.purchase((Activity) cont,ConstsCore.ITEM_PRIVATECHAT_SKU);
-
-
-                                        }
-                                    }
-
-                                });
-                alertDialogBuilder.show();
+//                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
+//                alertDialogBuilder
+//                        .setTitle("Pay for 1-1 Chat.")
+//                        .setMessage("Are you sure you want to pay for 1-1 Chat ?")
+//                        .setCancelable(false)
+//                        .setNegativeButton("No", new DialogInterface.OnClickListener()
+//                        {
+//                            public void onClick(DialogInterface dialog, int id)
+//                            {
+//
+//                            }
+//                        })
+//                        .setPositiveButton("Yes",
+//                                new DialogInterface.OnClickListener() {
+//                                    public void onClick(DialogInterface dialog, int id)
+//                                    {
+//                                        if (!RequestantActivity.readyToPurchaseRChat)
+//                                        {
+//                                            GenerikFunctions.showToast(cont,"Billing not initialized.");
+//                                            return;
+//                                        }
+//                                        else
+//                                        {
+//
+//                                            m_config.QbIdforInappPChat = QbId.get(position);
+//                                            RequestantActivity.bpReqChat.purchase((Activity) cont,ConstsCore.ITEM_PRIVATECHAT_SKU);
+//
+//
+//                                        }
+//                                    }
+//
+//                                });
+//                alertDialogBuilder.show();
 
             }
         });
@@ -349,7 +344,7 @@ public class RequestantFragment extends Fragment
 
                     String SubscriptionTime = PaidGC.get(0).getSubscriptiondate();
                     if (currentApprovalTime > Long.parseLong(SubscriptionTime)) {
-                        //GenerikFunctions.showToast(cont, "Your subscription has been expired");
+                        GenerikFunctions.showToast(cont,"Your subscription for this user is expired.");
                         message = user.getName() +" Your subscription has been expired";
                         //Subscription time expired
                         val = false;
@@ -537,6 +532,227 @@ public class RequestantFragment extends Fragment
         }
     }
 
+    public void  checkforPrivateChat(Context cont, String oppFbId)
+    {
+        String facebookid = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+
+        try
+        {
+            PaymentTable paymentTable = m_config.mapper.load(PaymentTable.class,facebookid);
+
+            //check for current user
+            if(paymentTable == null)
+            {
+                // if current user does not exist in payment table check for opponent user in PaymentTable
+                checkOppUserinPChat(cont, oppFbId, facebookid);
+            }
+            else
+            {
+                //if current user exist in payment table check for its privatechat array
+                if(paymentTable.getPrivatechat() == null || paymentTable.getPrivatechat().size() == 0)
+                {
+
+                    // check for opponent user
+                    checkOppUserinPChat(cont, oppFbId, facebookid);
+
+                }
+                else
+                {
+                    for(int i = 0; i< paymentTable.getPrivatechat().size(); i++)
+                    {
+                        //if current user exist in payment table check for oppIdFbid in privatechat array
+                        if(paymentTable.getPrivatechat().get(i).getFbid().equals(oppFbId))
+                        {
+                            //if oppIdFbid exist in  privatechat array check for subscription date
+                            if(Validations.getCurrentTime() > Long.parseLong(paymentTable.getPrivatechat().get(i).getSubscriptiondate()))
+                            {
+                                //check whether currentuserfbid and private chat array fbid are similar
+                                //a. if it is similar he cannot go for subscription
+                                //b. if it is non similar he can go for subscription
+                                if(paymentTable.getPrivatechat().get(i).getFbid().equals(facebookid))
+                                {
+                                    //here user is not admin and subscription is expired
+                                    GenerikFunctions.showToast(cont,"Your chat with this user already exist.");
+                                    GenerikFunctions.hDialog();
+
+                                    Intent intent = new Intent(cont, DialogsActivity.class);
+                                    startActivity(intent);
+                                    break;
+                                }
+                                else
+                                {
+                                    GenerikFunctions.showToast(cont,"Your subscription for this user is expired.");
+                                    //delete previous chat dialog
+                                    //call for in app purchase
+                                    GenerikFunctions.hDialog();
+                                    inAppPurchaseHChat(cont,paymentTable.getPrivatechat().get(i).getDialogId());
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                GenerikFunctions.showToast(cont,"Your chat with this user already exist.");
+                                GenerikFunctions.hDialog();
+
+                                Intent intent = new Intent(cont, DialogsActivity.class);
+                                startActivity(intent);
+                                break;
+                            }
+                        }
+                        else {
+                            // if oppIdFbid does not exist in privatechat array check for opponent user in payment table
+                            checkOppUserinPChat(cont, oppFbId, facebookid);
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+        catch (Exception e)
+        {
+            //GenerikFunctions.showToast(cont,"");
+            GenerikFunctions.hDialog();
+        }
+    }
+
+    public void checkOppUserinPChat(Context cont, String oppFbId, String facebookid)
+    {
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        try
+        {
+            PaymentTable opppaymentTable = m_config.mapper.load(PaymentTable.class,oppFbId);
+
+            // check for opponent user in PaymentTable
+            if(opppaymentTable == null)
+            {
+                //call for in app purchase
+                Log.i("oppfbuser does not exist in paymentatble","");
+
+                inAppPurchaseHChat(cont, "");
+                GenerikFunctions.hDialog();
+
+
+            }
+            else
+            {
+                //if opponent user exist in payment table check for its privatechat array
+                if(opppaymentTable.getPrivatechat() == null || opppaymentTable.getPrivatechat().size() == 0)
+                {
+
+                    Log.i("private chat array is blank for opp user","");
+                    GenerikFunctions.hDialog();
+                    inAppPurchaseHChat(cont, "");
+                    //call for in app purchase
+
+                }
+                else
+                {
+
+                    for(int i = 0; i< opppaymentTable.getPrivatechat().size(); i++)
+                    {
+                        //if opponent user exist in payment table check for currentuserfbid in privatechat array
+                        if(opppaymentTable.getPrivatechat().get(i).getFbid().equals(facebookid))
+                        {
+                            //if currentuserfbid exist in  privatechat array check for subscription date
+                            if(Validations.getCurrentTime() > Long.parseLong(opppaymentTable.getPrivatechat().get(i).getSubscriptiondate()))
+                            {
+
+                                //check whether currentuserfbid and private chat array fbid are similar
+                                //a. if it is similar he cannot go for subscription
+                                //b. if it is non similar he can go for subscription
+                                if(opppaymentTable.getPrivatechat().get(i).getFbid().equals(facebookid))
+                                {
+                                    //here user is not admin and subscription is expired
+                                    GenerikFunctions.showToast(cont,"Your chat with this user already exist.");
+                                    GenerikFunctions.hDialog();
+
+                                    Intent intent = new Intent(cont, DialogsActivity.class);
+                                    startActivity(intent);
+                                    break;
+
+                                }
+                                else
+                                {
+                                    GenerikFunctions.showToast(cont,"Your subscription for this user is expired.");
+                                    //delete previous chat dialog
+                                    //call for in app purchase
+                                    GenerikFunctions.hDialog();
+                                    inAppPurchaseHChat(cont,opppaymentTable.getPrivatechat().get(i).getDialogId());
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                Log.i("current user does not exist in opponent user data ","");
+                                GenerikFunctions.showToast(cont,"Your chat with this user already exist.");
+                                GenerikFunctions.hDialog();
+
+                                Intent intent = new Intent(cont, DialogsActivity.class);
+                                startActivity(intent);
+                                break;
+                            }
+                        }
+                        else{
+                            //call for in app purchase
+                            Log.i("Call for in app Purchase.","");
+                            GenerikFunctions.hDialog();
+                            inAppPurchaseHChat(cont, "");
+                        }
+                    }
+
+
+                }
+
+
+            }
+        }
+        catch (Exception e){
+
+        }
+    }
+
+    public void inAppPurchaseHChat(final Context cont, final String dialogId)
+    {
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);
+        alertDialogBuilder
+                .setTitle("Pay for 1-1 Chat.")
+                .setMessage("Are you sure you want to pay for 1-1 Chat ?")
+                .setCancelable(false)
+                .setNegativeButton("No", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int id)
+                    {
+
+                    }
+                })
+                .setPositiveButton("Yes",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id)
+                            {
+                                Log.e("RequestantActivity.readyToPurchaseRChat"," "+RequestantActivity.readyToPurchaseRChat+" ");
+                                if (RequestantActivity.readyToPurchaseRChat == true)
+                                {
+                                    m_config.DialogidforReqInappPChat = dialogId;
+                                    m_config.QbIdforInappPChat = QbId.get(position);
+                                    m_config.FbIdforInappPChat = facebookId.get(position);
+
+                                    RequestantActivity.bpReqChat.purchase((Activity) cont,ConstsCore.ITEM_PRIVATECHAT_SKU);
+                                }
+                                else
+                                {
+                                    GenerikFunctions.showToast(cont,"Billing not initialized.");
+                                    return;
+                                }
+                            }
+
+                        });
+        alertDialogBuilder.show();
+    }
 
 
 

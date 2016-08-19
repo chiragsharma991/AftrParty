@@ -1,0 +1,305 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:id="@+id/loginactivity"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical">
+
+
+        <!-- Toolbar for HomePage-->
+        <LinearLayout
+            android:visibility="visible"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/ll_home_toolbar"   >
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/home_toolbar"
+                android:layout_marginLeft="-16dp"
+                android:layout_alignParentTop="true"
+                android:background="@color/colorPrimaryDark"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:minHeight="?attr/actionBarSize"   >
+
+                <RelativeLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="44dp"
+                    android:id="@+id/toolbar_content"   >
+
+                    <TextView
+                        android:textSize="20sp"
+                        android:layout_centerInParent="true"
+                        android:text="Party Details"
+                        android:id="@+id/activity_title"
+                        android:textColor="#ffffff"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"   />
+
+                </RelativeLayout>
+
+            </android.support.v7.widget.Toolbar>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_margin="10dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+
+            <LinearLayout
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.github.siyamed.shapeimageview.CircularImageView
+                    android:id="@+id/partyimage"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:src="@drawable/placeholder_user"
+                    app:siBorderWidth="4dp"
+                    app:siBorderColor="@color/colorPrimaryDark"/>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:text="Party Name : "
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:id="@+id/partyname"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:text="Host Name : "
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:id="@+id/hostname"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:text="Party Description : "
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:id="@+id/partydesc"
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:text="Party Address : "
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:id="@+id/partyaddress"
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:text=""
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:text="Party StartTime : "
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:id="@+id/partystarttime"
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:text=""
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:text="Party EndTime : "
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_weight="0.5"
+                    android:id="@+id/partyendtime"
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:text=""
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+
+
+            <LinearLayout
+                android:weightSum="1"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <TextView
+                    android:textSize="@dimen/text_size"
+                    android:textColor="@color/black"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="BYOB : "/>
+
+                <RadioGroup
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/identity"
+                    android:layout_weight="0.5"
+                    android:divider="?android:attr/dividerHorizontal"
+                    android:orientation="horizontal" >
+
+                    <RadioButton
+                        android:enabled="false"
+                        android:layout_centerVertical="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Yes"
+                        android:textSize="@dimen/text_size"
+                        android:id="@+id/byobYes"  />
+
+
+                    <RadioButton
+                        android:enabled="false"
+                        android:layout_centerVertical="true"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/text_size"
+                        android:id="@+id/byobNo"/>
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

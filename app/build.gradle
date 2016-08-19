@@ -49,6 +49,7 @@ android {
 
     repositories {
         mavenCentral()
+        maven { url 'http://maven.stickerpipe.com/artifactory/stickerfactory' }
 
     }
 }
@@ -92,5 +93,6 @@ dependencies {
     }
     compile files('libs/http-core-4.1.jar')
     compile 'com.anjlab.android.iab.v3:library:1.0.+'
+
 
 }

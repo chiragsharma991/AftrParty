@@ -2,7 +2,6 @@ package com.aperotechnologies.aftrparties.PNotifications;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -15,14 +14,11 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPartyOperations;
-import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
-import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
 import com.google.android.gms.common.ConnectionResult;
@@ -31,7 +27,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
 
-public class PlayServicesHelper {
+public class PlayServicesHelperWork {
 
     //Harshada
     private static final String TAG = "PlayServicesHelper";
@@ -57,19 +53,20 @@ public class PlayServicesHelper {
 
 
 
-    public PlayServicesHelper(Activity cont, LoggedInUserInformation loggedInUserInfo) {
+    public PlayServicesHelperWork(Activity cont, LoggedInUserInformation loggedInUserInfo) {
         this.cont = cont;
         this.loggedInUserInfo = loggedInUserInfo;
         m_config = Configuration_Parameter.getInstance();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
+
         faceOverlayView = new FaceOverlayView(cont);
 //      faceOverlayView.setTag(1);
         faceOverlayView = (FaceOverlayView) cont.findViewById(R.id.face_overlay);
         queue = Volley.newRequestQueue(cont);
 
-        checkPlayService();
-//        Thread t = new Thread(new CheckPlayServicesLooper());
-//        t.start();
+        //checkPlayService();
+        Thread t = new Thread(new CheckPlayServicesLooper());
+        t.start();
     }
 
     private void checkPlayService() {

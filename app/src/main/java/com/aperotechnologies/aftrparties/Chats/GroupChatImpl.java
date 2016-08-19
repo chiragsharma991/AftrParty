@@ -113,18 +113,18 @@ public class GroupChatImpl extends QBMessageListenerImpl<QBGroupChat> implements
     @Override
     public void sendMessage(QBChatMessage message) throws XMPPException, SmackException.NotConnectedException {
         if (groupChat != null) {
-            try {
+//            try {
                 groupChat.sendMessage(message);
-            } catch (SmackException.NotConnectedException nce){
-                nce.printStackTrace();
-                GenerikFunctions.showToast(chatActivity,"Can't send a message, You are not connected to chat");
-                Log.i("","Can't send a message, You are not connected to chat");
-            } catch (IllegalStateException e){
-                e.printStackTrace();
-                GenerikFunctions.showToast(chatActivity,"You are still joining a group chat, please wait a bit");
-                Log.i("","You are still joining a group chat, please wait a bit");
-
-            }
+//            } catch (SmackException.NotConnectedException nce){
+//                nce.printStackTrace();
+//                GenerikFunctions.showToast(chatActivity,"Can't send a message, You are not connected to chat");
+//                Log.i("","Can't send a message, You are not connected to chat");
+//            } catch (IllegalStateException e){
+//                e.printStackTrace();
+//                GenerikFunctions.showToast(chatActivity,"You are still joining a group chat, please wait a bit");
+//                Log.i("","You are still joining a group chat, please wait a bit");
+//
+//            }
         } else {
             //Toast.makeText(chatActivity, "Join unsuccessful", Toast.LENGTH_LONG).show();
             Log.i("","Join unsuccessful");

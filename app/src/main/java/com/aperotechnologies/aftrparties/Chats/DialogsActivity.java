@@ -356,7 +356,9 @@ public class DialogsActivity extends Activity implements AbsListView.OnScrollLis
 
         if(getIntent() == null || getIntent().equals(null) || getIntent().getExtras() == null || getIntent().getExtras().equals(null))
         {
-            super.onBackPressed();
+            Intent i = new Intent(DialogsActivity.this, HomePageActivity.class);
+            startActivity(i);
+            finish();
         }
         else if(getIntent().getExtras().getString("from").equals("chatoffline") || getIntent().getExtras().getString("from").equals("1-1 Chat") || getIntent().getExtras().getString("from").equals("1-1 Chat OfflineMsg"))
         {

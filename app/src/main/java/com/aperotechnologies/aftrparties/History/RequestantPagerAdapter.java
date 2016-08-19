@@ -43,6 +43,8 @@ public class RequestantPagerAdapter extends FragmentStatePagerAdapter
         super(supportFragmentManager);
     }
 
+
+
     //Overriding method getItem
     @Override
     public Fragment getItem(int position)

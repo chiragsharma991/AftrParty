@@ -89,9 +89,6 @@ public class SplashActivity extends Activity {
             setContentView(R.layout.activity_splashevening);
         }
 
-
-
-
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         m_config = Configuration_Parameter.getInstance();
         Crouton.cancelAllCroutons();
@@ -148,9 +145,6 @@ public class SplashActivity extends Activity {
                         }
 
 
-                        //Start QB Session
-//                       Intent i = new Intent(cont, HomePageActivity.class);
-//                       cont.startActivity(i);
                         LoginValidations.QBStartSession(cont);
                     }
                     else

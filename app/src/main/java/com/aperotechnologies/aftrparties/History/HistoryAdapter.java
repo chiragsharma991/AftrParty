@@ -111,12 +111,6 @@ public class HistoryAdapter extends BaseAdapter {
 
         PartiesClass Parties = new PartiesClass();
         Parties = (PartiesClass) PartiesList.get(position);
-//        Log.e("", " " + Parties.getPartyName());
-//        Log.e("", " " + Parties.getPartyStatus());
-
-      //  Log.e("Party Adapter  " , position + "   " + Parties.getPartyName());
-
-
 
 
         holder.partyName.setText(Parties.getPartyname());

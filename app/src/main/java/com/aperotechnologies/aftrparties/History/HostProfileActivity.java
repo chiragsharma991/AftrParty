@@ -4,26 +4,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
-import com.andtinder.model.CardModel;
-import com.andtinder.model.Orientations;
-import com.andtinder.view.CardContainer;
 import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
+import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 
@@ -74,6 +69,8 @@ public class HostProfileActivity extends AppCompatActivity implements BillingPro
 
     }
 
+
+
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (!bpHostChat.handleActivityResult(requestCode, resultCode, data))
@@ -90,18 +87,23 @@ public class HostProfileActivity extends AppCompatActivity implements BillingPro
 
     @Override
     public void onProductPurchased(String productId, TransactionDetails details) {
-        GenerikFunctions.showToast(cont,"Purchase Successful");
+        GenerikFunctions.sDialog(cont,"Creating 1-1 Chat...");
+        Long subscriptiondate = Validations.getCurrentTime() + ConstsCore.FifteenDayVal;
+        if(m_config.DialogidforHostInappPChat.equals("")){
+            //Here fbid refers to oppfbid
+            QBChatDialogCreation.createPrivateChat(Integer.valueOf(qbid), cont, subscriptiondate, fbid, "1-1 Chat Created Successfully");
+        }
+        else{
+            new AWSPaymentOperations.storePrivateChat(cont, subscriptiondate , m_config.DialogidforHostInappPChat, fbid, null, "1-1 Chat Updated Successfully").execute();
+            //QBChatDialogCreation.deletePrivateDialog(m_config.DialogidforHostInappPChat);
+            //QBChatDialogCreation.createPrivateChat(Integer.valueOf(qbid), cont, subscriptiondate, fbid, "1-1 Chat Created Successfully");
+        }
         Boolean consumed = bpHostChat.consumePurchase(ConstsCore.ITEM_PRIVATECHAT_SKU);
-        GenerikFunctions.sDialog(cont, "Creating 1-1 Chat...");
-
         if (consumed)
         {
             //GenerikFunctions.showToast(cont,"Successfully consumed");
-            QBChatDialogCreation.createPrivateChat(Integer.valueOf(qbid), cont);
         }
-        else{
-            GenerikFunctions.hDialog();
-        }
+
     }
 
     @Override
@@ -115,6 +117,13 @@ public class HostProfileActivity extends AppCompatActivity implements BillingPro
 
     @Override
     public void onBillingError(int errorCode, Throwable error) {
+        if(!m_config.DialogidforHostInappPChat.equals(""))
+        {
+            String oppfbid = fbid;
+            String facebookid = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
+            QBChatDialogCreation.deletePrivateDialog(cont, m_config.DialogidforHostInappPChat, facebookid, oppfbid);
+        }
+
         //GenerikFunctions.showToast(cont,"onBillingError: " + Integer.toString(errorCode));
     }
 
