@@ -133,7 +133,8 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
             partyy = (PartyParceableData)getIntent().getSerializableExtra(ConstsCore.SER_KEY);
             String PartyID = partyy.getPartyId();
 
-            Log.e("partyID "," "+partyy.getPartyId() );
+            Log.e("partyID "," "+partyy.getPartyId());
+
             PartyTable selparty = m_config.mapper.load(PartyTable.class, PartyID); // retrieve using particular key/primary key
             gc_list = selparty.getGatecrashers();
             //Log.e("finalGCList ", " " + gc_list.size());
@@ -193,151 +194,154 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
 
 
 
-    public void checkFBLILoginState()
-    {
-        //FB Case
-        if(LoginValidations.isFBLoggedIn())
-        {
-            //do nothing
-            Log.e("RequesrtantAcitivity", "FB");
-        }
-        else
-        {
-            try
-            {
-                loginManager.logInWithReadPermissions(RequestantActivity.this, permissions);
-                FacebookDataRetieval();
-            }
+//    public void checkFBLILoginState()
+//    {
+//        //FB Case
+//        if(LoginValidations.isFBLoggedIn())
+//        {
+//            //do nothing
+//            Log.e("RequesrtantAcitivity", "FB");
+//        }
+//        else
+//        {
+//            try
+//            {
+//                loginManager.logInWithReadPermissions(RequestantActivity.this, permissions);
+//                FacebookDataRetieval();
+//            }
+//
+//            catch (Exception e)
+//            {
+//                Log.e("External Exception", e.toString());
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        //LI Login Case
+//
+//        //Condition to check LI session existance check
+//        if(LISessionManager.getInstance(cont).getSession().getAccessToken() == null)
+//        {
+//            startLinkedInProcess();
+//        }
+//        else
+//        {
+//            //do nothing
+//            Log.e("RequesrtantAcitivity", "LI");
+//        }
+//
+//
+//
+//
+//
+//    }
+//
+//    public void FacebookDataRetieval()
+//    {
+//
+//        loginManager.registerCallback(callbackManager,
+//                new FacebookCallback<LoginResult>()
+//                {
+//                    @Override
+//                    public void onSuccess(LoginResult loginResult)
+//                    {
+//
+//                        //   https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
+//
+////                    // App code
+//                        Log.e("FB Login Success", "Yes");
+//                        token = loginResult.getAccessToken();
+//                        Log.e("AccessToken in RequestantActivity", token.toString() + "    " +token);
+//
+//                        Set<String> given_perm = token.getPermissions();
+//                        iterator = given_perm.iterator();
+//                        ArrayList<String> declined_permissions = new ArrayList<String>();
+//                        Set<String> declined_perm = token.getDeclinedPermissions();
+//                        iterator = declined_perm.iterator();
+//                        while (iterator.hasNext())
+//                        {
+//                            String perm_name = iterator.next().toString();
+//                            //       Log.e("declined_permission in: ", perm_name + " ");
+//                            declined_permissions.add(perm_name);
+//                        }
+//                        if (declined_perm.size() > 0)
+//                        {
+//                            askForDeclinedFBPermissions(declined_permissions);
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onCancel()
+//                    {
+//
+//                        Log.e("Login onCancel", "Yes");
+//                        GenerikFunctions.showToast(cont,"Please provide permissions for app login");
+//                    }
+//
+//                    @Override
+//                    public void onError(FacebookException error)
+//                    {
+//                        error.printStackTrace();
+//                        Log.e("Login error", "error" + error.toString());
+//
+//                        if (error instanceof FacebookAuthorizationException)
+//                        {
+//                            if (AccessToken.getCurrentAccessToken() != null)
+//                            {
+//                                LoginManager.getInstance().logOut();
+//
+//                            }
+//                        }
+//                    }
+//                });
+//
+//    }
+//
+//    public void askForDeclinedFBPermissions(ArrayList<String> declined_perm)
+//    {
+//
+//        loginManager.logInWithReadPermissions(RequestantActivity.this, declined_perm);
+//        FacebookDataRetieval();
+//    }
+//    private static Scope buildScope()
+//    {
+//        return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
+//    }
+//    public  void startLinkedInProcess()
+//    {
+//        linkedinStart="Yes";
+//        LISessionManager.getInstance(cont).init((Activity)cont, buildScope(), new AuthListener()
+//        {
+//            @Override
+//            public void onAuthSuccess()
+//            {
+//                Token = LISessionManager.getInstance(cont).getSession().getAccessToken().getValue().toString();
+//                Log.e("LI Token",Token+"");
+//                //  GenerikFunctions.showToast(cont,"success   Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
+//            }
+//
+//            @Override
+//            public void onAuthError(LIAuthError error)
+//            {
+//                Log.e("LI Login Error",error.toString()+"");
+//                GenerikFunctions.showToast(cont, "Linked In Login failed.");
+//                if(error.toString().trim().contains("USER_CANCELLED"))
+//                {
+//                    GenerikFunctions.showToast(cont, "Please accept permissions " );
+//                    startLinkedInProcess();
+//                }
+//
+//            }
+//        }, true);
+//    }
 
-            catch (Exception e)
-            {
-                Log.e("External Exception", e.toString());
-                e.printStackTrace();
-            }
-        }
-
-        //LI Login Case
-
-        //Condition to check LI session existance check
-        if(LISessionManager.getInstance(cont).getSession().getAccessToken() == null)
-        {
-            startLinkedInProcess();
-        }
-        else
-        {
-            //do nothing
-            Log.e("RequesrtantAcitivity", "LI");
-        }
 
 
-
-
-
-    }
-
-    public void FacebookDataRetieval()
-    {
-
-        loginManager.registerCallback(callbackManager,
-                new FacebookCallback<LoginResult>()
-                {
-                    @Override
-                    public void onSuccess(LoginResult loginResult)
-                    {
-
-                        //   https://graph.facebook.com/v2.6/me/messages?access_token=<PAGE_ACCESS_TOKEN>
-
-//                    // App code
-                        Log.e("FB Login Success", "Yes");
-                        token = loginResult.getAccessToken();
-                        Log.e("AccessToken in RequestantActivity", token.toString() + "    " +token);
-
-                        Set<String> given_perm = token.getPermissions();
-                        iterator = given_perm.iterator();
-                        ArrayList<String> declined_permissions = new ArrayList<String>();
-                        Set<String> declined_perm = token.getDeclinedPermissions();
-                        iterator = declined_perm.iterator();
-                        while (iterator.hasNext())
-                        {
-                            String perm_name = iterator.next().toString();
-                            //       Log.e("declined_permission in: ", perm_name + " ");
-                            declined_permissions.add(perm_name);
-                        }
-                        if (declined_perm.size() > 0)
-                        {
-                            askForDeclinedFBPermissions(declined_permissions);
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancel()
-                    {
-
-                        Log.e("Login onCancel", "Yes");
-                        GenerikFunctions.showToast(cont,"Please provide permissions for app login");
-                    }
-
-                    @Override
-                    public void onError(FacebookException error)
-                    {
-                        error.printStackTrace();
-                        Log.e("Login error", "error" + error.toString());
-
-                        if (error instanceof FacebookAuthorizationException)
-                        {
-                            if (AccessToken.getCurrentAccessToken() != null)
-                            {
-                                LoginManager.getInstance().logOut();
-
-                            }
-                        }
-                    }
-                });
-
-    }
-
-    public void askForDeclinedFBPermissions(ArrayList<String> declined_perm)
-    {
-
-        loginManager.logInWithReadPermissions(RequestantActivity.this, declined_perm);
-        FacebookDataRetieval();
-    }
-    private static Scope buildScope()
-    {
-        return Scope.build(Scope.R_BASICPROFILE, Scope.R_EMAILADDRESS);
-    }
-    public  void startLinkedInProcess()
-    {
-        linkedinStart="Yes";
-        LISessionManager.getInstance(cont).init((Activity)cont, buildScope(), new AuthListener()
-        {
-            @Override
-            public void onAuthSuccess()
-            {
-                Token = LISessionManager.getInstance(cont).getSession().getAccessToken().getValue().toString();
-                Log.e("LI Token",Token+"");
-                //  GenerikFunctions.showToast(cont,"success   Linked login" + LISessionManager.getInstance(getApplicationContext()).getSession().getAccessToken().toString());
-            }
-
-            @Override
-            public void onAuthError(LIAuthError error)
-            {
-                Log.e("LI Login Error",error.toString()+"");
-                GenerikFunctions.showToast(cont, "Linked In Login failed.");
-                if(error.toString().trim().contains("USER_CANCELLED"))
-                {
-                    GenerikFunctions.showToast(cont, "Please accept permissions " );
-                    startLinkedInProcess();
-                }
-
-            }
-        }, true);
-    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-            GenerikFunctions.showToast(cont,m_config.QbIdforInappPChat);
+            //GenerikFunctions.showToast(cont,m_config.QbIdforInappPChat);
 
             if (!bpReqChat.handleActivityResult(requestCode, resultCode, data))
                 super.onActivityResult(requestCode, resultCode, data);

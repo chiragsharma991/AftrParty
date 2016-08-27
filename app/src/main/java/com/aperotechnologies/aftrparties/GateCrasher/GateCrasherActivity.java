@@ -33,6 +33,7 @@ import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.quickblox.chat.model.QBDialog;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 
@@ -81,7 +82,6 @@ public class GateCrasherActivity extends Activity
             txtNoParties = (TextView) findViewById(R.id.noParties);
             pBar = (ProgressBar) findViewById(R.id.progressBar);
             pBar.setVisibility(View.VISIBLE);
-
 
             footerView = (ProgressBar) ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.list_footer, null, false);
             listGateCrasher.addFooterView(footerView);
@@ -338,7 +338,8 @@ public class GateCrasherActivity extends Activity
     }
 
 
-//    JsonArrayRequest jr = new JsonArrayRequest(url, obj.toString(), new Response.Listener<NetworkResponse>() {
+
+    //    JsonArrayRequest jr = new JsonArrayRequest(url, obj.toString(), new Response.Listener<NetworkResponse>() {
 //
 //                        @Override
 //                        public void onResponse(NetworkResponse networkResponse) {

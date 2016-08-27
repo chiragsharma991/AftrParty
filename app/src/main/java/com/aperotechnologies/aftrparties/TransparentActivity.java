@@ -5,8 +5,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.anjlab.android.iab.v3.BillingProcessor;
@@ -24,10 +27,14 @@ import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreatio
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.quickblox.auth.QBAuth;
 import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBGroupChatManager;
+import com.quickblox.chat.QBPrivateChatManager;
 import com.quickblox.core.QBEntityCallback;
+import com.quickblox.core.exception.BaseServiceException;
 import com.quickblox.core.exception.QBResponseException;
+import com.quickblox.core.server.BaseService;
 
 /**
  * Created by hasai on 01/07/16.
@@ -45,42 +52,64 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
     String from;
     Boolean flagcheck = false;
     Configuration_Parameter m_config;
+    static Activity transparent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         cont = this;
+        transparent = this;
+
         m_config = Configuration_Parameter.getInstance();
 
         from = getIntent().getExtras().getString("from");
 
         if(from.equals("requestSend"))
         {
-            alertRequestSend(from);
+            final String message = getIntent().getExtras().getString("message");
+            alertDialogforPN("requestSend","Accept request for Party",message);
         }
-        else if(from.equals("requestApproved"))
+        if(from.equals("requestApproved"))
         {
-            alertRequestApproved(from);
+            final String message = getIntent().getExtras().getString("message");
+            alertDialogforPN("requestApproved","Request Accepted for Party",message);
         }
-        else if(from.equals("requestDeclined"))
+        if(from.equals("requestDeclined"))
         {
-            alertRequestDeclined(from);
+            final String message = getIntent().getExtras().getString("message");
+            alertDialogforPN("requestDeclined","Request Declined for Party",message);
         }
-        else if(from.equals("PartyRetention"))
+        if(from.equals("partyCancelled"))
         {
-            alertPartyRetentionDialog(from);
-        }
-        else if(from.equals("privatechatsubs")){
-            alertprivatechatsubs(from);
-        }
-        else if(from.equals("partymaskstatus")){
-            alertpartymaskstatus(from);
-        }
-        else if(from.equals("gcmultipleparty")){
-            alertgcmultipleparty(from);
+            final String message = getIntent().getExtras().getString("message");
+            alertDialogforPN("partyCancelled","Party Cancelled",message);
         }
 
-        if(!BillingProcessor.isIabServiceAvailable(cont)) {
+        if(from.equals("PartyRetention"))
+        {
+
+            String PartyName = getIntent().getExtras().getString("PartyName");
+            alertDialogforPNInAppPurchase(from,"Notification Arrives", "Do you want to retain chat for "+PartyName);
+        }
+
+        if(from.equals("privatechatsubs"))
+        {
+
+            alertDialogforPNInAppPurchase(from,"Notification Arrives","Your subscription for private chat has been expired?");
+        }
+
+        if(from.equals("partymaskstatus"))
+        {
+            alertDialogforPNInAppPurchase(from, "Notification Arrives", "Your subscription for party mask status has been expired?");
+        }
+
+        if(from.equals("gcmultipleparty"))
+        {
+            alertDialogforPNInAppPurchase(from,"Notification Arrives", "Your subscription for gc multiple party purchase has been expired?");
+        }
+
+        if(!BillingProcessor.isIabServiceAvailable(cont))
+        {
             GenerikFunctions.showToast(cont,"In-app billing service is unavailable, please upgrade Android Market/Play to version >= 3.9.16");
         }
 
@@ -88,168 +117,26 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
 
     }
 
-    //Alert Dialog for Party mask Subscription
-    private void alertpartymaskstatus(String from) {
 
-        facebooidforPartymaskStatus = getIntent().getExtras().getString("loginUserFbId");
+
+    // Alert Dialog for PartyReq Send, Approved,Declined and cancelled
+    private void alertDialogforPN(final String from, final String title, final String message) {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Notification Arrives");
-        alertDialogBuilder.setMessage("Your subscription for party mask status has been expired?");
+        alertDialogBuilder.setTitle(title);
+        alertDialogBuilder.setMessage(message);
         alertDialogBuilder.setCancelable(false);
 
         alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if (!readyToPurchase)
-                {
-                    GenerikFunctions.showToast(cont,"Billing not initialized.");
-                    return;
-                }
-                else
-                {
-                    bp.purchase((Activity) cont,ConstsCore.ITEM_MASK_SKU);
-
-                }
-                finish();
-
+                NavigationtoScreenAfterPN(from);
             }
         });
         alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                finish();
-
-            }
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-
-
-    }
-
-    //Alert Dialog for Multiple parties Subscription
-    private void alertgcmultipleparty(String from) {
-
-        facebooidforGCMultipleParties = getIntent().getExtras().getString("loginUserFbId");
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Notification Arrives");
-        alertDialogBuilder.setMessage("Your subscription for gc multiple party purchase has been expired?");
-        alertDialogBuilder.setCancelable(false);
-
-        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (!readyToPurchase)
-                {
-                    GenerikFunctions.showToast(cont,"Billing not initialized.");
-                    return;
-                }
-                else
-                {
-                    bp.purchase((Activity) cont,ConstsCore.ITEM_PARTYPURCHASE_SKU);
-
-                }
-                finish();
-
-            }
-        });
-        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                finish();
-            }
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-
-    }
-
-    //Alert Dialog for Private Chat Subscription
-    private void alertprivatechatsubs(String from) {
-
-        flagcheck = true;
-
-        DialogIdforPChat = getIntent().getExtras().getString("dialogId");
-        oppFbIdforPChat = getIntent().getExtras().getString("oppFbId");
-        facebookidforPChat = getIntent().getExtras().getString("loginUserFbId");
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Notification Arrives");
-        alertDialogBuilder.setMessage("Your subscription for private chat has been expired?");
-        alertDialogBuilder.setCancelable(false);
-
-        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (!readyToPurchase)
-                {
-                    GenerikFunctions.showToast(cont,"Billing not initialized.");
-                    return;
-                }
-                else
-                {
-                    bp.purchase((Activity) cont,ConstsCore.ITEM_PRIVATECHAT_SKU);
-
-                }
-                finish();
-
-            }
-        });
-        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                GenerikFunctions.sDialog(cont, "Deleting....");
-
-                if (ChatService.getInstance().getCurrentUser() == null)
-                {
-                    String accessToken = LoginValidations.getFBAccessToken().getToken();
-
-                    QBSessionClass.getInstance().getQBSession(new QBEntityCallback() {
-
-                        @Override
-                        public void onSuccess(Object o, Bundle bundle) {
-
-                            Handler h = new Handler();
-                            h.post(new Runnable() {
-                                @Override
-                                public void run() {
-
-                                    QBChatDialogCreation.deletePrivateDialog(cont,DialogIdforPChat, facebookidforPChat,oppFbIdforPChat);
-                                    GenerikFunctions.hDialog();
-                                    finish();
-                                }
-                            });
-
-
-                        }
-
-                        @Override
-                        public void onError(QBResponseException e) {
-                            GenerikFunctions.hDialog();
-                            finish();
-
-                        }
-
-                    }, accessToken, null, cont);
-
-
-                }
-                else
-                {
-                    QBChatDialogCreation.deletePrivateDialog(cont, DialogIdforPChat, facebookidforPChat,oppFbIdforPChat);
-                    GenerikFunctions.hDialog();
-                    finish();
-
-
-                }
-
-
+                NavigationCancelAfterPN(from);
             }
         });
 
@@ -260,111 +147,78 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
     }
 
 
-    //Alert Dialog for Party Retention
-    private void alertPartyRetentionDialog(final String from)
+    // Navigation to Screen for Party Req Send, Approved,Declined and cancelled
+    public void NavigationtoScreenAfterPN(String from)
     {
-        flagcheck = true;
+        if(from.equals("requestSend"))
+        {
+            final String PartyId = getIntent().getExtras().getString("PartyId");
+            final String PartyName = getIntent().getExtras().getString("PartyName");
+            final String PartyStartTime = getIntent().getExtras().getString("PartyStartTime");
+            final String PartyEndTime = getIntent().getExtras().getString("PartyEndTime");
+            final String PartyStatus = getIntent().getExtras().getString("PartyStatus");
+            final String GCQBID = getIntent().getExtras().getString("GCQBID");
+            final String GCFBID = getIntent().getExtras().getString("GCFBID");
+            Log.e("TransparentActivity","PartyId "+PartyId+ " PartyName "+PartyName+" PartyStartTime "+PartyStartTime+" PartyEndTime "+PartyEndTime+" PartyStatus "+PartyStatus);
 
-        String PartyName = getIntent().getExtras().getString("PartyName");
-        String PartyId = getIntent().getExtras().getString("PartyId");
-        DialogIdforGChat = getIntent().getExtras().getString("DialogId");
-        final String message = getIntent().getExtras().getString("message");
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Notification Arrives");
-        alertDialogBuilder.setMessage("Do you want to retain chat for "+PartyName+"?");
-        alertDialogBuilder.setCancelable(false);
+            Intent i = new Intent(TransparentActivity.this, RequestantActivity.class);
+            PartyParceableData party1 = new PartyParceableData();
+            party1.setPartyId(PartyId);
+            party1.setPartyName(PartyName);
+            party1.setStartTime(PartyStartTime);
+            party1.setEndTime(PartyEndTime);
+            party1.setPartyStatus(PartyStatus);
+            i.putExtra("GCQBID",GCQBID);
+            i.putExtra("GCFBID", GCFBID);
+            i.putExtra("from", from);
+            Bundle mBundles = new Bundle();
+            mBundles.putSerializable(ConstsCore.SER_KEY, party1);
+            i.putExtras(mBundles);
+            startActivity(i);
+            finish();
 
-        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (!readyToPurchase)
-                {
-                    GenerikFunctions.showToast(cont,"Billing not initialized.");
-                    return;
-                }
-                else
-                {
+        }
 
-                    bp.purchase((Activity) cont,ConstsCore.ITEM_PARTYRETENTION_SKU);
-
-                }
-                finish();
-
-            }
-        });
-        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-
-                GenerikFunctions.sDialog(cont, "Deleting....");
-
-                if (ChatService.getInstance().getCurrentUser() == null)
-                {
-                    String accessToken = LoginValidations.getFBAccessToken().getToken();
-
-                    QBSessionClass.getInstance().getQBSession(new QBEntityCallback() {
-
-                        @Override
-                        public void onSuccess(Object o, Bundle bundle) {
-
-                            Handler h = new Handler();
-                            h.post(new Runnable() {
-                                @Override
-                                public void run() {
-
-                                    deleteGroupDialog(cont,DialogIdforGChat);
-
-                                }
-                            });
+        if(from.equals("requestApproved") || from.equals("requestDeclined"))
+        {
+            final String GCFBID = getIntent().getExtras().getString("GCFBID");
+            Log.e("TransparentActivity","GCFBID "+GCFBID+ "");
+            Intent i = new Intent(TransparentActivity.this, HistoryActivity.class);
+            i.putExtra("GCFBID", GCFBID);
+            i.putExtra("from", from);
+            startActivity(i);
+            finish();
 
 
-                        }
+        }
 
-                        @Override
-                        public void onError(QBResponseException e) {
-                            GenerikFunctions.hDialog();
-                            finish();
+        if(from.equals("partyCancelled") || from.equals("requestDeclined"))
+        {
+            Intent i = new Intent(TransparentActivity.this, HistoryActivity.class);
+            i.putExtra("from", from);
+            startActivity(i);
+            finish();
+        }
 
-                        }
+    }
 
-                    }, accessToken, null, cont);
-
-
-                }
-                else
-                {
-                        deleteGroupDialog(cont, DialogIdforGChat);
-
-                }
-
-
-            }
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
+    //Cancel Navigation to Screen for Party Req Send, Approved,Declined and cancelled
+    public void NavigationCancelAfterPN(String from)
+    {
+        if(from.equals("requestSend") || from.equals("requestApproved") || from.equals("requestDeclined") || from.equals("partyCancelled"))
+        {
+            finish();
+        }
 
 
     }
 
 
-    //Alert Dialog for Party Request Send
-    private void alertRequestSend(final String from) {
-
-        final String PartyId = getIntent().getExtras().getString("PartyId");
-        final String PartyName = getIntent().getExtras().getString("PartyName");
-        final String PartyStartTime = getIntent().getExtras().getString("PartyStartTime");
-        final String PartyEndTime = getIntent().getExtras().getString("PartyEndTime");
-        final String PartyStatus = getIntent().getExtras().getString("PartyStatus");
-        final String message = getIntent().getExtras().getString("message");
-        final String GCQBID = getIntent().getExtras().getString("GCQBID");
-        final String GCFBID = getIntent().getExtras().getString("GCFBID");
-        Log.e("TransparentActivity","PartyId "+PartyId+ " PartyName "+PartyName+" PartyStartTime "+PartyStartTime+" PartyEndTime "+PartyEndTime+" PartyStatus "+PartyStatus);
-
-
+    // Alert Dialog for Party mask Subscription, GC Multiple Party Subscription, Party Retention, Private Chat Subscription
+    private void alertDialogforPNInAppPurchase(final String from, final String title, final String message)
+    {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Accept request for Party");
+        alertDialogBuilder.setTitle(title);
         alertDialogBuilder.setMessage(message);
         alertDialogBuilder.setCancelable(false);
 
@@ -372,115 +226,218 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                Intent i = new Intent(TransparentActivity.this, RequestantActivity.class);
-                PartyParceableData party1 = new PartyParceableData();
-                party1.setPartyId(PartyId);
-                party1.setPartyName(PartyName);
-                party1.setStartTime(PartyStartTime);
-                party1.setEndTime(PartyEndTime);
-                party1.setPartyStatus(PartyStatus);
-                i.putExtra("GCQBID",GCQBID);
-                i.putExtra("GCFBID", GCFBID);
-                i.putExtra("from", from);
-                Bundle mBundles = new Bundle();
-                mBundles.putSerializable(ConstsCore.SER_KEY, party1);
-                i.putExtras(mBundles);
-                startActivity(i);
-                finish();
+                NavigationtoScreenAfterPNInApppurchase(from);
 
             }
         });
         alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                finish();
+                NavigationCancelAfterPNInApppurchase(from);
+
             }
         });
 
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
+    }
+
+
+
+    // Navigation to Screen for Party mask Subscription, GC Multiple Party Subscription, Party Retention, Private Chat Subscription
+    public void NavigationtoScreenAfterPNInApppurchase(String from)
+    {
+        if(from.equals("partymaskstatus"))
+        {
+            facebooidforPartymaskStatus = getIntent().getExtras().getString("loginUserFbId");
+            if (!readyToPurchase)
+            {
+                GenerikFunctions.showToast(cont,"Billing not initialized.");
+                return;
+            }
+            else
+            {
+                bp.purchase((Activity) cont,ConstsCore.ITEM_MASK_SKU);
+
+            }
+            finish();
+
+        }
+
+        if(from.equals("gcmultipleparty"))
+        {
+            facebooidforGCMultipleParties = getIntent().getExtras().getString("loginUserFbId");
+
+            if (!readyToPurchase)
+            {
+                GenerikFunctions.showToast(cont,"Billing not initialized.");
+                return;
+            }
+            else
+            {
+                bp.purchase((Activity) cont,ConstsCore.ITEM_PARTYPURCHASE_SKU);
+
+            }
+            finish();
+        }
+
+        if(from.equals("PartyRetention"))
+        {
+            //String PartyName = getIntent().getExtras().getString("PartyName");
+            //String PartyId = getIntent().getExtras().getString("PartyId");
+            DialogIdforGChat = getIntent().getExtras().getString("DialogId");
+
+            if (!readyToPurchase)
+            {
+                GenerikFunctions.showToast(cont,"Billing not initialized.");
+                return;
+            }
+            else
+            {
+
+                bp.purchase((Activity) cont,ConstsCore.ITEM_PARTYRETENTION_SKU);
+
+            }
+            finish();
+
+        }
+
+        if(from.equals("privatechatsubs"))
+        {
+            DialogIdforPChat = getIntent().getExtras().getString("dialogId");
+            oppFbIdforPChat = getIntent().getExtras().getString("oppFbId");
+            facebookidforPChat = getIntent().getExtras().getString("loginUserFbId");
+
+            if (!readyToPurchase)
+            {
+                GenerikFunctions.showToast(cont,"Billing not initialized.");
+                return;
+            }
+            else
+            {
+                bp.purchase((Activity) cont,ConstsCore.ITEM_PRIVATECHAT_SKU);
+
+            }
+            finish();
+        }
+
+
+    }
+
+    //Cancel Navigation to Screen for Party mask Subscription, GC Multiple Party Subscription, Party Retention, Private Chat Subscription
+    public void NavigationCancelAfterPNInApppurchase(String from)
+    {
+        if(from.equals("partymaskstatus") || from.equals("gcmultipleparty"))
+        {
+            finish();
+        }
+
+        if(from.equals("PartyRetention"))
+        {
+            GenerikFunctions.sDialog(cont, "Deleting....");
+
+            if (ChatService.getInstance().getCurrentUser() == null)
+            {
+                String accessToken = LoginValidations.getFBAccessToken().getToken();
+
+                QBSessionClass.getInstance().getQBSession(new QBEntityCallback() {
+
+                    @Override
+                    public void onSuccess(Object o, Bundle bundle) {
+
+//                        Handler h = new Handler();
+//                        h.post(new Runnable() {
+//                            @Override
+//                            public void run() {
+//
+//                                deleteGroupDialog(cont,DialogIdforGChat);
+//
+//                            }
+//                        });
+
+                        Thread t = new Thread(new deleteGroupDialogLooper(cont, DialogIdforGChat));
+                        t.start();
+                        TransparentActivity.transparent.finish();
+                        GenerikFunctions.hDialog();
+
+
+                    }
+
+                    @Override
+                    public void onError(QBResponseException e) {
+                        GenerikFunctions.hDialog();
+                        finish();
+
+                    }
+
+                }, accessToken, null, cont);
+
+
+            }
+            else
+            {
+                deleteGroupDialog(cont, DialogIdforGChat);
+                finish();
+
+            }
+        }
+
+        if(from.equals("privatechatsubs"))
+        {
+            GenerikFunctions.sDialog(cont, "Deleting....");
+
+            if (ChatService.getInstance().getCurrentUser() == null)
+            {
+                String accessToken = LoginValidations.getFBAccessToken().getToken();
+
+                QBSessionClass.getInstance().getQBSession(new QBEntityCallback() {
+
+                    @Override
+                    public void onSuccess(Object o, Bundle bundle) {
+
+                        Log.e("here"," "+"onSuccess====");
+
+////                        Handler h = new Handler();
+////                        h.post(new Runnable() {
+////                            @Override
+////                            public void run() {
+//
+//                                QBChatDialogCreation.deletePrivateDialog(cont,DialogIdforPChat, facebookidforPChat,oppFbIdforPChat);
+//                                GenerikFunctions.hDialog();
+//                                finish();
+////
+                        Thread t = new Thread(new deletePChatLooper(cont,DialogIdforPChat, facebookidforPChat,oppFbIdforPChat));
+                        t.start();
+                        TransparentActivity.transparent.finish();
+                        GenerikFunctions.hDialog();
+
+                    }
+
+                    @Override
+                    public void onError(QBResponseException e) {
+                        GenerikFunctions.hDialog();
+                        finish();
+
+                    }
+
+                }, accessToken, null, cont);
+
+
+            }
+            else
+            {
+                QBChatDialogCreation.deletePrivateDialog(cont, DialogIdforPChat, facebookidforPChat,oppFbIdforPChat);
+                GenerikFunctions.hDialog();
+                finish();
+
+
+            }
+        }
 
 
     }
 
 
-    //Alert Dialog for Party Request Approved
-    private void alertRequestApproved(final String from) {
-
-        final String message = getIntent().getExtras().getString("message");
-        final String GCFBID = getIntent().getExtras().getString("GCFBID");
-        Log.e("TransparentActivity","GCFBID "+GCFBID+ "");
-
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Request Accepted for Party");
-        alertDialogBuilder.setMessage(message);
-        alertDialogBuilder.setCancelable(false);
-
-        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                Intent i = new Intent(TransparentActivity.this, HistoryActivity.class);
-                i.putExtra("GCFBID", GCFBID);
-                i.putExtra("from", from);
-                startActivity(i);
-                finish();
-
-            }
-        });
-
-        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-
-
-    }
-
-    //Alert Dialog for Party Request Declined
-    private void alertRequestDeclined(final String from) {
-
-        final String message = getIntent().getExtras().getString("message");
-        final String GCFBID = getIntent().getExtras().getString("GCFBID");
-        Log.e("TransparentActivity","GCFBID "+GCFBID+ "");
-
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Request Declined for Party");
-        alertDialogBuilder.setMessage(message);
-        alertDialogBuilder.setCancelable(false);
-
-        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                Intent i = new Intent(TransparentActivity.this, HistoryActivity.class);
-                i.putExtra("GCFBID", GCFBID);
-                i.putExtra("from", from);
-                startActivity(i);
-                finish();
-
-            }
-        });
-
-        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        });
-
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
-
-
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -505,7 +462,7 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
     @Override
     public void onProductPurchased(String productId, TransactionDetails details) {
         Boolean consumed = null;
-        flagcheck = false;
+        flagcheck = true;
 
         GenerikFunctions.showToast(cont, from);
 
@@ -567,24 +524,29 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
                 @Override
                 public void onSuccess(Object o, Bundle bundle) {
 
-                    Handler h = new Handler();
-                    h.post(new Runnable() {
-                        @Override
-                        public void run() {
+//                    Handler h = new Handler();
+//                    h.post(new Runnable() {
+//                        @Override
+//                        public void run() {
 
                             if(from.equals("PartyRetention"))
                             {
-                                deleteGroupDialog(cont, DialogIdforGChat);
+
+                                Thread t = new Thread(new deleteGroupDialogLooper(cont, DialogIdforGChat));
+                                t.start();
+                                TransparentActivity.transparent.finish();
+                                GenerikFunctions.hDialog();
                             }
                             else if(from.equals("privatechatsubs"))
                             {
-                                QBChatDialogCreation.deletePrivateDialog(cont, DialogIdforPChat, facebookidforPChat,oppFbIdforPChat);
+                                Thread t = new Thread(new deletePChatLooper(cont,DialogIdforPChat, facebookidforPChat,oppFbIdforPChat));
+                                t.start();
+                                TransparentActivity.transparent.finish();
                                 GenerikFunctions.hDialog();
-                                finish();
                             }
 
-                        }
-                    });
+//                        }
+//                    });
 
                 }
 
@@ -632,6 +594,74 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
     }
 
 
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        GenerikFunctions.showToast(cont, "onStop");
+        Boolean isApplicationForeground = BaseLifeCycleCallbacks.applicationStatus();
+        Log.d("isApplicationForeground ","---" + isApplicationForeground);
+
+        if(flagcheck == false && (from.equals("PartyRetention") || from.equals("privatechatsubs")) && isApplicationForeground == false) {
+
+            if (ChatService.getInstance().getCurrentUser() == null) {
+                String accessToken = LoginValidations.getFBAccessToken().getToken();
+
+                QBSessionClass.getInstance().getQBSession(new QBEntityCallback() {
+
+                    @Override
+                    public void onSuccess(Object o, Bundle bundle) {
+
+//                    Handler h = new Handler();
+//                    h.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+
+                        if (from.equals("PartyRetention")) {
+                            Thread t = new Thread(new deleteGroupDialogLooper(cont, DialogIdforGChat));
+                            t.start();
+                            TransparentActivity.transparent.finish();
+                            GenerikFunctions.hDialog();
+                        } else if (from.equals("privatechatsubs")) {
+                            Thread t = new Thread(new deletePChatLooper(cont,DialogIdforPChat, facebookidforPChat,oppFbIdforPChat));
+                            t.start();
+                            TransparentActivity.transparent.finish();
+                            GenerikFunctions.hDialog();
+                        }
+
+//                        }
+//                    });
+
+                    }
+
+                    @Override
+                    public void onError(QBResponseException e) {
+                        GenerikFunctions.hDialog();
+                        finish();
+
+                    }
+
+                }, accessToken, null, cont);
+
+            } else {
+                if (from.equals("PartyRetention")) {
+                    deleteGroupDialog(cont, DialogIdforGChat);
+                } else if (from.equals("privatechatsubs")) {
+                    QBChatDialogCreation.deletePrivateDialog(cont, DialogIdforPChat, facebookidforPChat, oppFbIdforPChat);
+                    GenerikFunctions.hDialog();
+                    finish();
+                }
+
+            }
+        }
+
+    }
+
+
+
+
+
     private void deleteGroupDialog(Context cont, String DialogId)
     {
 
@@ -642,7 +672,7 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
             @Override
             public void onSuccess(Void aVoid, Bundle bundle)
             {
-                Log.e("Onsuccess","delete Dialog ");
+                Log.e("Onsuccess","delete Group Dialog ");
                 GenerikFunctions.hDialog();
                 finish();
 
@@ -651,26 +681,108 @@ public class TransparentActivity extends Activity implements BillingProcessor.IB
             @Override
             public void onError(QBResponseException errors)
             {
-                Log.e("onError","delete Dialog ");
+                Log.e("onError","delete Group Dialog ");
                 GenerikFunctions.hDialog();
                 finish();
             }
         });
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(from.equals("PartyRetention") && flagcheck == true)
-        {
-            deleteGroupDialog(cont, DialogIdforGChat);
+    static class deletePChatLooper implements Runnable {
+        private Looper myLooper;
+        Context cont;
+        String DialogId;
+        String facebookid;
+        String oppfbid;
+
+        public deletePChatLooper(Context cont, final String DialogId, final String facebookid, final String oppfbid) {
+            this.cont = cont;
+            this.DialogId = DialogId;
+            this.facebookid = facebookid;
+            this.oppfbid = oppfbid;
         }
-        else if(from.equals("privatechatsubs")  && flagcheck == true)
-        {
-            QBChatDialogCreation.deletePrivateDialog(cont, DialogIdforPChat, facebookidforPChat,oppFbIdforPChat);
-            GenerikFunctions.hDialog();
-            finish();
+
+        @Override
+        public void run() {
+            Looper.prepare();
+
+            // code that needed a separated thread
+            QBPrivateChatManager privateChatManager = QBChatService.getInstance().getPrivateChatManager();
+            privateChatManager.deleteDialog(DialogId, true, new QBEntityCallback<Void>()
+            {
+
+                @Override
+                public void onSuccess(Void aVoid, Bundle bundle)
+                {
+                    Log.e("Onsuccess","delete Private Dialog ");
+                    AWSPaymentOperations.deletePrivateChatData(facebookid, oppfbid);
+
+//
+
+                }
+
+                @Override
+                public void onError(QBResponseException errors)
+                {
+                    Log.e("onError","delete Private Dialog ");
+
+//
+
+                }
+            });
+
+            myLooper = Looper.myLooper();
+            Looper.loop();
+            myLooper.quit();
         }
 
     }
+
+
+    static class deleteGroupDialogLooper implements Runnable {
+        private Looper myLooper;
+        Context cont;
+        String DialogId;
+
+
+        public deleteGroupDialogLooper(Context cont, final String DialogId) {
+            this.cont = cont;
+            this.DialogId = DialogId;
+
+        }
+
+        @Override
+        public void run() {
+            Looper.prepare();
+            // code that needed a separated thread
+            QBGroupChatManager groupChatManager = QBChatService.getInstance().getGroupChatManager();
+            groupChatManager.deleteDialog(DialogId, true, new QBEntityCallback<Void>()
+            {
+
+                @Override
+                public void onSuccess(Void aVoid, Bundle bundle)
+                {
+                    Log.e("Onsuccess","delete Group Dialog ");
+
+
+
+                }
+
+                @Override
+                public void onError(QBResponseException errors)
+                {
+                    Log.e("onError","delete Group Dialog ");
+
+
+                }
+            });
+
+            myLooper = Looper.myLooper();
+            Looper.loop();
+            myLooper.quit();
+        }
+
+    }
+
+
 }

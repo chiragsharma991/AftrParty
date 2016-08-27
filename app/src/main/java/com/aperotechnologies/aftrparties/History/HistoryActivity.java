@@ -267,7 +267,7 @@ public class HistoryActivity extends Activity
         {
             super.onBackPressed();
         }
-        else if(getIntent().getExtras().getString("from").equals("requestApproved") || getIntent().getExtras().getString("from").equals("requestDeclined"))
+        else if(getIntent().getExtras().getString("from").equals("requestApproved") || getIntent().getExtras().getString("from").equals("requestDeclined") ||  getIntent().getExtras().getString("from").equals("partyCancelled"))
         {
             Intent i = new Intent(HistoryActivity.this, HomePageActivity.class);
             startActivity(i);

@@ -43,7 +43,7 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 
 
 public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefreshListener {
-    
+
     private static final String TAG = ChatActivity.class.getSimpleName();
     Configuration_Parameter m_config;
     SharedPreferences sharedpreferences;
@@ -155,7 +155,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
 
 
     //This method is called when swipe refresh is pulled down
-     //
+    //
     @Override
     public void onRefresh() {
         index = index + 20;
@@ -193,12 +193,12 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
         resultIntent.putExtra("unreadmsg", String.valueOf(unreadmsgcount));
 
         setResult(Activity.RESULT_OK, resultIntent);
-            try {
-                chat.release();
-            } catch (XMPPException e) {
-                Log.e(TAG, "failed to release chat", e);
-            }
-            super.onBackPressed();
+        try {
+            chat.release();
+        } catch (XMPPException e) {
+            Log.e(TAG, "failed to release chat", e);
+        }
+        super.onBackPressed();
 
 
 
@@ -400,7 +400,7 @@ public class ChatActivity extends Activity implements SwipeRefreshLayout.OnRefre
 
     private void scrollDown()
     {
-       // Log.e("messagesContainer.getCount()"," "+(listView.getCount() - 1));
+        // Log.e("messagesContainer.getCount()"," "+(listView.getCount() - 1));
         listView.setSelection(listView.getCount() - 1);
     }
 

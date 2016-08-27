@@ -37,12 +37,14 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
 import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.History.RequestantActivity;
+import com.aperotechnologies.aftrparties.HomePage.HomePageActivity;
 import com.aperotechnologies.aftrparties.PNotifications.PlayServicesHelper;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.aperotechnologies.aftrparties.SplashActivity;
+import com.aperotechnologies.aftrparties.TransparentActivity;
 import com.aperotechnologies.aftrparties.model.*;
 import com.aperotechnologies.aftrparties.model.LIPictureData;
 import com.facebook.AccessToken;
@@ -87,6 +89,7 @@ public class Welcome extends Activity
     SharedPreferences sharedPreferences;
     Configuration_Parameter m_config;
     static Context cont;
+    public static Activity welcome;
     CallbackManager callbackManager;
     ArrayList<String> permissions;
     public static String linkedinStart="";
@@ -117,13 +120,15 @@ public class Welcome extends Activity
 
 
     public static  ProgressDialog wl_pd = null;
+    String from;
 
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(getApplicationContext());
         setContentView(R.layout.welcome);
-        cont=this;
+        cont = this;
+        welcome =  this;
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         m_config = Configuration_Parameter.getInstance();
         Crouton.cancelAllCroutons();
@@ -143,6 +148,7 @@ public class Welcome extends Activity
         callbackManager = CallbackManager.Factory.create();
         loginManager = LoginManager.getInstance();
 
+
         //Permissions needed for FB Login
         permissions = new ArrayList<>();
         permissions.add("public_profile");
@@ -153,8 +159,19 @@ public class Welcome extends Activity
         //permissions.add("user_hometown");
         //permissions.add("user_photos");
 
-
         Log.e("wl_pd"," "+wl_pd);
+
+        if(getIntent().getExtras() != null)
+        {
+            from = getIntent().getExtras().getString("from");
+        }
+        else
+        {
+            from = "homepage";
+        }
+        Log.e("from"," "+from);
+
+
         //Start Registration activity on Register button click
         btn_register.setOnClickListener(new View.OnClickListener()
         {
@@ -460,7 +477,15 @@ public class Welcome extends Activity
                 editor.putString(m_config.LILoginDone,"Yes");
                 editor.apply();
 
-                String from = getIntent().getExtras().getString("from");
+
+                Log.e("Updated all flags","yes");
+                if(getIntent().getExtras() != null)
+                {
+                    from = getIntent().getExtras().getString("from");
+                }
+                else{
+                    from = "homepage";
+                }
                 Log.e("from"," "+from);
 
                 Log.e("Shrd Pref aftr LILginDne",sharedPreferences.getString(m_config.Entered_User_Name,"N/A") + "   " +
@@ -766,9 +791,9 @@ public class Welcome extends Activity
                     @Override
                     public void onCompleted(JSONObject object, GraphResponse response)
                     {
-                            wl_pd.setMessage("Loading Data...");
-                            wl_pd.setCancelable(false);
-                            wl_pd.show();
+//                            wl_pd.setMessage("Loading Data...");
+//                            wl_pd.setCancelable(false);
+//                            wl_pd.show();
 
 
                         String emptyFields="";
@@ -1126,9 +1151,12 @@ public class Welcome extends Activity
                 editor.putString(m_config.FinalStepDone,"Yes");
                 editor.apply();
 
-                String from = "";
+
+
                 Log.e("Updated all flags","yes");
-                if(getIntent().getExtras() != null){
+                if(getIntent().getExtras() != null)
+                {
+
                     from = getIntent().getExtras().getString("from");
 
                 }
@@ -1272,8 +1300,14 @@ public class Welcome extends Activity
             {
                 //LoginValidations.QBStartSession(cont);
 
-                String from = getIntent().getExtras().getString("from");
-                Log.e("from"," "+from);
+                Log.e("Updated all flags","yes");
+                if(getIntent().getExtras() != null){
+                    from = getIntent().getExtras().getString("from");
+
+                }
+                else{
+                    from = "homepage";
+                }
 
                 checkfromWhere(from);
             }
@@ -1535,19 +1569,7 @@ public class Welcome extends Activity
             }
 
         }
-        else if(from.equals("chatoffline"))
-        {
-            Intent i = new Intent(Welcome.this, DialogsActivity.class);
-            startActivity(i);
 
-            if(wl_pd!=null)
-            {
-                if(wl_pd.isShowing())
-                {
-                    wl_pd.dismiss();
-                }
-            }
-        }
         else if(from.equals("requestApproved"))
         {
             String GCFBID = getIntent().getExtras().getString("GCFBID");
@@ -1586,5 +1608,84 @@ public class Welcome extends Activity
                 }
             }
         }
+
+        else if(from.equals("partyCancelled"))
+        {
+            String message = getIntent().getExtras().getString("message");
+            Intent i = new Intent(Welcome.this, HistoryActivity.class);
+            i.putExtra("from", "partyCancelled");
+            i.putExtra("message", message);
+            startActivity(i);
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
+        else if(from.equals("chatoffline") || from.equals("1-1 Chat"))
+        {
+            Intent i = new Intent(Welcome.this, DialogsActivity.class);
+            i.putExtra("from", from);
+            startActivity(i);
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
+
+        else if(from.equals("privatechatsubs"))
+        {
+            String loginUserFbId = getIntent().getExtras().getString("loginUserFbId");
+            String oppFbId = getIntent().getExtras().getString("oppFbId");
+            String dialogId = getIntent().getExtras().getString("dialogId");
+            Intent i = new Intent(Welcome.this, HomePageActivity.class);
+            i.putExtra("loginUserFbId", loginUserFbId);
+            i.putExtra("oppFbId",oppFbId);
+            i.putExtra("dialogId", dialogId);
+            i.putExtra("from", "privatechatsubs");
+            startActivity(i);
+
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
+
+
+        else if(from.equals("PartyRetention"))
+        {
+            String PartyName = getIntent().getExtras().getString("PartyName");
+            String PartyId = getIntent().getExtras().getString("PartyId");
+            String DialogId = getIntent().getExtras().getString("DialogId");
+            Intent i = new Intent(Welcome.this, HomePageActivity.class);
+            i.putExtra("DialogId", DialogId);
+            i.putExtra("PartyId",PartyId);
+            i.putExtra("PartyName", PartyName);
+            i.putExtra("from", "PartyRetention");
+            startActivity(i);
+
+
+            if(wl_pd!=null)
+            {
+                if(wl_pd.isShowing())
+                {
+                    wl_pd.dismiss();
+                }
+            }
+        }
+
+
+
     }
 }

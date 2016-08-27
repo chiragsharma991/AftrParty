@@ -1,9 +1,10 @@
 package com.aperotechnologies.aftrparties.History;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -18,13 +19,9 @@ import com.android.volley.toolbox.Volley;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.GateCrashersClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartyTable;
-import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
+import com.aperotechnologies.aftrparties.LocalNotifications.LNotificationsAlarmReceiver;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
-import com.quickblox.chat.QBChatService;
-import com.quickblox.chat.QBGroupChatManager;
-import com.quickblox.core.QBEntityCallback;
-import com.quickblox.core.exception.QBResponseException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,13 +75,13 @@ public class HostCancelPartyAPI {
                         try {
                             if(response.getInt("confirm_status") == 1)
                             {
-                                GenerikFunctions.showToast(cont, "Party request has been cancelled");
 
                                 try {
                                     PartyTable selPartyTable = m_config.mapper.load(PartyTable.class, partyid);
                                     gatecrasherList = selPartyTable.getGatecrashers();
                                     String PartyName = selPartyTable.getPartyName();
 
+                                    // if gatecrashers exist then send notification to gatecrashers and delete group dialog from quickblox
                                     if (gatecrasherList != null || gatecrasherList.size() > 0)
                                     {
                                         for(int i = 0; i < gatecrasherList.size(); i++)
@@ -94,12 +91,14 @@ public class HostCancelPartyAPI {
 
                                         }
                                         Log.d("gcqbidlist ", ":" + gcqbidlist);
-                                        //QBChatDialogCreation.deleteGroupDialog(selPartyTable.getDialogID());
-                                        QBPushNotifications.sendPartyCancelledPN(gcqbidlist, partyid, PartyName, cont);
+                                        cancelLocalNotificationPartyretention(partyid);
+                                        QBPushNotifications.sendPartyCancelledPN(gcqbidlist, partyid, PartyName, cont, selPartyTable.getDialogID());
+
 
                                     }
                                     else
                                     {
+                                        GenerikFunctions.showToast(cont, "Party request has been cancelled");
                                         //no gate crasher for party
 
                                     }
@@ -111,6 +110,7 @@ public class HostCancelPartyAPI {
 
                                 } catch (Exception e) {
                                     GenerikFunctions.hDialog();
+                                    GenerikFunctions.showToast(cont, "Party request has been cancelled");
                                     Intent i = new Intent(cont, HistoryActivity.class);
                                     cont.startActivity(i);
                                 }
@@ -147,5 +147,21 @@ public class HostCancelPartyAPI {
         queue.add(getRequest);
 
 
+    }
+
+    public void cancelLocalNotificationPartyretention(String partyId)
+    {
+        String notid = partyId.split("_")[1];
+        int notId =  Integer.parseInt(notid.substring(0, 8));
+        Log.e("notid "," "+notId);
+        Intent intent = new Intent(cont, LNotificationsAlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(cont, notId, intent, 0);
+        AlarmManager alarmManager = (AlarmManager)cont.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
+        alarmManager = null;
+        pendingIntent = null;
+
+
+        Log.e("here ", "alarmManager--- "+alarmManager+"pendingIntent--- "+pendingIntent);
     }
 }

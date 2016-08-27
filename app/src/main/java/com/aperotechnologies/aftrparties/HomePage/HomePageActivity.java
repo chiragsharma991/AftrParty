@@ -1,8 +1,6 @@
 package com.aperotechnologies.aftrparties.HomePage;
 
 import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -12,7 +10,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -22,21 +19,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
-import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
-import com.aperotechnologies.aftrparties.History.HostFragment;
-import com.aperotechnologies.aftrparties.History.HostProfileActivity;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
-import com.aperotechnologies.aftrparties.LocalNotifications.RatingsAlarmReceiver;
 import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
@@ -45,16 +36,11 @@ import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
-import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.aperotechnologies.aftrparties.Settings.SettingsActivity;
 import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.TipsActivity;
 import com.aperotechnologies.aftrparties.TransparentActivity;
 import com.aperotechnologies.aftrparties.model.LoggedInUserInformation;
-import com.aperotechnologies.aftrparties.util.IabHelper;
-import com.aperotechnologies.aftrparties.util.IabResult;
-import com.aperotechnologies.aftrparties.util.Inventory;
-import com.aperotechnologies.aftrparties.util.Purchase;
 import com.aperotechnologies.aftrparties.utils.ResizableButton;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -63,8 +49,6 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.github.siyamed.shapeimageview.CircularImageView;
 import com.linkedin.platform.LISessionManager;
-import com.quickblox.chat.QBChatService;
-import com.quickblox.chat.QBPrivateChatManager;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.squareup.picasso.Picasso;
@@ -141,6 +125,11 @@ public class HomePageActivity extends Activity
             }
         }
         SplashActivity.pd = null;
+        if(SplashActivity.splash != null)
+        {
+            SplashActivity.splash.finish();
+        }
+
 
         if (RegistrationActivity.reg_pd != null)
         {
@@ -180,7 +169,8 @@ public class HomePageActivity extends Activity
         Log.e("loggedInUserInfo", " "+loggedInUserInformation);
 
         if(getIntent().getExtras() != null){
-            if(getIntent().getExtras().getString("from").equals("PartyRetention")){
+            if(getIntent().getExtras().getString("from").equals("PartyRetention"))
+            {
                 String PartyName = getIntent().getExtras().getString("PartyName");
                 String PartyId = getIntent().getExtras().getString("PartyId");
                 String DialogId = getIntent().getExtras().getString("DialogId");
@@ -191,15 +181,16 @@ public class HomePageActivity extends Activity
                 i.putExtra("from", "PartyRetention");
                 startActivity(i);
             }
-            else if(getIntent().getExtras().getString("from").equals("PartyRetention")){
-                String PartyName = getIntent().getExtras().getString("PartyName");
-                String PartyId = getIntent().getExtras().getString("PartyId");
-                String DialogId = getIntent().getExtras().getString("DialogId");
+            else if(getIntent().getExtras().getString("from").equals("privatechatsubs"))
+            {
+                String loginUserFbId = getIntent().getExtras().getString("loginUserFbId");
+                String oppFbId = getIntent().getExtras().getString("oppFbId");
+                String dialogId = getIntent().getExtras().getString("dialogId");
                 Intent i = new Intent(HomePageActivity.this, TransparentActivity.class);
-                i.putExtra("DialogId", DialogId);
-                i.putExtra("PartyId",PartyId);
-                i.putExtra("PartyName", PartyName);
-                i.putExtra("from", "PartyRetention");
+                i.putExtra("loginUserFbId", loginUserFbId);
+                i.putExtra("oppFbId",oppFbId);
+                i.putExtra("dialogId", dialogId);
+                i.putExtra("from", "privatechatsubs");
                 startActivity(i);
             }
         }
@@ -313,20 +304,7 @@ public class HomePageActivity extends Activity
 //                Intent i = new Intent(HomePageActivity.this, TipsActivity.class);
 //                startActivity(i);
 
-                AlarmManager alarmManager = (AlarmManager) cont.getSystemService(Context.ALARM_SERVICE);
-                Intent notificationIntent = new Intent(cont, RatingsAlarmReceiver.class);
-                notificationIntent.putExtra("from","trial");
-
-                long notificationTime = System.currentTimeMillis() + 50000;//Long.parseLong(PartyEndTime) + 10000;
-                Log.e("notificationTime "," "+(notificationTime + 50000));
-
-                //notificationIntent.addCategory("android.intent.category.DEFAULT");
-                PendingIntent broadcast = PendingIntent.getBroadcast(cont, 123450, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-                if (Build.VERSION.SDK_INT >= 19)
-                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, notificationTime, broadcast);
-                else if (Build.VERSION.SDK_INT >= 15)
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, notificationTime, broadcast);
+                SetLocalNotifications.setLNotificationforPrivateChat(cont, Long.parseLong("1471519800000"), "87878" , "57985d4aa28f9adb3b00006a", "777777777777");
 
 
             }
@@ -456,7 +434,7 @@ public class HomePageActivity extends Activity
             }
         });
 
-        //SetLocalNotifications.setLNotificationPartyRetention(cont, "hhh", "87878" , "57985d4aa28f9adb3b00006a", "777777777777");
+
 
     }
 
@@ -479,15 +457,7 @@ public class HomePageActivity extends Activity
                                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(i);
 
-//                                Intent intent = new Intent(cont, RatingsAlarmReceiver.class);
-//                                PendingIntent pendingIntent = PendingIntent.getBroadcast(cont, 123450, intent, 0);
-//                                AlarmManager alarmManager = (AlarmManager)cont.getSystemService(Context.ALARM_SERVICE);
-//                                alarmManager.cancel(pendingIntent);
-//                                alarmManager = null;
-//                                pendingIntent = null;
-//
-//
-//                                Log.e("here ", " "+alarmManager+" "+pendingIntent);
+
 
                             }
                         });

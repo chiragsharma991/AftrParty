@@ -19,6 +19,9 @@ import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.TransparentActivity;
 import com.linkedin.platform.LISessionManager;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 
@@ -39,16 +42,21 @@ public class BackgroundFunctionCall {
         //*//when request is send to host and it is received by host
         if (messagetype.equals("requestSend")) {
 
-            String PartyId = extras.getString("PartyID");
-            String PartyName = extras.getString("PartyName");
-            String PartyStartTime = extras.getString("PartyStartTime");
-            String PartyEndTime = extras.getString("PartyEndTime");
-            String PartyStatus = extras.getString("PartyStatus");
-            //String GCQBID = extras.getString("GCQBID");
-            String GCFBID = extras.getString("GCFBID");
+            JSONObject json = null;
+            String PartyId = null, PartyName = null , PartyStartTime = null, PartyEndTime = null, PartyStatus = null, GCFBID = null;
+            try {
+                json = new JSONObject(extras.getString("body"));
+                PartyId = json.getString("PartyID");
+                PartyName = json.getString("PartyName");
+                PartyStartTime = json.getString("PartyStartTime");
+                PartyEndTime = json.getString("PartyEndTime");
+                PartyStatus = json.getString("PartyStatus");
+                GCFBID = json.getString("GCFBID");
 
-            Log.e("PartyId "," "+PartyId+ " PartyName "+PartyName+" PartyStartTime "+PartyStartTime+" PartyEndTime "+PartyEndTime+" PartyStatus "+PartyStatus);
-
+                Log.e("PartyId "," "+PartyId+ " PartyName "+PartyName+" PartyStartTime "+PartyStartTime+" PartyEndTime "+PartyEndTime+" PartyStatus "+PartyStatus);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
             if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(gcmIntentService).getSession() == null || LISessionManager.getInstance(gcmIntentService).getSession().getAccessToken() == null)
             {
@@ -88,9 +96,18 @@ public class BackgroundFunctionCall {
          if (messagetype.equals("requestApproved"))
         {
 
-            String PartyID = extras.getString("PartyID");
-            String GCFBID = extras.getString("GCFBID");
-            Log.e("GCFBID", " " + GCFBID + " PartyID" + " " + PartyID );
+            JSONObject json;
+            String PartyID = null, GCFBID = null;
+
+            try {
+                json = new JSONObject(extras.getString("body"));
+                PartyID = json.getString("PartyID");
+                GCFBID = json.getString("GCFBID");
+                Log.e("GCFBID", " " + GCFBID + " PartyID" + " " + PartyID );
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
             if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(gcmIntentService).getSession() == null || LISessionManager.getInstance(gcmIntentService).getSession().getAccessToken() == null)
             {
@@ -117,9 +134,18 @@ public class BackgroundFunctionCall {
         if (messagetype.equals("requestDeclined"))
         {
 
-            String PartyID = extras.getString("PartyID");
-            String GCFBID = extras.getString("GCFBID");
-            Log.e("GCFBID", " " + GCFBID + " PartyID" + " " + PartyID );
+            JSONObject json;
+            String PartyID = null, GCFBID = null;
+
+            try {
+                json = new JSONObject(extras.getString("body"));
+                PartyID = json.getString("PartyID");
+                GCFBID = json.getString("GCFBID");
+                Log.e("GCFBID", " " + GCFBID + " PartyID" + " " + PartyID );
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
             if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(gcmIntentService).getSession() == null || LISessionManager.getInstance(gcmIntentService).getSession().getAccessToken() == null)
             {
@@ -140,6 +166,34 @@ public class BackgroundFunctionCall {
             }
 
         }//***//
+
+
+        //****//
+        //Notification after Party cancel to all GateCrashers
+        if (messagetype.equals("partyCancelled"))
+        {
+
+
+            if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(gcmIntentService).getSession() == null || LISessionManager.getInstance(gcmIntentService).getSession().getAccessToken() == null)
+            {
+                Intent i = new Intent(gcmIntentService, Welcome.class);
+                i.putExtra("from", messagetype);
+                i.putExtra("message", message);
+                GCMIntentService.CreateNotification(i, message, gcmIntentService);
+            }
+            else
+            {
+                Intent i = new Intent(gcmIntentService, HistoryActivity.class);
+                i.putExtra("from", messagetype);
+                i.putExtra("message", message);
+                GCMIntentService.CreateNotification(i, message, gcmIntentService);
+
+            }
+
+
+        }
+        //****//
+
 
         //****//
         //Notification after 1-1 Chat dialog Creation
@@ -164,29 +218,6 @@ public class BackgroundFunctionCall {
         }
         //****//
 
-        //****//
-        //Notification after Party cancel to all GateCrashers
-        if (messagetype.equals("partyCancelled"))
-        {
-
-
-            if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(gcmIntentService).getSession() == null || LISessionManager.getInstance(gcmIntentService).getSession().getAccessToken() == null)
-            {
-                Intent i = new Intent(gcmIntentService, Welcome.class);
-                i.putExtra("from", messagetype);
-                GCMIntentService.CreateNotification(i, message, gcmIntentService);
-            }
-            else
-            {
-                Intent i = new Intent(gcmIntentService, HistoryActivity.class);
-                i.putExtra("from", messagetype);
-                gcmIntentService.startActivity(i);
-
-            }
-
-
-        }
-        //****//
 
         //*****//
         if (messagetype.equals("1-1 Chat OfflineMsg"))

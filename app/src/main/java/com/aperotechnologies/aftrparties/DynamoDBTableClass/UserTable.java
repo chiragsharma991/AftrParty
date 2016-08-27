@@ -30,7 +30,6 @@ public class UserTable {
     private String Name;
     private String Email;
     private String PhoneNumber;
-    private int Ratings;
     private String ProfileStatus;
     private String DeviceToken;
     private List<PartiesClass> parties;
@@ -40,6 +39,7 @@ public class UserTable {
     private String currentmaskstatus;
     private String Imageflag;
     private List<PartyMaskStatusClass> PartyMaskStatus;
+    private List<RatingsClass> Ratings;
 
 
     @DynamoDBHashKey(attributeName = "facebookid")
@@ -221,15 +221,6 @@ public class UserTable {
     }
 
 
-    @DynamoDBAttribute(attributeName = "ratings")
-    public int getRatings() {
-        return Ratings;
-    }
-
-    public void setRatings(int Ratings) {
-        this.Ratings = Ratings;
-    }
-
 
     @DynamoDBAttribute(attributeName = "profilestatus")
     public String getProfileStatus() {
@@ -301,6 +292,15 @@ public class UserTable {
     public void setPartymaskstatus(List<PartyMaskStatusClass> PartyMaskStatus) {
         this.PartyMaskStatus = PartyMaskStatus;
     }
+
+
+//    public List<RatingsClass> getRatings() {
+//        return Ratings;
+//    }
+//
+//    public void setRatings(List<RatingsClass> Ratings) {
+//        this.Ratings = Ratings;
+//    }
 
 }
 

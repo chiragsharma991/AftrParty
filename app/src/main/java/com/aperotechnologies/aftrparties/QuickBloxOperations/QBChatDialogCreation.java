@@ -95,9 +95,6 @@ public class QBChatDialogCreation {
                 AWSPartyOperations.updateDialogId(cont, dialog.getDialogId(), GCFBID, GCQBID, PartyID, PartyName);
                 SetLocalNotifications.setLNotificationPartyRetention(cont, PartyName, PartyID , dialog.getDialogId(), PartyEndTime);
 
-
-
-
             }
 
             @Override
@@ -158,14 +155,14 @@ public class QBChatDialogCreation {
     public static void deletePrivateDialog(Context cont, final String DialogId, final String facebookid, final String oppfbid)
     {
 
-        QBPrivateChatManager groupChatManager = QBChatService.getInstance().getPrivateChatManager();
-        groupChatManager.deleteDialog(DialogId, true, new QBEntityCallback<Void>()
+        QBPrivateChatManager privateChatManager = QBChatService.getInstance().getPrivateChatManager();
+        privateChatManager.deleteDialog(DialogId, true, new QBEntityCallback<Void>()
         {
 
             @Override
             public void onSuccess(Void aVoid, Bundle bundle)
             {
-                Log.e("Onsuccess","delete Dialog ");
+                Log.e("Onsuccess","delete Private Dialog ");
                 AWSPaymentOperations.deletePrivateChatData(facebookid, oppfbid);
 
             }
@@ -173,7 +170,7 @@ public class QBChatDialogCreation {
             @Override
             public void onError(QBResponseException errors)
             {
-                Log.e("onError","delete Dialog ");
+                Log.e("onError","delete Private Dialog ");
 
             }
         });
@@ -220,6 +217,34 @@ public class QBChatDialogCreation {
 
 
 
+        });
+    }
+
+
+    public static void deleteGroupDialog(final Context cont, String DialogId)
+    {
+
+        QBGroupChatManager groupChatManager = QBChatService.getInstance().getGroupChatManager();
+        groupChatManager.deleteDialog(DialogId, true, new QBEntityCallback<Void>()
+        {
+
+            @Override
+            public void onSuccess(Void aVoid, Bundle bundle)
+            {
+                Log.e("Onsuccess","delete Dialog ");
+                GenerikFunctions.showToast(cont, "Party request has been cancelled");
+                GenerikFunctions.hDialog();
+
+
+            }
+
+            @Override
+            public void onError(QBResponseException errors)
+            {
+                Log.e("onError","delete Dialog ");
+                GenerikFunctions.hDialog();
+
+            }
         });
     }
 

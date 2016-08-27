@@ -153,6 +153,7 @@ public class RegistrationActivity extends Activity
     //General
     Configuration_Parameter m_config;
     static Context cont;
+    public static Activity register;
     SharedPreferences sharedpreferences;
     SQLiteDatabase sqldb;
     DBHelper helper;
@@ -173,6 +174,7 @@ public class RegistrationActivity extends Activity
         Crouton.cancelAllCroutons();
         m_config.foregroundCont = this;
         cont = this;
+        register = this;
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         gson=new Gson();
         helper= DBHelper.getInstance(cont);
@@ -1164,6 +1166,7 @@ public class RegistrationActivity extends Activity
 
                             if(cursor.getCount() == 0)
                             {
+
                             }
                             else
                             {

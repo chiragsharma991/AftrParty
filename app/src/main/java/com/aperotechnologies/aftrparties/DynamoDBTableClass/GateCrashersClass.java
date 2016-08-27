@@ -14,6 +14,8 @@ public class GateCrashersClass {
     private String gclkid;
     private String gcqbid;
     private String gcfbprofilepic;
+    private String ratingsbyhost;
+    private String ratingsbygc;
 
 
     public String getGatecrasherid() { return gatecrasherid; }
@@ -33,6 +35,13 @@ public class GateCrashersClass {
 
     public String getgcfbprofilepic() { return gcfbprofilepic; }
     public void setgcfbprofilepic(String gcfbprofilepic) { this.gcfbprofilepic = gcfbprofilepic; }
+
+    public String getRatingsbyhost() { return ratingsbyhost; }
+    public void setRatingsbyhost(String ratingsbyhost) { this.ratingsbyhost = ratingsbyhost; }
+
+    public String getRatingsbygc() { return ratingsbygc; }
+    public void setRatingsbygc(String ratingsbygc) { this.ratingsbygc = ratingsbygc; }
+
 
 
 }

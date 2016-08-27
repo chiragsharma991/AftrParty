@@ -54,7 +54,7 @@ public class CircularViewPagerHandler implements ViewPager.OnPageChangeListener 
         if(mCurrentPosition == 0) {
             mViewPager.setCurrentItem(lastPosition, false);
         } else if(mCurrentPosition == lastPosition) {
-           // mViewPager.setPageTransformer(true, new DepthPageTransformer());
+            //mViewPager.setPageTransformer(true, new DepthPageTransformer());
             mViewPager.setCurrentItem(0, false);
 
         }

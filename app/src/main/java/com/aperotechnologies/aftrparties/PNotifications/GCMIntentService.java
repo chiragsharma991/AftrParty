@@ -12,6 +12,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import com.aperotechnologies.aftrparties.BaseLifeCycleCallbacks;
 import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
@@ -25,6 +26,9 @@ import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.linkedin.platform.LISessionManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Random;
 
@@ -46,9 +50,7 @@ public class GCMIntentService extends IntentService {
     }
 
 
-
-    @Override
-    protected void onHandleIntent(Intent intent) {
+   protected void onHandleIntent(Intent intent) {
         Log.i(TAG, "new push");
         m_config = Configuration_Parameter.getInstance();
         Bundle extras = intent.getExtras();
@@ -57,8 +59,8 @@ public class GCMIntentService extends IntentService {
         // in your BroadcastReceiver.
         String messageType = googleCloudMessaging.getMessageType(intent);
 
-
-        Log.e("", " messageType  " + messageType+" ----  "+extras.getString("message"));
+       Log.e("", " body  " +" ----  "+extras.getString("body"));
+       Log.e("", " aps  " +" ----  "+extras.getString("aps"));
 
         if (!extras.isEmpty()) {  // has effect of unparcelling Bundle
 
@@ -86,30 +88,54 @@ public class GCMIntentService extends IntentService {
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
 
-        String message = extras.getString(ConstsCore.EXTRA_MESSAGE);
+        //String message = extras.getString(ConstsCore.EXTRA_MESSAGE);
         String dialog_id = extras.getString(ConstsCore.DIALOG_ID);
-        String messagetype = extras.getString("type");
-        Boolean isApplicationForeGround = BaseLifeCycleCallbacks.applicationStatus();//MyLifecycleHandler.isApplicationInForeground();
-        Log.e("here", " " + message + " " + messagetype);
+        //String messagetype = extras.getString("type");
 
-        Log.e("isApplicationForeground ", "---- " + BaseLifeCycleCallbacks.applicationStatus());//MyLifecycleHandler.isApplicationInForeground());
+        JSONObject jsonbody = null;
+        String messagetype = null;
+        String message = null;
 
+        Log.e("extras "," ---- "+extras+" ");
 
-        if (messagetype == null || messagetype.equals(null))
+        try
         {
-            if (dialog_id == null) {
-                //no chat
-
-                //this is for test purpose
-                Intent i = new Intent(this, Welcome.class);
-                i.putExtra("from","home");
-                CreateNotification(i, message, this);
-
+            if(dialog_id == null || dialog_id.equals(null))
+            {
+                // no chat notification
+                jsonbody = new JSONObject(extras.getString("body"));
+                messagetype = jsonbody.getString("type");
+                message = jsonbody.getString("message");
 
             }
             else
             {
-                m_config.notificationManager = notificationManager;
+                // chat notificn.
+                jsonbody = null;
+                message = extras.getString(ConstsCore.EXTRA_MESSAGE);
+            }
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        Boolean isApplicationForeGround = BaseLifeCycleCallbacks.applicationStatus();//MyLifecycleHandler.isApplicationInForeground();
+
+        Log.e("isApplicationForeground ", "---- " + BaseLifeCycleCallbacks.applicationStatus());//MyLifecycleHandler.isApplicationInForeground());
+
+        m_config.notificationManager = notificationManager;
+
+        if (jsonbody == null || jsonbody.equals(null))
+        {
+            if (dialog_id == null) {
+                //no chat
+
+            }
+            else
+            {
+
                 //offline chat notification navigation
                 if (isApplicationForeGround == true) {
                     // application is in foreground
@@ -123,9 +149,11 @@ public class GCMIntentService extends IntentService {
                     }
                     else {
 
+
+
                         // Define configuration options
                         Configuration croutonConfiguration = new Configuration.Builder()
-                                .setDuration(2500).build();
+                                .setDuration(5000).build();
                         Style style = new Style.Builder()
                                 .setConfiguration(croutonConfiguration)
                                 .setBackgroundColor(R.color.colorAccent)
@@ -133,6 +161,7 @@ public class GCMIntentService extends IntentService {
                                 .setGravity(Gravity.CENTER)
                                 .setTextColor(android.R.color.white)
                                 .setHeight(100)
+                                .setWidth(FrameLayout.LayoutParams.MATCH_PARENT)
                                 .build();
 
 

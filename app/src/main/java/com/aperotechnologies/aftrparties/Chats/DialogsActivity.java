@@ -124,10 +124,10 @@ public class DialogsActivity extends Activity implements AbsListView.OnScrollLis
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                if(m_config.notificationManager != null)
-                {
-                    m_config.notificationManager.cancelAll();
-                }
+//                if(m_config.notificationManager != null)
+//                {
+//                    m_config.notificationManager.cancelAll();
+//                }
 
                 QBDialog selectedDialog = (QBDialog) adapter.getItem(position);
                 Bundle bundle = new Bundle();

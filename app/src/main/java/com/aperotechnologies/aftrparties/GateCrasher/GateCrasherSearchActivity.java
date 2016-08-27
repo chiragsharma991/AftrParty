@@ -16,7 +16,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -33,18 +32,27 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 
+import com.amazonaws.com.google.gson.Gson;
 import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Constants.ConstsCore;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations;
-import com.aperotechnologies.aftrparties.DynamoDBTableClass.ActivePartyClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.R;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
+import com.aperotechnologies.aftrparties.model.FBFriendsList;
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -69,6 +77,7 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
     Button btn_getCurrentLocation, btn_SearchGCParty;
     CheckBox cb_byobYes, cb_byobNo;
 
+    public static List<FBFriendsList> friendsList;
     String timeSelection;
 
     //final variables for StartTime in milliseconds
@@ -114,7 +123,7 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-
+        friendsList = new ArrayList<>();
         // Spinner for Start Now/Later
 //        Spinner spn_startTime = (Spinner) findViewById(R.id.spn_startTime);
 //        List<String> startTimelist = new ArrayList<String>();
@@ -370,7 +379,7 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
             public void onClick(View v) {
                 //Find Self Location Here
 
-                //this is a check for build version below 23
+                //this is a check for build version below 19
 
                 if ((int) Build.VERSION.SDK_INT < 23) {
                     getSelfLocation();
@@ -411,7 +420,7 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
                 } else {
 
 
-                    if ((int) Build.VERSION.SDK_INT < 23) {
+                    if ((int) Build.VERSION.SDK_INT < 19) {
                         getSelfLocation();
                     } else {
                         if (ActivityCompat.checkSelfPermission(GateCrasherSearchActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -438,36 +447,15 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
 
     public void getSelfLocation() {
 
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(GateCrasherSearchActivity.this, "GPS not Available", Toast.LENGTH_LONG).show();
-            Log.e("GPS DEisables", "Disabled");
-            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
-            builder.setTitle("Location Services Not Active");
-            builder.setMessage("Please enable Location Services and GPS");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    // Show location settings when the user acknowledges the alert dialog
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivity(intent);
 
-                    if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                        Log.e("GPS DEisables 111 ", "Disabled");
-                    } else {
-                        Location location = getLastBestLocation();
-                        Log.e("Func  ", location.getLatitude() + "     " + location.getLongitude());
-                    }
-                }
-            });
-            Dialog alertDialog = builder.create();
-            alertDialog.setCanceledOnTouchOutside(false);
-            alertDialog.show();
-        } else {
-
+        if ((int) Build.VERSION.SDK_INT < 19)
+        {
 
             location = getLastBestLocation();
 
 
-            if (location == null) {
+            if (location == null)
+            {
                 Toast.makeText(cont, "Current Location not available", Toast.LENGTH_SHORT).show();
 
             } else {
@@ -484,10 +472,73 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
                 i.putExtras(mBundles);
                 cont.startActivity(i);
 
+                getFriendsList();
+
+
 
             }
+        }
+        else
+        {
+            Log.e("--getLocationMode---", " "+getLocationMode());
+            if(getLocationMode() == 0 || getLocationMode() == 1 || getLocationMode() == 2)
+            {
+                if(getLocationMode() == 0)
+                {
+
+                }
+                else if(getLocationMode() == 1 || getLocationMode() == 2)
+                {
+                    Toast.makeText(GateCrasherSearchActivity.this, "Please select high accuracy mode.", Toast.LENGTH_LONG).show();
+                }
 
 
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+                builder.setTitle("Location Services Not Active");
+                builder.setMessage("Please enable Location Services and GPS");
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Show location settings when the user acknowledges the alert dialog
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+
+                    }
+                });
+                Dialog alertDialog = builder.create();
+                alertDialog.setCanceledOnTouchOutside(false);
+                alertDialog.show();
+            } else {
+
+                location = getLastBestLocation();
+                if(getLocationMode() == 1 && location == null)
+                {
+                    return;
+                }
+
+
+                if (location == null) {
+
+                    Toast.makeText(cont, "Current Location not available", Toast.LENGTH_SHORT).show();
+
+                } else {
+                    Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
+                    GCParceableData data = new GCParceableData();
+                    data.setlatitude(String.valueOf(location.getLatitude()));
+                    data.setlongitude(String.valueOf(location.getLongitude()));
+                    data.setdistance(sharedPreferences.getString(m_config.Distance, "3"));
+                    data.setatdatetime(String.valueOf(selected_startTimeVal));
+                    data.setbyob(selected_byob);
+                    data.setgenderpreference(sharedPreferences.getString(m_config.GenderPreference, "N/A"));
+                    Bundle mBundles = new Bundle();
+                    mBundles.putSerializable(ConstsCore.SER_KEY, data);
+                    i.putExtras(mBundles);
+                    cont.startActivity(i);
+
+                    getFriendsList();
+
+
+                }
+            }
         }
 
     }
@@ -536,7 +587,8 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
         }
     }
 
-    private Location getLastBestLocation() {
+    private Location getLastBestLocation()
+    {
         Location locationGPS = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -890,9 +942,139 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
 
     }
 
+    public int getLocationMode()
+    {
+        int i = 0;
+
+        try {
+            i =  Settings.Secure.getInt(cont.getContentResolver(), Settings.Secure.LOCATION_MODE);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return i;
+    }
+
+    //Function to retrieve FB friends
+    private void getFriendsList()
+    {
+
+        final Gson gson = new Gson();
+
+
+        GraphRequest req = new GraphRequest(AccessToken.getCurrentAccessToken(),
+                "/me/friends",    null,
+                HttpMethod.GET,
+                new GraphRequest.Callback()
+                {
+                    public void onCompleted(GraphResponse response)
+                    {
+
+                        Log.e("resposne", " "+response);
+
+                        JSONObject responseJSONObject = response.getJSONObject();
+                        Log.e("responseJSONObject", " "+responseJSONObject);
+
+                        JSONArray arrFriendsData = null;
+
+                        try
+                        {
+                            arrFriendsData = (JSONArray) responseJSONObject.get("data");
+                            Log.e("", " " + arrFriendsData);
+
+
+                            for(int i = 0; i < arrFriendsData.length(); i++)
+                            {
+
+                                JSONObject jsonobj1 = (JSONObject) arrFriendsData.get(i);
+                                FBFriendsList friends = gson.fromJson(jsonobj1.toString(), FBFriendsList.class);
+                                friendsList.add(friends);
+                                Log.e("friendsList name"," "+friendsList.get(i).getName());
+
+
+                            }
+
+                            Log.e("friendsList size"," "+friendsList.size());
+
+
+                        }
+                        catch (JSONException e)
+                        {
+                            e.printStackTrace();
+                        }
 
 
 
+
+                    }
+                }
+        );
+        Bundle parameters1 = new Bundle();
+        parameters1.putString("fields", "id,name,gender,picture.type(large)");
+        req.setParameters(parameters1);
+        req.executeAsync();
+
+
+
+    }
+
+
+
+//    public void getSelfLocation() {
+//
+//        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//            Toast.makeText(GateCrasherSearchActivity.this, "GPS not Available", Toast.LENGTH_LONG).show();
+//            Log.e("GPS DEisables", "Disabled");
+//            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+//            builder.setTitle("Location Services Not Active");
+//            builder.setMessage("Please enable Location Services and GPS");
+//            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//                    // Show location settings when the user acknowledges the alert dialog
+//                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//                    startActivity(intent);
+//
+//                    if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//                        Log.e("GPS DEisables 111 ", "Disabled");
+//                    } else {
+//                        location = getLastBestLocation();
+//                        Log.e("Func  ", location.getLatitude() + "     " + location.getLongitude());
+//                    }
+//                }
+//            });
+//            Dialog alertDialog = builder.create();
+//            alertDialog.setCanceledOnTouchOutside(false);
+//            alertDialog.show();
+//        } else {
+//
+//
+//            location = getLastBestLocation();
+//
+//
+//            if (location == null) {
+//                Toast.makeText(cont, "Current Location not available", Toast.LENGTH_SHORT).show();
+//
+//            } else {
+//                Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
+//                GCParceableData data = new GCParceableData();
+//                data.setlatitude(String.valueOf(location.getLatitude()));
+//                data.setlongitude(String.valueOf(location.getLongitude()));
+//                data.setdistance(sharedPreferences.getString(m_config.Distance, "3"));
+//                data.setatdatetime(String.valueOf(selected_startTimeVal));
+//                data.setbyob(selected_byob);
+//                data.setgenderpreference(sharedPreferences.getString(m_config.GenderPreference, "N/A"));
+//                Bundle mBundles = new Bundle();
+//                mBundles.putSerializable(ConstsCore.SER_KEY, data);
+//                i.putExtras(mBundles);
+//                cont.startActivity(i);
+//
+//
+//            }
+//
+//
+//        }
+//
+//    }
 
 }
 

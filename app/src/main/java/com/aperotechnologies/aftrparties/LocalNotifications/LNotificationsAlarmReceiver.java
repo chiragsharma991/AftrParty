@@ -48,7 +48,7 @@ public class LNotificationsAlarmReceiver extends BroadcastReceiver{
 
 
         //Notification for PartyRetention
-        if(from.equals("partyretention")) {
+        if(from.equals("PartyRetention")) {
 
             String PartyID = extras.getString("PartyId");
             String PartyName = extras.getString("PartyName");
@@ -105,11 +105,7 @@ public class LNotificationsAlarmReceiver extends BroadcastReceiver{
 
             Log.e("loginUserFbId", " " + loginUserFbId + " oppFbId" + " " + oppFbId);
 
-
             if (isApplicationForeGround == true) {
-
-                Log.e("came in foreground","");
-
 
                 if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
                     Intent i = new Intent(cont, Welcome.class);
@@ -129,8 +125,8 @@ public class LNotificationsAlarmReceiver extends BroadcastReceiver{
                 }
 
 
-            } else {
-                Log.e("came in background","");
+            } else
+            {
 
                 if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
                     Intent i = new Intent(cont, Welcome.class);
@@ -263,7 +259,7 @@ public class LNotificationsAlarmReceiver extends BroadcastReceiver{
                 .setContentTitle("AftrParties")
                 .setContentText(message);
 
-        //mBuilder.setDeleteIntent(contentIntent);
+        mBuilder.setDeleteIntent(contentIntent);
         mBuilder.setContentIntent(contentIntent);
         mBuilder.setAutoCancel(true);
 

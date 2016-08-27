@@ -974,8 +974,11 @@ public  class LoginValidations
                     {
                         SplashActivity.pd.dismiss();
                     }
+
                     Intent i = new Intent(cont, HomePageActivity.class);
                     cont.startActivity(i);
+
+
                 }
                 else{
                     GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");

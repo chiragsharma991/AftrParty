@@ -2,12 +2,16 @@ package com.aperotechnologies.aftrparties;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Chats.ChatService;
+import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.linkedin.platform.LISessionManager;
 
 import java.util.HashMap;
 
@@ -69,6 +73,8 @@ public class BaseLifeCycleCallbacks implements Application.ActivityLifecycleCall
 
 
     static HashMap<String, Integer> activities;
+    static Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+    static SharedPreferences sharedpreferences;
 
     BaseLifeCycleCallbacks() {
         activities = new HashMap<String, Integer>();
@@ -76,6 +82,8 @@ public class BaseLifeCycleCallbacks implements Application.ActivityLifecycleCall
 
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        //Log.e("sharedpre"," "+sharedpreferences);
+        sharedpreferences = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
     }
 
     @Override
@@ -83,10 +91,13 @@ public class BaseLifeCycleCallbacks implements Application.ActivityLifecycleCall
         //map Activity unique class name with 1 on foreground
         activities.put(activity.getLocalClassName(), 1);
         applicationStatus();
+
+
     }
 
     @Override
     public void onActivityResumed(Activity activity) {
+
 
 
     }
@@ -127,11 +138,23 @@ public class BaseLifeCycleCallbacks implements Application.ActivityLifecycleCall
      * Log application status.
      */
     public static boolean applicationStatus() {
+
+
         Log.d("ApplicationStatus", "Is application background " + isBackGround());
         if (isBackGround()) {
             //Do something if the application is in background
             return false;
-        }else{
+        }
+        else
+        {
+            //Log.e("sharedpreferences"," "+sharedpreferences+" "+m_config);
+            //checks whether user is logged in or not for canceeling notifications from notifical tray
+            if(sharedpreferences.getString(m_config.FinalStepDone,"No").equals("Yes")) {
+                if (m_config.notificationManager != null) {
+                    m_config.notificationManager.cancelAll();
+                }
+            }
+
             return true;
         }
     }

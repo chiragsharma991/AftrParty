@@ -96,6 +96,10 @@
             android:screenOrientation="portrait"></activity>
 
         <activity
+            android:name=".GateCrasher.FriendsListActivity"
+            android:screenOrientation="portrait"></activity>
+
+        <activity
             android:name=".GateCrasher.GateCrasherActivity"
             android:screenOrientation="portrait"></activity>
 
@@ -123,7 +127,7 @@
 
 
         <!-- Local Notification receiver-->
-        <receiver android:name=".LocalNotifications.RatingsAlarmReceiver">
+        <receiver android:name=".LocalNotifications.LNotificationsAlarmReceiver">
         </receiver>
 
 

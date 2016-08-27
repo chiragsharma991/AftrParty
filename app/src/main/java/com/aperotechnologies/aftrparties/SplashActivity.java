@@ -61,9 +61,11 @@ import static com.aperotechnologies.aftrparties.Reusables.Validations.getMonthNo
 public class SplashActivity extends Activity {
     SharedPreferences sharedpreferences;
     Configuration_Parameter m_config;
-    Context cont = this;
+    Context cont;
     String LIToken;
     public static  ProgressDialog pd = null;
+
+    public static Activity splash;
 
 
     @Override
@@ -71,6 +73,7 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         //FacebookSdk.sdkInitialize(getApplicationContext());
         Fabric.with(this, new Crashlytics());
+
 
         Calendar c = Calendar.getInstance();
         int timeOfDay = c.get(Calendar.HOUR_OF_DAY);
@@ -92,6 +95,8 @@ public class SplashActivity extends Activity {
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         m_config = Configuration_Parameter.getInstance();
         Crouton.cancelAllCroutons();
+        cont = this;
+        splash = this;
         m_config.foregroundCont = this;
         pd = new ProgressDialog(cont);
         pd.setMessage("Loading");
@@ -146,6 +151,7 @@ public class SplashActivity extends Activity {
 
 
                         LoginValidations.QBStartSession(cont);
+
                     }
                     else
                     {
@@ -154,7 +160,10 @@ public class SplashActivity extends Activity {
                         Intent intent = new Intent(cont,Welcome.class);
                         intent.putExtra("from","splash");
                         cont.startActivity(intent);
+                        finish();
                     }
+
+
 
 
                 }

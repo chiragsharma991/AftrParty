@@ -14,6 +14,8 @@ public class PartiesClass {
     private String partystatus;
     private String starttime;
     private String endtime;
+    private String ratingsbyhost;
+    private String ratingsbygc;
 
 
     public String getPartyid() { return partyid; }
@@ -30,6 +32,12 @@ public class PartiesClass {
 
     public String getEndtime() { return endtime; }
     public void setEndtime(String endtime) { this.endtime = endtime; }
+
+    public String getRatingsbyhost() { return ratingsbyhost; }
+    public void setRatingsbyhost(String ratingsbyhost) { this.ratingsbyhost = ratingsbyhost; }
+
+    public String getRatingsbygc() { return ratingsbygc; }
+    public void setRatingsbygc(String ratingsbygc) { this.ratingsbygc = ratingsbygc; }
 
 }
 

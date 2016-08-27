@@ -331,7 +331,7 @@ public class RequestantFragment extends Fragment
             List<PaidGCClass> PaidGC = new ArrayList<>();
             PaidGC = user.getPaidgc();
 
-            if(PaidGC == null)
+            if(PaidGC == null || PaidGC.size() == 0)
             {
                 //UnPaidUser
                 message = user.getName() +" is unpaid user";
@@ -385,7 +385,7 @@ public class RequestantFragment extends Fragment
             ActiveParty = user.getActiveparty();
             Log.e("ActiveParty "," "+ActiveParty);
 
-            if(ActiveParty == null)
+            if(ActiveParty == null || ActiveParty.size() == 0)
             {
                 allowStatus = true;
             }

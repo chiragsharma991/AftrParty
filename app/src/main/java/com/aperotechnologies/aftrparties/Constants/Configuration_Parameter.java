@@ -66,10 +66,11 @@ public class Configuration_Parameter
     public String temp_regId = "temp_registration_id";
     public String AWSUserDataDone = "No";
     public Context foregroundCont;
+
     //*//Cloudinary Variables
-    public String cloud_name = "dklb21dyh";
-    public String api_key = "585356451553425";
-    public String api_secret = "ylB_rZgnwVT823PH3_HtZo79Sf4";
+    public String cloud_name = "apero-technologies";//"dklb21dyh";
+    public String api_key = "312553713914717"; //"585356451553425";
+    public String api_secret = "4WDIYEDiZC6EY_9Cdk8_s0bFZh8";//"ylB_rZgnwVT823PH3_HtZo79Sf4";
     //*//
     //lastMessge variable is used for updating lastmessage of chat dialog while navigating from ChatActivity to DialogsActivity
     public String lastMessge = "";

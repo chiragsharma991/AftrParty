@@ -1954,80 +1954,13 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
     //***// Function for getting Current Location
     public void getSelfLocation() {
 
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            Toast.makeText(HostActivity.this, "GPS not Available", Toast.LENGTH_LONG).show();
-            Log.e("GPS Disabled", "Disabled---");
-            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
-            builder.setTitle("Location Services Not Active");
-            builder.setMessage("Please enable Location Services and GPS");
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    // Show location settings when the user acknowledges the alert dialog
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivity(intent);
 
-                    if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                        Log.e("GPS Disabled ", "Disabled");
-                        
-                    } else {
-                        currentlocation = getLastBestLocation();
-                        //Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
-                        if (currentlocation != null)
-                        {
-
-                            double latitude = currentlocation.getLatitude();
-                            double longitude = currentlocation.getLongitude();
-                            Geocoder geocoder = new Geocoder(HostActivity.this, Locale.getDefault());
-                            try {
-
-
-                                List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-                                Log.e("here", " " + addresses);
-
-                                String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                                String city = addresses.get(0).getLocality();
-                                String state = addresses.get(0).getAdminArea();
-                                String country = addresses.get(0).getCountryName();
-                                String postalCode = addresses.get(0).getPostalCode();
-                                String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
-
-
-                                //edt_locationAddress.setText(address + " ,  " + city + "  ,  " + state + "  ,  " + country + "  ,  " + postalCode);
-                                //llayoutGetLocation.setVisibility(View.VISIBLE);
-                                edt_street.setText(address);
-                                edt_city.setText(city);
-                                edt_state.setText(state);
-                                edt_pincode.setText(postalCode);
-                                edt_address.requestFocus();
-                                llayoutenterAddress.setVisibility(View.VISIBLE);
-                                cb_getLocation.setChecked(true);
-
-                            }
-                            catch (Exception e)
-                            {
-
-                                e.printStackTrace();
-                                Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                        else
-                        {
-
-                            Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            });
-            Dialog alertDialog = builder.create();
-            alertDialog.setCanceledOnTouchOutside(false);
-            alertDialog.show();
-        } else {
+        if ((int) Build.VERSION.SDK_INT < 19)
+        {
 
             currentlocation = getLastBestLocation();
-
             if (currentlocation != null)
             {
-
                 Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
                 double latitude = currentlocation.getLatitude();
                 double longitude = currentlocation.getLongitude();
@@ -2041,7 +1974,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                     String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
                     String city = addresses.get(0).getLocality();
                     String state = addresses.get(0).getAdminArea();
-             //       String country = addresses.get(0).getCountryName();
+                    //       String country = addresses.get(0).getCountryName();
                     String postalCode = addresses.get(0).getPostalCode();
                     String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
 
@@ -2069,9 +2002,90 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
             }
 
 
+        }
+        else
+        {
+            Log.e("--getLocationMode---", " "+getLocationMode());
+            if(getLocationMode() == 0 || getLocationMode() == 1 || getLocationMode() == 2)
+            {
+                if(getLocationMode() == 0)
+                {
 
+                }
+                else if(getLocationMode() == 1 || getLocationMode() == 2)
+                {
+                    Toast.makeText(HostActivity.this, "Please select high accuracy mode.", Toast.LENGTH_LONG).show();
+                }
+
+
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+                builder.setTitle("Location Services Not Active");
+                builder.setMessage("Please enable Location Services and GPS");
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Show location settings when the user acknowledges the alert dialog
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+
+                    }
+                });
+                Dialog alertDialog = builder.create();
+                alertDialog.setCanceledOnTouchOutside(false);
+                alertDialog.show();
+            } else {
+
+                currentlocation = getLastBestLocation();
+                if(getLocationMode() == 1 && currentlocation == null)
+                {
+                    return;
+                }
+
+                if (currentlocation != null)
+                {
+                    Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
+                    double latitude = currentlocation.getLatitude();
+                    double longitude = currentlocation.getLongitude();
+                    Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                    try
+                    {
+
+                        List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                        Log.e("here", " " + addresses);
+
+                        String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                        String city = addresses.get(0).getLocality();
+                        String state = addresses.get(0).getAdminArea();
+                        //       String country = addresses.get(0).getCountryName();
+                        String postalCode = addresses.get(0).getPostalCode();
+                        String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
+
+//                    edt_locationAddress.setText(address + " ,  " + city + "  ,  " + state + "  ,  " /*+ country + "  ,  "*/ + postalCode);
+//                    llayoutGetLocation.setVisibility(View.VISIBLE);
+                        edt_street.setText(address);
+                        edt_city.setText(city);
+                        edt_state.setText(state);
+                        edt_pincode.setText(postalCode);
+                        edt_address.requestFocus();
+                        llayoutenterAddress.setVisibility(View.VISIBLE);
+                        cb_getLocation.setChecked(true);
+
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+                else
+                {
+                    Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
+                }
+
+            }
 
         }
+
 
     }
     //***//
@@ -2110,7 +2124,18 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
 
 
 
+    public int getLocationMode()
+    {
+        int i = 0;
 
+        try {
+            i =  Settings.Secure.getInt(cont.getContentResolver(), Settings.Secure.LOCATION_MODE);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return i;
+    }
 
 
 
@@ -2153,10 +2178,140 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
         m_config.masksubscriptionTime = "";
     }
 
+
+
 }
 
 
 
+
+//    //***// Function for getting Current Location
+//    public void getSelfLocation() {
+//
+//
+//        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//
+//            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+//            builder.setTitle("Location Services Not Active");
+//            builder.setMessage("Please enable Location Services and GPS");
+//            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//                    // Show location settings when the user acknowledges the alert dialog
+//                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//                    startActivity(intent);
+//
+//                    if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//
+//                        Log.e("GPS Disabled ", "Disabled");
+//
+//                    } else {
+//
+//                        currentlocation = getLastBestLocation();
+//
+//                        //Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
+//                        if (currentlocation != null)
+//                        {
+//
+//                            double latitude = currentlocation.getLatitude();
+//                            double longitude = currentlocation.getLongitude();
+//                            Geocoder geocoder = new Geocoder(HostActivity.this, Locale.getDefault());
+//                            try {
+//
+//
+//                                List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+//                                Log.e("here", " " + addresses);
+//
+//                                String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+//                                String city = addresses.get(0).getLocality();
+//                                String state = addresses.get(0).getAdminArea();
+//                                String country = addresses.get(0).getCountryName();
+//                                String postalCode = addresses.get(0).getPostalCode();
+//                                String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
+//
+//
+//                                //edt_locationAddress.setText(address + " ,  " + city + "  ,  " + state + "  ,  " + country + "  ,  " + postalCode);
+//                                //llayoutGetLocation.setVisibility(View.VISIBLE);
+//                                edt_street.setText(address);
+//                                edt_city.setText(city);
+//                                edt_state.setText(state);
+//                                edt_pincode.setText(postalCode);
+//                                edt_address.requestFocus();
+//                                llayoutenterAddress.setVisibility(View.VISIBLE);
+//                                cb_getLocation.setChecked(true);
+//
+//                            }
+//                            catch (Exception e)
+//                            {
+//
+//                                e.printStackTrace();
+//                                Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
+//                            }
+//                        }
+//                        else
+//                        {
+//
+//                            Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                }
+//            });
+//            Dialog alertDialog = builder.create();
+//            alertDialog.setCanceledOnTouchOutside(false);
+//            alertDialog.show();
+//        } else {
+//
+//            currentlocation = getLastBestLocation();
+//
+//            if (currentlocation != null)
+//            {
+//
+//                Log.e("Func  ", currentlocation.getLatitude() + "     " + currentlocation.getLongitude());
+//                double latitude = currentlocation.getLatitude();
+//                double longitude = currentlocation.getLongitude();
+//                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+//                try
+//                {
+//
+//                    List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+//                    Log.e("here", " " + addresses);
+//
+//                    String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+//                    String city = addresses.get(0).getLocality();
+//                    String state = addresses.get(0).getAdminArea();
+//                    //       String country = addresses.get(0).getCountryName();
+//                    String postalCode = addresses.get(0).getPostalCode();
+//                    String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
+//
+////                    edt_locationAddress.setText(address + " ,  " + city + "  ,  " + state + "  ,  " /*+ country + "  ,  "*/ + postalCode);
+////                    llayoutGetLocation.setVisibility(View.VISIBLE);
+//                    edt_street.setText(address);
+//                    edt_city.setText(city);
+//                    edt_state.setText(state);
+//                    edt_pincode.setText(postalCode);
+//                    edt_address.requestFocus();
+//                    llayoutenterAddress.setVisibility(View.VISIBLE);
+//                    cb_getLocation.setChecked(true);
+//
+//                }
+//                catch (Exception e)
+//                {
+//                    e.printStackTrace();
+//                    Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
+//
+//                }
+//            }
+//            else
+//            {
+//                Toast.makeText(cont, "Unable to get current location.",Toast.LENGTH_SHORT).show();
+//            }
+//
+//
+//
+//
+//        }
+//
+//    }
+////***//
 
 
 

@@ -192,6 +192,8 @@ public class PlayServicesHelper {
             @Override
             protected String doInBackground(Void... params)
             {
+                Log.e("here"," ");
+
                 String msg = "";
                 try
                 {
@@ -229,7 +231,8 @@ public class PlayServicesHelper {
                     });
 
 
-                } catch (IOException ex)
+                }
+                catch (IOException ex)
                 {
 
                     Handler h = new Handler(cont.getMainLooper());
@@ -259,7 +262,7 @@ public class PlayServicesHelper {
                                     SplashActivity.pd.dismiss();
                                 }
                             }
-                            GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
+                            //GenerikFunctions.showToast(cont, "Login Failed, Please try again after some time");
                         }
                     });
 

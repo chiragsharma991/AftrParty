@@ -333,12 +333,14 @@ public class AWSPartyOperations {
     {
         Context cont;
         UserTable user;
+        List PartiesList;
         PartyTable partytable;
         String Status;
         String fromWhere;
         List<PartyConversion> pc;
         Button b;
         boolean value = false;
+        boolean existParty = false;
 
 
         public addPartiestoUserTable(UserTable user, PartyTable partytable, Context cont, String Status, String fromWhere, List<PartyConversion> pc, Button b)
@@ -358,39 +360,36 @@ public class AWSPartyOperations {
         protected Boolean doInBackground(String... params)
         {
 
-
             try {
 
-                if (user.getParties() == null || user.getParties().size() == 0) {
-                    PartiesClass Parties = new PartiesClass();
-                    Parties.setPartyid(partytable.getPartyID());
-                    Parties.setPartyname(partytable.getPartyName());
-                    Parties.setPartystatus(Status);
-                    Parties.setStarttime(partytable.getStartTime());
-                    Parties.setEndtime(partytable.getEndTime());
+                PartiesList = user.getParties();
 
-                    List PartiesList = new ArrayList();
-                    PartiesList.add(Parties);
-                    user.setParties(PartiesList);
-                    m_config.mapper.save(user);
+                if (PartiesList == null || PartiesList.size() == 0)
+                {
+                    PartiesList = new ArrayList();
+                    existParty = false;
                     value = true;
 
                 } else {
                     //add new entry to existing array
-                    PartiesClass Parties = new PartiesClass();
-                    Parties.setPartyid(partytable.getPartyID());
-                    Parties.setPartyname(partytable.getPartyName());
-                    Parties.setPartystatus(Status);
-                    Parties.setStarttime(partytable.getStartTime());
-                    Parties.setEndtime(partytable.getEndTime());
 
-                    List PartiesList = new ArrayList();
                     PartiesList = user.getParties();
-                    Log.e("finalpartyIdstatus size", " " + PartiesList.size());
-                    PartiesList.add(Parties);
-                    user.setParties(PartiesList);
-                    m_config.mapper.save(user);
-                    value = true;
+                    for(int i  = 0 ; i < user.getParties().size(); i++)
+                    {
+                        if(user.getParties().get(i).getPartyid().equals(partytable.getPartyID()))
+                        {
+                            existParty = true;
+                            value = true;
+                            break;
+                        }
+                        else
+                        {
+                            existParty = false;
+                            value = true;
+                        }
+
+                    }
+
                 }
 
 
@@ -421,6 +420,22 @@ public class AWSPartyOperations {
 
             if(v == true)
             {
+
+                if(existParty == false)
+                {
+                    PartiesClass Parties = new PartiesClass();
+                    Parties.setPartyid(partytable.getPartyID());
+                    Parties.setPartyname(partytable.getPartyName());
+                    Parties.setPartystatus(Status);
+                    Parties.setStarttime(partytable.getStartTime());
+                    Parties.setEndtime(partytable.getEndTime());
+                    Parties.setRatingsbyhost("0");
+                    Parties.setRatingsbygc("0");
+                    PartiesList.add(Parties);
+                    user.setParties(PartiesList);
+                    m_config.mapper.save(user);
+                }
+
 
                 if(fromWhere == "CreateParty")
                 {
@@ -465,7 +480,11 @@ public class AWSPartyOperations {
         String Status;
         List<PartyConversion> pc;
         Button b;
+        PartyTable selPartyTable;
+        List GateCrasherList;
+        String GCFBID,GCFBProfilePic,GCLKID;
         boolean value = false;
+        boolean existGC = false;
 
 
         public addGCtoPartyTable(Context cont, PartyTable partytable, String Status, List<PartyConversion> pc, Button b)
@@ -484,49 +503,44 @@ public class AWSPartyOperations {
         {
 
             try {
-                PartyTable selPartyTable = m_config.mapper.load(PartyTable.class, partytable.getPartyID());
+                selPartyTable = m_config.mapper.load(PartyTable.class, partytable.getPartyID());
                 LoggedInUserInformation loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
-                String GCFBID = loggedInUserInformation.getFB_USER_ID();
+                GCFBID = loggedInUserInformation.getFB_USER_ID();
 
-                String GCFBProfilePic = loggedInUserInformation.getFB_USER_PROFILE_PIC();
-                String GCLKID = loggedInUserInformation.getLI_USER_ID();
+                GCFBProfilePic = loggedInUserInformation.getFB_USER_PROFILE_PIC();
+                GCLKID = loggedInUserInformation.getLI_USER_ID();
+                GateCrasherList = selPartyTable.getGatecrashers();
 
-                if (selPartyTable.getGatecrashers() == null || selPartyTable.getGatecrashers().size() == 0) {
-                    GateCrashersClass GateCrashers = new GateCrashersClass();
-                    GateCrashers.setGatecrasherid(GCFBID);
-                    GateCrashers.setGcrequeststatus(Status);
-                    //
-                    GateCrashers.setgcfbprofilepic(GCFBProfilePic);
-                    GateCrashers.setgclkid(GCLKID);
-                    GateCrashers.setgcqbid(sharedPreferences.getString(m_config.QuickBloxID,""));
-                    //
-                    GateCrashers.setGcattendancestatus("No");
-
-                    List GateCrasherList = new ArrayList();
-                    GateCrasherList.add(GateCrashers);
-                    selPartyTable.setGatecrashers(GateCrasherList);
-                    m_config.mapper.save(selPartyTable);
+                if (GateCrasherList == null || GateCrasherList.size() == 0) {
+                    GateCrasherList = new ArrayList();
+                    existGC = false;
                     value = true;
+
 
                 } else {
                     //add new entry to existing array
-                    GateCrashersClass GateCrashers = new GateCrashersClass();
-                    GateCrashers.setGatecrasherid(GCFBID);
-                    GateCrashers.setGcrequeststatus(Status);
-                    //
-                    GateCrashers.setgcfbprofilepic(GCFBProfilePic);
-                    GateCrashers.setgclkid(GCLKID);
-                    GateCrashers.setgcqbid(sharedPreferences.getString(m_config.QuickBloxID,""));
-                    //
-                    GateCrashers.setGcattendancestatus("No");
-
-                    List GateCrasherList = new ArrayList();
                     GateCrasherList = selPartyTable.getGatecrashers();
-                    Log.e("finalpartyIdstatus size", " " + GateCrasherList.size());
-                    GateCrasherList.add(GateCrashers);
-                    selPartyTable.setGatecrashers(GateCrasherList);
-                    m_config.mapper.save(selPartyTable);
-                    value = true;
+
+                    for (int i = 0; i < selPartyTable.getGatecrashers().size(); i++)
+                    {
+
+                        if (selPartyTable.getGatecrashers().get(i).getGatecrasherid().equals(GCFBID))
+                        {
+                            existGC = true;
+                            value = true;
+                            break;
+
+                        }
+                        else
+                        {
+                            existGC = false;
+                            value = true;
+
+                        }
+
+
+                    }
+
                 }
 
 
@@ -558,8 +572,26 @@ public class AWSPartyOperations {
 
             if(v == true) {
 
+                if(existGC == false) {
+
+                    GateCrashersClass GateCrashers = new GateCrashersClass();
+                    GateCrashers.setGatecrasherid(GCFBID);
+                    GateCrashers.setGcrequeststatus(Status);
+                    GateCrashers.setgcfbprofilepic(GCFBProfilePic);
+                    GateCrashers.setgclkid(GCLKID);
+                    GateCrashers.setgcqbid(sharedPreferences.getString(m_config.QuickBloxID, ""));
+                    GateCrashers.setGcattendancestatus("No");
+                    GateCrashers.setRatingsbyhost("0");
+                    GateCrashers.setRatingsbygc("0");
+                    GateCrasherList.add(GateCrashers);
+                    selPartyTable.setGatecrashers(GateCrasherList);
+                    m_config.mapper.save(selPartyTable);
+                }
+
 
                 b.setText(Status);
+                b.setEnabled(true);
+
                 PartyConversion pconv = new PartyConversion();
                 pconv.setPartyid(partytable.getPartyID());
                 pconv.setPartyname(partytable.getPartyName());
@@ -567,9 +599,7 @@ public class AWSPartyOperations {
                 pconv.setStarttime(partytable.getStartTime());
                 pconv.setEndtime(partytable.getEndTime());
                 pc.add(pconv);
-                Log.e("pc"," "+pc.size()+" ");
-                GenerikFunctions.hDialog();
-                GenerikFunctions.showToast(cont,"Request has been send to Party");
+                //Log.e("pc"," "+pc.size()+" ");
 
                 JSONObject jsonObj = new JSONObject();
                 try {
@@ -580,19 +610,19 @@ public class AWSPartyOperations {
                     jsonObj.put("PartyStartTime",partytable.getStartTime());
                     jsonObj.put("PartyEndTime",partytable.getEndTime());
 
-                    Log.e("save jsonObj "," "+jsonObj);
-                } catch (JSONException e) {
+                    //Log.e("save jsonObj "," "+jsonObj);
+                } catch (JSONException e)
+                {
                     e.printStackTrace();
                 }
 
-                //QBPushNotifications.sendRequestPN(partytable.getHostQBID(), partytable.getHostFBID(), partytable.getPartyName(), partytable.getPartyID(), cont);
-
                 QBPushNotifications.sendRequestPN(jsonObj, cont);
+
             }else{
                 GenerikFunctions.hDialog();
                 GenerikFunctions.showToast(cont,"Party Request Failed, Please try after some time.");
                 b.setEnabled(true);
-                //addGCtoPartyTable(cont, partytable, "Pending", pc);
+
             }
 
         }
@@ -809,6 +839,8 @@ public class AWSPartyOperations {
                         GateCrashers.setgclkid(GCList.get(i).getgclkid());
                         GateCrashers.setgcqbid(GCList.get(i).getgcqbid());
                         GateCrashers.setGcattendancestatus("No");
+                        GateCrashers.setRatingsbyhost(GCList.get(i).getRatingsbyhost());
+                        GateCrashers.setRatingsbygc(GCList.get(i).getRatingsbygc());
                         GCList.set(i, GateCrashers);
                         party.setGatecrashers(GCList);
                         m_config.mapper.save(party);
@@ -927,6 +959,8 @@ public class AWSPartyOperations {
                         Parties.setPartyname(PartiesList.get(i).getPartyname());
                         //PartiesList.remove(i);
                         Parties.setPartystatus(Status);
+                        Parties.setRatingsbyhost(PartiesList.get(i).getRatingsbyhost());
+                        Parties.setRatingsbygc(PartiesList.get(i).getRatingsbygc());
                         PartiesList.set(i, Parties);
                         user.setParties(PartiesList);
                         PartyName = PartiesList.get(i).getPartyname();
@@ -948,7 +982,7 @@ public class AWSPartyOperations {
                             List<PaidGCClass> PaidGC = user.getPaidgc();
                             Long currentCancelTime = Validations.getCurrentTime();//System.currentTimeMillis();
 
-                            if (PaidGC == null)
+                            if (PaidGC == null || PaidGC.size() == 0)
                             {
                                 //Unpaid user
                                 //t.setVisibility(View.GONE);
@@ -1032,8 +1066,7 @@ public class AWSPartyOperations {
                     accept.setVisibility(View.INVISIBLE);
                     deny.setVisibility(View.INVISIBLE);
                     QBPushNotifications.sendDeclinedPN(gateCrasherFBID, gateCrasherQBID, partyID, PartyName, cont);
-                    Toast.makeText(cont, "Request has been declined",Toast.LENGTH_SHORT).show();
-                    GenerikFunctions.hDialog();
+
                 }
 
 
