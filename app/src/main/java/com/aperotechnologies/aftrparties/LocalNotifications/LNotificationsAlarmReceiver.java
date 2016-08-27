@@ -31,7 +31,7 @@ import java.util.Random;
 /**
  * Created by mpatil on 27/06/16.
  */
-public class RatingsAlarmReceiver extends BroadcastReceiver{
+public class LNotificationsAlarmReceiver extends BroadcastReceiver{
     Configuration_Parameter m_config;
     Context cont;
 
@@ -108,6 +108,9 @@ public class RatingsAlarmReceiver extends BroadcastReceiver{
 
             if (isApplicationForeGround == true) {
 
+                Log.e("came in foreground","");
+
+
                 if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
                     Intent i = new Intent(cont, Welcome.class);
                     i.putExtra("dialogId", dialogId);
@@ -127,6 +130,8 @@ public class RatingsAlarmReceiver extends BroadcastReceiver{
 
 
             } else {
+                Log.e("came in background","");
+
                 if (LoginValidations.getFBAccessToken() == null || LoginValidations.getFBAccessToken().getToken() == null || LISessionManager.getInstance(context).getSession() == null || LISessionManager.getInstance(context).getSession().getAccessToken() == null) {
                     Intent i = new Intent(cont, Welcome.class);
                     i.putExtra("dialogId", dialogId);
@@ -258,6 +263,7 @@ public class RatingsAlarmReceiver extends BroadcastReceiver{
                 .setContentTitle("AftrParties")
                 .setContentText(message);
 
+        //mBuilder.setDeleteIntent(contentIntent);
         mBuilder.setContentIntent(contentIntent);
         mBuilder.setAutoCancel(true);
 
