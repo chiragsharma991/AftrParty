@@ -123,6 +123,13 @@ public class HistoryAdapter extends BaseAdapter {
 //                Log.e("PartyName"," "+ finalParties.getPartyName());
 //                Log.e("Status"," "+ finalParties.getPartyStatus());
 
+
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
+
+
                 if(finalParties.getPartystatus().equals("Created") || finalParties.getPartystatus().equals("Approved"))
                 {
                     Intent i = new Intent(cont,PartyDetails.class);

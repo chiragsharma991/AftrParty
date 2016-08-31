@@ -12,6 +12,7 @@ import com.quickblox.chat.QBChatService;
 import com.quickblox.chat.QBGroupChatManager;
 import com.quickblox.chat.QBPrivateChatManager;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -80,6 +81,7 @@ public class Configuration_Parameter
     public String FbIdforInappPChat = "";//used for returning DialogId from fragment to Activity for  In app purchase(1-1Chat)
     public static String peerchatDialogId = "dialogid ";
     public static String masksubscriptionTime = "";
+    public static List inviteesId = new ArrayList();
 
     public TelephonyManager mTelephony;
 

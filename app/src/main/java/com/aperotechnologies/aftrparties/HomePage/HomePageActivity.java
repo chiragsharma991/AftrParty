@@ -24,9 +24,13 @@ import com.aperotechnologies.aftrparties.Chats.ChatService;
 import com.aperotechnologies.aftrparties.Chats.DialogsActivity;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
 import com.aperotechnologies.aftrparties.DBOperations.DBHelper;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.PartiesClass;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.RatingsClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.GateCrasher.GateCrasherSearchActivity;
 import com.aperotechnologies.aftrparties.History.HistoryActivity;
+import com.aperotechnologies.aftrparties.History.RequestantActivity;
+import com.aperotechnologies.aftrparties.History.RequestantFragment;
 import com.aperotechnologies.aftrparties.Host.HostActivity;
 import com.aperotechnologies.aftrparties.LocalNotifications.SetLocalNotifications;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
@@ -34,8 +38,10 @@ import com.aperotechnologies.aftrparties.Login.RegistrationActivity;
 import com.aperotechnologies.aftrparties.Login.Welcome;
 import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.RatePartyActivity;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
+import com.aperotechnologies.aftrparties.Reusables.Validations;
 import com.aperotechnologies.aftrparties.Settings.SettingsActivity;
 import com.aperotechnologies.aftrparties.SplashActivity;
 import com.aperotechnologies.aftrparties.TipsActivity;
@@ -75,9 +81,9 @@ public class HomePageActivity extends Activity
     TextView txtuserName, txtuserEmail, txtuserDOB, txtuserGender;
     Context cont;
     SharedPreferences sharedPreferences;
-    Configuration_Parameter m_config;
+    static Configuration_Parameter m_config;
     ResizableButton btnTips, btnSettings, btnChat, btnHistory,  btnHost, btnGateCrasher;
-    LoggedInUserInformation loggedInUserInformation;
+    static LoggedInUserInformation loggedInUserInformation;
     ArrayList<String> profilePics, validPics;
     int i=0;
     String url;
@@ -165,8 +171,9 @@ public class HomePageActivity extends Activity
         faceOverlayView = (FaceOverlayView)findViewById(R.id.face_overlay);
 
         loggedInUserInformation = LoginValidations.initialiseLoggedInUser(cont);
-
         Log.e("loggedInUserInfo", " "+loggedInUserInformation);
+
+        new RatingsCheckfroGC(loggedInUserInformation).execute();
 
         if(getIntent().getExtras() != null){
             if(getIntent().getExtras().getString("from").equals("PartyRetention"))
@@ -301,10 +308,10 @@ public class HomePageActivity extends Activity
                     return;
                 }
 
-//                Intent i = new Intent(HomePageActivity.this, TipsActivity.class);
-//                startActivity(i);
+                Intent i = new Intent(HomePageActivity.this, TipsActivity.class);
+                startActivity(i);
 
-                SetLocalNotifications.setLNotificationforPrivateChat(cont, Long.parseLong("1471519800000"), "87878" , "57985d4aa28f9adb3b00006a", "777777777777");
+                //SetLocalNotifications.setLNotificationforPrivateChat(cont, Long.parseLong("1471519800000"), "87878" , "57985d4aa28f9adb3b00006a", "777777777777");
 
 
             }
@@ -766,6 +773,76 @@ public class HomePageActivity extends Activity
         }
     }
 
+
+    public class RatingsCheckfroGC extends AsyncTask<String, Void, Boolean> {
+
+        LoggedInUserInformation loggedInUserInformation;
+        public RatingsCheckfroGC(LoggedInUserInformation loggedInUserInformation) {
+            this.loggedInUserInformation = loggedInUserInformation;
+
+
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+
+            try
+            {
+
+                String FBID = loggedInUserInformation.getFB_USER_ID();
+                UserTable user = m_config.mapper.load(UserTable.class, FBID);
+
+                List<RatingsClass> RatingsList = user.getRatings();
+
+                if(RatingsList != null || RatingsList.size() != 0)
+                {
+                    for(int i = RatingsList.size() - 1; i >= 0; i--)
+                    {
+
+                        //Log.e("RatingsList"," === "+RatingsList.get(i).getIsactive().equals("Yes"));
+                        if(RatingsList.get(i).getIsactive().equals("Yes"))
+                        {
+
+                            Log.e("RatingsList"," === "+(Validations.getCurrentTime() > Long.parseLong(RatingsList.get(i).getEndtime())));
+                            if(Validations.getCurrentTime() > Long.parseLong(RatingsList.get(i).getEndtime()))
+                            {
+                                Intent intent = new Intent(HomePageActivity.this, RatePartyActivity.class);
+                                intent.putExtra("rateBy","GC");
+                                intent.putExtra("PartyId", RatingsList.get(i).getPartyid());
+                                intent.putExtra("PartyName", "");
+                                intent.putExtra("GCFBID",FBID);
+                                startActivity(intent);
+                                break;
+                            }
+                            else
+                            {
+                                Log.e("here", " in ratings");
+                            }
+                        }
+
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return true;
+
+        }
+
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean v) {
+
+        }
+    }
 
 
 

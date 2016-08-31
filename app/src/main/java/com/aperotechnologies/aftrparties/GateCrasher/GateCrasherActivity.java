@@ -62,6 +62,7 @@ public class GateCrasherActivity extends Activity
     private int index = 0;
     private int count = 10;
     private int iterations;
+    static Context gatecrasher;
 
 
         public void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,7 @@ public class GateCrasherActivity extends Activity
             StrictMode.setThreadPolicy(policy);
 
             cont = this;
+            gatecrasher = this;
             m_config = Configuration_Parameter.getInstance();
             Crouton.cancelAllCroutons();
             m_config.foregroundCont = this;

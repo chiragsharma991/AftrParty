@@ -119,11 +119,11 @@
         <activity android:name=".Login.OTPActivity"
             android:screenOrientation="portrait"></activity>
 
+        <activity android:name=".RatePartyActivity"
+            android:screenOrientation="portrait"></activity>
+
         <!--<activity android:name=".InAppPurchase.InAppBillingActivity"
             android:screenOrientation="portrait"></activity>-->
-
-        <activity android:name=".GateCrasher.RatePartyActivity"
-            android:screenOrientation="portrait"></activity>
 
 
         <!-- Local Notification receiver-->

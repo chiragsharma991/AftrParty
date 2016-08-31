@@ -28,6 +28,7 @@ import com.aperotechnologies.aftrparties.History.PartyParceableData;
 import com.aperotechnologies.aftrparties.Login.FaceOverlayView;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBPushNotifications;
+import com.aperotechnologies.aftrparties.RatePartyActivity;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
@@ -712,6 +713,7 @@ public class AWSPartyOperations {
                     ActivityPartylist.add(ActiveParty);
                     user.setActiveparty(ActivityPartylist);
                     m_config.mapper.save(user);
+                    addRatingsInUserTable(user, party.getPartyId(), party.getEndTime());
                     new AWSPartyOperations.updateGCinPartyTable(gateCrasherID, party.getPartyId(),  status, cont, t, accept, deny).execute();
 
 
@@ -730,6 +732,7 @@ public class AWSPartyOperations {
                     ActivePartyList.set(0, ActiveParty);
                     user.setActiveparty(ActivePartyList);
                     m_config.mapper.save(user);
+                    addRatingsInUserTable(user, party.getPartyId(), party.getEndTime());
                     new AWSPartyOperations.updateGCinPartyTable(gateCrasherID, party.getPartyId(),  status, cont, t, accept, deny).execute();
 
 
@@ -746,6 +749,102 @@ public class AWSPartyOperations {
 
         }
     }
+
+    /** Adding Rating column at time of approval in PartyTable**/
+
+    public static void addRatingsInUserTable(UserTable user, String partyId, String partyEndTime)
+    {
+        try
+        {
+            List<RatingsClass> RatingsList = user.getRatings();
+
+            if(RatingsList == null || RatingsList.size() == 0)
+            {
+                RatingsList =  new ArrayList<>();
+                RatingsClass ratings = new RatingsClass();
+                ratings.setIsactive("Yes");
+                ratings.setEndtime(partyEndTime);
+                ratings.setPartyid(partyId);
+                RatingsList.add(ratings);
+                user.setRatings(RatingsList);
+                m_config.mapper.save(user);
+            }
+            else
+            {
+
+                RatingsClass ratings = new RatingsClass();
+                ratings.setIsactive("Yes");
+                ratings.setEndtime(partyEndTime);
+                ratings.setPartyid(partyId);
+                RatingsList.add(ratings);
+                user.setRatings(RatingsList);
+                m_config.mapper.save(user);
+
+
+
+            }
+
+        }
+        catch (Exception e)
+        {
+
+        }
+    }
+
+    public static void updateRatingsInUserTable(Context cont, String FBID, String partyId, UserTable user)
+    {
+
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        Log.e("FBID ", " "+FBID);
+
+        try
+        {
+            //UserTable user = m_config.mapper.load(UserTable.class, FBID);
+            List<RatingsClass> RatingsList = user.getRatings();
+            Log.e("RatingsList ", " "+RatingsList);
+            if(RatingsList == null || RatingsList.size() == 0)
+            {
+
+            }
+            else
+            {
+
+                for(int i = RatingsList.size() - 1; i >= 0; i--)
+                {
+                    //Log.e("RatingsList ", " "+RatingsList.get(i).getPartyid().equals(partyId));
+                    if(RatingsList.get(i).getPartyid().equals(partyId))
+                    {
+                        RatingsClass ratings = RatingsList.get(i);
+                        ratings.setIsactive("No");
+                        ratings.setEndtime(RatingsList.get(i).getEndtime());
+                        ratings.setPartyid(RatingsList.get(i).getPartyid());
+                        RatingsList.set(i,ratings);
+                        user.setRatings(RatingsList);
+                        m_config.mapper.save(user);
+
+                        GenerikFunctions.hDialog();
+                        GenerikFunctions.showToast(cont, "Ratings Succeeded");
+                        RatePartyActivity.rateparty.finish();
+                        break;
+                    }
+
+                }
+
+
+
+
+            }
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            GenerikFunctions.hDialog();
+            GenerikFunctions.showToast(cont, "Ratings failed");
+        }
+    }
+
+     /**/
 
 
     /** Updating PartyTable at time of Status Updation**/
@@ -966,8 +1065,6 @@ public class AWSPartyOperations {
                         PartyName = PartiesList.get(i).getPartyname();
                         PartyEndTime = PartiesList.get(i).getEndtime();
                         m_config.mapper.save(user);
-
-                        value = true;
                         break;
                     }
                 }

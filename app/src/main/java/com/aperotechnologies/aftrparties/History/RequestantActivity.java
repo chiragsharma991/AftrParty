@@ -11,6 +11,9 @@ import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.RelativeLayout;
+
 import com.anjlab.android.iab.v3.BillingProcessor;
 import com.anjlab.android.iab.v3.TransactionDetails;
 import com.aperotechnologies.aftrparties.Constants.Configuration_Parameter;
@@ -47,7 +50,7 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
  * Created by mpatil on 19/07/16.
  */
 public class RequestantActivity extends AppCompatActivity implements BillingProcessor.IBillingHandler {
-    private ViewPager viewPager;
+    ViewPager viewPager;
     CallbackManager callbackManager;
     LoginManager loginManager;
     ArrayList<String> permissions;
@@ -56,7 +59,7 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
     SharedPreferences sharedpreferences;
     SQLiteDatabase sqldb;
     DBHelper helper;
-    ArrayList<String> status,facebookId,liId, QbId,imageArray;
+    ArrayList<String> status,facebookId,liId, QbId,imageArray, ratingsByHost, ratingsByGC;
 
     public static Context cont;
 
@@ -72,6 +75,8 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
     public static BillingProcessor bpReqChat;
     public static  boolean readyToPurchaseRChat = false;
     String fragmentPosition;
+
+    public static boolean rating = false;
 
 
     public void onCreate(Bundle savedInstanceState)
@@ -107,6 +112,8 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
         liId = new ArrayList<>();
         QbId = new ArrayList<>();
         imageArray  = new ArrayList<>();
+        ratingsByHost = new ArrayList<>();
+        ratingsByGC = new ArrayList<>();
 
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         gson=new Gson();
@@ -154,11 +161,14 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
                     QbId.add(gc.getgcqbid());
                     imageArray.add(gc.getgcfbprofilepic());
                     status.add(gc.getGcrequeststatus());
+                    ratingsByHost.add(gc.getRatingsbyhost());
+                    ratingsByGC.add(gc.getRatingsbygc());
                 }
 
             }
+
             //  setGCListAdapter();
-            RequestantPagerAdapter adapter = new RequestantPagerAdapter(cont,getSupportFragmentManager(),facebookId,liId, QbId,imageArray,status);
+            RequestantPagerAdapter adapter = new RequestantPagerAdapter(cont,getSupportFragmentManager(),facebookId,liId, QbId, imageArray, status, ratingsByHost, ratingsByGC);
             viewPager.setAdapter(adapter);
             viewPager.setOnPageChangeListener(new CircularViewPagerHandler(viewPager));
 
@@ -339,25 +349,13 @@ public class RequestantActivity extends AppCompatActivity implements BillingProc
 
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-            //GenerikFunctions.showToast(cont,m_config.QbIdforInappPChat);
-
-            if (!bpReqChat.handleActivityResult(requestCode, resultCode, data))
-                super.onActivityResult(requestCode, resultCode, data);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //GenerikFunctions.showToast(cont,m_config.QbIdforInappPChat);
 
 
-//        else {
-//            if (linkedinStart.equals(""))
-//            {
-//                //For FB
-//                super.onActivityResult(requestCode, resultCode, data);
-//                callbackManager.onActivityResult(requestCode, resultCode, data);
-//            } else {
-//                //For LI
-//                LISessionManager.getInstance(getApplicationContext()).onActivityResult(this, requestCode, resultCode, data);
-//            }
-//        }
+        if (!bpReqChat.handleActivityResult(requestCode, resultCode, data))
+            super.onActivityResult(requestCode, resultCode, data);
+
     }
 
 

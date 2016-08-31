@@ -294,13 +294,13 @@ public class UserTable {
     }
 
 
-//    public List<RatingsClass> getRatings() {
-//        return Ratings;
-//    }
-//
-//    public void setRatings(List<RatingsClass> Ratings) {
-//        this.Ratings = Ratings;
-//    }
+    public List<RatingsClass> getRatings() {
+        return Ratings;
+    }
+
+    public void setRatings(List<RatingsClass> Ratings) {
+        this.Ratings = Ratings;
+    }
 
 }
 

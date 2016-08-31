@@ -9,16 +9,16 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBDocument
 @DynamoDBDocument
 public class RatingsClass
 {
-    private String partyendtime;
+    private String endtime;
     private String partyid;
     private String isactive;
 
 
-    public String getPartyendtime() {
-        return partyendtime;
+    public String getEndtime() {
+        return endtime;
     }
-    public void setPartyendtime(String partyendtime) {
-        this.partyendtime = partyendtime;
+    public void setEndtime(String endtime) {
+        this.endtime = endtime;
     }
 
     public String getPartyid() {

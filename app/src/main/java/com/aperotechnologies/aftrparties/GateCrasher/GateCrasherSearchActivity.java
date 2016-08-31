@@ -192,6 +192,10 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
             @Override
             public void onClick(View v) {
 
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
 
                 //Check mask status of user for party request
                 GenerikFunctions.sDialog(cont, "Loading...");
@@ -459,6 +463,12 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
                 Toast.makeText(cont, "Current Location not available", Toast.LENGTH_SHORT).show();
 
             } else {
+
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
+
                 Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
                 GCParceableData data = new GCParceableData();
                 data.setlatitude(String.valueOf(location.getLatitude()));
@@ -521,6 +531,12 @@ public class GateCrasherSearchActivity extends Activity implements BillingProces
                     Toast.makeText(cont, "Current Location not available", Toast.LENGTH_SHORT).show();
 
                 } else {
+
+                    if (!GenerikFunctions.chkStatus(cont)) {
+                        GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                        return;
+                    }
+
                     Intent i = new Intent(GateCrasherSearchActivity.this, GateCrasherActivity.class);
                     GCParceableData data = new GCParceableData();
                     data.setlatitude(String.valueOf(location.getLatitude()));

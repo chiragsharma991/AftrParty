@@ -111,10 +111,10 @@ public class FBFriendsListAdapter extends BaseAdapter {
         participentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("view "," "+v);
+                //Log.e("view "," "+v);
                 CheckBox cb = (CheckBox) v.findViewById(R.id.CheckBox01);
                 TextView txt = (TextView) v.findViewById(R.id.rowTextView);
-                Log.e("position "," =--- "+txt.getTag());
+                //Log.e("position "," =--- "+txt.getTag());
                 if(!cb.isChecked() && fbFriendsSelected.size() < 6)
                 {
                     if(hostfbid.equals(friendsList.get((Integer) txt.getTag()).getId()))
@@ -126,7 +126,7 @@ public class FBFriendsListAdapter extends BaseAdapter {
                     {
                         cb.setChecked(true);
                         FriendsSelectedList selList = new FriendsSelectedList(friendsList.get((Integer) txt.getTag()).getId(), txt.getText().toString(),"friend", true);
-                        Log.e("selList"," "+selList);
+                        //Log.e("selList"," "+selList);
                         fbFriendsSelected.add(selList);
                         FbFriendsId.add(friendsList.get((Integer) txt.getTag()).getId());
 
@@ -137,7 +137,7 @@ public class FBFriendsListAdapter extends BaseAdapter {
                 {
                     cb.setChecked(false);
                     FriendsSelectedList selList = new FriendsSelectedList(friendsList.get((Integer) txt.getTag()).getId(), txt.getText().toString(),"friend", false);
-                    Log.e("selList"," "+selList);
+                    //Log.e("selList"," "+selList);
                     if(FbFriendsId.contains(friendsList.get((Integer) txt.getTag()).getId()))
                     {
                         int val = FbFriendsId.indexOf(friendsList.get((Integer) txt.getTag()).getId());

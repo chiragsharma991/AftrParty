@@ -485,6 +485,9 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
             @Override
             public void onClick(View v) {
 
+                cb_unmask.setChecked(false);
+                cb_mask.setChecked(true);
+
                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(HostActivity.this);
                 alertDialogBuilder
                         .setTitle("Pay for Unmasking Party.")
@@ -503,6 +506,11 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                                 {
                                     public void onClick(DialogInterface dialog, int id)
                                     {
+
+                                        if (!GenerikFunctions.chkStatus(cont)) {
+                                            GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                                            return;
+                                        }
 
                                         cb_unmask.setChecked(false);
                                         cb_mask.setChecked(true);
@@ -859,6 +867,11 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                         final String latitude = String.valueOf(currentlocation.getLatitude());
                         final String longitude = String.valueOf(currentlocation.getLongitude());
 
+                        if (!GenerikFunctions.chkStatus(cont)) {
+                            GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                            GenerikFunctions.hDialog();
+                            return;
+                        }
 
                         Log.e("ChatService.getInstance().getCurrentUser()", " " + ChatService.getInstance().getCurrentUser());
                         if (ChatService.getInstance().getCurrentUser() == null)
@@ -874,6 +887,7 @@ public class HostActivity extends Activity implements BillingProcessor.IBillingH
                                     h.post(new Runnable() {
                                         @Override
                                         public void run() {
+
 
                                             new AWSPartyOperations.createParty(cont, initialiseParty(cont, latitude, longitude, newAddress)).execute();
                                         }

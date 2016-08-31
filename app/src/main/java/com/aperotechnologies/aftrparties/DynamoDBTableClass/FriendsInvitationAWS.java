@@ -36,104 +36,26 @@ import java.util.List;
  */
 public class FriendsInvitationAWS {
 
-    static Configuration_Parameter m_config;
-    static List inviteesId = new ArrayList();
 
 
     /** Adding Parties to userTable at time of creating party*/
-    public static class addPartyinUserwithFriends extends AsyncTask<String, Void, Boolean>
-    {
-        Context cont;
-        UserTable user;
+    public static void addPartyinUserwithFriends(UserTable user, PartyTable partytable, Context cont, String Status, String fromWhere, int position) {
+
         List PartiesList;
-        PartyTable partytable;
-        String Status;
-        String fromWhere;
-        boolean value = false;
-        boolean existParty = false;
-        int position;
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        Boolean existParty = false;
 
 
-        public addPartyinUserwithFriends(UserTable user, PartyTable partytable, Context cont, String Status, String fromWhere, int position)
+        try
         {
-            this.cont = cont;
-            this.user = user;
-            this.partytable = partytable;
-            this.Status = Status;
-            this.fromWhere = fromWhere;
-            this.position = position;
-            m_config = Configuration_Parameter.getInstance();
-
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params)
-        {
-
-            try {
+            if(user.getRegistrationStatus().equals("Yes"))
+            {
+                Log.e(" addPartyinUserwithFriends RegistrationStatus===", " "+"Yes");
 
                 PartiesList = user.getParties();
-
                 if (PartiesList == null || PartiesList.size() == 0)
                 {
                     PartiesList = new ArrayList();
-                    existParty = false;
-                    value = true;
-
-                } else {
-                    //add new entry to existing array
-
-                    PartiesList = user.getParties();
-                    for(int i  = 0 ; i < user.getParties().size(); i++)
-                    {
-                        if(user.getParties().get(i).getPartyid().equals(partytable.getPartyID()))
-                        {
-                            existParty = true;
-                            value = true;
-                            break;
-                        }
-                        else
-                        {
-                            existParty = false;
-                            value = true;
-                        }
-
-                    }
-
-                }
-
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                value = false;
-
-            }
-            finally
-            {
-
-                return value;
-
-            }
-
-        }
-
-
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Boolean v)
-        {
-            Log.e("--onPostEx- addPartyinUserwithFriends"," "+v);
-
-            if(v == true)
-            {
-
-                if(existParty == false && user.getRegistrationStatus().equals("Yes"))
-                {
                     PartiesClass Parties = new PartiesClass();
                     Parties.setPartyid(partytable.getPartyID());
                     Parties.setPartyname(partytable.getPartyName());
@@ -145,134 +67,95 @@ public class FriendsInvitationAWS {
                     PartiesList.add(Parties);
                     user.setParties(PartiesList);
                     m_config.mapper.save(user);
+                    addGCtoPartywithFriends(cont, user,  partytable, "Pending", fromWhere, position);
+
                 }
                 else
                 {
+                    PartiesList = user.getParties();
+                    for(int i  = 0 ; i < PartiesList.size(); i++)
+                    {
+                        if(user.getParties().get(i).getPartyid().equals(partytable.getPartyID()))
+                        {
+
+                            existParty = true;
+                            break;
+                        }
+                        else
+                        {
+
+                            existParty = false;
+
+                        }
+                    }
+
                     if(existParty == false)
                     {
-                        FriendsListActivity.unregisterfbFriends.add(user.getFBUserName());
+
+                        Log.e("existParty"," "+"false");
+
+                        PartiesClass Parties = new PartiesClass();
+                        Parties.setPartyid(partytable.getPartyID());
+                        Parties.setPartyname(partytable.getPartyName());
+                        Parties.setPartystatus(Status);
+                        Parties.setStarttime(partytable.getStartTime());
+                        Parties.setEndtime(partytable.getEndTime());
+                        Parties.setRatingsbyhost("0");
+                        Parties.setRatingsbygc("0");
+                        PartiesList.add(Parties);
+                        user.setParties(PartiesList);
+                        m_config.mapper.save(user);
+                        addGCtoPartywithFriends(cont, user,  partytable, "Pending", fromWhere, position);
+                    }else
+                    {
+                        Log.e("existParty"," "+"true");
+                        addGCtoPartywithFriends(cont, user,  partytable, "Pending", fromWhere, position);
                     }
                 }
-
-
-                new addGCtoPartywithFriends(cont, user,  partytable, "Pending", fromWhere, position).execute();
 
             }
             else
             {
-                GenerikFunctions.hDialog();
-                FriendsListActivity.friendlist.finish();
-                GenerikFunctions.showToast(cont,"Party Request Failed, Please try again after some time.");
+                Log.e(" addPartyinUserwithFriends RegistrationStatus===", " "+"No");
 
-
+                FriendsListActivity.unregisterfbFriends.add(user.getFBUserName());
+                addGCtoPartywithFriends(cont, user,  partytable, "Pending", fromWhere, position);
             }
 
+
         }
+        catch (Exception e)
+        {
+            GenerikFunctions.hDialog();
+        }
+
     }
 
 
     /** Adding GateCrashers to partyTable at time of requesting party*/
-    public static class addGCtoPartywithFriends extends AsyncTask<String, Void, Boolean>
+    public static void addGCtoPartywithFriends(Context cont, UserTable user, PartyTable partytable, String Status, String fromWhere, int position)
     {
-        Context cont;
-        UserTable user;
-        PartyTable partytable;
-        String Status;
         List GateCrasherList;
         String GCFBID,GCFBProfilePic,GCLKID,GCQBID;
-        boolean value = false;
-        boolean existGC = false;
-        String fromWhere;
-        int position;
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+        Boolean existGC = false;
 
-
-        public addGCtoPartywithFriends(Context cont, UserTable user, PartyTable partytable, String Status, String fromWhere, int position)
+        try
         {
-            this.cont = cont;
-            this.user = user;
-            this.partytable = partytable;
-            this.Status = Status;
-            this.fromWhere = fromWhere;
-            this.position = position;
-            m_config = Configuration_Parameter.getInstance();
-        }
+            if(user.getRegistrationStatus().equals("Yes"))
+            {
 
-        @Override
-        protected Boolean doInBackground(String... params)
-        {
+                Log.e(" addGCtoPartywithFriends RegistrationStatus===", " "+"Yes");
 
-            try {
                 GCFBID = user.getFacebookID();
                 GCFBProfilePic = user.getProfilePicUrl().get(0);
                 GCLKID = user.getLinkedInID();
                 GCQBID = user.getQuickBloxID();
                 GateCrasherList = partytable.getGatecrashers();
 
-                if (GateCrasherList == null || GateCrasherList.size() == 0) {
-                    GateCrasherList = new ArrayList();
-                    existGC = false;
-                    value = true;
-
-
-                } else {
-                    //add new entry to existing array
-                    GateCrasherList = partytable.getGatecrashers();
-
-                    for (int i = 0; i < partytable.getGatecrashers().size(); i++)
-                    {
-
-                        if (partytable.getGatecrashers().get(i).getGatecrasherid().equals(GCFBID))
-                        {
-                            existGC = true;
-                            value = true;
-                            break;
-
-                        }
-                        else
-                        {
-                            existGC = false;
-                            value = true;
-
-                        }
-
-
-                    }
-
-                }
-
-            } catch (Exception ex) {
-                //Log.e("", "Error Update retrieving data");
-                ex.printStackTrace();
-                value = false;
-            }
-
-            finally {
-
-                return value;
-
-            }
-
-        }
-
-
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onPostExecute(Boolean v)
-        {
-            Log.e("--onPostEx- addGCtoPartyTable"," "+position);
-
-            if(v == true) {
-
-                if(existGC == false && user.getRegistrationStatus().equals("Yes"))
+                if (GateCrasherList == null || GateCrasherList.size() == 0)
                 {
-
-                    Log.e("came here ", " "+GCFBID);
-
+                    GateCrasherList = new ArrayList();
                     GateCrashersClass GateCrashers = new GateCrashersClass();
                     GateCrashers.setGatecrasherid(GCFBID);
                     GateCrashers.setGcrequeststatus(Status);
@@ -285,82 +168,128 @@ public class FriendsInvitationAWS {
                     GateCrasherList.add(GateCrashers);
                     partytable.setGatecrashers(GateCrasherList);
                     m_config.mapper.save(partytable);
+
+                    if(fromWhere.equals("friend"))
+                    {
+                        //ids for notification to all invitees
+                        m_config.inviteesId.add(Integer.valueOf(GCQBID));
+                    }
+
                 }
                 else
                 {
-                    if(existGC == false){
-                        FriendsListActivity.unregisterfbFriends.add(user.getFBUserName());
-                    }
+                    //add new entry to existing array
+                    GateCrasherList = partytable.getGatecrashers();
 
-                }
-
-                if(fromWhere.equals("friend"))
-                {
-                    //ids for notification to all invitees
-                    inviteesId.add(Integer.valueOf(GCQBID));
-                }
-
-
-
-                if(position == 0)
-                {
-
-                    if(FriendsListActivity.unregisterfbFriends.size() != 0)
+                    for (int i = 0; i < partytable.getGatecrashers().size(); i++)
                     {
-                        String name = "";
 
-                        for(int i = 0; i < FriendsListActivity.unregisterfbFriends.size(); i++){
-                            if(FriendsListActivity.unregisterfbFriends.size() == 1)
-                            {
-                                name += FriendsListActivity.unregisterfbFriends.get(i);
-                            }
-                            else
-                            {
-                                name += FriendsListActivity.unregisterfbFriends.get(i) + ",";
-                            }
+                        if (partytable.getGatecrashers().get(i).getGatecrasherid().equals(GCFBID))
+                        {
+                            existGC = true;
+                            break;
+                        }
+                        else
+                        {
+                            existGC = false;
+
                         }
 
-
-                        GenerikFunctions.showToast(cont, "Request to "+name+" was unable to send as their registration process is incomplete.");
-
                     }
 
-
-                    //notification to host
-                    JSONObject jsonObj = new JSONObject();
-                    try {
-                        jsonObj.put("HostQBID",partytable.getHostQBID());
-                        jsonObj.put("HostFBID",partytable.getHostFBID());
-                        jsonObj.put("PartyName",partytable.getPartyName());
-                        jsonObj.put("PartyID",partytable.getPartyID());
-                        jsonObj.put("PartyStartTime",partytable.getStartTime());
-                        jsonObj.put("PartyEndTime",partytable.getEndTime());
-
-                    } catch (JSONException e)
+                    if(existGC == false)
                     {
-                        e.printStackTrace();
-                    }
+                        GateCrashersClass GateCrashers = new GateCrashersClass();
+                        GateCrashers.setGatecrasherid(GCFBID);
+                        GateCrashers.setGcrequeststatus(Status);
+                        GateCrashers.setgcfbprofilepic(GCFBProfilePic);
+                        GateCrashers.setgclkid(GCLKID);
+                        GateCrashers.setgcqbid(GCQBID);
+                        GateCrashers.setGcattendancestatus("No");
+                        GateCrashers.setRatingsbyhost("0");
+                        GateCrashers.setRatingsbygc("0");
+                        GateCrasherList.add(GateCrashers);
+                        partytable.setGatecrashers(GateCrasherList);
+                        m_config.mapper.save(partytable);
 
-                    sendRequestPN(jsonObj, cont);
-                    sendPNtoFriends(inviteesId, partytable.getPartyName(), cont);
-                    FriendsListActivity.friendlist.finish();
-                    GenerikFunctions.showToast(cont,"Request has been send to Party");
-                    GenerikFunctions.hDialog();
+                        if(fromWhere.equals("friend"))
+                        {
+                            //ids for notification to all invitees
+                            m_config.inviteesId.add(Integer.valueOf(GCQBID));
+                        }
+                    }
+                    else
+                    {
+
+                    }
 
                 }
-
             }
-            else
-            {
-                GenerikFunctions.hDialog();
-                FriendsListActivity.friendlist.finish();
-                GenerikFunctions.showToast(cont,"Party Request Failed, Please try after some time.");
 
 
-            }
+
+        } catch (Exception ex)
+        {
+            //Log.e("", "Error Update retrieving data");
+            ex.printStackTrace();
+            GenerikFunctions.hDialog();
 
         }
+
+
     }
+
+
+    public static void setNotification(Context cont, PartyTable partytable) {
+
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+
+
+        Log.e("inviteesId"," "+ m_config.inviteesId);
+
+
+        if (FriendsListActivity.unregisterfbFriends.size() != 0) {
+            String name = "";
+
+
+            for (int i = 0; i < FriendsListActivity.unregisterfbFriends.size(); i++) {
+                if (FriendsListActivity.unregisterfbFriends.size() == 1) {
+                    name += FriendsListActivity.unregisterfbFriends.get(i);
+                    Log.e("name ", " " + name);
+                } else {
+                    name += FriendsListActivity.unregisterfbFriends.get(i) + ",";
+                    Log.e("name ", " ==== " + name);
+                }
+            }
+
+
+            GenerikFunctions.showToast(cont, "Request to " + name + " was unable to send as their registration process is incomplete.");
+
+        }
+
+
+        //notification to host
+        JSONObject jsonObj = new JSONObject();
+        try {
+            jsonObj.put("HostQBID", partytable.getHostQBID());
+            jsonObj.put("HostFBID", partytable.getHostFBID());
+            jsonObj.put("PartyName", partytable.getPartyName());
+            jsonObj.put("PartyID", partytable.getPartyID());
+            jsonObj.put("PartyStartTime", partytable.getStartTime());
+            jsonObj.put("PartyEndTime", partytable.getEndTime());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        sendRequestPN(jsonObj, cont);
+        sendPNtoFriends(m_config.inviteesId, partytable.getPartyName(), cont);
+        FriendsListActivity.friendlist.finish();
+        GenerikFunctions.showToast(cont, "Request has been send to Party");
+        GenerikFunctions.hDialog();
+
+    }
+
 
 
     //PushNotification to Host after Party Request
@@ -368,7 +297,7 @@ public class FriendsInvitationAWS {
 
         Log.e("get jsonObj TAG"," "+jsonObject);
 
-        m_config = Configuration_Parameter.getInstance();
+        Configuration_Parameter m_config = Configuration_Parameter.getInstance();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         String username = sharedPreferences.getString(m_config.Entered_User_Name,"");
 
@@ -445,7 +374,8 @@ public class FriendsInvitationAWS {
     public static void sendPNtoFriends(List<Integer> inviteesId, String PartyName, final Context cont) {
 
 
-        m_config = Configuration_Parameter.getInstance();
+        final Configuration_Parameter m_config = Configuration_Parameter.getInstance();
+
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
         String username = sharedPreferences.getString(m_config.Entered_User_Name,"");
 
@@ -471,7 +401,7 @@ public class FriendsInvitationAWS {
 
         try {
             jsonbody.put("message", username +" has invited you for  "+PartyName);
-            jsonbody.put("type","requestSend");
+            jsonbody.put("type","invited");
 
             jsonaps.put("alert", username +" has invited you for  "+PartyName);
             jsonaps.put("badge","1");
@@ -493,18 +423,14 @@ public class FriendsInvitationAWS {
             @Override
             public void onSuccess(QBEvent qbEvent, Bundle args) {
                 // sent
-                Log.e("notification ","success "+qbEvent);
-//                GenerikFunctions.hDialog();
-//                GenerikFunctions.showToast(cont,"Invitation sent successfully");
+                m_config.inviteesId = new ArrayList();
+                Log.e("notification ","success "+qbEvent+" "+m_config.inviteesId);
 
 
             }
 
             @Override
             public void onError(QBResponseException errors) {
-
-//                GenerikFunctions.hDialog();
-//                GenerikFunctions.showToast(cont,"Invitation sent successfully, Notification sending failed");
 
             }
         });

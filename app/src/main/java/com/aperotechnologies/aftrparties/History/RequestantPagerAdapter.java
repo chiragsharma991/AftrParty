@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.Log;
 
 import com.aperotechnologies.aftrparties.Chats.ChatActivity;
 
@@ -23,10 +24,12 @@ public class RequestantPagerAdapter extends FragmentStatePagerAdapter
     ArrayList<String> facebookId;ArrayList<String> liId;
     ArrayList<String> QbId;ArrayList<String> imageArray;
     Context cont;
+    ArrayList<String> ratingsByHost;
+    ArrayList<String> ratingsByGC;
 
     //Constructor to the class
     public RequestantPagerAdapter(Context cont, FragmentManager fm, ArrayList<String> facebookId, ArrayList<String> liId,
-                                  ArrayList<String> QbId, ArrayList<String> imageArray, ArrayList<String> status)
+                                  ArrayList<String> QbId, ArrayList<String> imageArray, ArrayList<String> status, ArrayList<String> ratingsByHost, ArrayList<String> ratingsByGC)
     {
         super(fm);
         //Initializing tab count
@@ -35,6 +38,8 @@ public class RequestantPagerAdapter extends FragmentStatePagerAdapter
         this.liId = liId;
         this.QbId = QbId;
         this.imageArray = imageArray;
+        this.ratingsByHost = ratingsByHost;
+        this.ratingsByGC = ratingsByGC;
         this.cont = cont;
     }
 
@@ -50,7 +55,7 @@ public class RequestantPagerAdapter extends FragmentStatePagerAdapter
     public Fragment getItem(int position)
     {
         //Returning the current tabs
-        RequestantFragment tab1 = new RequestantFragment(cont,position,status,facebookId,liId,QbId,imageArray);
+        RequestantFragment tab1 = new RequestantFragment(cont,position,status,facebookId,liId,QbId,imageArray, ratingsByHost, ratingsByGC);
         return tab1;
     }
 
@@ -58,6 +63,8 @@ public class RequestantPagerAdapter extends FragmentStatePagerAdapter
     @Override
     public int getCount()
     {
+
+        //Log.e("-- "," "+status.size()+ " "+facebookId.size());
         return status.size();
     }
 }

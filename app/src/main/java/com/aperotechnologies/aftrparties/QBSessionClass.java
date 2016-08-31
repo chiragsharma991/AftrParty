@@ -82,6 +82,8 @@ public class QBSessionClass {
                                         @Override
                                         public void onSuccess(Object o, Bundle bundle)
                                         {
+
+                                            Log.e("onSuccess chat","");
                                             SharedPreferences.Editor editor= sharedPreferences.edit();
                                             editor.putString(m_config.QuickBloxID, String.valueOf(user.getId()));
                                             editor.apply();
@@ -92,7 +94,9 @@ public class QBSessionClass {
                                         @Override
                                         public void onError(QBResponseException e)
                                         {
+                                            Log.e("onError chat","");
                                             e.printStackTrace();
+                                            callback.onError(e);
 
                                             GenerikFunctions.showToast(cont, "There was an error while loading data, please try again after some time.");
                                             if(pBar != null){
@@ -104,7 +108,7 @@ public class QBSessionClass {
                                                 GenerikFunctions.hDialog();
                                             }
 
-                                            callback.onError(e);
+
                                         }
 
 

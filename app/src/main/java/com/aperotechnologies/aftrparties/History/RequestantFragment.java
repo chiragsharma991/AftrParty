@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aperotechnologies.aftrparties.Chats.ChatService;
@@ -29,10 +30,12 @@ import com.aperotechnologies.aftrparties.DynamoDBTableClass.AWSPaymentOperations
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.ActivePartyClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaidGCClass;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.PaymentTable;
+import com.aperotechnologies.aftrparties.DynamoDBTableClass.RatingsOperations;
 import com.aperotechnologies.aftrparties.DynamoDBTableClass.UserTable;
 import com.aperotechnologies.aftrparties.QBSessionClass;
 import com.aperotechnologies.aftrparties.QuickBloxOperations.QBChatDialogCreation;
 import com.aperotechnologies.aftrparties.R;
+import com.aperotechnologies.aftrparties.RatePartyActivity;
 import com.aperotechnologies.aftrparties.Reusables.GenerikFunctions;
 import com.aperotechnologies.aftrparties.Reusables.LoginValidations;
 import com.aperotechnologies.aftrparties.Reusables.Validations;
@@ -43,6 +46,9 @@ import com.linkedin.platform.listeners.DeepLinkListener;
 import com.quickblox.core.QBEntityCallback;
 import com.quickblox.core.exception.QBResponseException;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,6 +62,7 @@ public class RequestantFragment extends Fragment
     //Overriden method onCreateView
     int position;
     ImageButton fbProfile,liProfile, oto;
+    ImageButton starrating;
     Button accept, deny;
     TextView txt_fbid, txt_status;
     ArrayList<String> status,facebookId,liId,QbId,imageArray;
@@ -63,6 +70,10 @@ public class RequestantFragment extends Fragment
     Context cont;
     String message = " ";
     Configuration_Parameter m_config;
+    ArrayList<String> ratingsByHost, ratingsByGC;
+
+
+    //public static View layoutView;
 
 
     public RequestantFragment()
@@ -70,7 +81,7 @@ public class RequestantFragment extends Fragment
     }
 
     @SuppressLint("ValidFragment")
-    public RequestantFragment(Context cont, int position, ArrayList<String> status, ArrayList<String> facebookId, ArrayList<String> liId, ArrayList<String> QbId, ArrayList<String> imageArray)
+    public RequestantFragment(Context cont, int position, ArrayList<String> status, ArrayList<String> facebookId, ArrayList<String> liId, ArrayList<String> QbId, ArrayList<String> imageArray, ArrayList<String> ratingsByHost, ArrayList<String> ratingsByGC)
     {
         this.status = status;
         this.facebookId = facebookId;
@@ -79,6 +90,8 @@ public class RequestantFragment extends Fragment
         this.imageArray = imageArray;
         this.position = position;
         this.cont = cont;
+        this.ratingsByGC = ratingsByGC;
+        this.ratingsByHost = ratingsByHost;
         m_config = Configuration_Parameter.getInstance();
     }
 
@@ -86,8 +99,7 @@ public class RequestantFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         //Returning the layout file after inflating
-        //Change R.layout.tab1 in you classes
-        final View  layoutView = inflater.inflate(R.layout.requestant_fragment, container, false);
+        final View layoutView = inflater.inflate(R.layout.requestant_fragment, container, false);
 
         txt_fbid = (TextView) layoutView.findViewById(R.id.title);
         txt_status = (TextView) layoutView.findViewById(R.id.status);
@@ -95,7 +107,7 @@ public class RequestantFragment extends Fragment
         fbProfile = (ImageButton) layoutView.findViewById(R.id.image_fb);
         liProfile = (ImageButton) layoutView.findViewById(R.id.image_li);
         oto = (ImageButton) layoutView.findViewById(R.id.image_oto);
-
+        starrating = (ImageButton) layoutView.findViewById(R.id.image_rating);
         image = (ImageView) layoutView.findViewById(R.id.image);
 
         accept = (Button) layoutView.findViewById(R.id.accept);
@@ -118,6 +130,18 @@ public class RequestantFragment extends Fragment
         txt_status.setText(status.get(position));
 
 
+        // checks whether host have rated GC and currenttime is greater than party endtime
+
+        Log.e("currentTime "," "+Validations.getCurrentTime()+" "+RequestantActivity.partyy.getEndTime());
+        if(ratingsByHost.get(position).equals("0") && (Validations.getCurrentTime() > Long.parseLong(RequestantActivity.partyy.getEndTime())))
+        {
+            starrating.setVisibility(View.VISIBLE);
+
+        }
+        else
+        {
+           // starrating.setVisibility(View.INVISIBLE);
+        }
 
 
         Picasso.with(cont).load(imageArray.get(position)).fit().centerCrop()
@@ -125,12 +149,37 @@ public class RequestantFragment extends Fragment
                 .error(R.drawable.placeholder_user)
                 .into(image);
 
+
+        starrating.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Log.e("---- "," "+(ImageButton) starrating);
+
+                Intent i = new Intent(cont, RatePartyActivity.class);
+                i.putExtra("rateBy","Host");
+                i.putExtra("GCFBID",facebookId.get(position));
+                i.putExtra("PartyId",RequestantActivity.partyy.getPartyId());
+                i.putExtra("PartyName",RequestantActivity.partyy.getPartyName());
+                startActivity(i);
+
+
+
+            }
+        });
+
         //For FB Profile Navigation
         fbProfile.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
+
+
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
 
                 String fbUrl = "https://www.facebook.com/"+facebookId.get(position);
                 Log.e("fbUrl"," "+fbUrl);
@@ -171,6 +220,12 @@ public class RequestantFragment extends Fragment
             @Override
             public void onClick(View v)
             {
+
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
+
                 DeepLinkHelper deepLinkHelper = DeepLinkHelper.getInstance();
                 // Open the target LinkedIn member's profile
                 deepLinkHelper.openOtherProfile((Activity)cont, liId.get(position), new DeepLinkListener()
@@ -198,6 +253,11 @@ public class RequestantFragment extends Fragment
             @Override
             public void onClick(View v)
             {
+
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
 
                 GenerikFunctions.sDialog(cont, "Loading...");
                 checkforPrivateChat(cont, facebookId.get(position));
@@ -586,7 +646,7 @@ public class RequestantFragment extends Fragment
                                     //delete previous chat dialog
                                     //call for in app purchase
                                     GenerikFunctions.hDialog();
-                                    inAppPurchaseHChat(cont,paymentTable.getPrivatechat().get(i).getDialogId());
+                                    inAppPurchaseReqChat(cont,paymentTable.getPrivatechat().get(i).getDialogId());
                                     break;
                                 }
                             }
@@ -632,7 +692,7 @@ public class RequestantFragment extends Fragment
                 //call for in app purchase
                 Log.i("oppfbuser does not exist in paymentatble","");
 
-                inAppPurchaseHChat(cont, "");
+                inAppPurchaseReqChat(cont, "");
                 GenerikFunctions.hDialog();
 
 
@@ -645,7 +705,7 @@ public class RequestantFragment extends Fragment
 
                     Log.i("private chat array is blank for opp user","");
                     GenerikFunctions.hDialog();
-                    inAppPurchaseHChat(cont, "");
+                    inAppPurchaseReqChat(cont, "");
                     //call for in app purchase
 
                 }
@@ -681,7 +741,7 @@ public class RequestantFragment extends Fragment
                                     //delete previous chat dialog
                                     //call for in app purchase
                                     GenerikFunctions.hDialog();
-                                    inAppPurchaseHChat(cont,opppaymentTable.getPrivatechat().get(i).getDialogId());
+                                    inAppPurchaseReqChat(cont,opppaymentTable.getPrivatechat().get(i).getDialogId());
                                     break;
                                 }
                             }
@@ -700,7 +760,7 @@ public class RequestantFragment extends Fragment
                             //call for in app purchase
                             Log.i("Call for in app Purchase.","");
                             GenerikFunctions.hDialog();
-                            inAppPurchaseHChat(cont, "");
+                            inAppPurchaseReqChat(cont, "");
                         }
                     }
 
@@ -715,7 +775,7 @@ public class RequestantFragment extends Fragment
         }
     }
 
-    public void inAppPurchaseHChat(final Context cont, final String dialogId)
+    public void inAppPurchaseReqChat(final Context cont, final String dialogId)
     {
 
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(cont);

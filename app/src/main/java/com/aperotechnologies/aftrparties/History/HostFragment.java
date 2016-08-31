@@ -113,6 +113,11 @@ public class HostFragment extends Fragment
             public void onClick(View v)
             {
 
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
+
                 String fbUrl = "https://www.facebook.com/"+fbid;
                 Log.e("fbUrl"," "+fbUrl);
 
@@ -153,6 +158,13 @@ public class HostFragment extends Fragment
             @Override
             public void onClick(View v)
             {
+
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
+
+
                 DeepLinkHelper deepLinkHelper = DeepLinkHelper.getInstance();
                 // Open the target LinkedIn member's profile
                 deepLinkHelper.openOtherProfile((Activity)cont, liid, new DeepLinkListener()
@@ -182,6 +194,11 @@ public class HostFragment extends Fragment
             @Override
             public void onClick(View v)
             {
+
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
 
                 GenerikFunctions.sDialog(cont, "Loading...");
                 checkforPrivateChat(cont, fbid);

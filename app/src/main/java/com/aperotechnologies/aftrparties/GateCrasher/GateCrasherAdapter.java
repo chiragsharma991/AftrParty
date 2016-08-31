@@ -184,14 +184,14 @@ public class GateCrasherAdapter extends BaseAdapter {
                     boolean sameDay = cal1.get(Calendar.YEAR) == currentDay.get(Calendar.YEAR) &&
                             cal1.get(Calendar.DAY_OF_YEAR) == currentDay.get(Calendar.DAY_OF_YEAR) && cal1.get(Calendar.MONTH) == currentDay.get(Calendar.MONTH);
 
-                    //Log.e("sameDay   " + i, " " + sameDay);
+                    Log.e("sameDay   " + i, " " + sameDay);
                     Log.e("currrr", " " + Validations.getCurrentTime() + " " + pconv.getEndtime() + " " + (Validations.getCurrentTime() <= Long.parseLong(pconv.getEndtime())));
                     //stores parties data of user in PartyConversion array for current date
                     if (sameDay == true) {
-                        if (Validations.getCurrentTime() <= Long.parseLong(pconv.getEndtime())) {
+                        //if (Validations.getCurrentTime() <= Long.parseLong(pconv.getEndtime())) {
                             pc.add(pconv);
                             Log.e("pc---- " + " " + pconv.getPartyname() + " " + pconv.getPartystatus(), "aa");
-                        }
+                        //}
                     } else {
                         if (Validations.getCurrentTime() <= Long.parseLong(pconv.getEndtime())) {
                             pc.add(pconv);
@@ -237,9 +237,15 @@ public class GateCrasherAdapter extends BaseAdapter {
 
         final ViewHolder finalHolder = holder;
         final SearchedParties finalParty = party;
+
         holder.btn_Request.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
 
                 GenerikFunctions.sDialog(cont, "Sending Request for Party");
 
@@ -292,6 +298,13 @@ public class GateCrasherAdapter extends BaseAdapter {
         participentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (!GenerikFunctions.chkStatus(cont)) {
+                    GenerikFunctions.showToast(cont, "Check Your Network Connectivity");
+                    return;
+                }
+
+
                 GenerikFunctions.sDialog(cont, "Loading...");
 
                 try {
@@ -475,8 +488,6 @@ public class GateCrasherAdapter extends BaseAdapter {
                     }
 
                 }
-
-
             }
 
 

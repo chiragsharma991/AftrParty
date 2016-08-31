@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.aperotechnologies.aftrparties.DynamoDBTableClass.FriendsInvitationAWS.*;
+
 public class FriendsListActivity extends FragmentActivity {
 
     private FBFriendsListAdapter fbfriendsAdapter ;
@@ -78,29 +80,28 @@ public class FriendsListActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
 
-
-
                 UserTable user;
                 PartyTable party = null;
 
                 Log.e("fbfriendsSelection", " "+fbfriendsAdapter.fbFriendsSelected.size());
 
+                GenerikFunctions.sDialog(FriendsListActivity.this, "Sending Request for Party");
+
+
+                // check gatecrasher have selected friends
                 if(fbfriendsAdapter.fbFriendsSelected.size() != 0)
                 {
-
-                    GenerikFunctions.sDialog(cont, "Sending Request for Party");
-
-                    // Add Req to FriendsList
+                    // Add Requestant(GC) to FriendsList
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(cont);
                     String reqFbid = LoginValidations.initialiseLoggedInUser(cont).getFB_USER_ID();
                     String reqName = sharedPreferences.getString(m_config.Entered_User_Name,"");
                     FriendsSelectedList selList = new FriendsSelectedList(reqFbid, reqName, "me", true);
-                    Log.e("selList"," "+selList);
                     fbfriendsAdapter.fbFriendsSelected.add(selList);
+                    //
 
-                    Log.e("after adding me", " "+fbfriendsAdapter.fbFriendsSelected.size());
+                    Log.e("after adding GC", " "+fbfriendsAdapter.fbFriendsSelected.size());
 
-                    for(int i = fbfriendsAdapter.fbFriendsSelected.size() - 1; i >= 0; i--)
+                    for(int i = 0; i < fbfriendsAdapter.fbFriendsSelected.size(); i++)
                     {
 
                         List<FriendsSelectedList> friendsList = fbfriendsAdapter.fbFriendsSelected;
@@ -111,23 +112,15 @@ public class FriendsListActivity extends FragmentActivity {
 
                         Log.e("friendFbName", " "+friendFbName);
 
-                        try {
+                        try
+                        {
                             user = m_config.mapper.load(UserTable.class, friendFbId);
                             party = m_config.mapper.load(PartyTable.class, partyid);
 
                             if (user != null)
                             {
-//                                if (user.getRegistrationStatus().equals("Yes"))
-//                                {
-                                    new FriendsInvitationAWS.addPartyinUserwithFriends(user, party, cont, "Pending", fromWhere, i).execute();
-
-//                                }
-//                                else
-//                                {
-                                    //unregisterfbFriends.add(friendFbName);
-
-                                //}
-
+                                Log.e("i===", " "+i);
+                                addPartyinUserwithFriends(user, party, cont, "Pending", fromWhere, i);
                             }
                         }
                         catch (Exception e)
@@ -139,12 +132,13 @@ public class FriendsListActivity extends FragmentActivity {
 
                     }
 
-
+                    setNotification(cont, party);
 
                     
                 }
                 else
                 {
+                    GenerikFunctions.hDialog();
                     GenerikFunctions.showToast(FriendsListActivity.this,"Please select your friends for invitation");
 
                 }
